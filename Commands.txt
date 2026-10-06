@@ -1,0 +1,27 @@
+Windows
+=========
+
+$profile = Join-Path $env:TEMP ("edge-cdp-" + (Get-Date -Format "yyyyMMdd-HHmmss")); `
+Start-Process "C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe" "--remote-debugging-port=9222 --user-data-dir=$profile"; `
+Start-Sleep -Seconds 2; `
+$CDP = (Invoke-RestMethod http://localhost:9222/json/version).webSocketDebuggerUrl;
+
+
+=======
+Mac
+=======
+
+PROFILE="/tmp/edge-cdp-$(date +%Y%m%d-%H%M%S)"
+
+open -na "Microsoft Edge" --args \
+  --remote-debugging-port=9222 \
+  --user-data-dir="$PROFILE"
+
+sleep 2
+
+CDP=$(curl -s http://localhost:9222/json/version | \
+  node -pe "JSON.parse(require('fs').readFileSync(0,'utf8')).webSocketDebuggerUrl")
+
+echo "$CDP"
+
+=============
