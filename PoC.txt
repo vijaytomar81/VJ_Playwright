@@ -1,51 +1,17 @@
-PS C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\AZ_Playwright> Write-Host "`n=== NPM Proxy Settings ==="
->> npm config get proxy
->> npm config get https-proxy                                                                                                                                                                                           
->> npm config get registry                                                                                                                                                                                              
->>                                                                                                                                                                                                                      
->> Write-Host "`n=== Proxy Environment Variables ==="                                                                                                                                                                   
->> Get-ChildItem Env:*PROXY* -ErrorAction SilentlyContinue                                                                                                                                                              
->>                                                                                                                                                                                                                      
->> Write-Host "`n=== Windows WinHTTP Proxy ==="                                                                                                                                                                         
->> netsh winhttp show proxy                                                                                                                                                                                             
->>                                                                                                                                                                                                                      
->> Write-Host "`n=== Chromium Download Server Connectivity ==="                                                                                                                                                         
->> Test-NetConnection cdn.playwright.dev -Port 443                                                                                                                                                                      
->>                                                                                                                                                                                                                      
->> Write-Host "`n=== Microsoft Edge Installation ==="                                                                                                                                                                   
->> Test-Path "${env:ProgramFiles(x86)}\Microsoft\Edge\Application\msedge.exe"                                                                                                                                           
->> Test-Path "$env:ProgramFiles\Microsoft\Edge\Application\msedge.exe"                                                                                                                                                  
-                                                                                                                                                                                                                        
-=== NPM Proxy Settings ===
-npm error The proxy option is protected, and cannot be retrieved in this way
-npm error A complete log of this run can be found in: C:\Users\tp70707\AppData\Local\npm-cache\_logs\2026-10-08T11_06_01_206Z-debug-0.log
-npm error The https-proxy option is protected, and cannot be retrieved in this way
-npm error A complete log of this run can be found in: C:\Users\tp70707\AppData\Local\npm-cache\_logs\2026-10-08T11_06_01_712Z-debug-0.log
-https://registry.npmjs.org/
+Write-Host "`n=== NPM Proxy Configuration ==="
+npm config get proxy
+npm config get https-proxy
+npm config get registry
 
-=== Proxy Environment Variables ===
+Write-Host "`n=== Proxy Environment Variables ==="
+Get-ChildItem Env:*PROXY* -ErrorAction SilentlyContinue
 
-=== Windows WinHTTP Proxy ===
+Write-Host "`n=== Windows Proxy Configuration ==="
+netsh winhttp show proxy
 
-Current WinHTTP proxy settings:
+Write-Host "`n=== Playwright Download Server ==="
+Test-NetConnection cdn.playwright.dev -Port 443
 
-    Direct access (no proxy server).
-
-
-=== Chromium Download Server Connectivity ===
-
-
-ComputerName     : cdn.playwright.dev
-RemoteAddress    : 150.171.109.214
-RemotePort       : 443
-InterfaceAlias   : Ethernet
-SourceAddress    : 44.141.201.39
-TcpTestSucceeded : True
-
-
-=== Microsoft Edge Installation ===
-True
-False
-
-
-PS C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\AZ_Playwright> 
+Write-Host "`n=== Microsoft Edge Installation ==="
+Test-Path "${env:ProgramFiles(x86)}\Microsoft\Edge\Application\msedge.exe"
+Test-Path "$env:ProgramFiles\Microsoft\Edge\Application\msedge.exe"
