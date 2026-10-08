@@ -28,7 +28,10 @@ npx --no-install tsc --noEmit
 
 ======
 
-Cannot find type definition file for 'node'.
-  The file is in the program because:
-    Entry point of type library 'node' specified in compilerOptions
+PS C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\AZ_Playwright> npx --no-install playwright --version
+Version 1.64.0
+PS C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\AZ_Playwright> npx --no-install tsc --version
+Version 7.0.2
+PS C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\AZ_Playwright> npx --no-install tsc --noEmit
+PS C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\AZ_Playwright> 
 
