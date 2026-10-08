@@ -1,30 +1,18 @@
-PS C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\AZ_Playwright> # Check npm proxy settings
->> npm config get proxy
->> npm config get https-proxy
->> 
->> # Check proxy environment variables
->> Get-ChildItem Env:*PROXY* -ErrorAction SilentlyContinue
->> 
->> # Check Windows proxy configuration
->> netsh winhttp show proxy
->> 
->> # Check current user's Windows proxy settings
->> Get-ItemProperty `
->>   "HKCU:\Software\Microsoft\Windows\CurrentVersion\Internet Settings" |
->>   Select-Object ProxyEnable, ProxyServer, AutoConfigURL
-npm error The proxy option is protected, and cannot be retrieved in this way
-npm error A complete log of this run can be found in: C:\Users\tp70707\AppData\Local\npm-cache\_logs\2026-10-08T11_21_32_161Z-debug-0.log
-npm error The https-proxy option is protected, and cannot be retrieved in this way
-npm error A complete log of this run can be found in: C:\Users\tp70707\AppData\Local\npm-cache\_logs\2026-10-08T11_21_32_653Z-debug-0.log
+Write-Host "`n=== Corporate Proxy Detection ==="
 
-Current WinHTTP proxy settings:
+# Destination used by Playwright
+$targetUrl = [Uri]"https://cdn.playwright.dev/builds/cft/156.0.8078.4/win64/chrome-win64.zip"
 
-    Direct access (no proxy server).
+# Ask Windows/.NET for the proxy selected for this URL
+$proxy = [System.Net.WebRequest]::GetSystemWebProxy()
 
+$proxyAddress = $proxy.GetProxy($targetUrl)
 
-ProxyEnable ProxyServer AutoConfigURL              
------------ ----------- -------------              
-          0             http://lvproxyconfig/lv.pac
+Write-Host "Target URL:"
+Write-Host $targetUrl
 
+Write-Host "`nProxy selected by Windows:"
+Write-Host $proxyAddress
 
-PS C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\AZ_Playwright>
+Write-Host "`nDirect connection:"
+Write-Host ($proxy.IsBypassed($targetUrl))
