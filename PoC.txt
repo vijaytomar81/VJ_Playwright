@@ -1,39 +1,30 @@
-# Check npm proxy settings
-npm config get proxy
-npm config get https-proxy
+PS C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\AZ_Playwright> # Check npm proxy settings
+>> npm config get proxy
+>> npm config get https-proxy
+>> 
+>> # Check proxy environment variables
+>> Get-ChildItem Env:*PROXY* -ErrorAction SilentlyContinue
+>> 
+>> # Check Windows proxy configuration
+>> netsh winhttp show proxy
+>> 
+>> # Check current user's Windows proxy settings
+>> Get-ItemProperty `
+>>   "HKCU:\Software\Microsoft\Windows\CurrentVersion\Internet Settings" |
+>>   Select-Object ProxyEnable, ProxyServer, AutoConfigURL
+npm error The proxy option is protected, and cannot be retrieved in this way
+npm error A complete log of this run can be found in: C:\Users\tp70707\AppData\Local\npm-cache\_logs\2026-10-08T11_21_32_161Z-debug-0.log
+npm error The https-proxy option is protected, and cannot be retrieved in this way
+npm error A complete log of this run can be found in: C:\Users\tp70707\AppData\Local\npm-cache\_logs\2026-10-08T11_21_32_653Z-debug-0.log
 
-# Check proxy environment variables
-Get-ChildItem Env:*PROXY* -ErrorAction SilentlyContinue
+Current WinHTTP proxy settings:
 
-# Check Windows proxy configuration
-netsh winhttp show proxy
-
-# Check current user's Windows proxy settings
-Get-ItemProperty `
-  "HKCU:\Software\Microsoft\Windows\CurrentVersion\Internet Settings" |
-  Select-Object ProxyEnable, ProxyServer, AutoConfigURL
-
-
-
-
-# Enable corporate certificates
-$env:NODE_USE_SYSTEM_CA = "1"
-
-# Configure corporate proxy
-$env:HTTPS_PROXY = "http://proxy.company.com:8080"
-$env:HTTP_PROXY = $env:HTTPS_PROXY
-
-# Increase download timeout
-$env:PLAYWRIGHT_DOWNLOAD_CONNECTION_TIMEOUT = "120000"
-
-# Install Chromium
-npx --no-install playwright install chromium
+    Direct access (no proxy server).
 
 
+ProxyEnable ProxyServer AutoConfigURL              
+----------- ----------- -------------              
+          0             http://lvproxyconfig/lv.pac
 
-npx --no-install playwright install --dry-run chromium
 
-npx --no-install playwright test tests/framework/pom-generator --project=framework --workers=4
-
-$env:NODE_TLS_REJECT_UNAUTHORIZED = "0"
-
+PS C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\AZ_Playwright>
