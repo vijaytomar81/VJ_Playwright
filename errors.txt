@@ -1,12 +1,22 @@
+PS C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\AZ_Playwright> node -- version
+node:internal/modules/cjs/loader:1573
+  throw err;
+  ^
 
-PS C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\AZ_Playwright> npx playwright --version
-npm error code UNABLE_TO_VERIFY_LEAF_SIGNATURE
-npm error errno UNABLE_TO_VERIFY_LEAF_SIGNATURE
-npm error request to https://registry.npmjs.org/playwright failed, reason: unable to verify the first certificate; if the root CA is installed locally, try running Node.js with --use-system-ca
-npm error A complete log of this run can be found in: C:\Users\tp70707\AppData\Local\npm-cache\_logs\2026-10-08T10_14_46_055Z-debug-0.log
-PS C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\AZ_Playwright> npx tsc --version
-npm error code UNABLE_TO_VERIFY_LEAF_SIGNATURE
-npm error errno UNABLE_TO_VERIFY_LEAF_SIGNATURE
-npm error request to https://registry.npmjs.org/tsc failed, reason: unable to verify the first certificate; if the root CA is installed locally, try running Node.js with --use-system-ca
-npm error A complete log of this run can be found in: C:\Users\tp70707\AppData\Local\npm-cache\_logs\2026-10-08T10_16_21_214Z-debug-0.log
+Error: Cannot find module 'C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\AZ_Playwright\version'
+    at Module._resolveFilename (node:internal/modules/cjs/loader:1569:15)
+    at wrapResolveFilename (node:internal/modules/cjs/loader:1123:27)
+    at defaultResolveImplForCJSLoading (node:internal/modules/cjs/loader:1147:10)
+    at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1174:12)
+    at Module._load (node:internal/modules/cjs/loader:1346:5)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:261:19)
+    at Module.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:154:5)
+    at node:internal/main/run_main_module:33:47 {
+  code: 'MODULE_NOT_FOUND',
+  requireStack: []
+}
+
+Node.js v26.8.2
+PS C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\AZ_Playwright> npm --version
+11.19.1
 PS C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\AZ_Playwright> 
