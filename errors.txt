@@ -7,3 +7,20 @@ Test-Path .\node_modules\.bin\tsc.cmd
 $env:NODE_USE_SYSTEM_CA = "1"
 
 npm ping
+
+============
+
+PS C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\AZ_Playwright> npm ls @playwright/test playwright typescript --depth=0
+allianz-automation@1.0.0 C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\AZ_Playwright
+└── (empty)
+
+PS C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\AZ_Playwright> Test-Path .\node_modules\.bin\playwright.cmd
+False
+PS C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\AZ_Playwright> Test-Path .\node_modules\.bin\tsc.cmd
+False
+PS C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\AZ_Playwright> $env:NODE_USE_SYSTEM_CA = "1"
+PS C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\AZ_Playwright> npm ping
+npm notice PING https://registry.npmjs.org/
+npm notice PONG 790ms
+PS C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\AZ_Playwright>
+
