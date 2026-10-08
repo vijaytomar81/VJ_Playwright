@@ -28,13 +28,746 @@ npx --no-install tsc --noEmit
 
 ======
 
-npx --no-install playwright install --dry-run chromium
+PS C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\AZ_Playwright> npx --no-install playwright install --dry-run chromium
+Chrome for Testing 156.0.8078.4 (playwright chromium v1248)
+  Install location:    C:\Users\tp70707\AppData\Local\ms-playwright\chromium-1248
+  Download url:        https://cdn.playwright.dev/builds/cft/156.0.8078.4/win64/chrome-win64.zip
 
-npx --no-install playwright install chromium
+FFmpeg (playwright ffmpeg v1013)
+  Install location:    C:\Users\tp70707\AppData\Local\ms-playwright\ffmpeg-1013
+  Download url:        https://cdn.playwright.dev/dbazure/download/playwright/builds/ffmpeg/1013/ffmpeg-win64.zip
+  Download fallback 1: https://playwright.download.prss.microsoft.com/dbazure/download/playwright/builds/ffmpeg/1013/ffmpeg-win64.zip
+  Download fallback 2: https://cdn.playwright.dev/builds/ffmpeg/1013/ffmpeg-win64.zip
 
-npx --no-install playwright test --list
+Chrome Headless Shell 156.0.8078.4 (playwright chromium-headless-shell v1248)
+  Install location:    C:\Users\tp70707\AppData\Local\ms-playwright\chromium_headless_shell-1248
+  Download url:        https://cdn.playwright.dev/builds/cft/156.0.8078.4/win64/chrome-headless-shell-win64.zip
 
-npx --no-install playwright test --project=framework
+Winldd (playwright winldd v1007)
+  Install location:    C:\Users\tp70707\AppData\Local\ms-playwright\winldd-1007
+  Download url:        https://cdn.playwright.dev/dbazure/download/playwright/builds/winldd/1007/winldd-win64.zip
+  Download fallback 1: https://playwright.download.prss.microsoft.com/dbazure/download/playwright/builds/winldd/1007/winldd-win64.zip
+  Download fallback 2: https://cdn.playwright.dev/builds/winldd/1007/winldd-win64.zip
 
+PS C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\AZ_Playwright> npx --no-install playwright test --list
+Listing tests:
+  [framework] › tests\config\config.spec.ts:13:9 › Brand → Channel → Product Configuration › should return configured brands
+  [framework] › tests\config\config.spec.ts:22:9 › Brand → Channel → Product Configuration › should return channels configured for AZO
+  [framework] › tests\config\config.spec.ts:31:9 › Brand → Channel → Product Configuration › should return products configured for AZO → CTM
+  [framework] › tests\config\config.spec.ts:42:9 › Brand → Channel → Product Configuration › should accept valid AZO → CTM → Motor combination
+  [framework] › tests\config\config.spec.ts:53:9 › Brand → Channel → Product Configuration › should reject unsupported AZO → CNF → Home combination
+  [framework] › tests\framework\evidence-factory\evidence-factory-excel.spec.ts:71:7 › TC-001 - Create Policy
+  [framework] › tests\framework\evidence-factory\evidence-factory-excel.spec.ts:71:7 › TC-002 - Update Policy
+  [framework] › tests\framework\evidence-factory\evidence-factory-excel.spec.ts:71:7 › TC-003 - Cancel Policy
+  [framework] › tests\framework\evidence-factory\evidence-factory-excel.spec.ts:71:7 › TC-004 - Renew Policy
+  [framework] › tests\framework\evidence-factory\evidence-report.spec.ts:30:5 › Generate final Excel evidence report
+  [framework] › tests\framework\pom-generator\actions-template.spec.ts:66:13 › ActionsTemplate › should generate actions class
+  [framework] › tests\framework\pom-generator\actions-template.spec.ts:84:13 › ActionsTemplate › should import generated page
+  [framework] › tests\framework\pom-generator\actions-template.spec.ts:107:13 › ActionsTemplate › should inject page object through constructor
+  [framework] › tests\framework\pom-generator\actions-template.spec.ts:125:13 › ActionsTemplate › should not generate actions from page elements
+  [framework] › tests\framework\pom-generator\actions-template.spec.ts:201:13 › ActionsTemplate › should not contain auto-generated overwrite warning
+  [framework] › tests\framework\pom-generator\cdp-browser-connector.spec.ts:59:13 › CdpBrowserConnector › should reject an empty CDP endpoint before connecting
+  [framework] › tests\framework\pom-generator\cdp-browser-connector.spec.ts:74:13 › CdpBrowserConnector › should reject when no browser context exists
+  [framework] › tests\framework\pom-generator\cdp-browser-connector.spec.ts:96:13 › CdpBrowserConnector › should reject when no open page exists
+  [framework] › tests\framework\pom-generator\cdp-browser-connector.spec.ts:120:13 › CdpBrowserConnector › should return the only open page
+  [framework] › tests\framework\pom-generator\cdp-browser-connector.spec.ts:152:13 › CdpBrowserConnector › should select the only non-blank page
+  [framework] › tests\framework\pom-generator\cdp-browser-connector.spec.ts:190:13 › CdpBrowserConnector › should find pages across multiple contexts
+  [framework] › tests\framework\pom-generator\cdp-browser-connector.spec.ts:231:13 › CdpBrowserConnector › should reject when multiple usable pages exist
+  [framework] › tests\framework\pom-generator\cdp-browser-connector.spec.ts:263:13 › CdpBrowserConnector › should reject when multiple pages exist but all are blank
+  [framework] › tests\framework\pom-generator\change-reviewer.spec.ts:57:13 › ChangeReviewer › should preserve unchanged element without decision
+  [framework] › tests\framework\pom-generator\change-reviewer.spec.ts:108:13 › ChangeReviewer › should add approved new element
+  [framework] › tests\framework\pom-generator\change-reviewer.spec.ts:160:13 › ChangeReviewer › should ignore new element without adding it
+  [framework] › tests\framework\pom-generator\change-reviewer.spec.ts:206:13 › ChangeReviewer › should update changed element when approved
+  [framework] › tests\framework\pom-generator\change-reviewer.spec.ts:270:13 › ChangeReviewer › should keep existing changed element when update rejected
+  [framework] › tests\framework\pom-generator\change-reviewer.spec.ts:327:13 › ChangeReviewer › should keep not found element
+  [framework] › tests\framework\pom-generator\change-reviewer.spec.ts:375:13 › ChangeReviewer › should remove not found element only with explicit REMOVE
+  [framework] › tests\framework\pom-generator\change-reviewer.spec.ts:421:13 › ChangeReviewer › should preserve ambiguous existing element
+  [framework] › tests\framework\pom-generator\change-reviewer.spec.ts:474:13 › ChangeReviewer › should report unresolved change when no decision exists
+  [framework] › tests\framework\pom-generator\change-reviewer.spec.ts:518:13 › ChangeReviewer › should reject invalid action for change type
+  [framework] › tests\framework\pom-generator\change-reviewer.spec.ts:564:13 › ChangeReviewer › should reject duplicate decisions for same stable key
+  [framework] › tests\framework\pom-generator\cli-argument-parser.spec.ts:19:13 › CliArgumentParser › should parse all required CREATE arguments
+  [framework] › tests\framework\pom-generator\cli-argument-parser.spec.ts:54:13 › CliArgumentParser › should preserve equals characters inside values
+  [framework] › tests\framework\pom-generator\cli-argument-parser.spec.ts:76:13 › CliArgumentParser › should reject missing CDP argument
+  [framework] › tests\framework\pom-generator\cli-argument-parser.spec.ts:94:13 › CliArgumentParser › should reject missing brand
+  [framework] › tests\framework\pom-generator\cli-argument-parser.spec.ts:112:13 › CliArgumentParser › should reject missing channel
+  [framework] › tests\framework\pom-generator\cli-argument-parser.spec.ts:130:13 › CliArgumentParser › should reject missing product
+  [framework] › tests\framework\pom-generator\cli-argument-parser.spec.ts:148:13 › CliArgumentParser › should reject missing page name
+  [framework] › tests\framework\pom-generator\cli-argument-parser.spec.ts:166:13 › CliArgumentParser › should reject empty values
+  [framework] › tests\framework\pom-generator\cli-argument-parser.spec.ts:185:13 › CliArgumentParser › should reject invalid argument format
+  [framework] › tests\framework\pom-generator\cli-argument-parser.spec.ts:204:13 › CliArgumentParser › should reject duplicate arguments
+  [framework] › tests\framework\pom-generator\create-mode.spec.ts:227:13 › CreateMode › should CREATE POM artifacts and metadata
+  [framework] › tests\framework\pom-generator\create-mode.spec.ts:301:13 › CreateMode › should reject CREATE when metadata already exists
+  [framework] › tests\framework\pom-generator\create-mode.spec.ts:326:13 › CreateMode › should not overwrite developer actions on rejected second CREATE
+  [framework] › tests\framework\pom-generator\create-mode.spec.ts:379:13 › CreateMode › should preserve stable identity in persisted metadata
+  [framework] › tests\framework\pom-generator\create-mode.spec.ts:421:13 › CreateMode › should rollback CREATE when POM writing fails
+  [framework] › tests\framework\pom-generator\create-runner.spec.ts:99:13 › CreateRunner › should scan page and CREATE generated POM
+  [framework] › tests\framework\pom-generator\create-runner.spec.ts:339:13 › CreateRunner › should reject invalid Brand Channel Product hierarchy
+  [framework] › tests\framework\pom-generator\create-runner.spec.ts:422:13 › CreateRunner › should reject duplicate CREATE through existing metadata
+  [framework] › tests\framework\pom-generator\dom-scanner.spec.ts:14:13 › DomScanner › should scan supported visible elements
+  [framework] › tests\framework\pom-generator\dom-scanner.spec.ts:57:13 › DomScanner › should capture discovered metadata
+  [framework] › tests\framework\pom-generator\dom-scanner.spec.ts:116:13 › DomScanner › should classify checkbox and radio correctly
+  [framework] › tests\framework\pom-generator\dom-scanner.spec.ts:155:13 › DomScanner › should scan role based controls
+  [framework] › tests\framework\pom-generator\dom-scanner.spec.ts:188:13 › DomScanner › should exclude hidden elements by default
+  [framework] › tests\framework\pom-generator\dom-scanner.spec.ts:216:13 › DomScanner › should not generate locator candidates
+  [framework] › tests\framework\pom-generator\dom-scanner.spec.ts:243:13 › DomScanner › should ignore unsupported non-interactive elements
+  [framework] › tests\framework\pom-generator\element-comparator.spec.ts:57:13 › ElementComparator › should identify unchanged element
+  [framework] › tests\framework\pom-generator\element-comparator.spec.ts:77:13 › ElementComparator › should detect preferred locator change
+  [framework] › tests\framework\pom-generator\element-comparator.spec.ts:109:13 › ElementComparator › should detect fallback changes
+  [framework] › tests\framework\pom-generator\element-comparator.spec.ts:141:13 › ElementComparator › should detect element name change
+  [framework] › tests\framework\pom-generator\element-fingerprint.spec.ts:33:13 › ElementFingerprintBuilder › should build fingerprint from logical element characteristics
+  [framework] › tests\framework\pom-generator\element-fingerprint.spec.ts:60:13 › ElementFingerprintBuilder › should normalize whitespace and casing
+  [framework] › tests\framework\pom-generator\element-fingerprint.spec.ts:73:13 › ElementFingerprintBuilder › should not use locator or html id as fingerprint identity
+  [framework] › tests\framework\pom-generator\element-metadata-reader.spec.ts:17:13 › ElementMetadataReader › should read element attributes
+  [framework] › tests\framework\pom-generator\element-metadata-reader.spec.ts:61:13 › ElementMetadataReader › should discover label using for attribute
+  [framework] › tests\framework\pom-generator\element-metadata-reader.spec.ts:85:13 › ElementMetadataReader › should discover wrapping label
+  [framework] › tests\framework\pom-generator\element-metadata-reader.spec.ts:108:13 › ElementMetadataReader › should capture surrounding semantic context
+  [framework] › tests\framework\pom-generator\element-metadata-reader.spec.ts:136:13 › ElementMetadataReader › should identify hidden elements
+  [framework] › tests\framework\pom-generator\element-name-generator.spec.ts:31:9 › ElementNameGenerator › should use label as the preferred name source
+  [framework] › tests\framework\pom-generator\element-name-generator.spec.ts:43:9 › ElementNameGenerator › should use aria-label when label is unavailable
+  [framework] › tests\framework\pom-generator\element-name-generator.spec.ts:55:9 › ElementNameGenerator › should append Button for button elements
+  [framework] › tests\framework\pom-generator\element-name-generator.spec.ts:68:9 › ElementNameGenerator › should append Checkbox for checkbox elements
+  [framework] › tests\framework\pom-generator\element-name-generator.spec.ts:80:9 › ElementNameGenerator › should not duplicate an existing type suffix
+  [framework] › tests\framework\pom-generator\element-name-generator.spec.ts:93:9 › ElementNameGenerator › should fall back to id when descriptive properties are unavailable
+  [framework] › tests\framework\pom-generator\element-type-resolver.spec.ts:17:13 › ElementTypeResolver › should resolve standard form elements
+  [framework] › tests\framework\pom-generator\element-type-resolver.spec.ts:51:13 › ElementTypeResolver › should resolve checkbox input
+  [framework] › tests\framework\pom-generator\element-type-resolver.spec.ts:61:13 › ElementTypeResolver › should resolve radio input
+  [framework] › tests\framework\pom-generator\element-type-resolver.spec.ts:71:13 › ElementTypeResolver › should resolve semantic role elements
+  [framework] › tests\framework\pom-generator\element-type-resolver.spec.ts:88:13 › ElementTypeResolver › should reject unsupported elements
+  [framework] › tests\framework\pom-generator\elements-template.spec.ts:102:13 › ElementsTemplate › should render elements TypeScript source
+  [framework] › tests\framework\pom-generator\elements-template.spec.ts:160:13 › ElementsTemplate › should not expose fingerprint in runtime elements source
+  [framework] › tests\framework\pom-generator\elements-template.spec.ts:183:13 › ElementsTemplate › should render multiple elements
+  [framework] › tests\framework\pom-generator\elements-template.spec.ts:249:13 › ElementsTemplate › should render empty elements collection
+  [framework] › tests\framework\pom-generator\elements-template.spec.ts:269:13 › ElementsTemplate › should safely escape generated string values
+  [framework] › tests\framework\pom-generator\elements-template.spec.ts:319:13 › ElementsTemplate › should quote invalid TypeScript property names
+  [framework] › tests\framework\pom-generator\file-snapshot-manager.spec.ts:67:13 › FileSnapshotManager › should capture existing file content
+  [framework] › tests\framework\pom-generator\file-snapshot-manager.spec.ts:102:13 › FileSnapshotManager › should capture missing file
+  [framework] › tests\framework\pom-generator\file-snapshot-manager.spec.ts:128:13 › FileSnapshotManager › should restore previous file content
+  [framework] › tests\framework\pom-generator\file-snapshot-manager.spec.ts:179:13 › FileSnapshotManager › should remove file created after missing-file snapshot
+  [framework] › tests\framework\pom-generator\file-snapshot-manager.spec.ts:220:13 › FileSnapshotManager › should restore multiple files
+  [framework] › tests\framework\pom-generator\file-snapshot-manager.spec.ts:320:13 › FileSnapshotManager › should preserve empty existing file during rollback
+  [framework] › tests\framework\pom-generator\file-writer.spec.ts:65:13 › FileWriter › should create file and parent directories
+  [framework] › tests\framework\pom-generator\file-writer.spec.ts:102:13 › FileWriter › should replace existing file when using write
+  [framework] › tests\framework\pom-generator\file-writer.spec.ts:139:13 › FileWriter › should create missing file using writeIfMissing
+  [framework] › tests\framework\pom-generator\file-writer.spec.ts:177:13 › FileWriter › should never overwrite existing file using writeIfMissing
+  [framework] › tests\framework\pom-generator\file-writer.spec.ts:221:13 › FileWriter › should protect existing empty file using writeIfMissing
+  [framework] › tests\framework\pom-generator\fingerprint-matcher.spec.ts:31:13 › FingerprintMatcher › should match identical logical elements
+  [framework] › tests\framework\pom-generator\fingerprint-matcher.spec.ts:64:13 › FingerprintMatcher › should tolerate a changed lower-weight attribute
+  [framework] › tests\framework\pom-generator\fingerprint-matcher.spec.ts:99:13 › FingerprintMatcher › should reject different element types
+  [framework] › tests\framework\pom-generator\fingerprint-matcher.spec.ts:129:13 › FingerprintMatcher › should reject unrelated elements
+  [framework] › tests\framework\pom-generator\fingerprint-matcher.spec.ts:157:13 › FingerprintMatcher › should reject fingerprints with no comparable information
+  [framework] › tests\framework\pom-generator\generated-element-assembler.spec.ts:38:13 › GeneratedElementAssembler › should assemble a captured element into a generated element
+  [framework] › tests\framework\pom-generator\generated-element-assembler.spec.ts:111:13 › GeneratedElementAssembler › should select role locator for a button
+  [framework] › tests\framework\pom-generator\generated-element-assembler.spec.ts:178:13 › GeneratedElementAssembler › should reject element when no unique locator can be generated
+  [framework] › tests\framework\pom-generator\generated-element-assembler.spec.ts:215:13 › GeneratedElementAssembler › should assemble multiple elements
+  [framework] › tests\framework\pom-generator\generated-element-assembler.spec.ts:291:13 › GeneratedElementAssembler › should generate different stable keys for different new elements
+  [framework] › tests\framework\pom-generator\generated-page-assembler.spec.ts:27:13 › GeneratedPageAssembler › should assemble a complete generated page
+  [framework] › tests\framework\pom-generator\generated-page-assembler.spec.ts:149:13 › GeneratedPageAssembler › should trim and normalize page name
+  [framework] › tests\framework\pom-generator\generated-page-assembler.spec.ts:197:13 › GeneratedPageAssembler › should reject an invalid Brand Channel Product combination
+  [framework] › tests\framework\pom-generator\generated-page-assembler.spec.ts:231:13 › GeneratedPageAssembler › should reject an empty page name before scanning
+  [framework] › tests\framework\pom-generator\generated-page-assembler.spec.ts:264:13 › GeneratedPageAssembler › should support a page with no capturable elements
+  [framework] › tests\framework\pom-generator\locator-builder.spec.ts:31:9 › LocatorBuilder › should build supported locator candidates
+  [framework] › tests\framework\pom-generator\locator-builder.spec.ts:60:9 › LocatorBuilder › should initialise candidates as not yet unique
+  [framework] › tests\framework\pom-generator\locator-builder.spec.ts:78:9 › LocatorBuilder › should only create candidates for available attributes
+  [framework] › tests\framework\pom-generator\locator-builder.spec.ts:93:9 › LocatorBuilder › should create role locator using accessible name
+  [framework] › tests\framework\pom-generator\locator-code-generator.spec.ts:19:13 › LocatorCodeGenerator › should generate role locator code
+  [framework] › tests\framework\pom-generator\locator-code-generator.spec.ts:45:13 › LocatorCodeGenerator › should generate label locator code
+  [framework] › tests\framework\pom-generator\locator-code-generator.spec.ts:70:13 › LocatorCodeGenerator › should generate testid locator code
+  [framework] › tests\framework\pom-generator\locator-code-generator.spec.ts:92:13 › LocatorCodeGenerator › should generate placeholder locator code
+  [framework] › tests\framework\pom-generator\locator-code-generator.spec.ts:117:13 › LocatorCodeGenerator › should generate css locator code
+  [framework] › tests\framework\pom-generator\locator-code-generator.spec.ts:139:13 › LocatorCodeGenerator › should generate name css locator code
+  [framework] › tests\framework\pom-generator\locator-code-generator.spec.ts:161:13 › LocatorCodeGenerator › should safely escape locator values
+  [framework] › tests\framework\pom-generator\locator-code-generator.spec.ts:179:13 › LocatorCodeGenerator › should support custom page variable
+  [framework] › tests\framework\pom-generator\locator-code-generator.spec.ts:198:13 › LocatorCodeGenerator › should reject unsupported descriptor
+  [framework] › tests\framework\pom-generator\locator-code-generator.spec.ts:214:13 › LocatorCodeGenerator › should reject malformed role descriptor
+  [framework] › tests\framework\pom-generator\locator-priority.spec.ts:31:9 › LocatorPriority › should sort candidates according to configured priority
+  [framework] › tests\framework\pom-generator\locator-priority.spec.ts:70:9 › LocatorPriority › should not mutate the original candidate array
+  [framework] › tests\framework\pom-generator\locator-selector.spec.ts:32:9 › LocatorSelector › should select highest-priority unique locator as preferred
+  [framework] › tests\framework\pom-generator\locator-selector.spec.ts:67:9 › LocatorSelector › should exclude non-unique candidates
+  [framework] › tests\framework\pom-generator\locator-selector.spec.ts:99:9 › LocatorSelector › should allow a single unique locator with no fallbacks
+  [framework] › tests\framework\pom-generator\locator-selector.spec.ts:116:9 › LocatorSelector › should reject an element when no unique locator exists
+  [framework] › tests\framework\pom-generator\locator-validator.spec.ts:29:9 › LocatorValidator › should mark a single matching locator as unique
+  [framework] › tests\framework\pom-generator\locator-validator.spec.ts:60:9 › LocatorValidator › should mark duplicate locators as non-unique
+  [framework] › tests\framework\pom-generator\locator-validator.spec.ts:90:9 › LocatorValidator › should mark missing locators as non-unique
+  [framework] › tests\framework\pom-generator\locator-validator.spec.ts:116:9 › LocatorValidator › should validate role locators
+  [framework] › tests\framework\pom-generator\locator-validator.spec.ts:142:9 › LocatorValidator › should validate id locators
+  [framework] › tests\framework\pom-generator\metadata-path-builder.spec.ts:64:13 › MetadataPathBuilder › should build metadata path using configured hierarchy
+  [framework] › tests\framework\pom-generator\metadata-path-builder.spec.ts:90:13 › MetadataPathBuilder › should support custom metadata root
+  [framework] › tests\framework\pom-generator\metadata-path-builder.spec.ts:117:13 › MetadataPathBuilder › should preserve configured GoCo channel value
+  [framework] › tests\framework\pom-generator\metadata-store.spec.ts:156:13 › MetadataStore › should save generated page metadata
+  [framework] › tests\framework\pom-generator\metadata-store.spec.ts:191:13 › MetadataStore › should persist stable key and fingerprint
+  [framework] › tests\framework\pom-generator\metadata-store.spec.ts:242:13 › MetadataStore › should load previously saved metadata
+  [framework] › tests\framework\pom-generator\metadata-store.spec.ts:269:13 › MetadataStore › should return undefined when metadata does not exist
+  [framework] › tests\framework\pom-generator\metadata-store.spec.ts:285:13 › MetadataStore › should replace existing metadata on save
+  [framework] › tests\framework\pom-generator\metadata-store.spec.ts:339:13 › MetadataStore › should throw when metadata contains invalid JSON
+  [framework] › tests\framework\pom-generator\metadata-store.spec.ts:377:13 › MetadataStore › should create metadata using saveIfMissing
+  [framework] › tests\framework\pom-generator\metadata-store.spec.ts:413:13 › MetadataStore › should not overwrite existing metadata using saveIfMissing
+  [framework] › tests\framework\pom-generator\output-path-builder.spec.ts:68:13 › OutputPathBuilder › should build page directory
+  [framework] › tests\framework\pom-generator\output-path-builder.spec.ts:94:13 › OutputPathBuilder › should build actions directory
+  [framework] › tests\framework\pom-generator\output-path-builder.spec.ts:119:13 › OutputPathBuilder › should build elements file path
+  [framework] › tests\framework\pom-generator\output-path-builder.spec.ts:146:13 › OutputPathBuilder › should build page file path
+  [framework] › tests\framework\pom-generator\output-path-builder.spec.ts:173:13 › OutputPathBuilder › should build actions file path
+  [framework] › tests\framework\pom-generator\output-path-builder.spec.ts:199:13 › OutputPathBuilder › should preserve configured GoCo channel value
+  [framework] › tests\framework\pom-generator\output-path-builder.spec.ts:234:13 › OutputPathBuilder › should support Ferry home structure
+  [framework] › tests\framework\pom-generator\page-comparator.spec.ts:59:13 › PageComparator › should identify unchanged element using stableKey
+  [framework] › tests\framework\pom-generator\page-comparator.spec.ts:78:13 › PageComparator › should identify changed locator while preserving stableKey
+  [framework] › tests\framework\pom-generator\page-comparator.spec.ts:120:13 › PageComparator › should identify new element
+  [framework] › tests\framework\pom-generator\page-comparator.spec.ts:169:13 › PageComparator › should identify existing element as NOT_FOUND
+  [framework] › tests\framework\pom-generator\page-comparator.spec.ts:188:13 › PageComparator › should match same logical element through fingerprint
+  [framework] › tests\framework\pom-generator\page-comparator.spec.ts:252:13 › PageComparator › should report ambiguous candidates instead of choosing automatically
+  [framework] › tests\framework\pom-generator\page-name-generator.spec.ts:15:9 › PageNameGenerator › should generate page naming representations
+  [framework] › tests\framework\pom-generator\page-name-generator.spec.ts:29:9 › PageNameGenerator › should handle camelCase input
+  [framework] › tests\framework\pom-generator\page-name-generator.spec.ts:43:9 › PageNameGenerator › should trim surrounding whitespace
+  [framework] › tests\framework\pom-generator\page-name-generator.spec.ts:60:9 › PageNameGenerator › should reject an empty page name
+  [framework] › tests\framework\pom-generator\page-template.spec.ts:125:13 › PageTemplate › should generate page class
+  [framework] › tests\framework\pom-generator\page-template.spec.ts:153:13 › PageTemplate › should generate native Playwright label locator
+  [framework] › tests\framework\pom-generator\page-template.spec.ts:176:13 › PageTemplate › should generate native Playwright role locator
+  [framework] › tests\framework\pom-generator\page-template.spec.ts:199:13 › PageTemplate › should not create runtime dependency on pom generator
+  [framework] › tests\framework\pom-generator\page-template.spec.ts:227:13 › PageTemplate › should not import generated elements descriptors at runtime
+  [framework] › tests\framework\pom-generator\page-template.spec.ts:250:13 › PageTemplate › should generate empty page class when no elements exist
+  [framework] › tests\framework\pom-generator\page-template.spec.ts:280:13 › PageTemplate › should safely support non-standard element property names
+  [framework] › tests\framework\pom-generator\page-template.spec.ts:330:13 › PageTemplate › should include page generation metadata
+  [framework] › tests\framework\pom-generator\pom-output-writer.spec.ts:160:13 › PomOutputWriter › should write all three POM artifacts
+  [framework] › tests\framework\pom-generator\pom-output-writer.spec.ts:215:13 › PomOutputWriter › should create Brand Channel Product structure
+  [framework] › tests\framework\pom-generator\pom-output-writer.spec.ts:256:13 › PomOutputWriter › should regenerate generator-owned files
+  [framework] › tests\framework\pom-generator\pom-output-writer.spec.ts:338:13 › PomOutputWriter › should never overwrite developer-owned actions file
+  [framework] › tests\framework\pom-generator\pom-output-writer.spec.ts:398:13 › PomOutputWriter › should report actions as existing on second generation
+  [framework] › tests\framework\pom-generator\regeneration-snapshot-manager.spec.ts:150:13 › RegenerationSnapshotManager › should include actions in CREATE snapshot
+  [framework] › tests\framework\pom-generator\regeneration-snapshot-manager.spec.ts:187:13 › RegenerationSnapshotManager › should exclude actions from UPDATE snapshot
+  [framework] › tests\framework\pom-generator\regeneration-snapshot-manager.spec.ts:232:13 › RegenerationSnapshotManager › should capture existing generated state
+  [framework] › tests\framework\pom-generator\regeneration-snapshot-manager.spec.ts:293:13 › RegenerationSnapshotManager › should restore UPDATE state without touching actions
+  [framework] › tests\framework\pom-generator\regeneration-snapshot-manager.spec.ts:408:13 › RegenerationSnapshotManager › should restore CREATE state including actions
+  [framework] › tests\framework\pom-generator\review-action-policy.spec.ts:19:13 › ReviewActionPolicy › should expose no actions for unchanged element
+  [framework] › tests\framework\pom-generator\review-action-policy.spec.ts:32:13 › ReviewActionPolicy › should expose ADD and IGNORE for new element
+  [framework] › tests\framework\pom-generator\review-action-policy.spec.ts:48:13 › ReviewActionPolicy › should expose UPDATE KEEP IGNORE for changed element
+  [framework] › tests\framework\pom-generator\review-action-policy.spec.ts:65:13 › ReviewActionPolicy › should expose KEEP REMOVE IGNORE for not found element
+  [framework] › tests\framework\pom-generator\review-action-policy.spec.ts:82:13 › ReviewActionPolicy › should expose KEEP IGNORE for ambiguous element
+  [framework] › tests\framework\pom-generator\review-action-policy.spec.ts:98:13 › ReviewActionPolicy › should identify allowed action
+  [framework] › tests\framework\pom-generator\review-action-policy.spec.ts:112:13 › ReviewActionPolicy › should reject disallowed action
+  [framework] › tests\framework\pom-generator\review-plan-builder.spec.ts:57:13 › ReviewPlanBuilder › should build unchanged review item
+  [framework] › tests\framework\pom-generator\review-plan-builder.spec.ts:127:13 › ReviewPlanBuilder › should expose ADD and IGNORE for new element
+  [framework] › tests\framework\pom-generator\review-plan-builder.spec.ts:182:13 › ReviewPlanBuilder › should expose changed locator details
+  [framework] › tests\framework\pom-generator\review-plan-builder.spec.ts:272:13 › ReviewPlanBuilder › should expose KEEP REMOVE IGNORE for not found element
+  [framework] › tests\framework\pom-generator\review-plan-builder.spec.ts:325:13 › ReviewPlanBuilder › should expose ambiguous candidates without selecting one
+  [framework] › tests\framework\pom-generator\review-plan-builder.spec.ts:386:13 › ReviewPlanBuilder › should require review when any change requires a decision
+  [framework] › tests\framework\pom-generator\review-plan-builder.spec.ts:455:13 › ReviewPlanBuilder › should not require review for empty change collection
+  [framework] › tests\framework\pom-generator\stable-key-generator.spec.ts:17:9 › StableKeyGenerator › should generate a stable-key value
+  [framework] › tests\framework\pom-generator\stable-key-generator.spec.ts:29:9 › StableKeyGenerator › should generate unique keys for new elements
+  [framework] › tests\framework\pom-generator\stable-key-generator.spec.ts:41:9 › StableKeyGenerator › should generate UUID formatted keys
+  [framework] › tests\framework\pom-generator\update-mode.spec.ts:250:13 › UpdateMode › should reject UPDATE when metadata does not exist
+  [framework] › tests\framework\pom-generator\update-mode.spec.ts:267:13 › UpdateMode › should reject UPDATE when a review decision is unresolved
+  [framework] › tests\framework\pom-generator\update-mode.spec.ts:326:13 › UpdateMode › should reject invalid review decision before writing
+  [framework] › tests\framework\pom-generator\update-mode.spec.ts:391:13 › UpdateMode › should UPDATE an approved changed element
+  [framework] › tests\framework\pom-generator\update-mode.spec.ts:483:13 › UpdateMode › should KEEP existing element when proposed change is rejected
+  [framework] › tests\framework\pom-generator\update-mode.spec.ts:552:13 › UpdateMode › should ADD an approved new element
+  [framework] › tests\framework\pom-generator\update-mode.spec.ts:633:13 › UpdateMode › should REMOVE only when explicitly approved
+  [framework] › tests\framework\pom-generator\update-mode.spec.ts:685:13 › UpdateMode › should never overwrite developer-owned actions
+  [framework] › tests\framework\pom-generator\update-mode.spec.ts:772:13 › UpdateMode › should rollback UPDATE when metadata persistence fails
+  [framework] › tests\framework\pom-generator\validate-mode.spec.ts:177:13 › ValidateMode › should reject VALIDATE when metadata does not exist
+  [framework] › tests\framework\pom-generator\validate-mode.spec.ts:197:13 › ValidateMode › should report unchanged element without requiring review
+  [framework] › tests\framework\pom-generator\validate-mode.spec.ts:235:13 › ValidateMode › should detect changed locator and preserve existing stable identity
+  [framework] › tests\framework\pom-generator\validate-mode.spec.ts:321:13 › ValidateMode › should detect a new element
+  [framework] › tests\framework\pom-generator\validate-mode.spec.ts:392:13 › ValidateMode › should detect an element that is no longer found
+  [framework] › tests\framework\pom-generator\validate-mode.spec.ts:434:13 › ValidateMode › should not modify persisted metadata during validation
+  [framework] › tests\framework\utils\string.utils.spec.ts:12:9 › StringUtils › should convert text to camelCase
+  [framework] › tests\framework\utils\string.utils.spec.ts:21:9 › StringUtils › should convert text to PascalCase
+  [framework] › tests\framework\utils\string.utils.spec.ts:30:9 › StringUtils › should convert text to kebab-case
+  [framework] › tests\framework\utils\string.utils.spec.ts:39:9 › StringUtils › should handle existing camelCase text
+  [framework] › tests\framework\utils\string.utils.spec.ts:48:9 › StringUtils › should handle spaces and special characters
+  [framework] › tests\framework\utils\string.utils.spec.ts:57:9 › StringUtils › should return empty string for empty input
+Total: 223 tests in 40 files
+PS C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\AZ_Playwright> npx --no-install playwright test --project=framework
 
+Running 223 tests using 4 workers
+  1) [framework] › tests\framework\evidence-factory\evidence-factory-excel.spec.ts:71:7 › TC-002 - Update Policy 
 
+    Error: ENOENT: no such file or directory, open 'C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\AZ_Playwright\results\.current-test-run.json'
+
+    Error Context: test-results\tests-framework-evidence-f-85d89-xcel-TC-002---Update-Policy-framework\error-context.md
+
+  2) [framework] › tests\framework\evidence-factory\evidence-factory-excel.spec.ts:71:7 › TC-001 - Create Policy 
+
+    Error: ENOENT: no such file or directory, open 'C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\AZ_Playwright\results\.current-test-run.json'
+
+    Error Context: test-results\tests-framework-evidence-f-d5922-xcel-TC-001---Create-Policy-framework\error-context.md
+
+  3) [framework] › tests\framework\evidence-factory\evidence-factory-excel.spec.ts:71:7 › TC-003 - Cancel Policy 
+
+    Error: ENOENT: no such file or directory, open 'C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\AZ_Playwright\results\.current-test-run.json'
+
+    Error Context: test-results\tests-framework-evidence-f-8a5be-xcel-TC-003---Cancel-Policy-framework\error-context.md
+
+  4) [framework] › tests\framework\evidence-factory\evidence-factory-excel.spec.ts:71:7 › TC-004 - Renew Policy 
+
+    Error: ENOENT: no such file or directory, open 'C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\AZ_Playwright\results\.current-test-run.json'
+
+    Error Context: test-results\tests-framework-evidence-f-de912-excel-TC-004---Renew-Policy-framework\error-context.md
+
+  5) [framework] › tests\framework\pom-generator\create-runner.spec.ts:99:13 › CreateRunner › should scan page and CREATE generated POM 
+
+    Error: browserType.launch: Executable doesn't exist at C:\Users\tp70707\AppData\Local\ms-playwright\chromium_headless_shell-1248\chrome-headless-shell-win64\chrome-headless-shell.exe
+    ╔════════════════════════════════════════════════════════════╗
+    ║ Looks like Playwright was just installed or updated.       ║
+    ║ Please run the following command to download new browsers: ║
+    ║                                                            ║
+    ║     npx playwright install                                 ║
+    ║                                                            ║
+    ║ <3 Playwright Team                                         ║
+    ╚════════════════════════════════════════════════════════════╝
+
+    Error Context: test-results\tests-framework-pom-genera-b486a-ge-and-CREATE-generated-POM-framework\error-context.md
+
+  6) [framework] › tests\framework\pom-generator\create-runner.spec.ts:422:13 › CreateRunner › should reject duplicate CREATE through existing metadata 
+
+    Error: browserType.launch: Executable doesn't exist at C:\Users\tp70707\AppData\Local\ms-playwright\chromium_headless_shell-1248\chrome-headless-shell-win64\chrome-headless-shell.exe
+    ╔════════════════════════════════════════════════════════════╗
+    ║ Looks like Playwright was just installed or updated.       ║
+    ║ Please run the following command to download new browsers: ║
+    ║                                                            ║
+    ║     npx playwright install                                 ║
+    ║                                                            ║
+    ║ <3 Playwright Team                                         ║
+    ╚════════════════════════════════════════════════════════════╝
+
+    Error Context: test-results\tests-framework-pom-genera-efc8e-E-through-existing-metadata-framework\error-context.md
+
+  7) [framework] › tests\framework\pom-generator\create-runner.spec.ts:339:13 › CreateRunner › should reject invalid Brand Channel Product hierarchy 
+
+    Error: browserType.launch: Executable doesn't exist at C:\Users\tp70707\AppData\Local\ms-playwright\chromium_headless_shell-1248\chrome-headless-shell-win64\chrome-headless-shell.exe
+    ╔════════════════════════════════════════════════════════════╗
+    ║ Looks like Playwright was just installed or updated.       ║
+    ║ Please run the following command to download new browsers: ║
+    ║                                                            ║
+    ║     npx playwright install                                 ║
+    ║                                                            ║
+    ║ <3 Playwright Team                                         ║
+    ╚════════════════════════════════════════════════════════════╝
+
+    Error Context: test-results\tests-framework-pom-genera-09ce7-d-Channel-Product-hierarchy-framework\error-context.md
+
+  8) [framework] › tests\framework\pom-generator\dom-scanner.spec.ts:14:13 › DomScanner › should scan supported visible elements 
+
+    Error: browserType.launch: Executable doesn't exist at C:\Users\tp70707\AppData\Local\ms-playwright\chromium_headless_shell-1248\chrome-headless-shell-win64\chrome-headless-shell.exe
+    ╔════════════════════════════════════════════════════════════╗
+    ║ Looks like Playwright was just installed or updated.       ║
+    ║ Please run the following command to download new browsers: ║
+    ║                                                            ║
+    ║     npx playwright install                                 ║
+    ║                                                            ║
+    ║ <3 Playwright Team                                         ║
+    ╚════════════════════════════════════════════════════════════╝
+
+    Error Context: test-results\tests-framework-pom-genera-ed790--supported-visible-elements-framework\error-context.md
+
+  9) [framework] › tests\framework\pom-generator\dom-scanner.spec.ts:57:13 › DomScanner › should capture discovered metadata 
+
+    Error: browserType.launch: Executable doesn't exist at C:\Users\tp70707\AppData\Local\ms-playwright\chromium_headless_shell-1248\chrome-headless-shell-win64\chrome-headless-shell.exe
+    ╔════════════════════════════════════════════════════════════╗
+    ║ Looks like Playwright was just installed or updated.       ║
+    ║ Please run the following command to download new browsers: ║
+    ║                                                            ║
+    ║     npx playwright install                                 ║
+    ║                                                            ║
+    ║ <3 Playwright Team                                         ║
+    ╚════════════════════════════════════════════════════════════╝
+
+    Error Context: test-results\tests-framework-pom-genera-975b5-capture-discovered-metadata-framework\error-context.md
+
+  10) [framework] › tests\framework\pom-generator\dom-scanner.spec.ts:116:13 › DomScanner › should classify checkbox and radio correctly 
+
+    Error: browserType.launch: Executable doesn't exist at C:\Users\tp70707\AppData\Local\ms-playwright\chromium_headless_shell-1248\chrome-headless-shell-win64\chrome-headless-shell.exe
+    ╔════════════════════════════════════════════════════════════╗
+    ║ Looks like Playwright was just installed or updated.       ║
+    ║ Please run the following command to download new browsers: ║
+    ║                                                            ║
+    ║     npx playwright install                                 ║
+    ║                                                            ║
+    ║ <3 Playwright Team                                         ║
+    ╚════════════════════════════════════════════════════════════╝
+
+    Error Context: test-results\tests-framework-pom-genera-bf9ba-heckbox-and-radio-correctly-framework\error-context.md
+
+  11) [framework] › tests\framework\evidence-factory\evidence-report.spec.ts:30:5 › Generate final Excel evidence report 
+
+    Error: ENOENT: no such file or directory, open 'C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\AZ_Playwright\results\.current-test-run.json'
+
+    Error Context: test-results\tests-framework-evidence-f-45289-final-Excel-evidence-report-framework\error-context.md
+
+  12) [framework] › tests\framework\pom-generator\dom-scanner.spec.ts:155:13 › DomScanner › should scan role based controls 
+
+    Error: browserType.launch: Executable doesn't exist at C:\Users\tp70707\AppData\Local\ms-playwright\chromium_headless_shell-1248\chrome-headless-shell-win64\chrome-headless-shell.exe
+    ╔════════════════════════════════════════════════════════════╗
+    ║ Looks like Playwright was just installed or updated.       ║
+    ║ Please run the following command to download new browsers: ║
+    ║                                                            ║
+    ║     npx playwright install                                 ║
+    ║                                                            ║
+    ║ <3 Playwright Team                                         ║
+    ╚════════════════════════════════════════════════════════════╝
+
+    Error Context: test-results\tests-framework-pom-genera-55bb5-ld-scan-role-based-controls-framework\error-context.md
+
+  13) [framework] › tests\framework\pom-generator\dom-scanner.spec.ts:188:13 › DomScanner › should exclude hidden elements by default 
+
+    Error: browserType.launch: Executable doesn't exist at C:\Users\tp70707\AppData\Local\ms-playwright\chromium_headless_shell-1248\chrome-headless-shell-win64\chrome-headless-shell.exe
+    ╔════════════════════════════════════════════════════════════╗
+    ║ Looks like Playwright was just installed or updated.       ║
+    ║ Please run the following command to download new browsers: ║
+    ║                                                            ║
+    ║     npx playwright install                                 ║
+    ║                                                            ║
+    ║ <3 Playwright Team                                         ║
+    ╚════════════════════════════════════════════════════════════╝
+
+    Error Context: test-results\tests-framework-pom-genera-217cb--hidden-elements-by-default-framework\error-context.md
+
+  14) [framework] › tests\framework\pom-generator\dom-scanner.spec.ts:216:13 › DomScanner › should not generate locator candidates 
+
+    Error: browserType.launch: Executable doesn't exist at C:\Users\tp70707\AppData\Local\ms-playwright\chromium_headless_shell-1248\chrome-headless-shell-win64\chrome-headless-shell.exe
+    ╔════════════════════════════════════════════════════════════╗
+    ║ Looks like Playwright was just installed or updated.       ║
+    ║ Please run the following command to download new browsers: ║
+    ║                                                            ║
+    ║     npx playwright install                                 ║
+    ║                                                            ║
+    ║ <3 Playwright Team                                         ║
+    ╚════════════════════════════════════════════════════════════╝
+
+    Error Context: test-results\tests-framework-pom-genera-0946d-generate-locator-candidates-framework\error-context.md
+
+  15) [framework] › tests\framework\pom-generator\dom-scanner.spec.ts:243:13 › DomScanner › should ignore unsupported non-interactive elements 
+
+    Error: browserType.launch: Executable doesn't exist at C:\Users\tp70707\AppData\Local\ms-playwright\chromium_headless_shell-1248\chrome-headless-shell-win64\chrome-headless-shell.exe
+    ╔════════════════════════════════════════════════════════════╗
+    ║ Looks like Playwright was just installed or updated.       ║
+    ║ Please run the following command to download new browsers: ║
+    ║                                                            ║
+    ║     npx playwright install                                 ║
+    ║                                                            ║
+    ║ <3 Playwright Team                                         ║
+    ╚════════════════════════════════════════════════════════════╝
+
+    Error Context: test-results\tests-framework-pom-genera-157c6-ed-non-interactive-elements-framework\error-context.md
+
+  16) [framework] › tests\framework\pom-generator\element-metadata-reader.spec.ts:17:13 › ElementMetadataReader › should read element attributes 
+
+    Error: browserType.launch: Executable doesn't exist at C:\Users\tp70707\AppData\Local\ms-playwright\chromium_headless_shell-1248\chrome-headless-shell-win64\chrome-headless-shell.exe
+    ╔════════════════════════════════════════════════════════════╗
+    ║ Looks like Playwright was just installed or updated.       ║
+    ║ Please run the following command to download new browsers: ║
+    ║                                                            ║
+    ║     npx playwright install                                 ║
+    ║                                                            ║
+    ║ <3 Playwright Team                                         ║
+    ╚════════════════════════════════════════════════════════════╝
+
+    Error Context: test-results\tests-framework-pom-genera-6df8d-uld-read-element-attributes-framework\error-context.md
+
+  17) [framework] › tests\framework\pom-generator\element-metadata-reader.spec.ts:61:13 › ElementMetadataReader › should discover label using for attribute 
+
+    Error: browserType.launch: Executable doesn't exist at C:\Users\tp70707\AppData\Local\ms-playwright\chromium_headless_shell-1248\chrome-headless-shell-win64\chrome-headless-shell.exe
+    ╔════════════════════════════════════════════════════════════╗
+    ║ Looks like Playwright was just installed or updated.       ║
+    ║ Please run the following command to download new browsers: ║
+    ║                                                            ║
+    ║     npx playwright install                                 ║
+    ║                                                            ║
+    ║ <3 Playwright Team                                         ║
+    ╚════════════════════════════════════════════════════════════╝
+
+    Error Context: test-results\tests-framework-pom-genera-d7546-r-label-using-for-attribute-framework\error-context.md
+
+  18) [framework] › tests\framework\pom-generator\element-metadata-reader.spec.ts:108:13 › ElementMetadataReader › should capture surrounding semantic context 
+
+    Error: browserType.launch: Executable doesn't exist at C:\Users\tp70707\AppData\Local\ms-playwright\chromium_headless_shell-1248\chrome-headless-shell-win64\chrome-headless-shell.exe
+    ╔════════════════════════════════════════════════════════════╗
+    ║ Looks like Playwright was just installed or updated.       ║
+    ║ Please run the following command to download new browsers: ║
+    ║                                                            ║
+    ║     npx playwright install                                 ║
+    ║                                                            ║
+    ║ <3 Playwright Team                                         ║
+    ╚════════════════════════════════════════════════════════════╝
+
+    Error Context: test-results\tests-framework-pom-genera-e1f94-urrounding-semantic-context-framework\error-context.md
+
+  19) [framework] › tests\framework\pom-generator\element-metadata-reader.spec.ts:85:13 › ElementMetadataReader › should discover wrapping label 
+
+    Error: browserType.launch: Executable doesn't exist at C:\Users\tp70707\AppData\Local\ms-playwright\chromium_headless_shell-1248\chrome-headless-shell-win64\chrome-headless-shell.exe
+    ╔════════════════════════════════════════════════════════════╗
+    ║ Looks like Playwright was just installed or updated.       ║
+    ║ Please run the following command to download new browsers: ║
+    ║                                                            ║
+    ║     npx playwright install                                 ║
+    ║                                                            ║
+    ║ <3 Playwright Team                                         ║
+    ╚════════════════════════════════════════════════════════════╝
+
+    Error Context: test-results\tests-framework-pom-genera-2f99f-uld-discover-wrapping-label-framework\error-context.md
+
+  20) [framework] › tests\framework\pom-generator\element-metadata-reader.spec.ts:136:13 › ElementMetadataReader › should identify hidden elements 
+
+    Error: browserType.launch: Executable doesn't exist at C:\Users\tp70707\AppData\Local\ms-playwright\chromium_headless_shell-1248\chrome-headless-shell-win64\chrome-headless-shell.exe
+    ╔════════════════════════════════════════════════════════════╗
+    ║ Looks like Playwright was just installed or updated.       ║
+    ║ Please run the following command to download new browsers: ║
+    ║                                                            ║
+    ║     npx playwright install                                 ║
+    ║                                                            ║
+    ║ <3 Playwright Team                                         ║
+    ╚════════════════════════════════════════════════════════════╝
+
+    Error Context: test-results\tests-framework-pom-genera-bf234-ld-identify-hidden-elements-framework\error-context.md
+
+  21) [framework] › tests\framework\pom-generator\generated-element-assembler.spec.ts:38:13 › GeneratedElementAssembler › should assemble a captured element into a generated element 
+
+    Error: browserType.launch: Executable doesn't exist at C:\Users\tp70707\AppData\Local\ms-playwright\chromium_headless_shell-1248\chrome-headless-shell-win64\chrome-headless-shell.exe
+    ╔════════════════════════════════════════════════════════════╗
+    ║ Looks like Playwright was just installed or updated.       ║
+    ║ Please run the following command to download new browsers: ║
+    ║                                                            ║
+    ║     npx playwright install                                 ║
+    ║                                                            ║
+    ║ <3 Playwright Team                                         ║
+    ╚════════════════════════════════════════════════════════════╝
+
+    Error Context: test-results\tests-framework-pom-genera-f9854-nt-into-a-generated-element-framework\error-context.md
+
+  22) [framework] › tests\framework\pom-generator\generated-element-assembler.spec.ts:111:13 › GeneratedElementAssembler › should select role locator for a button 
+
+    Error: browserType.launch: Executable doesn't exist at C:\Users\tp70707\AppData\Local\ms-playwright\chromium_headless_shell-1248\chrome-headless-shell-win64\chrome-headless-shell.exe
+    ╔════════════════════════════════════════════════════════════╗
+    ║ Looks like Playwright was just installed or updated.       ║
+    ║ Please run the following command to download new browsers: ║
+    ║                                                            ║
+    ║     npx playwright install                                 ║
+    ║                                                            ║
+    ║ <3 Playwright Team                                         ║
+    ╚════════════════════════════════════════════════════════════╝
+
+    Error Context: test-results\tests-framework-pom-genera-c9225-t-role-locator-for-a-button-framework\error-context.md
+
+  23) [framework] › tests\framework\pom-generator\generated-element-assembler.spec.ts:291:13 › GeneratedElementAssembler › should generate different stable keys for different new elements 
+
+    Error: browserType.launch: Executable doesn't exist at C:\Users\tp70707\AppData\Local\ms-playwright\chromium_headless_shell-1248\chrome-headless-shell-win64\chrome-headless-shell.exe
+    ╔════════════════════════════════════════════════════════════╗
+    ║ Looks like Playwright was just installed or updated.       ║
+    ║ Please run the following command to download new browsers: ║
+    ║                                                            ║
+    ║     npx playwright install                                 ║
+    ║                                                            ║
+    ║ <3 Playwright Team                                         ║
+    ╚════════════════════════════════════════════════════════════╝
+
+    Error Context: test-results\tests-framework-pom-genera-d8339--for-different-new-elements-framework\error-context.md
+
+  24) [framework] › tests\framework\pom-generator\generated-page-assembler.spec.ts:27:13 › GeneratedPageAssembler › should assemble a complete generated page 
+
+    Error: browserType.launch: Executable doesn't exist at C:\Users\tp70707\AppData\Local\ms-playwright\chromium_headless_shell-1248\chrome-headless-shell-win64\chrome-headless-shell.exe
+    ╔════════════════════════════════════════════════════════════╗
+    ║ Looks like Playwright was just installed or updated.       ║
+    ║ Please run the following command to download new browsers: ║
+    ║                                                            ║
+    ║     npx playwright install                                 ║
+    ║                                                            ║
+    ║ <3 Playwright Team                                         ║
+    ╚════════════════════════════════════════════════════════════╝
+
+    Error Context: test-results\tests-framework-pom-genera-d63ce-e-a-complete-generated-page-framework\error-context.md
+
+  25) [framework] › tests\framework\pom-generator\generated-element-assembler.spec.ts:178:13 › GeneratedElementAssembler › should reject element when no unique locator can be generated 
+
+    Error: browserType.launch: Executable doesn't exist at C:\Users\tp70707\AppData\Local\ms-playwright\chromium_headless_shell-1248\chrome-headless-shell-win64\chrome-headless-shell.exe
+    ╔════════════════════════════════════════════════════════════╗
+    ║ Looks like Playwright was just installed or updated.       ║
+    ║ Please run the following command to download new browsers: ║
+    ║                                                            ║
+    ║     npx playwright install                                 ║
+    ║                                                            ║
+    ║ <3 Playwright Team                                         ║
+    ╚════════════════════════════════════════════════════════════╝
+
+    Error Context: test-results\tests-framework-pom-genera-4ac70-ue-locator-can-be-generated-framework\error-context.md
+
+  26) [framework] › tests\framework\pom-generator\generated-element-assembler.spec.ts:215:13 › GeneratedElementAssembler › should assemble multiple elements 
+
+    Error: browserType.launch: Executable doesn't exist at C:\Users\tp70707\AppData\Local\ms-playwright\chromium_headless_shell-1248\chrome-headless-shell-win64\chrome-headless-shell.exe
+    ╔════════════════════════════════════════════════════════════╗
+    ║ Looks like Playwright was just installed or updated.       ║
+    ║ Please run the following command to download new browsers: ║
+    ║                                                            ║
+    ║     npx playwright install                                 ║
+    ║                                                            ║
+    ║ <3 Playwright Team                                         ║
+    ╚════════════════════════════════════════════════════════════╝
+
+    Error Context: test-results\tests-framework-pom-genera-3a817--assemble-multiple-elements-framework\error-context.md
+
+  27) [framework] › tests\framework\pom-generator\generated-page-assembler.spec.ts:149:13 › GeneratedPageAssembler › should trim and normalize page name 
+
+    Error: browserType.launch: Executable doesn't exist at C:\Users\tp70707\AppData\Local\ms-playwright\chromium_headless_shell-1248\chrome-headless-shell-win64\chrome-headless-shell.exe
+    ╔════════════════════════════════════════════════════════════╗
+    ║ Looks like Playwright was just installed or updated.       ║
+    ║ Please run the following command to download new browsers: ║
+    ║                                                            ║
+    ║     npx playwright install                                 ║
+    ║                                                            ║
+    ║ <3 Playwright Team                                         ║
+    ╚════════════════════════════════════════════════════════════╝
+
+    Error Context: test-results\tests-framework-pom-genera-e97f6-rim-and-normalize-page-name-framework\error-context.md
+
+  28) [framework] › tests\framework\pom-generator\generated-page-assembler.spec.ts:197:13 › GeneratedPageAssembler › should reject an invalid Brand Channel Product combination 
+
+    Error: browserType.launch: Executable doesn't exist at C:\Users\tp70707\AppData\Local\ms-playwright\chromium_headless_shell-1248\chrome-headless-shell-win64\chrome-headless-shell.exe
+    ╔════════════════════════════════════════════════════════════╗
+    ║ Looks like Playwright was just installed or updated.       ║
+    ║ Please run the following command to download new browsers: ║
+    ║                                                            ║
+    ║     npx playwright install                                 ║
+    ║                                                            ║
+    ║ <3 Playwright Team                                         ║
+    ╚════════════════════════════════════════════════════════════╝
+
+    Error Context: test-results\tests-framework-pom-genera-5fc65-Channel-Product-combination-framework\error-context.md
+
+  29) [framework] › tests\framework\pom-generator\generated-page-assembler.spec.ts:231:13 › GeneratedPageAssembler › should reject an empty page name before scanning 
+
+    Error: browserType.launch: Executable doesn't exist at C:\Users\tp70707\AppData\Local\ms-playwright\chromium_headless_shell-1248\chrome-headless-shell-win64\chrome-headless-shell.exe
+    ╔════════════════════════════════════════════════════════════╗
+    ║ Looks like Playwright was just installed or updated.       ║
+    ║ Please run the following command to download new browsers: ║
+    ║                                                            ║
+    ║     npx playwright install                                 ║
+    ║                                                            ║
+    ║ <3 Playwright Team                                         ║
+    ╚════════════════════════════════════════════════════════════╝
+
+    Error Context: test-results\tests-framework-pom-genera-5be80-y-page-name-before-scanning-framework\error-context.md
+
+  30) [framework] › tests\framework\pom-generator\generated-page-assembler.spec.ts:264:13 › GeneratedPageAssembler › should support a page with no capturable elements 
+
+    Error: browserType.launch: Executable doesn't exist at C:\Users\tp70707\AppData\Local\ms-playwright\chromium_headless_shell-1248\chrome-headless-shell-win64\chrome-headless-shell.exe
+    ╔════════════════════════════════════════════════════════════╗
+    ║ Looks like Playwright was just installed or updated.       ║
+    ║ Please run the following command to download new browsers: ║
+    ║                                                            ║
+    ║     npx playwright install                                 ║
+    ║                                                            ║
+    ║ <3 Playwright Team                                         ║
+    ╚════════════════════════════════════════════════════════════╝
+
+    Error Context: test-results\tests-framework-pom-genera-0dbb6-with-no-capturable-elements-framework\error-context.md
+
+  31) [framework] › tests\framework\pom-generator\locator-validator.spec.ts:29:9 › LocatorValidator › should mark a single matching locator as unique 
+
+    Error: browserType.launch: Executable doesn't exist at C:\Users\tp70707\AppData\Local\ms-playwright\chromium_headless_shell-1248\chrome-headless-shell-win64\chrome-headless-shell.exe
+    ╔════════════════════════════════════════════════════════════╗
+    ║ Looks like Playwright was just installed or updated.       ║
+    ║ Please run the following command to download new browsers: ║
+    ║                                                            ║
+    ║     npx playwright install                                 ║
+    ║                                                            ║
+    ║ <3 Playwright Team                                         ║
+    ╚════════════════════════════════════════════════════════════╝
+
+    Error Context: test-results\tests-framework-pom-genera-f123c--matching-locator-as-unique-framework\error-context.md
+
+  32) [framework] › tests\framework\pom-generator\locator-validator.spec.ts:60:9 › LocatorValidator › should mark duplicate locators as non-unique 
+
+    Error: browserType.launch: Executable doesn't exist at C:\Users\tp70707\AppData\Local\ms-playwright\chromium_headless_shell-1248\chrome-headless-shell-win64\chrome-headless-shell.exe
+    ╔════════════════════════════════════════════════════════════╗
+    ║ Looks like Playwright was just installed or updated.       ║
+    ║ Please run the following command to download new browsers: ║
+    ║                                                            ║
+    ║     npx playwright install                                 ║
+    ║                                                            ║
+    ║ <3 Playwright Team                                         ║
+    ╚════════════════════════════════════════════════════════════╝
+
+    Error Context: test-results\tests-framework-pom-genera-cbb1c-cate-locators-as-non-unique-framework\error-context.md
+
+  33) [framework] › tests\framework\pom-generator\locator-validator.spec.ts:116:9 › LocatorValidator › should validate role locators 
+
+    Error: browserType.launch: Executable doesn't exist at C:\Users\tp70707\AppData\Local\ms-playwright\chromium_headless_shell-1248\chrome-headless-shell-win64\chrome-headless-shell.exe
+    ╔════════════════════════════════════════════════════════════╗
+    ║ Looks like Playwright was just installed or updated.       ║
+    ║ Please run the following command to download new browsers: ║
+    ║                                                            ║
+    ║     npx playwright install                                 ║
+    ║                                                            ║
+    ║ <3 Playwright Team                                         ║
+    ╚════════════════════════════════════════════════════════════╝
+
+    Error Context: test-results\tests-framework-pom-genera-7df68-ould-validate-role-locators-framework\error-context.md
+
+  34) [framework] › tests\framework\pom-generator\locator-validator.spec.ts:90:9 › LocatorValidator › should mark missing locators as non-unique 
+
+    Error: browserType.launch: Executable doesn't exist at C:\Users\tp70707\AppData\Local\ms-playwright\chromium_headless_shell-1248\chrome-headless-shell-win64\chrome-headless-shell.exe
+    ╔════════════════════════════════════════════════════════════╗
+    ║ Looks like Playwright was just installed or updated.       ║
+    ║ Please run the following command to download new browsers: ║
+    ║                                                            ║
+    ║     npx playwright install                                 ║
+    ║                                                            ║
+    ║ <3 Playwright Team                                         ║
+    ╚════════════════════════════════════════════════════════════╝
+
+    Error Context: test-results\tests-framework-pom-genera-3ef7e-sing-locators-as-non-unique-framework\error-context.md
+
+  35) [framework] › tests\framework\pom-generator\locator-validator.spec.ts:142:9 › LocatorValidator › should validate id locators 
+
+    Error: browserType.launch: Executable doesn't exist at C:\Users\tp70707\AppData\Local\ms-playwright\chromium_headless_shell-1248\chrome-headless-shell-win64\chrome-headless-shell.exe
+    ╔════════════════════════════════════════════════════════════╗
+    ║ Looks like Playwright was just installed or updated.       ║
+    ║ Please run the following command to download new browsers: ║
+    ║                                                            ║
+    ║     npx playwright install                                 ║
+    ║                                                            ║
+    ║ <3 Playwright Team                                         ║
+    ╚════════════════════════════════════════════════════════════╝
+
+    Error Context: test-results\tests-framework-pom-genera-22d16-should-validate-id-locators-framework\error-context.md
+
+  35 failed
+    [framework] › tests\framework\evidence-factory\evidence-factory-excel.spec.ts:71:7 › TC-001 - Create Policy 
+    [framework] › tests\framework\evidence-factory\evidence-factory-excel.spec.ts:71:7 › TC-002 - Update Policy 
+    [framework] › tests\framework\evidence-factory\evidence-factory-excel.spec.ts:71:7 › TC-003 - Cancel Policy 
+    [framework] › tests\framework\evidence-factory\evidence-factory-excel.spec.ts:71:7 › TC-004 - Renew Policy 
+    [framework] › tests\framework\evidence-factory\evidence-report.spec.ts:30:5 › Generate final Excel evidence report 
+    [framework] › tests\framework\pom-generator\create-runner.spec.ts:99:13 › CreateRunner › should scan page and CREATE generated POM 
+    [framework] › tests\framework\pom-generator\create-runner.spec.ts:339:13 › CreateRunner › should reject invalid Brand Channel Product hierarchy 
+    [framework] › tests\framework\pom-generator\create-runner.spec.ts:422:13 › CreateRunner › should reject duplicate CREATE through existing metadata 
+    [framework] › tests\framework\pom-generator\dom-scanner.spec.ts:14:13 › DomScanner › should scan supported visible elements 
+    [framework] › tests\framework\pom-generator\dom-scanner.spec.ts:57:13 › DomScanner › should capture discovered metadata 
+    [framework] › tests\framework\pom-generator\dom-scanner.spec.ts:116:13 › DomScanner › should classify checkbox and radio correctly 
+    [framework] › tests\framework\pom-generator\dom-scanner.spec.ts:155:13 › DomScanner › should scan role based controls 
+    [framework] › tests\framework\pom-generator\dom-scanner.spec.ts:188:13 › DomScanner › should exclude hidden elements by default 
+    [framework] › tests\framework\pom-generator\dom-scanner.spec.ts:216:13 › DomScanner › should not generate locator candidates 
+    [framework] › tests\framework\pom-generator\dom-scanner.spec.ts:243:13 › DomScanner › should ignore unsupported non-interactive elements 
+    [framework] › tests\framework\pom-generator\element-metadata-reader.spec.ts:17:13 › ElementMetadataReader › should read element attributes 
+    [framework] › tests\framework\pom-generator\element-metadata-reader.spec.ts:61:13 › ElementMetadataReader › should discover label using for attribute 
+    [framework] › tests\framework\pom-generator\element-metadata-reader.spec.ts:85:13 › ElementMetadataReader › should discover wrapping label 
+    [framework] › tests\framework\pom-generator\element-metadata-reader.spec.ts:108:13 › ElementMetadataReader › should capture surrounding semantic context 
+    [framework] › tests\framework\pom-generator\element-metadata-reader.spec.ts:136:13 › ElementMetadataReader › should identify hidden elements 
+    [framework] › tests\framework\pom-generator\generated-element-assembler.spec.ts:38:13 › GeneratedElementAssembler › should assemble a captured element into a generated element 
+    [framework] › tests\framework\pom-generator\generated-element-assembler.spec.ts:111:13 › GeneratedElementAssembler › should select role locator for a button 
+    [framework] › tests\framework\pom-generator\generated-element-assembler.spec.ts:178:13 › GeneratedElementAssembler › should reject element when no unique locator can be generated 
+    [framework] › tests\framework\pom-generator\generated-element-assembler.spec.ts:215:13 › GeneratedElementAssembler › should assemble multiple elements 
+    [framework] › tests\framework\pom-generator\generated-element-assembler.spec.ts:291:13 › GeneratedElementAssembler › should generate different stable keys for different new elements 
+    [framework] › tests\framework\pom-generator\generated-page-assembler.spec.ts:27:13 › GeneratedPageAssembler › should assemble a complete generated page 
+    [framework] › tests\framework\pom-generator\generated-page-assembler.spec.ts:149:13 › GeneratedPageAssembler › should trim and normalize page name 
+    [framework] › tests\framework\pom-generator\generated-page-assembler.spec.ts:197:13 › GeneratedPageAssembler › should reject an invalid Brand Channel Product combination 
+    [framework] › tests\framework\pom-generator\generated-page-assembler.spec.ts:231:13 › GeneratedPageAssembler › should reject an empty page name before scanning 
+    [framework] › tests\framework\pom-generator\generated-page-assembler.spec.ts:264:13 › GeneratedPageAssembler › should support a page with no capturable elements 
+    [framework] › tests\framework\pom-generator\locator-validator.spec.ts:29:9 › LocatorValidator › should mark a single matching locator as unique 
+    [framework] › tests\framework\pom-generator\locator-validator.spec.ts:60:9 › LocatorValidator › should mark duplicate locators as non-unique 
+    [framework] › tests\framework\pom-generator\locator-validator.spec.ts:90:9 › LocatorValidator › should mark missing locators as non-unique 
+    [framework] › tests\framework\pom-generator\locator-validator.spec.ts:116:9 › LocatorValidator › should validate role locators 
+    [framework] › tests\framework\pom-generator\locator-validator.spec.ts:142:9 › LocatorValidator › should validate id locators 
+  188 passed (14.3s)
+
+To open last HTML report run:
+
+  npx playwright show-report
+
+PS C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\AZ_Playwright> 
