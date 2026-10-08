@@ -1,12 +1,86 @@
+npm ls @playwright/test playwright typescript --depth=0
 
-PS C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\AZ_Playwright> npx playwright --version
-npm error code UNABLE_TO_VERIFY_LEAF_SIGNATURE
-npm error errno UNABLE_TO_VERIFY_LEAF_SIGNATURE
-npm error request to https://registry.npmjs.org/playwright failed, reason: unable to verify the first certificate; if the root CA is installed locally, try running Node.js with --use-system-ca
-npm error A complete log of this run can be found in: C:\Users\tp70707\AppData\Local\npm-cache\_logs\2026-10-08T10_14_46_055Z-debug-0.log
-PS C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\AZ_Playwright> npx tsc --version
-npm error code UNABLE_TO_VERIFY_LEAF_SIGNATURE
-npm error errno UNABLE_TO_VERIFY_LEAF_SIGNATURE
-npm error request to https://registry.npmjs.org/tsc failed, reason: unable to verify the first certificate; if the root CA is installed locally, try running Node.js with --use-system-ca
-npm error A complete log of this run can be found in: C:\Users\tp70707\AppData\Local\npm-cache\_logs\2026-10-08T10_16_21_214Z-debug-0.log
-PS C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\AZ_Playwright> 
+Test-Path .\node_modules\.bin\playwright.cmd
+
+Test-Path .\node_modules\.bin\tsc.cmd
+
+$env:NODE_USE_SYSTEM_CA = "1"
+
+npm ping
+
+============
+
+# Install framework dependencies
+npm install --save-dev @playwright/test typescript @types/node tsx
+
+# Install report dependencies
+npm install exceljs archiver
+
+# Install archive type definitions
+npm install --save-dev @types/archiver
+
+# Verify versions
+npx --no-install playwright --version
+npx --no-install tsc --version
+
+# Validate TypeScript
+npx --no-install tsc --noEmit
+
+======
+
+# ============================================================
+# ALLIANZ PLAYWRIGHT FRAMEWORK - WINDOWS VALIDATION
+# ============================================================
+
+# 1. Enable Windows trusted certificates for Node.js
+$env:NODE_USE_SYSTEM_CA = "1"
+
+# 2. Verify installed versions
+node --version
+npm --version
+npx --no-install playwright --version
+npx --no-install tsc --version
+
+# 3. Validate TypeScript
+npx --no-install tsc --noEmit
+if ($LASTEXITCODE -ne 0) { throw "TypeScript validation failed." }
+
+# 4. Install Playwright Chromium browser
+npx --no-install playwright install chromium
+if ($LASTEXITCODE -ne 0) { throw "Chromium installation failed." }
+
+# 5. Initialize EvidenceFactory run
+npx --no-install tsx tests/framework/evidence-factory/initialize-run.ts
+if ($LASTEXITCODE -ne 0) { throw "EvidenceFactory initialization failed." }
+
+# 6. Execute EvidenceFactory scenarios
+npx --no-install playwright test tests/framework/evidence-factory/evidence-factory-excel.spec.ts --project=framework --workers=4
+if ($LASTEXITCODE -ne 0) { throw "EvidenceFactory scenario tests failed." }
+
+# 7. Generate and validate Excel evidence report
+npx --no-install playwright test tests/framework/evidence-factory/evidence-report.spec.ts --project=framework --workers=1
+if ($LASTEXITCODE -ne 0) { throw "Excel report generation test failed." }
+
+# 8. Run POM Generator tests
+npx --no-install playwright test tests/framework/pom-generator --project=framework --workers=4
+if ($LASTEXITCODE -ne 0) { throw "POM Generator tests failed." }
+
+# 9. Read current run ID
+$runId = (Get-Content .\results\.current-test-run.json | ConvertFrom-Json).runId
+
+# 10. Open generated Excel report folder
+$reportDir = ".\results\$runId\report"
+
+if (Test-Path $reportDir) {
+    explorer $reportDir
+} else {
+    Write-Host "Report folder not found: $reportDir"
+}
+
+# 11. Display completion message
+Write-Host ""
+Write-Host "=========================================="
+Write-Host " PLAYWRIGHT FRAMEWORK VALIDATION COMPLETE"
+Write-Host "=========================================="
+Write-Host "Run ID: $runId"
+Write-Host "Report Directory: $reportDir"
