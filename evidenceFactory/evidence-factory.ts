@@ -5,97 +5,66 @@ import {
   ArchiveManager,
   type ArchiveResult,
 } from './archive/archive-manager';
+
 import { EvidenceAggregator } from './aggregation/evidence-aggregator';
+
 import type { Evidence } from './contracts/evidence';
 import type { ReportConfig } from './contracts/report-config';
+import type { ReportField } from './contracts/report-field';
+
 import type { EvidenceStore } from './store/evidence-store';
 import { createEvidenceWriter } from './writers/writer-factory';
 
-/**
- * Configuration required by EvidenceFactory.
- *
- * Evidence fields are supplied by the consuming automation.
- * EvidenceFactory does not define or maintain business field names.
- */
 export interface EvidenceFactoryConfig<
   TData extends Record<string, unknown>,
 > {
   /**
-   * Ordered business evidence fields.
+   * Consumer-owned report field definitions.
    *
-   * The order of this array determines the business-column order
-   * in tabular reports such as CSV and Excel.
+   * Includes both framework and business report fields.
    */
-  fields: readonly (keyof TData & string)[];
+  fields: readonly ReportField[];
 
-  /**
-   * Root execution-results directory.
-   *
-   * Example:
-   *   ./results
-   */
   resultsDir: string;
-
-  /**
-   * Current execution run identifier.
-   */
   runId: string;
 
-  /**
-   * Optional archive configuration.
-   */
   archive?: ArchiveConfig;
 }
 
-/**
- * Result returned after report generation.
- */
 export interface EvidenceReportResult {
   reportPath: string;
   evidenceCount: number;
 }
 
-/**
- * Result returned after complete run finalization.
- */
 export interface EvidenceFinalizationResult
   extends EvidenceReportResult {
   archive?: ArchiveResult;
 }
 
-/**
- * Coordinates evidence storage, aggregation, reporting,
- * and optional archiving.
- *
- * Business evidence fields remain owned by the consuming automation.
- */
 export class EvidenceFactory<
   TData extends Record<string, unknown>,
 > {
+  private readonly orderedFields: ReportField[];
+
   constructor(
     private readonly config:
       EvidenceFactoryConfig<TData>,
-  ) {}
+  ) {
+    this.orderedFields = [...config.fields].sort(
+      (a, b) => a.order - b.order,
+    );
 
-  /**
-   * Records one evidence item using the supplied store.
-   *
-   * EvidenceFactory validates only framework ownership information.
-   * It does not validate consumer business fields.
-   */
+    this.validateFieldConfiguration();
+  }
+
   async record(
     evidence: Evidence<TData>,
     store: EvidenceStore<TData>,
   ): Promise<void> {
     this.validateEvidenceOwnership(evidence);
-
     await store.add(evidence);
   }
 
-  /**
-   * Generates the selected final report from the latest
-   * attempt of every scenario.
-   */
   async generateReport(
     reportConfig: ReportConfig,
   ): Promise<EvidenceReportResult> {
@@ -110,7 +79,7 @@ export class EvidenceFactory<
     const reportPath =
       await writer.write(
         evidence,
-        this.config.fields,
+        this.orderedFields,
         reportConfig,
       );
 
@@ -120,9 +89,6 @@ export class EvidenceFactory<
     };
   }
 
-  /**
-   * Archives the current run directory.
-   */
   async archiveRun(): Promise<ArchiveResult> {
     if (!this.config.archive) {
       throw new Error(
@@ -140,17 +106,11 @@ export class EvidenceFactory<
     );
   }
 
-  /**
-   * Generates the final report and then archives the run
-   * when archiving is enabled.
-   */
   async finalize(
     reportConfig: ReportConfig,
   ): Promise<EvidenceFinalizationResult> {
     const report =
-      await this.generateReport(
-        reportConfig,
-      );
+      await this.generateReport(reportConfig);
 
     if (
       !this.config.archive ||
@@ -168,9 +128,6 @@ export class EvidenceFactory<
     };
   }
 
-  /**
-   * Returns every stored scenario attempt for the current run.
-   */
   async getAllAttempts(): Promise<
     Evidence<TData>[]
   > {
@@ -180,16 +137,11 @@ export class EvidenceFactory<
     const evidence =
       await aggregator.getAllAttempts();
 
-    this.validateAggregatedEvidence(
-      evidence,
-    );
+    this.validateAggregatedEvidence(evidence);
 
     return evidence;
   }
 
-  /**
-   * Returns only the latest attempt for each scenario.
-   */
   async getFinalEvidence(): Promise<
     Evidence<TData>[]
   > {
@@ -199,9 +151,7 @@ export class EvidenceFactory<
     const evidence =
       await aggregator.getLatestAttempts();
 
-    this.validateAggregatedEvidence(
-      evidence,
-    );
+    this.validateAggregatedEvidence(evidence);
 
     return evidence;
   }
@@ -214,18 +164,10 @@ export class EvidenceFactory<
     });
   }
 
-  /**
-   * Validates framework-owned run information only.
-   *
-   * Business evidence fields are intentionally not inspected here.
-   */
   private validateEvidenceOwnership(
     evidence: Evidence<TData>,
   ): void {
-    if (
-      evidence.runId !==
-      this.config.runId
-    ) {
+    if (evidence.runId !== this.config.runId) {
       throw new Error(
         `Evidence runId "${evidence.runId}" does not match EvidenceFactory runId "${this.config.runId}".`,
       );
@@ -236,9 +178,44 @@ export class EvidenceFactory<
     evidence: Evidence<TData>[],
   ): void {
     for (const item of evidence) {
-      this.validateEvidenceOwnership(
-        item,
-      );
+      this.validateEvidenceOwnership(item);
+    }
+  }
+
+  private validateFieldConfiguration(): void {
+    const names = new Set<string>();
+    const orders = new Set<number>();
+
+    for (const item of this.orderedFields) {
+      if (!item.field.trim()) {
+        throw new Error(
+          'Report field name cannot be empty.',
+        );
+      }
+
+      if (
+        !Number.isInteger(item.order) ||
+        item.order < 1
+      ) {
+        throw new Error(
+          `Invalid order for report field "${item.field}".`,
+        );
+      }
+
+      if (names.has(item.field)) {
+        throw new Error(
+          `Duplicate report field "${item.field}".`,
+        );
+      }
+
+      if (orders.has(item.order)) {
+        throw new Error(
+          `Duplicate report order "${item.order}".`,
+        );
+      }
+
+      names.add(item.field);
+      orders.add(item.order);
     }
   }
 

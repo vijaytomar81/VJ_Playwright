@@ -68,3 +68,10 @@ export type {
 export type {
   ArchiveCleanupResult,
 } from './archive/archive-cleaner';
+
+/**
+ * Consumer-configurable report field definition.
+ *
+ * Field names and order values are owned by configLayer.
+ */
+export type { ReportField } from './contracts/report-field';

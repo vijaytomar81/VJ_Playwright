@@ -1,8 +1,4 @@
-import { test } from '@playwright/test';
-
-import {
-  type EvidenceData,
-} from '../../../configLayer/schema/evidence/evidence-schema';
+import { test, expect } from '@playwright/test';
 
 import {
   EvidenceFactory,
@@ -11,114 +7,153 @@ import {
   type Evidence,
 } from '../../../evidenceFactory';
 
-const runId = 'evidence-four-workers';
-const resultsDir = './results';
+import {
+  evidenceFields,
+  type EvidenceData,
+} from '../../../configLayer/schema/evidence/evidence-schema';
 
-const evidenceFactory =
-  new EvidenceFactory<EvidenceData>({
-    fields: [],
-    resultsDir,
-    runId,
-  });
+import {
+  getTestRunContext,
+} from './test-run-context';
 
-test.describe.configure({ mode: 'parallel' });
-
-test.describe('Four worker evidence generation', () => {
-  const scenarios = [
-    {
-      id: 'TC-001',
-      name: 'Create Policy',
-      status: EvidenceStatus.PASSED,
-      data: {
-        policyNumber: 'POL-10001',
-        customerNumber: 'CUS-10001',
-        premium: 100.50,
-      },
+/**
+ * Test scenarios executed by parallel Playwright workers.
+ *
+ * Each scenario records its own raw evidence.
+ * The final Excel report is generated separately.
+ */
+const scenarios = [
+  {
+    scenarioId: 'TC-001',
+    scenarioName: 'Create Policy',
+    status: EvidenceStatus.PASSED,
+    data: {
+      policyNumber: 'POL-1001',
+      customerNumber: 'CUS-1001',
+      premium: 150.50,
     },
-    {
-      id: 'TC-002',
-      name: 'Create Customer',
-      status: EvidenceStatus.PASSED,
-      data: {
-        policyNumber: 'POL-10002',
-        customerNumber: 'CUS-10002',
-        premium: 200.75,
-      },
+  },
+  {
+    scenarioId: 'TC-002',
+    scenarioName: 'Update Policy',
+    status: EvidenceStatus.PASSED,
+    data: {
+      policyNumber: 'POL-1002',
+      customerNumber: 'CUS-1002',
+      premium: 200.75,
     },
-    {
-      id: 'TC-003',
-      name: 'Update Policy',
-      status: EvidenceStatus.FAILED,
-      data: {
-        policyNumber: 'POL-10003',
-        customerNumber: 'CUS-10003',
-        premium: 300.25,
-      },
+  },
+  {
+    scenarioId: 'TC-003',
+    scenarioName: 'Cancel Policy',
+    status: EvidenceStatus.FAILED,
+    data: {
+      policyNumber: 'POL-1003',
+      customerNumber: 'CUS-1003',
     },
-    {
-      id: 'TC-004',
-      name: 'Cancel Policy',
-      status: EvidenceStatus.NOT_EXECUTED,
-      data: {
-        policyNumber: 'POL-10004',
-        customerNumber: 'CUS-10004',
-        premium: 400.00,
-      },
-    },
-  ] satisfies Array<{
-    id: string;
-    name: string;
-    status: EvidenceStatus;
-    data: EvidenceData;
-  }>;
+  },
+  {
+    scenarioId: 'TC-004',
+    scenarioName: 'Renew Policy',
+    status: EvidenceStatus.NOT_EXECUTED,
+    data: {},
+  },
+];
 
-  for (const scenario of scenarios) {
-    test(scenario.name, async ({}, testInfo) => {
-      const workerId =
-        `worker-${testInfo.workerIndex}`;
+/**
+ * All four scenarios can execute in parallel.
+ */
+test.describe.configure({
+  mode: 'parallel',
+});
 
-      const store =
-        new FileEvidenceStore<EvidenceData>({
-          resultsDir,
-          runId,
-          workerId,
-        });
+for (const scenario of scenarios) {
+  test(
+    `${scenario.scenarioId} - ${scenario.scenarioName}`,
+    async ({}, testInfo) => {
+      /**
+       * Read the shared execution context.
+       *
+       * All workers receive the same runId.
+       */
+      const { runId } = await getTestRunContext();
 
-      const start = Date.now();
+      /**
+       * Worker ID comes from Playwright.
+       *
+       * In production, executionFactory will
+       * supply this identifier.
+       */
+      const workerId = `worker-${testInfo.workerIndex}`;
 
-      await new Promise<void>((resolve) =>
-        setTimeout(resolve, 500),
-      );
+      const resultsDir = './results';
 
+      /**
+       * Initialize EvidenceFactory.
+       */
+      const factory = new EvidenceFactory<EvidenceData>({
+        fields: evidenceFields,
+        resultsDir,
+        runId,
+      });
+
+      /**
+       * Each worker writes evidence into its own folder.
+       */
+      const store = new FileEvidenceStore<EvidenceData>({
+        resultsDir,
+        runId,
+        workerId,
+      });
+
+      const startTime = new Date();
+
+      /**
+       * Simulate scenario execution.
+       */
+      const endTime = new Date();
+
+      /**
+       * Prepare evidence for the scenario.
+       */
       const evidence: Evidence<EvidenceData> = {
         runId,
         workerId,
         attempt: 1,
 
-        scenarioId: scenario.id,
-        scenarioName: scenario.name,
+        scenarioId: scenario.scenarioId,
+        scenarioName: scenario.scenarioName,
         status: scenario.status,
 
-        startTime: new Date(start).toISOString(),
-        endTime: new Date().toISOString(),
-        durationMs: Date.now() - start,
+        startTime: startTime.toISOString(),
+        endTime: endTime.toISOString(),
+
+        durationMs:
+          endTime.getTime() - startTime.getTime(),
 
         data: scenario.data,
 
         ...(scenario.status === EvidenceStatus.FAILED
           ? {
               error: {
-                message: 'Simulated policy update failure',
+                message: 'Simulated scenario failure',
               },
             }
           : {}),
       };
 
-      await evidenceFactory.record(evidence, store);
+      /**
+       * Store raw evidence.
+       */
+      await factory.record(evidence, store);
 
-      console.log(
-        `[${workerId}] Evidence saved: ${scenario.id}`,
-      );
-    });
-  }
-});
+      /**
+       * Verify the evidence was recorded.
+       */
+      expect(evidence.runId).toBe(runId);
+      expect(evidence.workerId).toBe(workerId);
+      expect(evidence.scenarioId).toBe(scenario.scenarioId);
+      expect(evidence.status).toBe(scenario.status);
+    },
+  );
+}

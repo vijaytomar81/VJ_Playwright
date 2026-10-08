@@ -1,54 +1,61 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
+import { randomUUID } from 'node:crypto';
 
 import type { Evidence } from '../../contracts/evidence';
 import type { ReportConfig } from '../../contracts/report-config';
+import type { ReportField } from '../../contracts/report-field';
 import type { EvidenceWriter } from '../evidence-writer';
-
-interface JsonEvidenceReport<
-  TData extends Record<string, unknown>,
-> {
-  metadata: {
-    reportTitle?: string;
-    environment?: string;
-    generatedAt: string;
-    total: number;
-  };
-
-  evidence: Evidence<TData>[];
-}
 
 /**
  * Generates the final JSON evidence report.
  *
- * Business evidence data is preserved exactly as supplied by
- * the execution layer.
+ * All report fields and their order are supplied
+ * through consumer-owned configuration.
+ *
+ * Raw evidence files remain unchanged.
  */
 export class JsonEvidenceWriter<
   TData extends Record<string, unknown>,
 > implements EvidenceWriter<TData> {
   async write(
     evidence: Evidence<TData>[],
-    _fields: readonly (keyof TData & string)[],
+    fields: readonly ReportField[],
     config: ReportConfig,
   ): Promise<string> {
     await fs.mkdir(
       config.outputDir,
-      {
-        recursive: true,
-      },
+      { recursive: true },
     );
 
-    const fileName = this.normalizeFileName(
-      config.fileName ?? 'execution-report',
+    /**
+     * Sort fields by their configured order numbers.
+     */
+    const orderedFields = [...fields].sort(
+      (a, b) => a.order - b.order,
     );
 
-    const filePath = path.join(
-      config.outputDir,
-      `${fileName}.json`,
-    );
+    /**
+     * Build each report record using the configured
+     * field names and order.
+     */
+    const reportRecords = evidence.map((item) => {
+      const record: Record<string, unknown> = {};
 
-    const report: JsonEvidenceReport<TData> = {
+      for (const { field } of orderedFields) {
+        record[field] = resolveFieldValue(
+          item,
+          field,
+        ) ?? null;
+      }
+
+      return record;
+    });
+
+    /**
+     * Final JSON report structure.
+     */
+    const report = {
       metadata: {
         reportTitle: config.reportTitle,
         environment: config.environment,
@@ -56,60 +63,86 @@ export class JsonEvidenceWriter<
         total: evidence.length,
       },
 
-      evidence,
+      evidence: reportRecords,
     };
 
-    await this.writeAtomically(
-      filePath,
-      JSON.stringify(report, null, 2),
+    const baseName = (
+      config.fileName ?? 'execution-report'
+    ).replace(/\.json$/i, '');
+
+    const reportPath = path.join(
+      config.outputDir,
+      `${baseName}.json`,
     );
 
-    return filePath;
-  }
-
-  private normalizeFileName(
-    fileName: string,
-  ): string {
-    return fileName.replace(
-      /\.json$/i,
-      '',
-    );
-  }
-
-  private async writeAtomically(
-    filePath: string,
-    content: string,
-  ): Promise<void> {
     const temporaryPath =
-      `${filePath}.${process.pid}.tmp`;
+      `${reportPath}.${randomUUID()}.tmp`;
 
     try {
       await fs.writeFile(
         temporaryPath,
-        content,
-        {
-          encoding: 'utf8',
-          flag: 'w',
-        },
+        JSON.stringify(report, null, 2),
+        'utf8',
       );
 
       await fs.rename(
         temporaryPath,
-        filePath,
+        reportPath,
       );
+
+      return reportPath;
     } catch (error) {
-      try {
-        await fs.rm(
-          temporaryPath,
-          {
-            force: true,
-          },
-        );
-      } catch {
-        // Preserve the original error.
-      }
+      await fs.rm(
+        temporaryPath,
+        { force: true },
+      );
 
       throw error;
     }
   }
+}
+
+/**
+ * Resolves a configured report field.
+ *
+ * Business fields come from evidence.data.
+ * Framework metadata fields come from the
+ * evidence envelope.
+ *
+ * EvidenceFactory does not define business fields.
+ */
+function resolveFieldValue<
+  TData extends Record<string, unknown>,
+>(
+  evidence: Evidence<TData>,
+  field: string,
+): unknown {
+  if (
+    Object.prototype.hasOwnProperty.call(
+      evidence.data,
+      field,
+    )
+  ) {
+    return evidence.data[field];
+  }
+
+  const envelope =
+    evidence as unknown as Record<string, unknown>;
+
+  const value = envelope[field];
+
+  /**
+   * Use the error message when the configured
+   * field is "error".
+   */
+  if (
+    field === 'error' &&
+    value &&
+    typeof value === 'object' &&
+    'message' in value
+  ) {
+    return value.message;
+  }
+
+  return value;
 }

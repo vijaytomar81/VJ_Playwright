@@ -1,7 +1,9 @@
 import type ExcelJS from 'exceljs';
 
 import type { Evidence } from '../../contracts/evidence';
+import type { ReportField } from '../../contracts/report-field';
 import type { EvidenceStatus } from '../../contracts/evidence-status';
+
 import {
   applyBodyStyle,
   applyHeaderStyle,
@@ -18,20 +20,20 @@ export interface EvidenceSheetConfig {
 }
 
 /**
- * Creates an evidence worksheet.
+ * Creates an Excel worksheet using consumer-configured
+ * report fields.
  *
- * Framework-owned columns are written first.
- * Consumer-owned evidence fields are then written in exactly
- * the order supplied through the fields parameter.
+ * All report column names and their order come from
+ * configLayer through the fields parameter.
  *
- * EvidenceFactory does not define or maintain business field names.
+ * No report columns are hardcoded here.
  */
 export function createEvidenceSheet<
   TData extends Record<string, unknown>,
 >(
   workbook: ExcelJS.Workbook,
   evidence: Evidence<TData>[],
-  fields: readonly (keyof TData & string)[],
+  fields: readonly ReportField[],
   config: EvidenceSheetConfig,
 ): ExcelJS.Worksheet {
   const worksheet = workbook.addWorksheet(
@@ -46,15 +48,35 @@ export function createEvidenceSheet<
     },
   );
 
-  worksheet.columns = createColumns(fields);
+  /**
+   * Sort by configured order number.
+   *
+   * EvidenceFactory already sorts these fields,
+   * but sorting here keeps this function independent.
+   */
+  const orderedFields = [...fields].sort(
+    (a, b) => a.order - b.order,
+  );
 
+  /**
+   * Create all columns dynamically.
+   */
+  worksheet.columns = orderedFields.map(
+    ({ field }) => ({
+      header: field,
+      key: field,
+      width: 20,
+    }),
+  );
+
+  /**
+   * Apply header styling.
+   */
   const headerRow = worksheet.getRow(1);
+
   const headerColor =
     getSheetHeaderColor(config.name);
 
-  /**
-   * Excel styling helpers operate on individual cells.
-   */
   headerRow.eachCell((cell) => {
     applyHeaderStyle(
       cell,
@@ -62,37 +84,51 @@ export function createEvidenceSheet<
     );
   });
 
+  /**
+   * Add evidence rows.
+   */
   for (const item of evidence) {
-    const row = worksheet.addRow(
-      createRow(
-        item,
-        fields,
-      ),
+    const values = orderedFields.map(
+      ({ field }) =>
+        normalizeValue(
+          resolveFieldValue(item, field),
+        ),
     );
 
-    /**
-     * Apply standard body styling to every cell.
-     */
+    const row = worksheet.addRow(values);
+
     row.eachCell(
-      {
-        includeEmpty: true,
-      },
+      { includeEmpty: true },
       (cell) => {
         applyBodyStyle(cell);
       },
     );
 
     /**
-     * Status is always the third framework column.
+     * Apply status formatting dynamically.
+     *
+     * Status column position is determined by
+     * configLayer, not hardcoded.
      */
-    const statusCell = row.getCell(3);
+    const statusIndex =
+      orderedFields.findIndex(
+        ({ field }) => field === 'status',
+      );
 
-    applyStatusStyle(
-      statusCell,
-      item.status,
-    );
+    if (statusIndex >= 0) {
+      const statusCell =
+        row.getCell(statusIndex + 1);
+
+      applyStatusStyle(
+        statusCell,
+        item.status,
+      );
+    }
   }
 
+  /**
+   * Enable filters for configured columns.
+   */
   if (worksheet.columnCount > 0) {
     worksheet.autoFilter = {
       from: {
@@ -109,100 +145,55 @@ export function createEvidenceSheet<
   return worksheet;
 }
 
-function createColumns<
-  TData extends Record<string, unknown>,
->(
-  fields: readonly (keyof TData & string)[],
-): Partial<ExcelJS.Column>[] {
-  const frameworkColumns: Partial<ExcelJS.Column>[] = [
-    {
-      header: 'Scenario ID',
-      key: 'scenarioId',
-      width: 18,
-    },
-    {
-      header: 'Scenario Name',
-      key: 'scenarioName',
-      width: 35,
-    },
-    {
-      header: 'Status',
-      key: 'status',
-      width: 18,
-    },
-    {
-      header: 'Attempt',
-      key: 'attempt',
-      width: 12,
-    },
-    {
-      header: 'Worker',
-      key: 'workerId',
-      width: 16,
-    },
-    {
-      header: 'Start Time',
-      key: 'startTime',
-      width: 26,
-    },
-    {
-      header: 'End Time',
-      key: 'endTime',
-      width: 26,
-    },
-    {
-      header: 'Duration (ms)',
-      key: 'durationMs',
-      width: 16,
-    },
-  ];
-
-  const businessColumns: Partial<ExcelJS.Column>[] =
-    fields.map((field) => ({
-      header: field,
-      key: field,
-      width: 20,
-    }));
-
-  const errorColumn: Partial<ExcelJS.Column> = {
-    header: 'Error',
-    key: 'error',
-    width: 50,
-  };
-
-  return [
-    ...frameworkColumns,
-    ...businessColumns,
-    errorColumn,
-  ];
-}
-
-function createRow<
+/**
+ * Resolve a configured field value.
+ *
+ * Business fields are read from evidence.data.
+ * Framework metadata fields are read from the
+ * evidence envelope.
+ *
+ * EvidenceFactory does not need to know the
+ * individual business field names.
+ */
+function resolveFieldValue<
   TData extends Record<string, unknown>,
 >(
   evidence: Evidence<TData>,
-  fields: readonly (keyof TData & string)[],
-): unknown[] {
-  return [
-    evidence.scenarioId,
-    evidence.scenarioName,
-    evidence.status,
-    evidence.attempt,
-    evidence.workerId,
-    evidence.startTime ?? '',
-    evidence.endTime ?? '',
-    evidence.durationMs ?? '',
+  field: string,
+): unknown {
+  if (
+    Object.prototype.hasOwnProperty.call(
+      evidence.data,
+      field,
+    )
+  ) {
+    return evidence.data[field];
+  }
 
-    ...fields.map((field) =>
-      normalizeValue(
-        evidence.data[field],
-      ),
-    ),
+  const envelope =
+    evidence as unknown as Record<string, unknown>;
 
-    evidence.error?.message ?? '',
-  ];
+  const value = envelope[field];
+
+  /**
+   * The error envelope contains an object.
+   * Show the message when available.
+   */
+  if (
+    field === 'error' &&
+    value &&
+    typeof value === 'object' &&
+    'message' in value
+  ) {
+    return value.message;
+  }
+
+  return value;
 }
 
+/**
+ * Convert values into Excel-compatible types.
+ */
 function normalizeValue(
   value: unknown,
 ): string | number | boolean | Date {

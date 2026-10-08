@@ -1,37 +1,67 @@
 /**
  * Consumer-owned evidence field configuration.
  *
- * This is the single source of truth for:
+ * Single source of truth for:
+ * - All final report field names
+ * - Final report column order
  *
- * - allowed evidence field names
- * - evidence field/report order
+ * EvidenceFactory receives this configuration and sorts
+ * fields by their order number.
  *
- * The position of each field in this array determines its order
- * in the generated evidence report.
- *
- * EvidenceFactory must not define or maintain these business fields.
+ * EvidenceFactory must not define report fields or their order.
  */
 export const evidenceFields = [
-  'policyNumber',
-  'customerNumber',
-  'premium',
+  // Execution fields
+  { field: 'scenarioId', order: 1 },
+  { field: 'scenarioName', order: 2 },
+  { field: 'status', order: 3 },
+
+  // Business fields
+  { field: 'policyNumber', order: 4 },
+  { field: 'customerNumber', order: 5 },
+  { field: 'premium', order: 6 },
+
+  // Execution metadata
+  { field: 'attempt', order: 7 },
+  { field: 'workerId', order: 8 },
+  { field: 'startTime', order: 9 },
+  { field: 'endTime', order: 10 },
+  { field: 'durationMs', order: 11 },
+  { field: 'error', order: 12 },
 ] as const;
 
 /**
- * Union of all configured evidence field names.
- *
- * Produces:
- *
- * 'policyNumber' | 'customerNumber' | 'premium'
+ * Union of all configured report field names.
  */
 export type EvidenceField =
-  typeof evidenceFields[number];
+  typeof evidenceFields[number]['field'];
 
 /**
- * Evidence data populated by the execution layer.
+ * Framework-owned fields stored in the Evidence envelope.
+ */
+export type FrameworkEvidenceField =
+  | 'runId'
+  | 'workerId'
+  | 'attempt'
+  | 'scenarioId'
+  | 'scenarioName'
+  | 'status'
+  | 'startTime'
+  | 'endTime'
+  | 'durationMs'
+  | 'error';
+
+/**
+ * Business fields populated by executionFactory.
+ */
+export type BusinessEvidenceField =
+  Exclude<EvidenceField, FrameworkEvidenceField>;
+
+/**
+ * Consumer business evidence data.
  *
- * Not every scenario is required to populate every configured field.
+ * Not every scenario needs to populate every business field.
  */
 export type EvidenceData = Partial<
-  Record<EvidenceField, unknown>
+  Record<BusinessEvidenceField, unknown>
 >;

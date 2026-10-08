@@ -1,41 +1,38 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
+import { randomUUID } from 'node:crypto';
 
 import ExcelJS from 'exceljs';
 
 import type { Evidence } from '../../contracts/evidence';
 import { EvidenceStatus } from '../../contracts/evidence-status';
 import type { ReportConfig } from '../../contracts/report-config';
+import type { ReportField } from '../../contracts/report-field';
+
 import type { EvidenceWriter } from '../evidence-writer';
+
 import { createEvidenceSheet } from './evidence-sheet';
 import { createSummarySheet } from './summary-sheet';
 
 /**
- * Generates the final Excel evidence workbook.
+ * Generates the final Excel evidence report.
  *
- * Workbook structure:
+ * All report column names and their order are supplied
+ * through the consumer-owned field configuration.
  *
- * - Summary
- * - All
- * - Passed
- * - Failed
- * - Not Executed
- *
- * Business columns are supplied by the consuming automation.
+ * This writer does not define report columns.
  */
 export class ExcelEvidenceWriter<
   TData extends Record<string, unknown>,
 > implements EvidenceWriter<TData> {
   async write(
     evidence: Evidence<TData>[],
-    fields: readonly (keyof TData & string)[],
+    fields: readonly ReportField[],
     config: ReportConfig,
   ): Promise<string> {
     await fs.mkdir(
       config.outputDir,
-      {
-        recursive: true,
-      },
+      { recursive: true },
     );
 
     const workbook = new ExcelJS.Workbook();
@@ -44,12 +41,21 @@ export class ExcelEvidenceWriter<
     workbook.created = new Date();
     workbook.modified = new Date();
 
+    /**
+     * Summary worksheet.
+     *
+     * Contains execution statistics rather than
+     * scenario evidence columns.
+     */
     createSummarySheet(
       workbook,
       evidence,
       config,
     );
 
+    /**
+     * All scenarios.
+     */
     createEvidenceSheet(
       workbook,
       evidence,
@@ -59,6 +65,9 @@ export class ExcelEvidenceWriter<
       },
     );
 
+    /**
+     * Passed scenarios.
+     */
     createEvidenceSheet(
       workbook,
       evidence.filter(
@@ -72,6 +81,9 @@ export class ExcelEvidenceWriter<
       },
     );
 
+    /**
+     * Failed scenarios.
+     */
     createEvidenceSheet(
       workbook,
       evidence.filter(
@@ -85,6 +97,9 @@ export class ExcelEvidenceWriter<
       },
     );
 
+    /**
+     * Not executed scenarios.
+     */
     createEvidenceSheet(
       workbook,
       evidence.filter(
@@ -98,38 +113,26 @@ export class ExcelEvidenceWriter<
       },
     );
 
-    const fileName = this.normalizeFileName(
-      config.fileName ?? 'execution-report',
-    );
+    /**
+     * Prepare the final Excel file path.
+     */
+    const baseName = (
+      config.fileName ?? 'execution-report'
+    ).replace(/\.xlsx$/i, '');
 
-    const filePath = path.join(
+    const reportPath = path.join(
       config.outputDir,
-      `${fileName}.xlsx`,
+      `${baseName}.xlsx`,
     );
 
-    await this.writeAtomically(
-      workbook,
-      filePath,
-    );
-
-    return filePath;
-  }
-
-  private normalizeFileName(
-    fileName: string,
-  ): string {
-    return fileName.replace(
-      /\.xlsx$/i,
-      '',
-    );
-  }
-
-  private async writeAtomically(
-    workbook: ExcelJS.Workbook,
-    filePath: string,
-  ): Promise<void> {
+    /**
+     * Write to a temporary file first.
+     *
+     * This reduces the risk of leaving a partially
+     * written report if generation fails.
+     */
     const temporaryPath =
-      `${filePath}.${process.pid}.tmp`;
+      `${reportPath}.${randomUUID()}.tmp`;
 
     try {
       await workbook.xlsx.writeFile(
@@ -138,19 +141,15 @@ export class ExcelEvidenceWriter<
 
       await fs.rename(
         temporaryPath,
-        filePath,
+        reportPath,
       );
+
+      return reportPath;
     } catch (error) {
-      try {
-        await fs.rm(
-          temporaryPath,
-          {
-            force: true,
-          },
-        );
-      } catch {
-        // Preserve the original error.
-      }
+      await fs.rm(
+        temporaryPath,
+        { force: true },
+      );
 
       throw error;
     }
