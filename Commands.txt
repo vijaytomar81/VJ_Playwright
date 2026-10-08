@@ -25,3 +25,19 @@ CDP=$(curl -s http://localhost:9222/json/version | \
 echo "$CDP"
 
 =============
+
+npm install exceljs
+
+npm install --save-dev typescript @types/node @playwright/test tsx
+
+npm install archiver
+npm install --save-dev @types/archiver
+
+npx tsc --noEmit
+
+npx tsx tests/framework/evidence-factory/initialize-run.ts
+
+npx playwright test tests/framework/evidence-factory/evidence-factory-excel.spec.ts --project=framework --workers=4
+
+npx playwright test tests/framework/evidence-factory/evidence-report.spec.ts --project=framework --workers=1
+
