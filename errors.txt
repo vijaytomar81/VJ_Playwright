@@ -1,22 +1,9 @@
-PS C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\AZ_Playwright> node -- version
-node:internal/modules/cjs/loader:1573
-  throw err;
-  ^
+npm ls @playwright/test playwright typescript --depth=0
 
-Error: Cannot find module 'C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\AZ_Playwright\version'
-    at Module._resolveFilename (node:internal/modules/cjs/loader:1569:15)
-    at wrapResolveFilename (node:internal/modules/cjs/loader:1123:27)
-    at defaultResolveImplForCJSLoading (node:internal/modules/cjs/loader:1147:10)
-    at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1174:12)
-    at Module._load (node:internal/modules/cjs/loader:1346:5)
-    at wrapModuleLoad (node:internal/modules/cjs/loader:261:19)
-    at Module.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:154:5)
-    at node:internal/main/run_main_module:33:47 {
-  code: 'MODULE_NOT_FOUND',
-  requireStack: []
-}
+Test-Path .\node_modules\.bin\playwright.cmd
 
-Node.js v26.8.2
-PS C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\AZ_Playwright> npm --version
-11.19.1
-PS C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\AZ_Playwright> 
+Test-Path .\node_modules\.bin\tsc.cmd
+
+$env:NODE_USE_SYSTEM_CA = "1"
+
+npm ping
