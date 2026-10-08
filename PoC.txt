@@ -1,0 +1,62 @@
+PS C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\AZ_Playwright> $env:NODE_USE_SYSTEM_CA = "1"
+PS C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\AZ_Playwright> node --version
+>> npm --version
+>> npx --no-install playwright --version
+>> npx --no-install tsc --version
+v26.8.2
+11.19.1
+Version 1.64.0
+Version 7.0.2
+PS C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\AZ_Playwright> npx --no-install tsc --noEmit
+>> if ($LASTEXITCODE -ne 0) { throw "TypeScript validation failed." }
+PS C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\AZ_Playwright> npx --no-install playwright install chromium
+>> if ($LASTEXITCODE -ne 0) { throw "Chromium installation failed." }
+Downloading Chrome for Testing 156.0.8078.4 (playwright chromium v1248) from https://cdn.playwright.dev/builds/cft/156.0.8078.4/win64/chrome-win64.zip
+Error: read ECONNRESET
+    at TLSWrap.onStreamRead (node:internal/stream_base_commons:216:20) {
+  errno: -4077,
+  code: 'ECONNRESET',
+  syscall: 'read'
+}
+Downloading Chrome for Testing 156.0.8078.4 (playwright chromium v1248) from https://cdn.playwright.dev/builds/cft/156.0.8078.4/win64/chrome-win64.zip
+Error: read ECONNRESET
+    at TLSWrap.onStreamRead (node:internal/stream_base_commons:216:20) {
+  errno: -4077,
+  code: 'ECONNRESET',
+  syscall: 'read'
+}
+Downloading Chrome for Testing 156.0.8078.4 (playwright chromium v1248) from https://cdn.playwright.dev/builds/cft/156.0.8078.4/win64/chrome-win64.zip
+Error: read ECONNRESET
+    at TLSWrap.onStreamRead (node:internal/stream_base_commons:216:20) {
+  errno: -4077,
+  code: 'ECONNRESET',
+  syscall: 'read'
+}
+Downloading Chrome for Testing 156.0.8078.4 (playwright chromium v1248) from https://cdn.playwright.dev/builds/cft/156.0.8078.4/win64/chrome-win64.zip
+Error: read ECONNRESET
+    at TLSWrap.onStreamRead (node:internal/stream_base_commons:216:20) {
+  errno: -4077,
+  code: 'ECONNRESET',
+  syscall: 'read'
+}
+Downloading Chrome for Testing 156.0.8078.4 (playwright chromium v1248) from https://cdn.playwright.dev/builds/cft/156.0.8078.4/win64/chrome-win64.zip
+Error: read ECONNRESET
+    at TLSWrap.onStreamRead (node:internal/stream_base_commons:216:20) {
+  errno: -4077,
+  code: 'ECONNRESET',
+  syscall: 'read'
+}
+Failed to install browsers
+Error: Failed to download Chrome for Testing 156.0.8078.4 (playwright chromium v1248), caused by
+Error: Download failure, code=1
+    at ChildProcess.<anonymous> (C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\AZ_Playwright\node_modules\playwright-core\lib\coreBundle.js:33774:32)
+    at ChildProcess.emit (node:events:514:20)
+    at ChildProcess._handle.onexit (node:internal/child_process:294:12)
+Chromium installation failed.
+At line:2 char:28
++ if ($LASTEXITCODE -ne 0) { throw "Chromium installation failed." }
++                            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : OperationStopped: (Chromium installation failed.:String) [], RuntimeException
+    + FullyQualifiedErrorId : Chromium installation failed.
+ 
+PS C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\AZ_Playwright> 
