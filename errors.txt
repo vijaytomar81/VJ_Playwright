@@ -10,17 +10,18 @@ npm ping
 
 ============
 
-PS C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\AZ_Playwright> npm ls @playwright/test playwright typescript --depth=0
-allianz-automation@1.0.0 C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\AZ_Playwright
-└── (empty)
+# Install framework dependencies
+npm install --save-dev @playwright/test typescript @types/node tsx
 
-PS C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\AZ_Playwright> Test-Path .\node_modules\.bin\playwright.cmd
-False
-PS C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\AZ_Playwright> Test-Path .\node_modules\.bin\tsc.cmd
-False
-PS C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\AZ_Playwright> $env:NODE_USE_SYSTEM_CA = "1"
-PS C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\AZ_Playwright> npm ping
-npm notice PING https://registry.npmjs.org/
-npm notice PONG 790ms
-PS C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\AZ_Playwright>
+# Install report dependencies
+npm install exceljs archiver
 
+# Install archive type definitions
+npm install --save-dev @types/archiver
+
+# Verify versions
+npx --no-install playwright --version
+npx --no-install tsc --version
+
+# Validate TypeScript
+npx --no-install tsc --noEmit
