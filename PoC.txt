@@ -1,15 +1,12 @@
-PS C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\AZ_Playwright> Write-Host "`n=== Detect Corporate Proxy ==="
->> 
->> $targetUrl = [Uri]"https://cdn.playwright.dev/builds/cft/156.0.8078.4/win64/chrome-win64.zip"
->> 
->> $proxy = [System.Net.WebRequest]::GetSystemWebProxy()
->> 
->> $proxyAddress = $proxy.GetProxy($targetUrl)
->> 
->> Write-Host "Selected proxy: $proxyAddress"
->> Write-Host "Direct connection: $($proxy.IsBypassed($targetUrl))"
+$targetUrl = [Uri]"https://cdn.playwright.dev/builds/cft/156.0.8078.4/win64/chrome-win64.zip"
 
-=== Detect Corporate Proxy ===
-Selected proxy: http://internet-proxy-a.group.net:81/
-Direct connection: False
-PS C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\AZ_Playwright> 
+$proxy = [System.Net.WebRequest]::GetSystemWebProxy()
+
+$proxyAddress = $proxy.GetProxy($targetUrl)
+
+Write-Host ""
+Write-Host "================================="
+Write-Host " CORPORATE PROXY DETECTION"
+Write-Host "================================="
+Write-Host "Selected proxy: $proxyAddress"
+Write-Host "Direct connection: $($proxy.IsBypassed($targetUrl))"
