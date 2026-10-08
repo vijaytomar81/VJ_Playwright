@@ -28,10 +28,13 @@ npx --no-install tsc --noEmit
 
 ======
 
-PS C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\AZ_Playwright> npx --no-install playwright --version
-Version 1.64.0
-PS C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\AZ_Playwright> npx --no-install tsc --version
-Version 7.0.2
-PS C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\AZ_Playwright> npx --no-install tsc --noEmit
-PS C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\AZ_Playwright> 
+npx --no-install playwright install --dry-run chromium
+
+npx --no-install playwright install chromium
+
+npx --no-install playwright test --list
+
+npx --no-install playwright test --project=framework
+
+
 
