@@ -1,33 +1,31 @@
-import { ReportFormat } from './report-format';
+import type { ReportFormat } from './report-format';
+
+import type {
+  SummaryData,
+  SummarySchema,
+} from './summary-schema';
 
 /**
- * Configuration for final evidence report generation.
+ * Configuration for generating a final evidence report.
  */
 export interface ReportConfig {
-  /**
-   * Final output format.
-   */
   format: ReportFormat;
 
-  /**
-   * Directory where the final report is written.
-   */
   outputDir: string;
-
-  /**
-   * Optional report file name.
-   *
-   * The writer adds the appropriate extension.
-   */
   fileName?: string;
 
-  /**
-   * Optional report title.
-   */
   reportTitle?: string;
+  environment?: string;
 
   /**
-   * Optional execution environment.
+   * Consumer-owned Summary section/field configuration.
    */
-  environment?: string;
+  summarySchema?: SummarySchema;
+
+  /**
+   * Summary values supplied by the execution layer.
+   *
+   * EvidenceFactory adds calculated result statistics.
+   */
+  summaryData?: SummaryData;
 }

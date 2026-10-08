@@ -1,4 +1,5 @@
 import path from 'node:path';
+import os from 'node:os';
 
 import { test, expect } from '@playwright/test';
 import ExcelJS from 'exceljs';
@@ -15,26 +16,25 @@ import {
 } from '../../../configLayer/schema/evidence/evidence-schema';
 
 import {
+  summarySchema,
+} from '../../../configLayer/schema/evidence/summary-schema';
+
+import {
   getTestRunContext,
 } from './test-run-context';
 
 /**
- * Generates and validates the final Excel evidence report.
- *
- * Run this test after all scenario workers have completed.
+ * Generates and validates the final Excel
+ * evidence report after workers complete.
  */
 test('Generate final Excel evidence report', async () => {
-  /**
-   * Read the same execution context used by
-   * the four scenario workers.
-   */
   const { runId, timestamp } =
     await getTestRunContext();
 
   const resultsDir = './results';
 
   /**
-   * Initialize EvidenceFactory using the shared runId.
+   * Initialize EvidenceFactory.
    */
   const factory = new EvidenceFactory<EvidenceData>({
     fields: evidenceFields,
@@ -43,7 +43,7 @@ test('Generate final Excel evidence report', async () => {
   });
 
   /**
-   * Verify the evidence from all workers.
+   * Collect final evidence from all workers.
    */
   const finalEvidence =
     await factory.getFinalEvidence();
@@ -51,14 +51,16 @@ test('Generate final Excel evidence report', async () => {
   expect(finalEvidence).toHaveLength(4);
 
   /**
-   * Verify execution status counts.
+   * Validate execution results.
    */
   const passed = finalEvidence.filter(
-    (item) => item.status === EvidenceStatus.PASSED,
+    (item) =>
+      item.status === EvidenceStatus.PASSED,
   );
 
   const failed = finalEvidence.filter(
-    (item) => item.status === EvidenceStatus.FAILED,
+    (item) =>
+      item.status === EvidenceStatus.FAILED,
   );
 
   const notExecuted = finalEvidence.filter(
@@ -71,7 +73,7 @@ test('Generate final Excel evidence report', async () => {
   expect(notExecuted).toHaveLength(1);
 
   /**
-   * Generate timestamped Excel report.
+   * Prepare report paths.
    */
   const reportFileName =
     `execution-report_${timestamp}`;
@@ -82,16 +84,104 @@ test('Generate final Excel evidence report', async () => {
     'report',
   );
 
+  const evidenceDirectory = path.join(
+    resultsDir,
+    runId,
+    'evidence',
+  );
+
+  /**
+   * Derive timing information from evidence.
+   */
+  const startTimes = finalEvidence
+    .map((item) => item.startTime)
+    .filter(
+      (value): value is string =>
+        Boolean(value),
+    )
+    .map((value) =>
+      new Date(value).getTime(),
+    )
+    .filter(Number.isFinite);
+
+  const endTimes = finalEvidence
+    .map((item) => item.endTime)
+    .filter(
+      (value): value is string =>
+        Boolean(value),
+    )
+    .map((value) =>
+      new Date(value).getTime(),
+    )
+    .filter(Number.isFinite);
+
+  const startedAt =
+    startTimes.length > 0
+      ? new Date(
+          Math.min(...startTimes),
+        ).toISOString()
+      : '';
+
+  const finishedAt =
+    endTimes.length > 0
+      ? new Date(
+          Math.max(...endTimes),
+        ).toISOString()
+      : '';
+
+  const executionTime =
+    startTimes.length > 0 &&
+    endTimes.length > 0
+      ? `${(
+          (
+            Math.max(...endTimes) -
+            Math.min(...startTimes)
+          ) / 1000
+        ).toFixed(2)}s`
+      : '';
+
+  /**
+   * Generate the Excel report.
+   */
   const result = await factory.generateReport({
     format: ReportFormat.EXCEL,
+
     outputDir: reportOutputDir,
     fileName: reportFileName,
-    reportTitle: 'Automation Execution Report',
-    environment: 'QA',
+
+    reportTitle: 'Execution Summary',
+    environment: 'test',
+
+    summarySchema,
+
+    summaryData: {
+      // Run
+      runId,
+      mode: 'e2e',
+      environment: 'test',
+      evidenceDirectory,
+
+      // Runtime
+      machineName: os.hostname(),
+      user: os.userInfo().username,
+      platform: process.platform,
+      osVersion: os.release(),
+
+      // Browser
+      browser: 'chromium',
+      browserChannel: 'msedge',
+      browserVersion: 'Not captured',
+      headless: true,
+
+      // Timing
+      executionTime,
+      startedAt,
+      finishedAt,
+    },
   });
 
   /**
-   * Verify report generation result.
+   * Verify report output.
    */
   expect(result.evidenceCount).toBe(4);
 
@@ -107,7 +197,7 @@ test('Generate final Excel evidence report', async () => {
   );
 
   /**
-   * Open the generated Excel workbook.
+   * Read the generated workbook.
    */
   const workbook = new ExcelJS.Workbook();
 
@@ -116,7 +206,7 @@ test('Generate final Excel evidence report', async () => {
   );
 
   /**
-   * Verify worksheet names.
+   * Validate worksheet names.
    */
   const worksheetNames =
     workbook.worksheets.map(
@@ -131,11 +221,9 @@ test('Generate final Excel evidence report', async () => {
     'Not Executed',
   ]);
 
-  /**
-   * Verify scenario counts in each worksheet.
-   *
-   * Row 1 contains the column headers.
-   */
+  const summarySheet =
+    workbook.getWorksheet('Summary');
+
   const allSheet =
     workbook.getWorksheet('All');
 
@@ -148,67 +236,187 @@ test('Generate final Excel evidence report', async () => {
   const notExecutedSheet =
     workbook.getWorksheet('Not Executed');
 
+  expect(summarySheet).toBeDefined();
   expect(allSheet).toBeDefined();
   expect(passedSheet).toBeDefined();
   expect(failedSheet).toBeDefined();
   expect(notExecutedSheet).toBeDefined();
 
+  /**
+   * Validate evidence row counts.
+   */
   expect(allSheet!.rowCount - 1).toBe(4);
   expect(passedSheet!.rowCount - 1).toBe(2);
   expect(failedSheet!.rowCount - 1).toBe(1);
-  expect(notExecutedSheet!.rowCount - 1).toBe(1);
+  expect(
+    notExecutedSheet!.rowCount - 1,
+  ).toBe(1);
 
   /**
-   * Verify that report columns follow
-   * the order configured in configLayer.
+   * Validate column identifiers, labels,
+   * and order from evidenceFields.
    */
-  const expectedFields = [...evidenceFields]
-    .sort((a, b) => a.order - b.order)
-    .map(({ field }) => field);
+  const orderedEvidenceFields = [
+    ...evidenceFields,
+  ].sort(
+    (a, b) => a.order - b.order,
+  );
 
-  const actualFields = allSheet!
-    .getRow(1)
-    .values;
+  const expectedFields =
+    orderedEvidenceFields.map(
+      ({ field }) => field,
+    );
 
-  /**
-   * ExcelJS row.values uses a 1-based array.
-   * Remove the empty first element.
-   */
+  const expectedHeaders =
+    orderedEvidenceFields.map(
+      ({ label }) => label,
+    );
+
   const actualHeaders = (
-    actualFields as Array<string | undefined>
+    allSheet!.getRow(1).values as Array<
+      string | undefined
+    >
   ).slice(1);
 
   expect(actualHeaders).toEqual(
-    expectedFields,
+    expectedHeaders,
   );
 
   /**
-   * Verify that business evidence values
-   * appear in the generated report.
+   * Validate business evidence values.
    */
   const policyNumberColumn =
-    expectedFields.indexOf('policyNumber') + 1;
+    expectedFields.indexOf(
+      'policyNumber',
+    ) + 1;
 
-  const policyNumbers = [];
+  const policyNumbers: unknown[] = [];
 
   for (
     let rowNumber = 2;
     rowNumber <= allSheet!.rowCount;
     rowNumber++
   ) {
-    const value = allSheet!
-      .getRow(rowNumber)
-      .getCell(policyNumberColumn)
-      .value;
-
-    policyNumbers.push(value);
+    policyNumbers.push(
+      allSheet!
+        .getRow(rowNumber)
+        .getCell(policyNumberColumn)
+        .value,
+    );
   }
 
-  expect(policyNumbers).toContain('POL-1001');
-  expect(policyNumbers).toContain('POL-1002');
-  expect(policyNumbers).toContain('POL-1003');
+  expect(policyNumbers).toContain(
+    'POL-1001',
+  );
 
-  console.log(`Run ID: ${runId}`);
-  console.log(`Report: ${result.reportPath}`);
-  console.log(`Evidence count: ${result.evidenceCount}`);
+  expect(policyNumbers).toContain(
+    'POL-1002',
+  );
+
+  expect(policyNumbers).toContain(
+    'POL-1003',
+  );
+
+  /**
+   * Validate Summary sections and field labels.
+   */
+  const orderedSections = [
+    ...summarySchema,
+  ].sort(
+    (a, b) => a.order - b.order,
+  );
+
+  let summaryRow = 4;
+
+  for (const section of orderedSections) {
+    expect(
+      summarySheet!
+        .getCell(summaryRow, 1)
+        .value,
+    ).toBe(section.section);
+
+    summaryRow++;
+
+    const orderedFields = [
+      ...section.fields,
+    ].sort(
+      (a, b) => a.order - b.order,
+    );
+
+    for (const field of orderedFields) {
+      expect(
+        summarySheet!
+          .getCell(summaryRow, 1)
+          .value,
+      ).toBe(field.label);
+
+      summaryRow++;
+    }
+
+    /**
+     * Skip the blank row between sections.
+     */
+    summaryRow++;
+  }
+
+  /**
+   * Read Summary label/value pairs.
+   */
+  const summaryValues =
+    new Map<string, unknown>();
+
+  summarySheet!.eachRow((row) => {
+    const label =
+      row.getCell(1).value;
+
+    const value =
+      row.getCell(2).value;
+
+    if (
+      typeof label === 'string'
+    ) {
+      summaryValues.set(
+        label,
+        value,
+      );
+    }
+  });
+
+  /**
+   * Validate calculated results.
+   */
+  expect(
+    summaryValues.get('Total Items'),
+  ).toBe(4);
+
+  expect(
+    summaryValues.get('Passed'),
+  ).toBe(2);
+
+  expect(
+    summaryValues.get('Failed'),
+  ).toBe(1);
+
+  expect(
+    summaryValues.get('Not Executed'),
+  ).toBe(1);
+
+  expect(
+    summaryValues.get('Pass Rate (%)'),
+  ).toBe('50.00%');
+
+  /**
+   * Print report information.
+   */
+  console.log(
+    `Run ID: ${runId}`,
+  );
+
+  console.log(
+    `Report: ${result.reportPath}`,
+  );
+
+  console.log(
+    `Evidence count: ${result.evidenceCount}`,
+  );
 });

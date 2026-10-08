@@ -5,13 +5,15 @@ import { EvidenceStatus } from '../../contracts/evidence-status';
 import type { ReportConfig } from '../../contracts/report-config';
 
 import {
-  applyBodyStyle,
-  applyHeaderStyle,
-  EXCEL_COLORS,
-} from './excel-style';
+  type SummaryData,
+  type SummarySchema,
+} from '../../contracts/summary-schema';
 
 /**
- * Creates the workbook Summary worksheet.
+ * Creates the Excel Summary worksheet.
+ *
+ * All section names, field names, labels, and
+ * display order come from configLayer.
  */
 export function createSummarySheet<
   TData extends Record<string, unknown>,
@@ -19,261 +21,240 @@ export function createSummarySheet<
   workbook: ExcelJS.Workbook,
   evidence: Evidence<TData>[],
   config: ReportConfig,
-): void {
-  const worksheet =
-    workbook.addWorksheet(
-      'Summary',
-      {
-        views: [
-          {
-            state: 'frozen',
-            ySplit: 1,
-          },
-        ],
-      },
-    );
+): ExcelJS.Worksheet {
+  const worksheet = workbook.addWorksheet('Summary');
 
   worksheet.columns = [
-    {
-      width: 28,
-    },
-    {
-      width: 42,
-    },
+    { width: 36 },
+    { width: 85 },
   ];
 
-  const total = evidence.length;
+  /**
+   * Summary values supplied by executionFactory.
+   */
+  const summaryData: SummaryData = {
+    ...config.summaryData,
+  };
 
-  const passed =
-    evidence.filter(
-      item =>
-        item.status ===
-        EvidenceStatus.PASSED,
-    ).length;
+  /**
+   * Calculate execution results from final evidence.
+   */
+  const totalItems = evidence.length;
 
-  const failed =
-    evidence.filter(
-      item =>
-        item.status ===
-        EvidenceStatus.FAILED,
-    ).length;
+  const passed = evidence.filter(
+    (item) => item.status === EvidenceStatus.PASSED,
+  ).length;
 
-  const notExecuted =
-    evidence.filter(
-      item =>
-        item.status ===
-        EvidenceStatus.NOT_EXECUTED,
-    ).length;
+  const failed = evidence.filter(
+    (item) => item.status === EvidenceStatus.FAILED,
+  ).length;
+
+  const notExecuted = evidence.filter(
+    (item) =>
+      item.status === EvidenceStatus.NOT_EXECUTED,
+  ).length;
 
   const passRate =
-    total === 0
-      ? 0
-      : passed / total;
+    totalItems > 0
+      ? `${((passed / totalItems) * 100).toFixed(2)}%`
+      : '0.00%';
 
-  createTitle(
-    worksheet,
-    config.reportTitle ??
-      'Execution Summary',
-  );
-
-  worksheet.addRow([]);
-
-  createSectionHeader(
-    worksheet,
-    'Run Information',
-  );
-
-  const runId =
-    evidence[0]?.runId ?? '';
-
-  addInformationRow(
-    worksheet,
-    'Run ID',
-    runId,
-  );
-
-  addInformationRow(
-    worksheet,
-    'Environment',
-    config.environment ?? '',
-  );
-
-  addInformationRow(
-    worksheet,
-    'Generated At',
-    new Date().toISOString(),
-  );
-
-  worksheet.addRow([]);
-
-  createSectionHeader(
-    worksheet,
-    'Execution Results',
-  );
-
-  addMetricRow(
-    worksheet,
-    'Total',
-    total,
-  );
-
-  addMetricRow(
-    worksheet,
-    'Passed',
+  /**
+   * These calculated values take precedence
+   * over externally supplied values.
+   */
+  Object.assign(summaryData, {
+    totalItems,
     passed,
-    EXCEL_COLORS.passedLight,
-  );
-
-  addMetricRow(
-    worksheet,
-    'Failed',
     failed,
-    EXCEL_COLORS.failedLight,
-  );
-
-  addMetricRow(
-    worksheet,
-    'Not Executed',
     notExecuted,
-    EXCEL_COLORS.notExecutedLight,
-  );
+    passRate,
+  });
 
-  const passRateRow =
-    addMetricRow(
-      worksheet,
-      'Pass Rate',
-      passRate,
-    );
+  /**
+   * Read the consumer-owned Summary schema.
+   */
+  const schema: SummarySchema =
+    config.summarySchema ?? [];
 
-  passRateRow.getCell(2).numFmt =
-    '0.00%';
-}
+  /**
+   * Main report heading.
+   */
+  worksheet.mergeCells('A2:B2');
 
-function createTitle(
-  worksheet: ExcelJS.Worksheet,
-  title: string,
-): void {
-  worksheet.mergeCells('A1:B1');
+  const titleCell = worksheet.getCell('A2');
 
-  const cell =
-    worksheet.getCell('A1');
+  titleCell.value =
+    config.reportTitle ?? 'Execution Summary';
 
-  cell.value = title;
-
-  cell.font = {
+  titleCell.font = {
     bold: true,
     size: 18,
-    color: {
-      argb: EXCEL_COLORS.white,
-    },
+    color: { argb: 'FFFFFFFF' },
   };
 
-  cell.fill = {
+  titleCell.fill = {
     type: 'pattern',
     pattern: 'solid',
-    fgColor: {
-      argb: EXCEL_COLORS.primary,
-    },
+    fgColor: { argb: 'FF1F4E78' },
   };
 
-  cell.alignment = {
+  titleCell.alignment = {
     horizontal: 'center',
     vertical: 'middle',
   };
 
-  worksheet.getRow(1).height = 36;
+  worksheet.getRow(2).height = 34;
+
+  /**
+   * Generate sections dynamically.
+   */
+  let rowNumber = 4;
+
+  const orderedSections = [...schema].sort(
+    (a, b) => a.order - b.order,
+  );
+
+  for (const section of orderedSections) {
+    /**
+     * Section heading.
+     */
+    worksheet.mergeCells(
+      `A${rowNumber}:B${rowNumber}`,
+    );
+
+    const sectionCell =
+      worksheet.getCell(`A${rowNumber}`);
+
+    sectionCell.value = section.section;
+
+    sectionCell.font = {
+      bold: true,
+      size: 12,
+      color: { argb: 'FFFFFFFF' },
+    };
+
+    sectionCell.fill = {
+      type: 'pattern',
+      pattern: 'solid',
+      fgColor: { argb: 'FF5B7FAF' },
+    };
+
+    sectionCell.alignment = {
+      vertical: 'middle',
+    };
+
+    worksheet.getRow(rowNumber).height = 24;
+
+    rowNumber++;
+
+    /**
+     * Section fields.
+     */
+    const orderedFields = [...section.fields].sort(
+      (a, b) => a.order - b.order,
+    );
+
+    for (const field of orderedFields) {
+      const labelCell =
+        worksheet.getCell(rowNumber, 1);
+
+      const valueCell =
+        worksheet.getCell(rowNumber, 2);
+
+      labelCell.value = field.label;
+
+      labelCell.font = {
+        bold: true,
+        color: { argb: 'FF000000' },
+      };
+
+      const value = summaryData[field.field];
+
+      valueCell.value = normalizeSummaryValue(value);
+
+      /**
+       * Highlight execution result counts.
+       */
+      if (field.field === 'passed') {
+        valueCell.font = {
+          bold: true,
+          color: { argb: 'FF008000' },
+        };
+      } else if (field.field === 'failed') {
+        valueCell.font = {
+          bold: true,
+          color: { argb: 'FFFF0000' },
+        };
+      } else if (field.field === 'notExecuted') {
+        valueCell.font = {
+          bold: true,
+          color: { argb: 'FFFF8C00' },
+        };
+      }
+
+      labelCell.border = createBorder();
+      valueCell.border = createBorder();
+
+      labelCell.alignment = {
+        vertical: 'middle',
+      };
+
+      valueCell.alignment = {
+        vertical: 'middle',
+        wrapText: true,
+      };
+
+      worksheet.getRow(rowNumber).height = 22;
+
+      rowNumber++;
+    }
+
+    /**
+     * Blank row between sections.
+     */
+    rowNumber++;
+  }
+
+  return worksheet;
 }
 
 /**
- * Adds a merged section heading.
+ * Converts values to Excel-compatible types.
  */
-function createSectionHeader(
-  worksheet: ExcelJS.Worksheet,
-  title: string,
-): void {
-  const row =
-    worksheet.addRow([
-      title,
-      '',
-    ]);
-
-  worksheet.mergeCells(
-    `A${row.number}:B${row.number}`,
-  );
-
-  applyHeaderStyle(
-    worksheet.getCell(
-      `A${row.number}`,
-    ),
-  );
-
-  row.height = 24;
-}
-
-function addInformationRow(
-  worksheet: ExcelJS.Worksheet,
-  label: string,
-  value: string | number,
-): ExcelJS.Row {
-  const row =
-    worksheet.addRow([
-      label,
-      value,
-    ]);
-
-  styleStandardRow(row);
-
-  row.getCell(1).font = {
-    bold: true,
-  };
-
-  return row;
-}
-
-function addMetricRow(
-  worksheet: ExcelJS.Worksheet,
-  label: string,
-  value: string | number,
-  fillColor?: string,
-): ExcelJS.Row {
-  const row =
-    worksheet.addRow([
-      label,
-      value,
-    ]);
-
-  styleStandardRow(row);
-
-  row.getCell(1).font = {
-    bold: true,
-  };
-
-  if (fillColor) {
-    row.getCell(2).fill = {
-      type: 'pattern',
-      pattern: 'solid',
-      fgColor: {
-        argb: fillColor,
-      },
-    };
-
-    row.getCell(2).font = {
-      bold: true,
-    };
+function normalizeSummaryValue(
+  value: unknown,
+): string | number | boolean | Date {
+  if (
+    value === undefined ||
+    value === null
+  ) {
+    return '';
   }
 
-  return row;
+  if (value instanceof Date) {
+    return value;
+  }
+
+  if (
+    typeof value === 'string' ||
+    typeof value === 'number' ||
+    typeof value === 'boolean'
+  ) {
+    return value;
+  }
+
+  return JSON.stringify(value);
 }
 
-function styleStandardRow(
-  row: ExcelJS.Row,
-): void {
-  row.eachCell(
-    {
-      includeEmpty: true,
+/**
+ * Shared border styling for Summary rows.
+ */
+function createBorder(): Partial<ExcelJS.Borders> {
+  return {
+    bottom: {
+      style: 'thin',
+      color: { argb: 'FFD9D9D9' },
     },
-    cell => {
-      applyBodyStyle(cell);
-    },
-  );
+  };
 }

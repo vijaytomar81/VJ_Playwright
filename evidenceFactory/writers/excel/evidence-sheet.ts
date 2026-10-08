@@ -2,31 +2,32 @@ import type ExcelJS from 'exceljs';
 
 import type { Evidence } from '../../contracts/evidence';
 import type { ReportField } from '../../contracts/report-field';
-import type { EvidenceStatus } from '../../contracts/evidence-status';
 
 import {
-  applyBodyStyle,
   applyHeaderStyle,
+  applyBodyStyle,
   applyStatusStyle,
   getSheetHeaderColor,
 } from './excel-style';
 
 /**
  * Configuration for an individual evidence worksheet.
+ *
+ * The Excel writer controls worksheet names.
+ * The consumer-owned evidence schema controls columns.
  */
 export interface EvidenceSheetConfig {
   name: string;
-  status?: EvidenceStatus;
+  status?: string;
 }
 
 /**
- * Creates an Excel worksheet using consumer-configured
- * report fields.
+ * Creates an evidence worksheet.
  *
- * All report column names and their order come from
- * configLayer through the fields parameter.
+ * Column identifiers, display labels, and order
+ * are supplied by configLayer.
  *
- * No report columns are hardcoded here.
+ * Parameter order matches excel-evidence-writer.ts.
  */
 export function createEvidenceSheet<
   TData extends Record<string, unknown>,
@@ -36,100 +37,92 @@ export function createEvidenceSheet<
   fields: readonly ReportField[],
   config: EvidenceSheetConfig,
 ): ExcelJS.Worksheet {
-  const worksheet = workbook.addWorksheet(
-    config.name,
-    {
-      views: [
-        {
-          state: 'frozen',
-          ySplit: 1,
-        },
-      ],
-    },
-  );
+  const worksheet = workbook.addWorksheet(config.name);
 
   /**
-   * Sort by configured order number.
-   *
-   * EvidenceFactory already sorts these fields,
-   * but sorting here keeps this function independent.
+   * Sort columns according to consumer configuration.
    */
   const orderedFields = [...fields].sort(
     (a, b) => a.order - b.order,
   );
 
   /**
-   * Create all columns dynamically.
+   * Use display labels for Excel headers.
+   * Keep internal field identifiers as column keys.
    */
   worksheet.columns = orderedFields.map(
-    ({ field }) => ({
-      header: field,
+    ({ field, label }) => ({
+      header: label,
       key: field,
-      width: 20,
+      width: 22,
     }),
   );
 
   /**
-   * Apply header styling.
+   * Style header row.
    */
-  const headerRow = worksheet.getRow(1);
+  const headerColor = getSheetHeaderColor(config.name);
 
-  const headerColor =
-    getSheetHeaderColor(config.name);
+  const headerRow = worksheet.getRow(1);
+  headerRow.height = 28;
 
   headerRow.eachCell((cell) => {
-    applyHeaderStyle(
-      cell,
-      headerColor,
-    );
+    applyHeaderStyle(cell, headerColor);
   });
 
   /**
-   * Add evidence rows.
+   * Locate status column dynamically.
+   */
+  const statusColumnIndex =
+    orderedFields.findIndex(
+      ({ field }) => field === 'status',
+    ) + 1;
+
+  /**
+   * Populate evidence rows.
    */
   for (const item of evidence) {
-    const values = orderedFields.map(
-      ({ field }) =>
-        normalizeValue(
-          resolveFieldValue(item, field),
-        ),
-    );
+    const rowValues: Record<string, unknown> = {};
 
-    const row = worksheet.addRow(values);
+    for (const { field } of orderedFields) {
+      rowValues[field] = resolveEvidenceValue(
+        item,
+        field,
+      );
+    }
 
-    row.eachCell(
-      { includeEmpty: true },
-      (cell) => {
-        applyBodyStyle(cell);
-      },
-    );
+    const row = worksheet.addRow(rowValues);
+    row.height = 22;
+
+    row.eachCell((cell) => {
+      applyBodyStyle(cell);
+    });
 
     /**
-     * Apply status formatting dynamically.
-     *
-     * Status column position is determined by
-     * configLayer, not hardcoded.
+     * Apply status-specific formatting.
      */
-    const statusIndex =
-      orderedFields.findIndex(
-        ({ field }) => field === 'status',
-      );
-
-    if (statusIndex >= 0) {
-      const statusCell =
-        row.getCell(statusIndex + 1);
-
+    if (statusColumnIndex > 0) {
       applyStatusStyle(
-        statusCell,
+        row.getCell(statusColumnIndex),
         item.status,
       );
     }
   }
 
   /**
-   * Enable filters for configured columns.
+   * Freeze header row.
    */
-  if (worksheet.columnCount > 0) {
+  worksheet.views = [
+    {
+      state: 'frozen',
+      ySplit: 1,
+    },
+  ];
+
+  /**
+   * Enable filtering across configured columns.
+   */
+  if (orderedFields.length > 0) {
     worksheet.autoFilter = {
       from: {
         row: 1,
@@ -137,7 +130,7 @@ export function createEvidenceSheet<
       },
       to: {
         row: 1,
-        column: worksheet.columnCount,
+        column: orderedFields.length,
       },
     };
   }
@@ -146,28 +139,26 @@ export function createEvidenceSheet<
 }
 
 /**
- * Resolve a configured field value.
- *
- * Business fields are read from evidence.data.
- * Framework metadata fields are read from the
- * evidence envelope.
- *
- * EvidenceFactory does not need to know the
- * individual business field names.
+ * Resolves a configured field from:
+ * 1. Business evidence data
+ * 2. Framework evidence envelope
  */
-function resolveFieldValue<
+function resolveEvidenceValue<
   TData extends Record<string, unknown>,
 >(
   evidence: Evidence<TData>,
   field: string,
-): unknown {
+): string | number | boolean | Date {
+  const businessData =
+    evidence.data as Record<string, unknown>;
+
   if (
     Object.prototype.hasOwnProperty.call(
-      evidence.data,
+      businessData,
       field,
     )
   ) {
-    return evidence.data[field];
+    return normalizeValue(businessData[field]);
   }
 
   const envelope =
@@ -176,31 +167,28 @@ function resolveFieldValue<
   const value = envelope[field];
 
   /**
-   * The error envelope contains an object.
-   * Show the message when available.
+   * Error is stored as an object.
+   * Display the error message in the worksheet.
    */
   if (
     field === 'error' &&
-    value &&
+    value !== null &&
     typeof value === 'object' &&
     'message' in value
   ) {
-    return value.message;
+    return String(value.message);
   }
 
-  return value;
+  return normalizeValue(value);
 }
 
 /**
- * Convert values into Excel-compatible types.
+ * Converts evidence values to Excel-compatible types.
  */
 function normalizeValue(
   value: unknown,
 ): string | number | boolean | Date {
-  if (
-    value === undefined ||
-    value === null
-  ) {
+  if (value === undefined || value === null) {
     return '';
   }
 

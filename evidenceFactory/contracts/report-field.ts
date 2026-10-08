@@ -1,10 +1,15 @@
 /**
  * Generic report field configuration.
  *
- * Actual field names and order numbers are defined
- * outside EvidenceFactory, in configLayer.
+ * The consumer defines:
+ * - Field identifier
+ * - Display label
+ * - Column order
+ *
+ * EvidenceFactory must not define report columns.
  */
 export interface ReportField {
   field: string;
+  label: string;
   order: number;
 }

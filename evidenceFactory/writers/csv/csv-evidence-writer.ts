@@ -1,19 +1,17 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
-import { randomUUID } from 'node:crypto';
 
 import type { Evidence } from '../../contracts/evidence';
-import type { ReportConfig } from '../../contracts/report-config';
 import type { ReportField } from '../../contracts/report-field';
+import type { ReportConfig } from '../../contracts/report-config';
+
 import type { EvidenceWriter } from '../evidence-writer';
 
 /**
- * Generates a CSV evidence report.
+ * Generates a CSV report from final evidence.
  *
- * All report columns and their order come from
- * consumer-owned configuration in configLayer.
- *
- * EvidenceFactory does not define report columns.
+ * Column identifiers, labels, and order are
+ * supplied by configLayer.
  */
 export class CsvEvidenceWriter<
   TData extends Record<string, unknown>,
@@ -23,104 +21,77 @@ export class CsvEvidenceWriter<
     fields: readonly ReportField[],
     config: ReportConfig,
   ): Promise<string> {
-    await fs.mkdir(
+    await fs.mkdir(config.outputDir, {
+      recursive: true,
+    });
+
+    const fileName =
+      config.fileName ?? 'evidence-report';
+
+    const reportPath = path.join(
       config.outputDir,
-      { recursive: true },
+      `${fileName}.csv`,
     );
 
-    /**
-     * Sort fields using the configured order numbers.
-     */
     const orderedFields = [...fields].sort(
       (a, b) => a.order - b.order,
     );
 
     /**
-     * Generate CSV headers dynamically.
+     * CSV column headers use display labels.
      */
-    const headers = orderedFields.map(
-      ({ field }) => escapeCsv(field),
+    const header = orderedFields
+      .map(({ label }) => escapeCsv(label))
+      .join(',');
+
+    const rows = evidence.map((item) => {
+      return orderedFields
+        .map(({ field }) => {
+          const value = resolveEvidenceValue(
+            item,
+            field,
+          );
+
+          return escapeCsv(value);
+        })
+        .join(',');
+    });
+
+    const csv = [
+      header,
+      ...rows,
+    ].join('\n');
+
+    await fs.writeFile(
+      reportPath,
+      `${csv}\n`,
+      'utf8',
     );
 
-    /**
-     * Generate evidence rows using the same field order.
-     */
-    const rows = evidence.map((item) =>
-      orderedFields
-        .map(({ field }) =>
-          escapeCsv(
-            normalizeValue(
-              resolveFieldValue(item, field),
-            ),
-          ),
-        )
-        .join(','),
-    );
-
-    /**
-     * UTF-8 BOM improves compatibility with Excel.
-     */
-    const csvContent =
-      '\uFEFF' +
-      [headers.join(','), ...rows].join('\r\n') +
-      '\r\n';
-
-    const baseName = (
-      config.fileName ?? 'execution-report'
-    ).replace(/\.csv$/i, '');
-
-    const reportPath = path.join(
-      config.outputDir,
-      `${baseName}.csv`,
-    );
-
-    const temporaryPath =
-      `${reportPath}.${randomUUID()}.tmp`;
-
-    try {
-      await fs.writeFile(
-        temporaryPath,
-        csvContent,
-        'utf8',
-      );
-
-      await fs.rename(
-        temporaryPath,
-        reportPath,
-      );
-
-      return reportPath;
-    } catch (error) {
-      await fs.rm(
-        temporaryPath,
-        { force: true },
-      );
-
-      throw error;
-    }
+    return reportPath;
   }
 }
 
 /**
- * Reads a configured field from the evidence record.
- *
- * Business fields are stored in evidence.data.
- * Framework metadata fields are stored in the
- * evidence envelope.
+ * Resolves configured fields from business
+ * data or the framework evidence envelope.
  */
-function resolveFieldValue<
+function resolveEvidenceValue<
   TData extends Record<string, unknown>,
 >(
   evidence: Evidence<TData>,
   field: string,
 ): unknown {
+  const businessData =
+    evidence.data as Record<string, unknown>;
+
   if (
     Object.prototype.hasOwnProperty.call(
-      evidence.data,
+      businessData,
       field,
     )
   ) {
-    return evidence.data[field];
+    return businessData[field];
   }
 
   const envelope =
@@ -128,13 +99,9 @@ function resolveFieldValue<
 
   const value = envelope[field];
 
-  /**
-   * Display error.message instead of the complete
-   * error object when the configured field is "error".
-   */
   if (
     field === 'error' &&
-    value &&
+    value !== null &&
     typeof value === 'object' &&
     'message' in value
   ) {
@@ -145,11 +112,12 @@ function resolveFieldValue<
 }
 
 /**
- * Converts evidence values into CSV-compatible strings.
+ * Escapes values according to CSV rules.
+ *
+ * Values containing commas, quotes, or
+ * line breaks are enclosed in quotes.
  */
-function normalizeValue(
-  value: unknown,
-): string {
+function escapeCsv(value: unknown): string {
   if (
     value === undefined ||
     value === null
@@ -157,38 +125,19 @@ function normalizeValue(
     return '';
   }
 
-  if (value instanceof Date) {
-    return value.toISOString();
-  }
+  const text =
+    typeof value === 'object'
+      ? JSON.stringify(value)
+      : String(value);
 
   if (
-    typeof value === 'string' ||
-    typeof value === 'number' ||
-    typeof value === 'boolean'
+    text.includes(',') ||
+    text.includes('"') ||
+    text.includes('\n') ||
+    text.includes('\r')
   ) {
-    return String(value);
+    return `"${text.replace(/"/g, '""')}"`;
   }
 
-  return JSON.stringify(value);
-}
-
-/**
- * Escapes CSV values containing:
- * - commas
- * - double quotes
- * - line breaks
- */
-function escapeCsv(
-  value: string,
-): string {
-  if (
-    value.includes(',') ||
-    value.includes('"') ||
-    value.includes('\n') ||
-    value.includes('\r')
-  ) {
-    return `"${value.replace(/"/g, '""')}"`;
-  }
-
-  return value;
+  return text;
 }

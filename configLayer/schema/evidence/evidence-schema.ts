@@ -2,32 +2,30 @@
  * Consumer-owned evidence field configuration.
  *
  * Single source of truth for:
- * - All final report field names
- * - Final report column order
+ * - Report field identifiers
+ * - Report column labels
+ * - Report column order
  *
- * EvidenceFactory receives this configuration and sorts
- * fields by their order number.
- *
- * EvidenceFactory must not define report fields or their order.
+ * EvidenceFactory must not define report columns.
  */
 export const evidenceFields = [
   // Execution fields
-  { field: 'scenarioId', order: 1 },
-  { field: 'scenarioName', order: 2 },
-  { field: 'status', order: 3 },
+  { field: 'scenarioId', label: 'Scenario ID', order: 1 },
+  { field: 'scenarioName', label: 'Scenario Name', order: 2 },
+  { field: 'status', label: 'Status', order: 3 },
 
   // Business fields
-  { field: 'policyNumber', order: 4 },
-  { field: 'customerNumber', order: 5 },
-  { field: 'premium', order: 6 },
+  { field: 'policyNumber', label: 'Policy Number', order: 4 },
+  { field: 'customerNumber', label: 'Customer Number', order: 5 },
+  { field: 'premium', label: 'Premium', order: 6 },
 
   // Execution metadata
-  { field: 'attempt', order: 7 },
-  { field: 'workerId', order: 8 },
-  { field: 'startTime', order: 9 },
-  { field: 'endTime', order: 10 },
-  { field: 'durationMs', order: 11 },
-  { field: 'error', order: 12 },
+  { field: 'attempt', label: 'Attempt', order: 7 },
+  { field: 'workerId', label: 'Worker ID', order: 8 },
+  { field: 'startTime', label: 'Start Time', order: 9 },
+  { field: 'endTime', label: 'End Time', order: 10 },
+  { field: 'durationMs', label: 'Duration (ms)', order: 11 },
+  { field: 'error', label: 'Error', order: 12 },
 ] as const;
 
 /**
@@ -59,8 +57,6 @@ export type BusinessEvidenceField =
 
 /**
  * Consumer business evidence data.
- *
- * Not every scenario needs to populate every business field.
  */
 export type EvidenceData = Partial<
   Record<BusinessEvidenceField, unknown>
