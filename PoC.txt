@@ -1,19 +1,50 @@
-PS C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\AZ_Playwright> $targetUrl = [Uri]"https://cdn.playwright.dev/builds/cft/156.0.8078.4/win64/chrome-win64.zip"
->> 
->> $proxy = [System.Net.WebRequest]::GetSystemWebProxy()
->> 
->> $proxyAddress = $proxy.GetProxy($targetUrl)
->> 
->> Write-Host ""
->> Write-Host "================================="
->> Write-Host " CORPORATE PROXY DETECTION"
->> Write-Host "================================="
->> Write-Host "Selected proxy: $proxyAddress"
->> Write-Host "Direct connection: $($proxy.IsBypassed($targetUrl))"
+# ============================================================
+# PLAYWRIGHT - CORPORATE PROXY CONFIGURATION
+# ============================================================
 
-=================================
- CORPORATE PROXY DETECTION
-=================================
-Selected proxy: http://internet-proxy-a.group.net:81/
-Direct connection: False
-PS C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\AZ_Playwright>
+# 1. Enable Windows corporate certificates
+$env:NODE_USE_SYSTEM_CA = "1"
+
+# 2. Configure the detected corporate proxy
+$env:HTTPS_PROXY = "http://internet-proxy-a.group.net:81"
+$env:HTTP_PROXY  = "http://internet-proxy-a.group.net:81"
+
+# 3. Increase Playwright download timeout
+$env:PLAYWRIGHT_DOWNLOAD_CONNECTION_TIMEOUT = "120000"
+
+# 4. Display configuration
+Write-Host ""
+Write-Host "Corporate proxy configured:"
+Write-Host "HTTPS_PROXY = $env:HTTPS_PROXY"
+Write-Host "HTTP_PROXY  = $env:HTTP_PROXY"
+
+# 5. Download and install Chromium
+npx --no-install playwright install chromium
+
+# 6. Check installation result
+if ($LASTEXITCODE -eq 0) {
+    Write-Host ""
+    Write-Host "SUCCESS: Chromium installed!"
+} else {
+    Write-Host ""
+    Write-Host "ERROR: Chromium installation failed."
+}
+
+
+======
+
+
+# Validate TypeScript
+npx --no-install tsc --noEmit
+
+# Initialize EvidenceFactory
+npx --no-install tsx tests/framework/evidence-factory/initialize-run.ts
+
+# Run EvidenceFactory scenarios
+npx --no-install playwright test tests/framework/evidence-factory/evidence-factory-excel.spec.ts --project=framework --workers=4
+
+# Generate Excel report
+npx --no-install playwright test tests/framework/evidence-factory/evidence-report.spec.ts --project=framework --workers=1
+
+# Run POM Generator tests
+npx --no-install playwright test tests/framework/pom-generator --project=framework --workers=4
