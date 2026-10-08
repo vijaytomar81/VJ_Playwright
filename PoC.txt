@@ -1,45 +1,17 @@
-PS C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\AZ_Playwright> $env:NODE_USE_SYSTEM_CA = "1"
-PS C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\AZ_Playwright> $env:PLAYWRIGHT_DOWNLOAD_CONNECTION_TIMEOUT = "120000"
-PS C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\AZ_Playwright> npx --no-install playwright install chromium
-Downloading Chrome for Testing 156.0.8078.4 (playwright chromium v1248) from https://cdn.playwright.dev/builds/cft/156.0.8078.4/win64/chrome-win64.zip
-Error: read ECONNRESET
-    at TLSWrap.onStreamRead (node:internal/stream_base_commons:216:20) {
-  errno: -4077,
-  code: 'ECONNRESET',
-  syscall: 'read'
-}
-Downloading Chrome for Testing 156.0.8078.4 (playwright chromium v1248) from https://cdn.playwright.dev/builds/cft/156.0.8078.4/win64/chrome-win64.zip
-Error: read ECONNRESET
-    at TLSWrap.onStreamRead (node:internal/stream_base_commons:216:20) {
-  errno: -4077,
-  code: 'ECONNRESET',
-  syscall: 'read'
-}
-Downloading Chrome for Testing 156.0.8078.4 (playwright chromium v1248) from https://cdn.playwright.dev/builds/cft/156.0.8078.4/win64/chrome-win64.zip
-Error: read ECONNRESET
-    at TLSWrap.onStreamRead (node:internal/stream_base_commons:216:20) {
-  errno: -4077,
-  code: 'ECONNRESET',
-  syscall: 'read'
-}
-Downloading Chrome for Testing 156.0.8078.4 (playwright chromium v1248) from https://cdn.playwright.dev/builds/cft/156.0.8078.4/win64/chrome-win64.zip
-Error: read ECONNRESET
-    at TLSWrap.onStreamRead (node:internal/stream_base_commons:216:20) {
-  errno: -4077,
-  code: 'ECONNRESET',
-  syscall: 'read'
-}
-Downloading Chrome for Testing 156.0.8078.4 (playwright chromium v1248) from https://cdn.playwright.dev/builds/cft/156.0.8078.4/win64/chrome-win64.zip
-Error: read ECONNRESET
-    at TLSWrap.onStreamRead (node:internal/stream_base_commons:216:20) {
-  errno: -4077,
-  code: 'ECONNRESET',
-  syscall: 'read'
-}
-Failed to install browsers
-Error: Failed to download Chrome for Testing 156.0.8078.4 (playwright chromium v1248), caused by
-Error: Download failure, code=1
-    at ChildProcess.<anonymous> (C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\AZ_Playwright\node_modules\playwright-core\lib\coreBundle.js:33774:32)
-    at ChildProcess.emit (node:events:514:20)
-    at ChildProcess._handle.onexit (node:internal/child_process:294:12)
-PS C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\AZ_Playwright> 
+Write-Host "`n=== NPM Proxy Settings ==="
+npm config get proxy
+npm config get https-proxy
+npm config get registry
+
+Write-Host "`n=== Proxy Environment Variables ==="
+Get-ChildItem Env:*PROXY* -ErrorAction SilentlyContinue
+
+Write-Host "`n=== Windows WinHTTP Proxy ==="
+netsh winhttp show proxy
+
+Write-Host "`n=== Chromium Download Server Connectivity ==="
+Test-NetConnection cdn.playwright.dev -Port 443
+
+Write-Host "`n=== Microsoft Edge Installation ==="
+Test-Path "${env:ProgramFiles(x86)}\Microsoft\Edge\Application\msedge.exe"
+Test-Path "$env:ProgramFiles\Microsoft\Edge\Application\msedge.exe"
