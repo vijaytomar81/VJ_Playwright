@@ -48,3 +48,8 @@ npx --no-install playwright test tests/framework/evidence-factory/evidence-repor
 
 # Run POM Generator tests
 npx --no-install playwright test tests/framework/pom-generator --project=framework --workers=4
+
+======
+
+
+
