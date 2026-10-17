@@ -29,35 +29,25 @@ export const evidenceFields = [
 ] as const;
 
 /**
- * Union of all configured report field names.
+ * Union of all configured evidence field names.
  */
 export type EvidenceField =
   typeof evidenceFields[number]['field'];
 
 /**
- * Framework-owned fields stored in the Evidence envelope.
- */
-export type FrameworkEvidenceField =
-  | 'runId'
-  | 'workerId'
-  | 'attempt'
-  | 'scenarioId'
-  | 'scenarioName'
-  | 'status'
-  | 'startTime'
-  | 'endTime'
-  | 'durationMs'
-  | 'error';
-
-/**
- * Business fields populated by executionFactory.
- */
-export type BusinessEvidenceField =
-  Exclude<EvidenceField, FrameworkEvidenceField>;
-
-/**
- * Consumer business evidence data.
+ * Evidence data type derived from the schema.
  */
 export type EvidenceData = Partial<
-  Record<BusinessEvidenceField, unknown>
+  Record<EvidenceField, unknown>
 >;
+
+/**
+ * Runtime field identifiers derived from evidenceFields.
+ *
+ * Field names are defined only once.
+ */
+export const EvidenceData = Object.fromEntries(
+  evidenceFields.map(({ field }) => [field, field]),
+) as {
+    readonly [K in EvidenceField]: K;
+  };

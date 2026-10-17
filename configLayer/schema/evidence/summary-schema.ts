@@ -65,12 +65,46 @@ export const summarySchema = [
 
 /**
  * Union of configured section names.
+ *
+ * Automatically derived from summarySchema.
  */
 export type SummarySection =
   typeof summarySchema[number]['section'];
 
 /**
  * Union of all configured summary field names.
+ *
+ * Automatically derived from summarySchema.
  */
 export type SummaryField =
   typeof summarySchema[number]['fields'][number]['field'];
+
+/**
+ * Execution summary data type.
+ *
+ * Allows only field names defined in summarySchema.
+ */
+export type SummaryData = Partial<
+  Record<SummaryField, unknown>
+>;
+
+/**
+ * Runtime summary field identifiers.
+ *
+ * Automatically derived from summarySchema.
+ * No field names are defined again.
+ *
+ * Examples:
+ * SummaryData.runId          -> 'runId'
+ * SummaryData.environment    -> 'environment'
+ * SummaryData.browser        -> 'browser'
+ * SummaryData.totalItems     -> 'totalItems'
+ * SummaryData.executionTime  -> 'executionTime'
+ */
+export const SummaryData = Object.fromEntries(
+  summarySchema.flatMap(({ fields }) =>
+    fields.map(({ field }) => [field, field]),
+  ),
+) as {
+    readonly [K in SummaryField]: K;
+  };
