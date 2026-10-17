@@ -17,10 +17,10 @@ import {
 } from './test-run-context';
 
 /**
- * Test scenarios executed by parallel Playwright workers.
+ * Four data-driven scenarios.
  *
- * Each scenario records its own raw evidence.
- * The final Excel report is generated separately.
+ * TC-003 simulates a failed first attempt
+ * followed by a successful retry.
  */
 const scenarios = [
   {
@@ -61,7 +61,7 @@ const scenarios = [
 ];
 
 /**
- * All four scenarios can execute in parallel.
+ * Execute scenarios across parallel workers.
  */
 test.describe.configure({
   mode: 'parallel',
@@ -72,51 +72,40 @@ for (const scenario of scenarios) {
     `${scenario.scenarioId} - ${scenario.scenarioName}`,
     async ({}, testInfo) => {
       /**
-       * Read the shared execution context.
-       *
-       * All workers receive the same runId.
+       * Read the run ID shared by all workers.
        */
       const { runId } = await getTestRunContext();
 
       /**
-       * Worker ID comes from Playwright.
+       * Stable logical worker identifier.
        *
-       * In production, executionFactory will
-       * supply this identifier.
+       * Playwright may restart worker processes,
+       * but parallelIndex identifies the same slot.
        */
-      const workerId = `worker-${testInfo.workerIndex}`;
+      const workerId =
+        `worker-${testInfo.parallelIndex}`;
 
       const resultsDir = './results';
 
-      /**
-       * Initialize EvidenceFactory.
-       */
       const factory = new EvidenceFactory<EvidenceData>({
         fields: evidenceFields,
         resultsDir,
         runId,
       });
 
-      /**
-       * Each worker writes evidence into its own folder.
-       */
       const store = new FileEvidenceStore<EvidenceData>({
         resultsDir,
         runId,
         workerId,
       });
 
-      const startTime = new Date();
-
       /**
-       * Simulate scenario execution.
+       * Record the first attempt.
        */
-      const endTime = new Date();
+      const firstStartTime = new Date();
+      const firstEndTime = new Date();
 
-      /**
-       * Prepare evidence for the scenario.
-       */
-      const evidence: Evidence<EvidenceData> = {
+      const firstAttempt: Evidence<EvidenceData> = {
         runId,
         workerId,
         attempt: 1,
@@ -125,11 +114,12 @@ for (const scenario of scenarios) {
         scenarioName: scenario.scenarioName,
         status: scenario.status,
 
-        startTime: startTime.toISOString(),
-        endTime: endTime.toISOString(),
+        startTime: firstStartTime.toISOString(),
+        endTime: firstEndTime.toISOString(),
 
         durationMs:
-          endTime.getTime() - startTime.getTime(),
+          firstEndTime.getTime() -
+          firstStartTime.getTime(),
 
         data: scenario.data,
 
@@ -142,18 +132,80 @@ for (const scenario of scenarios) {
           : {}),
       };
 
-      /**
-       * Store raw evidence.
-       */
-      await factory.record(evidence, store);
+      await factory.record(firstAttempt, store);
 
       /**
-       * Verify the evidence was recorded.
+       * TC-003: Simulate a successful retry.
+       *
+       * Both attempts use:
+       * - The same runId
+       * - The same workerId
+       * - The same scenarioId
+       *
+       * Only the attempt number and outcome differ.
        */
-      expect(evidence.runId).toBe(runId);
-      expect(evidence.workerId).toBe(workerId);
-      expect(evidence.scenarioId).toBe(scenario.scenarioId);
-      expect(evidence.status).toBe(scenario.status);
+      if (scenario.scenarioId === 'TC-003') {
+        const retryStartTime = new Date();
+        const retryEndTime = new Date();
+
+        const retryAttempt: Evidence<EvidenceData> = {
+          runId,
+          workerId,
+          attempt: 2,
+
+          scenarioId: scenario.scenarioId,
+          scenarioName: scenario.scenarioName,
+
+          status: EvidenceStatus.PASSED,
+
+          startTime: retryStartTime.toISOString(),
+          endTime: retryEndTime.toISOString(),
+
+          durationMs:
+            retryEndTime.getTime() -
+            retryStartTime.getTime(),
+
+          data: scenario.data,
+        };
+
+        await factory.record(retryAttempt, store);
+
+        /**
+         * Verify both attempts were recorded
+         * in the same worker JSON array.
+         */
+        const workerEvidence = await store.getAll();
+
+        const tc003Attempts = workerEvidence
+          .filter(
+            item => item.scenarioId === 'TC-003',
+          )
+          .sort(
+            (a, b) => a.attempt - b.attempt,
+          );
+
+        expect(tc003Attempts).toHaveLength(2);
+
+        expect(tc003Attempts[0].status).toBe(
+          EvidenceStatus.FAILED,
+        );
+
+        expect(tc003Attempts[1].status).toBe(
+          EvidenceStatus.PASSED,
+        );
+      }
+
+      /**
+       * Verify the first attempt was recorded.
+       */
+      expect(firstAttempt.runId).toBe(runId);
+      expect(firstAttempt.workerId).toBe(workerId);
+      expect(firstAttempt.scenarioId).toBe(
+        scenario.scenarioId,
+      );
+      expect(firstAttempt.status).toBe(
+        scenario.status,
+      );
     },
   );
 }

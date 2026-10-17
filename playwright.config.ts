@@ -3,20 +3,28 @@ import { defineConfig, devices } from '@playwright/test';
 export default defineConfig({
 
   /*
-   * We currently have framework/configuration tests here.
-   * UI automation will later live under automationLayer/tests.
+   * Framework and application automation test locations.
    */
   testDir: '.',
 
-  /*
-   * Prevent Playwright from treating files outside our
-   * intended test locations as tests.
-   */
   testMatch: [
     'tests/**/*.spec.ts',
     'automationLayer/tests/**/*.spec.ts',
   ],
 
+  /*
+   * EvidenceFactory regression tests are executed
+   * separately using playwright.evidence.config.ts.
+   *
+   * Exclude them from normal automation execution.
+   */
+  testIgnore: [
+    'tests/framework/evidence-factory/**/*.spec.ts',
+  ],
+
+  /*
+   * Allow independent tests to execute in parallel.
+   */
   fullyParallel: true,
 
   forbidOnly: !!process.env.CI,
@@ -26,27 +34,28 @@ export default defineConfig({
   workers: process.env.CI ? 1 : undefined,
 
   reporter: [
-    ['html', {
-      outputFolder: 'playwright-report',
-      open: 'never',
-    }],
+    [
+      'html',
+      {
+        outputFolder: 'playwright-report',
+        open: 'never',
+      },
+    ],
   ],
 
   use: {
     trace: 'on-first-retry',
-
     screenshot: 'only-on-failure',
-
     video: 'retain-on-failure',
   },
 
   projects: [
 
     /*
-     * Framework-level tests.
+     * General framework and configuration tests.
      *
-     * These execute once and do not need
-     * Chromium / Firefox / WebKit duplication.
+     * EvidenceFactory validation tests are excluded
+     * by the global testIgnore configuration.
      */
     {
       name: 'framework',
@@ -62,12 +71,7 @@ export default defineConfig({
     },
 
     /*
-     * UI automation.
-     *
-     * These tests execute against Chromium.
-     *
-     * BrowserStack and additional browser projects
-     * will be added later.
+     * Actual application UI automation tests.
      */
     {
       name: 'chromium',

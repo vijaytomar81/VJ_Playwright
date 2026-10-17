@@ -3,51 +3,33 @@ import path from 'node:path';
 
 import type { Evidence } from '../contracts/evidence';
 
-/**
- * Configuration used by EvidenceAggregator.
- */
 export interface EvidenceAggregatorConfig {
-  /**
-   * Root directory containing execution results.
-   *
-   * Example:
-   *   ./results
-   */
   resultsDir: string;
-
-  /**
-   * Run identifier whose evidence should be aggregated.
-   *
-   * Example:
-   *   RUN-20261007-001
-   */
   runId: string;
 }
 
 /**
- * Reads evidence produced by all workers participating
- * in a single execution run.
+ * Aggregates evidence from logical Playwright workers.
  *
- * Raw evidence files remain untouched.
+ * During execution:
  *
- * Example:
+ * results/<runId>/evidence/
+ *   worker-0.json
+ *   worker-1.json
+ *   worker-2.json
+ *   worker-3.json
  *
- * results/
- *   RUN-001/
- *     evidence/
- *       worker-0/
- *         TC001_attempt-0.json
- *       worker-1/
- *         TC002_attempt-0.json
- *         TC002_attempt-1.json
+ * After finalization:
  *
- * By default, getLatestAttempts() returns only the latest
- * attempt for each scenario.
+ * results/<runId>/evidence/
+ *   consolidated-evidence.json
  */
 export class EvidenceAggregator<
   TData extends Record<string, unknown>,
 > {
   private readonly evidenceDirectory: string;
+
+  private readonly consolidatedFilePath: string;
 
   constructor(
     private readonly config: EvidenceAggregatorConfig,
@@ -57,92 +39,111 @@ export class EvidenceAggregator<
       config.runId,
       'evidence',
     );
+
+    this.consolidatedFilePath = path.join(
+      this.evidenceDirectory,
+      'consolidated-evidence.json',
+    );
   }
 
   /**
-   * Reads every valid evidence JSON file from every worker
-   * directory for the configured run.
+   * Returns all evidence attempts from every worker.
    *
-   * No retry filtering is performed here.
+   * If worker files have already been cleaned up,
+   * reads consolidated-evidence.json instead.
    */
   async getAllAttempts(): Promise<Evidence<TData>[]> {
     if (!(await this.directoryExists(this.evidenceDirectory))) {
       return [];
     }
 
-    const workerEntries = await fs.readdir(
+    const entries = await fs.readdir(
       this.evidenceDirectory,
       {
         withFileTypes: true,
       },
     );
 
-    const workerDirectories = workerEntries
-      .filter(entry => entry.isDirectory())
+    const workerFiles = entries
+      .filter(
+        entry =>
+          entry.isFile() &&
+          /^worker-\d+\.json$/.test(entry.name),
+      )
       .map(entry => entry.name)
       .sort();
 
-    const evidence: Evidence<TData>[] = [];
+    let evidence: Evidence<TData>[];
 
-    for (const workerDirectory of workerDirectories) {
-      const workerPath = path.join(
-        this.evidenceDirectory,
-        workerDirectory,
+    if (workerFiles.length > 0) {
+      evidence = [];
+
+      for (const fileName of workerFiles) {
+        const filePath = path.join(
+          this.evidenceDirectory,
+          fileName,
+        );
+
+        const records = await this.readEvidenceArray(
+          filePath,
+        );
+
+        const expectedWorkerId = path.basename(
+          fileName,
+          '.json',
+        );
+
+        for (const record of records) {
+          this.validateEvidence(
+            record,
+            filePath,
+            expectedWorkerId,
+          );
+        }
+
+        evidence.push(...records);
+      }
+    } else if (await this.fileExists(this.consolidatedFilePath)) {
+      evidence = await this.readEvidenceArray(
+        this.consolidatedFilePath,
       );
 
-      const workerEvidence =
-        await this.readWorkerEvidence(workerPath);
-
-      evidence.push(...workerEvidence);
+      for (const record of evidence) {
+        this.validateEvidence(
+          record,
+          this.consolidatedFilePath,
+        );
+      }
+    } else {
+      evidence = [];
     }
+
+    this.validateUniqueAttempts(evidence);
 
     return this.sortEvidence(evidence);
   }
 
   /**
    * Returns only the latest attempt for each scenario.
-   *
-   * Example:
-   *
-   * TC001 attempt 0 FAILED
-   * TC001 attempt 1 PASSED
-   *
-   * becomes:
-   *
-   * TC001 attempt 1 PASSED
-   *
-   * All raw attempt files remain on disk.
    */
   async getLatestAttempts(): Promise<Evidence<TData>[]> {
-    const allAttempts =
-      await this.getAllAttempts();
+    const allAttempts = await this.getAllAttempts();
 
     const latestByScenario =
       new Map<string, Evidence<TData>>();
 
-    for (const evidence of allAttempts) {
-      const existing =
-        latestByScenario.get(
-          evidence.scenarioId,
-        );
+    for (const record of allAttempts) {
+      const existing = latestByScenario.get(
+        record.scenarioId,
+      );
 
       if (
         !existing ||
-        evidence.attempt > existing.attempt
+        record.attempt > existing.attempt
       ) {
         latestByScenario.set(
-          evidence.scenarioId,
-          evidence,
-        );
-
-        continue;
-      }
-
-      if (
-        evidence.attempt === existing.attempt
-      ) {
-        throw new Error(
-          `Duplicate evidence detected for scenario "${evidence.scenarioId}" attempt ${evidence.attempt}.`,
+          record.scenarioId,
+          record,
         );
       }
     }
@@ -153,52 +154,11 @@ export class EvidenceAggregator<
   }
 
   /**
-   * Reads all JSON evidence files belonging to one worker.
+   * Reads an array of Evidence records from a JSON file.
    */
-  private async readWorkerEvidence(
-    workerDirectory: string,
-  ): Promise<Evidence<TData>[]> {
-    const entries = await fs.readdir(
-      workerDirectory,
-      {
-        withFileTypes: true,
-      },
-    );
-
-    const evidenceFiles = entries
-      .filter(
-        entry =>
-          entry.isFile() &&
-          entry.name.endsWith('.json'),
-      )
-      .map(entry => entry.name)
-      .sort();
-
-    const evidence: Evidence<TData>[] = [];
-
-    for (const fileName of evidenceFiles) {
-      const filePath = path.join(
-        workerDirectory,
-        fileName,
-      );
-
-      const record =
-        await this.readEvidenceFile(filePath);
-
-      this.validateRun(record, filePath);
-
-      evidence.push(record);
-    }
-
-    return evidence;
-  }
-
-  /**
-   * Reads and parses a single evidence JSON file.
-   */
-  private async readEvidenceFile(
+  private async readEvidenceArray(
     filePath: string,
-  ): Promise<Evidence<TData>> {
+  ): Promise<Evidence<TData>[]> {
     let content: string;
 
     try {
@@ -209,59 +169,111 @@ export class EvidenceAggregator<
     } catch (error) {
       throw new Error(
         `Unable to read evidence file "${filePath}".`,
-        {
-          cause: error,
-        },
+        { cause: error },
       );
     }
 
+    let parsed: unknown;
+
     try {
-      return JSON.parse(
-        content,
-      ) as Evidence<TData>;
+      parsed = JSON.parse(content);
     } catch (error) {
       throw new Error(
         `Invalid JSON in evidence file "${filePath}".`,
-        {
-          cause: error,
-        },
+        { cause: error },
       );
     }
+
+    if (!Array.isArray(parsed)) {
+      throw new Error(
+        `Evidence file "${filePath}" must contain a JSON array.`,
+      );
+    }
+
+    return parsed as Evidence<TData>[];
   }
 
   /**
-   * Protects against evidence from another run being placed
-   * accidentally inside the configured run directory.
+   * Validates evidence ownership and required identifiers.
    */
-  private validateRun(
-    evidence: Evidence<TData>,
+  private validateEvidence(
+    record: Evidence<TData>,
     filePath: string,
+    expectedWorkerId?: string,
   ): void {
     if (
-      evidence.runId !==
-      this.config.runId
+      !record ||
+      typeof record !== 'object' ||
+      record.runId !== this.config.runId
     ) {
       throw new Error(
-        `Evidence file "${filePath}" belongs to run "${evidence.runId}" but aggregator is processing run "${this.config.runId}".`,
+        `Invalid run ownership in evidence file "${filePath}".`,
+      );
+    }
+
+    if (
+      typeof record.workerId !== 'string' ||
+      !record.workerId
+    ) {
+      throw new Error(
+        `Missing workerId in evidence file "${filePath}".`,
+      );
+    }
+
+    if (
+      expectedWorkerId &&
+      record.workerId !== expectedWorkerId
+    ) {
+      throw new Error(
+        `Worker ownership mismatch in "${filePath}".`,
+      );
+    }
+
+    if (
+      typeof record.scenarioId !== 'string' ||
+      !record.scenarioId ||
+      !Number.isInteger(record.attempt) ||
+      record.attempt < 0
+    ) {
+      throw new Error(
+        `Invalid scenarioId or attempt in "${filePath}".`,
       );
     }
   }
 
   /**
-   * Provides deterministic ordering for report generation.
-   *
-   * Primary:
-   *   scenarioId
-   *
-   * Secondary:
-   *   attempt
+   * Rejects duplicate scenario/attempt combinations.
+   */
+  private validateUniqueAttempts(
+    evidence: Evidence<TData>[],
+  ): void {
+    const seen = new Set<string>();
+
+    for (const record of evidence) {
+      const key = JSON.stringify([
+        record.scenarioId,
+        record.attempt,
+      ]);
+
+      if (seen.has(key)) {
+        throw new Error(
+          `Duplicate evidence detected for scenario "${record.scenarioId}" attempt ${record.attempt}.`,
+        );
+      }
+
+      seen.add(key);
+    }
+  }
+
+  /**
+   * Sorts evidence by scenarioId, then attempt.
    */
   private sortEvidence(
     evidence: Evidence<TData>[],
   ): Evidence<TData>[] {
     return [...evidence].sort(
       (left, right) => {
-        const scenarioComparison =
+        const comparison =
           left.scenarioId.localeCompare(
             right.scenarioId,
             undefined,
@@ -271,8 +283,8 @@ export class EvidenceAggregator<
             },
           );
 
-        if (scenarioComparison !== 0) {
-          return scenarioComparison;
+        if (comparison !== 0) {
+          return comparison;
         }
 
         return left.attempt - right.attempt;
@@ -284,21 +296,41 @@ export class EvidenceAggregator<
     directory: string,
   ): Promise<boolean> {
     try {
-      const stats =
-        await fs.stat(directory);
-
+      const stats = await fs.stat(directory);
       return stats.isDirectory();
     } catch (error) {
-      if (
-        typeof error === 'object' &&
-        error !== null &&
-        'code' in error &&
-        error.code === 'ENOENT'
-      ) {
+      if (this.hasCode(error, 'ENOENT')) {
         return false;
       }
 
       throw error;
     }
+  }
+
+  private async fileExists(
+    filePath: string,
+  ): Promise<boolean> {
+    try {
+      const stats = await fs.stat(filePath);
+      return stats.isFile();
+    } catch (error) {
+      if (this.hasCode(error, 'ENOENT')) {
+        return false;
+      }
+
+      throw error;
+    }
+  }
+
+  private hasCode(
+    error: unknown,
+    code: string,
+  ): boolean {
+    return (
+      typeof error === 'object' &&
+      error !== null &&
+      'code' in error &&
+      error.code === code
+    );
   }
 }

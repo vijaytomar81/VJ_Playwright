@@ -1,3 +1,4 @@
+import fs from 'node:fs/promises';
 import path from 'node:path';
 import os from 'node:os';
 
@@ -8,6 +9,7 @@ import {
   EvidenceFactory,
   EvidenceStatus,
   ReportFormat,
+  type Evidence,
 } from '../../../evidenceFactory';
 
 import {
@@ -24,18 +26,23 @@ import {
 } from './test-run-context';
 
 /**
- * Generates and validates the final Excel
- * evidence report after workers complete.
+ * Validates the complete EvidenceFactory lifecycle:
+ *
+ * 1. Read all attempts from worker JSON files.
+ * 2. Select the latest attempt for each scenario.
+ * 3. Consolidate all attempts into one JSON file.
+ * 4. Generate an Excel report using final attempts.
+ * 5. Delete worker JSON files after successful finalization.
+ * 6. Verify consolidated evidence remains readable.
+ *
+ * This test must execute after evidence-collection.
  */
-test('Generate final Excel evidence report', async () => {
+test('Generate and finalize evidence report with retries', async () => {
   const { runId, timestamp } =
     await getTestRunContext();
 
   const resultsDir = './results';
 
-  /**
-   * Initialize EvidenceFactory.
-   */
   const factory = new EvidenceFactory<EvidenceData>({
     fields: evidenceFields,
     resultsDir,
@@ -43,37 +50,87 @@ test('Generate final Excel evidence report', async () => {
   });
 
   /**
-   * Collect final evidence from all workers.
+   * Step 1: Read all recorded attempts.
+   *
+   * Expected:
+   * TC-001: attempt 1 - PASSED
+   * TC-002: attempt 1 - PASSED
+   * TC-003: attempt 1 - FAILED
+   * TC-003: attempt 2 - PASSED
+   * TC-004: attempt 1 - NOT_EXECUTED
+   */
+  const allAttempts =
+    await factory.getAllAttempts();
+
+  expect(allAttempts).toHaveLength(5);
+
+  /**
+   * Step 2: Verify both TC-003 attempts are retained.
+   */
+  const tc003Attempts = allAttempts
+    .filter(
+      item => item.scenarioId === 'TC-003',
+    )
+    .sort(
+      (a, b) => a.attempt - b.attempt,
+    );
+
+  expect(tc003Attempts).toHaveLength(2);
+
+  expect(tc003Attempts[0].attempt).toBe(1);
+  expect(tc003Attempts[0].status).toBe(
+    EvidenceStatus.FAILED,
+  );
+
+  expect(tc003Attempts[1].attempt).toBe(2);
+  expect(tc003Attempts[1].status).toBe(
+    EvidenceStatus.PASSED,
+  );
+
+  /**
+   * Step 3: Read the latest attempt per scenario.
    */
   const finalEvidence =
     await factory.getFinalEvidence();
 
   expect(finalEvidence).toHaveLength(4);
 
+  const tc003Final = finalEvidence.find(
+    item => item.scenarioId === 'TC-003',
+  );
+
+  expect(tc003Final).toBeDefined();
+  expect(tc003Final!.attempt).toBe(2);
+  expect(tc003Final!.status).toBe(
+    EvidenceStatus.PASSED,
+  );
+
   /**
-   * Validate execution results.
+   * Step 4: Verify final scenario status counts.
+   *
+   * Passed:       3
+   * Failed:       0
+   * Not Executed: 1
    */
   const passed = finalEvidence.filter(
-    (item) =>
-      item.status === EvidenceStatus.PASSED,
+    item => item.status === EvidenceStatus.PASSED,
   );
 
   const failed = finalEvidence.filter(
-    (item) =>
-      item.status === EvidenceStatus.FAILED,
+    item => item.status === EvidenceStatus.FAILED,
   );
 
   const notExecuted = finalEvidence.filter(
-    (item) =>
+    item =>
       item.status === EvidenceStatus.NOT_EXECUTED,
   );
 
-  expect(passed).toHaveLength(2);
-  expect(failed).toHaveLength(1);
+  expect(passed).toHaveLength(3);
+  expect(failed).toHaveLength(0);
   expect(notExecuted).toHaveLength(1);
 
   /**
-   * Prepare report paths.
+   * Step 5: Prepare report paths.
    */
   const reportFileName =
     `execution-report_${timestamp}`;
@@ -91,28 +148,22 @@ test('Generate final Excel evidence report', async () => {
   );
 
   /**
-   * Derive timing information from evidence.
+   * Step 6: Derive execution timing.
    */
   const startTimes = finalEvidence
-    .map((item) => item.startTime)
+    .map(item => item.startTime)
     .filter(
-      (value): value is string =>
-        Boolean(value),
+      (value): value is string => Boolean(value),
     )
-    .map((value) =>
-      new Date(value).getTime(),
-    )
+    .map(value => new Date(value).getTime())
     .filter(Number.isFinite);
 
   const endTimes = finalEvidence
-    .map((item) => item.endTime)
+    .map(item => item.endTime)
     .filter(
-      (value): value is string =>
-        Boolean(value),
+      (value): value is string => Boolean(value),
     )
-    .map((value) =>
-      new Date(value).getTime(),
-    )
+    .map(value => new Date(value).getTime())
     .filter(Number.isFinite);
 
   const startedAt =
@@ -141,9 +192,12 @@ test('Generate final Excel evidence report', async () => {
       : '';
 
   /**
-   * Generate the Excel report.
+   * Step 7: Finalize the run.
+   *
+   * Consolidated JSON retains all 5 attempts.
+   * Excel report includes only 4 final scenarios.
    */
-  const result = await factory.generateReport({
+  const result = await factory.finalize({
     format: ReportFormat.EXCEL,
 
     outputDir: reportOutputDir,
@@ -155,25 +209,21 @@ test('Generate final Excel evidence report', async () => {
     summarySchema,
 
     summaryData: {
-      // Run
       runId,
       mode: 'e2e',
       environment: 'test',
       evidenceDirectory,
 
-      // Runtime
       machineName: os.hostname(),
       user: os.userInfo().username,
       platform: process.platform,
       osVersion: os.release(),
 
-      // Browser
       browser: 'chromium',
       browserChannel: 'msedge',
       browserVersion: 'Not captured',
       headless: true,
 
-      // Timing
       executionTime,
       startedAt,
       finishedAt,
@@ -181,9 +231,10 @@ test('Generate final Excel evidence report', async () => {
   });
 
   /**
-   * Verify report output.
+   * Step 8: Verify finalization metadata.
    */
   expect(result.evidenceCount).toBe(4);
+  expect(result.reports).toHaveLength(1);
 
   const expectedReportPath = path.join(
     reportOutputDir,
@@ -197,7 +248,105 @@ test('Generate final Excel evidence report', async () => {
   );
 
   /**
-   * Read the generated workbook.
+   * Step 9: Verify consolidated JSON path.
+   */
+  const expectedConsolidatedPath = path.join(
+    evidenceDirectory,
+    'consolidated-evidence.json',
+  );
+
+  expect(
+    path.resolve(result.consolidatedPath),
+  ).toBe(
+    path.resolve(expectedConsolidatedPath),
+  );
+
+  /**
+   * Step 10: Read consolidated JSON.
+   */
+  const consolidatedContent =
+    await fs.readFile(
+      result.consolidatedPath,
+      'utf8',
+    );
+
+  const consolidatedEvidence =
+    JSON.parse(consolidatedContent) as
+      Evidence<EvidenceData>[];
+
+  expect(consolidatedEvidence).toHaveLength(5);
+
+  /**
+   * Verify all 4 unique scenarios exist.
+   */
+  const uniqueScenarioIds = [
+    ...new Set(
+      consolidatedEvidence.map(
+        item => item.scenarioId,
+      ),
+    ),
+  ].sort();
+
+  expect(uniqueScenarioIds).toEqual([
+    'TC-001',
+    'TC-002',
+    'TC-003',
+    'TC-004',
+  ]);
+
+  /**
+   * Step 11: Verify both retry attempts survived
+   * consolidation.
+   */
+  const consolidatedTC003 =
+    consolidatedEvidence
+      .filter(
+        item => item.scenarioId === 'TC-003',
+      )
+      .sort(
+        (a, b) => a.attempt - b.attempt,
+      );
+
+  expect(consolidatedTC003).toHaveLength(2);
+
+  expect(consolidatedTC003[0].attempt).toBe(1);
+  expect(consolidatedTC003[0].status).toBe(
+    EvidenceStatus.FAILED,
+  );
+
+  expect(consolidatedTC003[1].attempt).toBe(2);
+  expect(consolidatedTC003[1].status).toBe(
+    EvidenceStatus.PASSED,
+  );
+
+  /**
+   * Step 12: Verify worker JSON cleanup.
+   */
+  const remainingFiles =
+    await fs.readdir(evidenceDirectory);
+
+  const workerFiles = remainingFiles.filter(
+    fileName =>
+      /^worker-\d+\.json$/.test(fileName),
+  );
+
+  expect(workerFiles).toHaveLength(0);
+
+  /**
+   * Step 13: Verify evidence is readable after cleanup.
+   */
+  const evidenceAfterCleanup =
+    await factory.getAllAttempts();
+
+  expect(evidenceAfterCleanup).toHaveLength(5);
+
+  const finalEvidenceAfterCleanup =
+    await factory.getFinalEvidence();
+
+  expect(finalEvidenceAfterCleanup).toHaveLength(4);
+
+  /**
+   * Step 14: Read the Excel workbook.
    */
   const workbook = new ExcelJS.Workbook();
 
@@ -205,12 +354,9 @@ test('Generate final Excel evidence report', async () => {
     result.reportPath,
   );
 
-  /**
-   * Validate worksheet names.
-   */
   const worksheetNames =
     workbook.worksheets.map(
-      (worksheet) => worksheet.name,
+      worksheet => worksheet.name,
     );
 
   expect(worksheetNames).toEqual([
@@ -243,18 +389,17 @@ test('Generate final Excel evidence report', async () => {
   expect(notExecutedSheet).toBeDefined();
 
   /**
-   * Validate evidence row counts.
+   * Step 15: Verify Excel uses final attempts only.
    */
   expect(allSheet!.rowCount - 1).toBe(4);
-  expect(passedSheet!.rowCount - 1).toBe(2);
-  expect(failedSheet!.rowCount - 1).toBe(1);
+  expect(passedSheet!.rowCount - 1).toBe(3);
+  expect(failedSheet!.rowCount - 1).toBe(0);
   expect(
     notExecutedSheet!.rowCount - 1,
   ).toBe(1);
 
   /**
-   * Validate column identifiers, labels,
-   * and order from evidenceFields.
+   * Step 16: Validate column order and labels.
    */
   const orderedEvidenceFields = [
     ...evidenceFields,
@@ -283,7 +428,7 @@ test('Generate final Excel evidence report', async () => {
   );
 
   /**
-   * Validate business evidence values.
+   * Step 17: Validate business evidence.
    */
   const policyNumberColumn =
     expectedFields.indexOf(
@@ -305,20 +450,12 @@ test('Generate final Excel evidence report', async () => {
     );
   }
 
-  expect(policyNumbers).toContain(
-    'POL-1001',
-  );
-
-  expect(policyNumbers).toContain(
-    'POL-1002',
-  );
-
-  expect(policyNumbers).toContain(
-    'POL-1003',
-  );
+  expect(policyNumbers).toContain('POL-1001');
+  expect(policyNumbers).toContain('POL-1002');
+  expect(policyNumbers).toContain('POL-1003');
 
   /**
-   * Validate Summary sections and field labels.
+   * Step 18: Validate summary sections.
    */
   const orderedSections = [
     ...summarySchema,
@@ -353,49 +490,35 @@ test('Generate final Excel evidence report', async () => {
       summaryRow++;
     }
 
-    /**
-     * Skip the blank row between sections.
-     */
     summaryRow++;
   }
 
   /**
-   * Read Summary label/value pairs.
+   * Step 19: Validate summary calculations.
    */
   const summaryValues =
     new Map<string, unknown>();
 
-  summarySheet!.eachRow((row) => {
-    const label =
-      row.getCell(1).value;
+  summarySheet!.eachRow(row => {
+    const label = row.getCell(1).value;
+    const value = row.getCell(2).value;
 
-    const value =
-      row.getCell(2).value;
-
-    if (
-      typeof label === 'string'
-    ) {
-      summaryValues.set(
-        label,
-        value,
-      );
+    if (typeof label === 'string') {
+      summaryValues.set(label, value);
     }
   });
 
-  /**
-   * Validate calculated results.
-   */
   expect(
     summaryValues.get('Total Items'),
   ).toBe(4);
 
   expect(
     summaryValues.get('Passed'),
-  ).toBe(2);
+  ).toBe(3);
 
   expect(
     summaryValues.get('Failed'),
-  ).toBe(1);
+  ).toBe(0);
 
   expect(
     summaryValues.get('Not Executed'),
@@ -403,20 +526,25 @@ test('Generate final Excel evidence report', async () => {
 
   expect(
     summaryValues.get('Pass Rate (%)'),
-  ).toBe('50.00%');
+  ).toBe('75.00%');
 
   /**
-   * Print report information.
+   * Step 20: Print finalization results.
    */
+  console.log(`Run ID: ${runId}`);
   console.log(
-    `Run ID: ${runId}`,
+    `Consolidated JSON: ${result.consolidatedPath}`,
   );
-
   console.log(
-    `Report: ${result.reportPath}`,
+    `Excel report: ${result.reportPath}`,
   );
-
   console.log(
-    `Evidence count: ${result.evidenceCount}`,
+    `Total attempts: ${consolidatedEvidence.length}`,
+  );
+  console.log(
+    `Final scenarios: ${result.evidenceCount}`,
+  );
+  console.log(
+    `Worker files deleted: ${result.deletedWorkerFiles}`,
   );
 });
