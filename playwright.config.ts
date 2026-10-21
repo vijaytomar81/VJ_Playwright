@@ -1,5 +1,13 @@
 import { defineConfig, devices } from '@playwright/test';
 
+import {
+  evidenceFields,
+} from './configLayer/schema/evidence/evidence-schema';
+
+import {
+  summarySchema,
+} from './configLayer/schema/evidence/summary-schema';
+
 export default defineConfig({
 
   /*
@@ -15,15 +23,13 @@ export default defineConfig({
   /*
    * EvidenceFactory regression tests are executed
    * separately using playwright.evidence.config.ts.
-   *
-   * Exclude them from normal automation execution.
    */
   testIgnore: [
     'tests/framework/evidence-factory/**/*.spec.ts',
   ],
 
   /*
-   * Allow independent tests to execute in parallel.
+   * Parallel execution.
    */
   fullyParallel: true,
 
@@ -32,6 +38,25 @@ export default defineConfig({
   retries: process.env.CI ? 2 : 0,
 
   workers: process.env.CI ? 1 : undefined,
+
+  /*
+   * Consumer-owned EvidenceFactory schemas.
+   */
+  metadata: {
+    evidence: {
+      evidenceFields,
+      summarySchema,
+    },
+  },
+
+  /*
+   * EvidenceFactory execution lifecycle.
+   */
+  globalSetup:
+    './evidenceFactory/fixtures/evidence.setup.ts',
+
+  globalTeardown:
+    './evidenceFactory/fixtures/evidence.finalize.ts',
 
   reporter: [
     [
@@ -52,10 +77,7 @@ export default defineConfig({
   projects: [
 
     /*
-     * General framework and configuration tests.
-     *
-     * EvidenceFactory validation tests are excluded
-     * by the global testIgnore configuration.
+     * Framework and configuration tests.
      */
     {
       name: 'framework',
@@ -71,7 +93,81 @@ export default defineConfig({
     },
 
     /*
-     * Actual application UI automation tests.
+     * Google Chrome.
+     *
+     * Uses the installed Google Chrome browser.
+     */
+    {
+      name: 'chrome',
+
+      testMatch: [
+        'automationLayer/tests/**/*.spec.ts',
+      ],
+
+      use: {
+        ...devices['Desktop Chrome'],
+        channel: 'chrome',
+      },
+    },
+
+    /*
+     * Microsoft Edge.
+     *
+     * Uses the installed Microsoft Edge browser.
+     */
+    {
+      name: 'edge',
+
+      testMatch: [
+        'automationLayer/tests/**/*.spec.ts',
+      ],
+
+      use: {
+        ...devices['Desktop Chrome'],
+        channel: 'msedge',
+      },
+    },
+
+    /*
+     * Mozilla Firefox.
+     *
+     * Uses Playwright's Firefox build.
+     */
+    {
+      name: 'firefox',
+
+      testMatch: [
+        'automationLayer/tests/**/*.spec.ts',
+      ],
+
+      use: {
+        ...devices['Desktop Firefox'],
+      },
+    },
+
+    /*
+     * WebKit.
+     *
+     * Uses Playwright's WebKit browser engine.
+     * This is Safari-compatible testing, not
+     * execution of the installed Safari application.
+     */
+    {
+      name: 'webkit',
+
+      testMatch: [
+        'automationLayer/tests/**/*.spec.ts',
+      ],
+
+      use: {
+        ...devices['Desktop Safari'],
+      },
+    },
+
+    /*
+     * Chromium.
+     *
+     * Uses Playwright's bundled Chromium browser.
      */
     {
       name: 'chromium',

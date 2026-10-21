@@ -24,7 +24,7 @@ type EvidenceFixtures = {
 };
 
 const resultsDir = path.resolve(
-  process.env.EVIDENCE_RESULTS_DIR ?? 'executionResults',
+  process.env.EVIDENCE_RESULTS_DIR ?? 'results',
 );
 
 function getRunId(): string {
@@ -68,7 +68,7 @@ function safeName(value: string): string {
 
 export const test = base.extend<EvidenceFixtures>({
   evidence: [
-    async ({ page }, use, testInfo) => {
+    async ({ page, browser, headless }, use, testInfo) => {
       const runId = getRunId();
       const workerId = `worker-${testInfo.parallelIndex}`;
       const attempt = testInfo.retry + 1;
@@ -91,6 +91,38 @@ export const test = base.extend<EvidenceFixtures>({
         resultsDir,
         workerId,
       });
+
+      /*
+       * Capture actual browser information.
+       *
+       * Each worker writes its own metadata file
+       * to avoid conflicts during parallel execution.
+       */
+      const browserMetadata = {
+        browser: browser.browserType().name(),
+        browserChannel:
+          testInfo.project.use.channel ?? 'default',
+        browserVersion: browser.version(),
+        headless,
+      };
+
+      const browserMetadataPath = path.join(
+        resultsDir,
+        runId,
+        'metadata',
+        `browser-${workerId}.json`,
+      );
+
+      await fs.mkdir(
+        path.dirname(browserMetadataPath),
+        { recursive: true },
+      );
+
+      await fs.writeFile(
+        browserMetadataPath,
+        JSON.stringify(browserMetadata, null, 2),
+        'utf8',
+      );
 
       let screenshotCount = 0;
 
@@ -192,16 +224,16 @@ export const test = base.extend<EvidenceFixtures>({
 
           ...(firstError
             ? {
-                error: {
-                  message:
-                    firstError.message ??
-                    'Test execution failed',
+              error: {
+                message:
+                  firstError.message ??
+                  'Test execution failed',
 
-                  ...(firstError.stack
-                    ? { stack: firstError.stack }
-                    : {}),
-                },
-              }
+                ...(firstError.stack
+                  ? { stack: firstError.stack }
+                  : {}),
+              },
+            }
             : {}),
         };
 
