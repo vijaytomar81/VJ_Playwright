@@ -41,3 +41,10 @@ npx playwright test tests/framework/evidence-factory/evidence-factory-excel.spec
 
 npx playwright test tests/framework/evidence-factory/evidence-report.spec.ts --project=framework --workers=1
 
+=============
+
+EVIDENCE_RUN_ID="RUN-$(date +%Y%m%d-%H%M%S)" \
+npx playwright test automationLayer/tests/evidence-e2e.spec.ts \
+  --project=edge
+
+=============

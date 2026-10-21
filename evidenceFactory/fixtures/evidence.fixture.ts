@@ -66,9 +66,71 @@ function safeName(value: string): string {
   );
 }
 
+/*
+ * Convert Playwright browser identifiers into
+ * readable browser names for evidence reports.
+ */
+function getBrowserName(
+  browserType: string,
+  browserChannel: string,
+): string {
+  if (
+    browserChannel === 'msedge' ||
+    browserChannel.startsWith('msedge-')
+  ) {
+    return 'Microsoft Edge';
+  }
+
+  if (
+    browserChannel === 'chrome' ||
+    browserChannel.startsWith('chrome-')
+  ) {
+    return 'Google Chrome';
+  }
+
+  switch (browserType) {
+    case 'chromium':
+      return 'Chromium';
+
+    case 'firefox':
+      return 'Mozilla Firefox';
+
+    case 'webkit':
+      return 'WebKit';
+
+    default:
+      return browserType;
+  }
+}
+
+/*
+ * Determine whether the test is running with
+ * a mobile or desktop device configuration.
+ *
+ * This uses Playwright's effective isMobile option.
+ * It does not identify a specific physical device.
+ */
+function getDeviceName(
+  isMobile: boolean,
+  projectName: string,
+): string {
+  return isMobile
+    ? `Mobile (${projectName})`
+    : 'Desktop';
+}
+
 export const test = base.extend<EvidenceFixtures>({
   evidence: [
-    async ({ page, browser, headless }, use, testInfo) => {
+    async (
+      {
+        page,
+        browser,
+        headless,
+        isMobile,
+      },
+      use,
+      testInfo,
+    ) => {
       const runId = getRunId();
       const workerId = `worker-${testInfo.parallelIndex}`;
       const attempt = testInfo.retry + 1;
@@ -93,17 +155,49 @@ export const test = base.extend<EvidenceFixtures>({
       });
 
       /*
-       * Capture actual browser information.
+       * Capture actual execution environment.
        *
-       * Each worker writes its own metadata file
-       * to avoid conflicts during parallel execution.
+       * The browser version comes from the running
+       * browser, not from a hardcoded configuration.
+       */
+      const browserType = browser.browserType().name();
+
+      const browserChannel =
+        testInfo.project.use.channel ?? 'default';
+
+      const browserName = getBrowserName(
+        browserType,
+        browserChannel,
+      );
+
+      const browserVersion = browser.version();
+
+      const executionMetadata = {
+        mode: process.env.TEST_MODE ?? 'E2E',
+
+        device: getDeviceName(
+          isMobile,
+          testInfo.project.name,
+        ),
+
+        browser: browserName,
+        browserChannel,
+        browserVersion,
+        headless,
+      };
+
+      /*
+       * Preserve the existing browser metadata file
+       * used by evidence.finalize.ts for the Summary
+       * worksheet.
        */
       const browserMetadata = {
-        browser: browser.browserType().name(),
+        browser: executionMetadata.browser,
         browserChannel:
-          testInfo.project.use.channel ?? 'default',
-        browserVersion: browser.version(),
-        headless,
+          executionMetadata.browserChannel,
+        browserVersion:
+          executionMetadata.browserVersion,
+        headless: executionMetadata.headless,
       };
 
       const browserMetadataPath = path.join(
@@ -217,8 +311,17 @@ export const test = base.extend<EvidenceFixtures>({
           endTime: finishedAt.toISOString(),
           durationMs: testInfo.duration,
 
+          /*
+           * Execution metadata is added automatically
+           * to every test case's evidence.
+           *
+           * It is placed after businessData so tests
+           * cannot accidentally override actual
+           * execution environment values.
+           */
           data: {
             ...businessData,
+            ...executionMetadata,
             screenshots: screenshotPaths,
           },
 

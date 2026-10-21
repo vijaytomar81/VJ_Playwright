@@ -26,6 +26,14 @@ export const evidenceFields = [
   { field: 'endTime', label: 'End Time', order: 10 },
   { field: 'durationMs', label: 'Duration (ms)', order: 11 },
   { field: 'error', label: 'Error', order: 12 },
+  
+  // Execution environment
+  { field: 'mode', label: 'Execution Mode', order: 13 },
+  { field: 'device', label: 'Device', order: 14 },
+  { field: 'browser', label: 'Browser', order: 15 },
+  { field: 'browserChannel', label: 'Browser Channel', order: 16 },
+  { field: 'browserVersion', label: 'Browser Version', order: 17 },
+  { field: 'headless', label: 'Headless', order: 18 },
 ] as const;
 
 /**
