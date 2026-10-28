@@ -106,6 +106,14 @@ export default async function finalizeEvidence(): Promise<void> {
 
   /*
    * Read browser metadata captured by test workers.
+   *
+   * Expected filename format:
+   * browser-<project-name>-worker-<index>.json
+   *
+   * Examples:
+   * browser-chrome-worker-0.json
+   * browser-edge-worker-0.json
+   * browser-firefox-worker-1.json
    */
   const metadataDir = path.join(
     resultsDir,
@@ -118,7 +126,7 @@ export default async function finalizeEvidence(): Promise<void> {
   try {
     const metadataFiles = (await fs.readdir(metadataDir))
       .filter((file) =>
-        /^browser-worker-\d+\.json$/.test(file),
+        /^browser-.+-worker-\d+\.json$/.test(file),
       )
       .sort();
 
@@ -127,9 +135,14 @@ export default async function finalizeEvidence(): Promise<void> {
     for (const file of metadataFiles) {
       const metadataPath = path.join(metadataDir, file);
 
-      const content = await fs.readFile(metadataPath, 'utf8');
+      const content = await fs.readFile(
+        metadataPath,
+        'utf8',
+      );
 
-      const metadata = JSON.parse(content) as BrowserMetadata;
+      const metadata = JSON.parse(
+        content,
+      ) as BrowserMetadata;
 
       metadataRecords.push(metadata);
     }
@@ -138,8 +151,11 @@ export default async function finalizeEvidence(): Promise<void> {
       const first = metadataRecords[0];
 
       /*
-       * A single Summary browser configuration is valid
-       * only when all workers report identical values.
+       * The Summary worksheet has one set of
+       * browser fields.
+       *
+       * Populate these fields only when all
+       * recorded browser configurations match.
        */
       const consistent = metadataRecords.every(
         (metadata) =>
@@ -157,6 +173,11 @@ export default async function finalizeEvidence(): Promise<void> {
           'Browser Summary fields will remain empty.',
         );
       }
+    } else {
+      console.warn(
+        'No browser metadata files found. ' +
+        'Browser Summary fields will remain empty.',
+      );
     }
   } catch (error) {
     if (

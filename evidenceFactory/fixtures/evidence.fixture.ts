@@ -187,9 +187,11 @@ export const test = base.extend<EvidenceFixtures>({
       };
 
       /*
-       * Preserve the existing browser metadata file
-       * used by evidence.finalize.ts for the Summary
-       * worksheet.
+       * Store browser metadata separately for each
+       * Playwright project and worker.
+       *
+       * This prevents different browser projects from
+       * overwriting each other's metadata.
        */
       const browserMetadata = {
         browser: executionMetadata.browser,
@@ -204,7 +206,7 @@ export const test = base.extend<EvidenceFixtures>({
         resultsDir,
         runId,
         'metadata',
-        `browser-${workerId}.json`,
+        `browser-${safeName(testInfo.project.name)}-${workerId}.json`,
       );
 
       await fs.mkdir(
