@@ -132,7 +132,24 @@ export const test = base.extend<EvidenceFixtures>({
       testInfo,
     ) => {
       const runId = getRunId();
-      const workerId = `worker-${testInfo.parallelIndex}`;
+
+      /*
+       * Generate a worker identifier using:
+       *
+       * - Playwright project name
+       * - Unique worker process index
+       *
+       * This prevents worker ID collisions between
+       * browser projects and replacement workers.
+       *
+       * Separate Jenkins executions are isolated
+       * through their EVIDENCE_RUN_ID.
+       */
+      const workerId = [
+        safeName(testInfo.project.name),
+        `worker-${testInfo.workerIndex}`,
+      ].join('-');
+
       const attempt = testInfo.retry + 1;
 
       const businessData: Record<string, unknown> = {};
@@ -188,10 +205,19 @@ export const test = base.extend<EvidenceFixtures>({
 
       /*
        * Store browser metadata separately for each
-       * Playwright project and worker.
+       * Playwright project and worker process.
        *
-       * This prevents different browser projects from
-       * overwriting each other's metadata.
+       * The workerId already contains the project
+       * name, so it must not be added again.
+       *
+       * Examples:
+       *
+       * browser-chrome-worker-0.json
+       * browser-edge-worker-1.json
+       * browser-firefox-worker-2.json
+       *
+       * These filenames are compatible with
+       * evidence.finalize.ts.
        */
       const browserMetadata = {
         browser: executionMetadata.browser,
@@ -206,7 +232,7 @@ export const test = base.extend<EvidenceFixtures>({
         resultsDir,
         runId,
         'metadata',
-        `browser-${safeName(testInfo.project.name)}-${workerId}.json`,
+        `browser-${workerId}.json`,
       );
 
       await fs.mkdir(

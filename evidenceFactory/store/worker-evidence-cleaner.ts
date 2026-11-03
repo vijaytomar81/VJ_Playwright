@@ -13,10 +13,16 @@ export interface WorkerEvidenceCleanerConfig {
  * Removes temporary worker JSON files after successful
  * evidence consolidation and report generation.
  *
+ * Supports both legacy and project-specific worker files.
+ *
  * Files removed:
  *   worker-0.json
  *   worker-1.json
- *   worker-2.json
+ *   chrome-worker-0.json
+ *   edge-worker-1.json
+ *   firefox-worker-2.json
+ *   webkit-worker-3.json
+ *   chromium-worker-4.json
  *
  * Files preserved:
  *   consolidated-evidence.json
@@ -58,11 +64,31 @@ export class WorkerEvidenceCleaner {
       throw error;
     }
 
+    /*
+     * Recognize both legacy and project-specific
+     * worker evidence files.
+     *
+     * Legacy:
+     *   worker-0.json
+     *
+     * Project-specific:
+     *   chrome-worker-0.json
+     *   edge-worker-1.json
+     *   firefox-worker-2.json
+     *
+     * This pattern does not match:
+     *   consolidated-evidence.json
+     *   temporary files
+     *   lock directories
+     */
+    const workerFilePattern =
+      /^(?:[a-zA-Z0-9_-]+-)?worker-\d+\.json$/;
+
     const workerFiles = entries
       .filter(
         entry =>
           entry.isFile() &&
-          /^worker-\d+\.json$/.test(entry.name),
+          workerFilePattern.test(entry.name),
       )
       .map(entry => entry.name);
 

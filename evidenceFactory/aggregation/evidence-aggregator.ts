@@ -11,13 +11,17 @@ export interface EvidenceAggregatorConfig {
 /**
  * Aggregates evidence from logical Playwright workers.
  *
+ * Supports both legacy and project-specific worker files.
+ *
  * During execution:
  *
  * results/<runId>/evidence/
  *   worker-0.json
- *   worker-1.json
- *   worker-2.json
- *   worker-3.json
+ *   chrome-worker-0.json
+ *   edge-worker-1.json
+ *   firefox-worker-2.json
+ *   webkit-worker-3.json
+ *   chromium-worker-4.json
  *
  * After finalization:
  *
@@ -49,6 +53,16 @@ export class EvidenceAggregator<
   /**
    * Returns all evidence attempts from every worker.
    *
+   * Supports:
+   *
+   * Legacy:
+   *   worker-0.json
+   *
+   * Project-specific:
+   *   chrome-worker-0.json
+   *   edge-worker-1.json
+   *   firefox-worker-2.json
+   *
    * If worker files have already been cleaned up,
    * reads consolidated-evidence.json instead.
    */
@@ -64,11 +78,30 @@ export class EvidenceAggregator<
       },
     );
 
+    /*
+     * Discover both legacy and project-specific
+     * worker evidence files.
+     *
+     * Examples:
+     *
+     * worker-0.json
+     * chrome-worker-0.json
+     * edge-worker-1.json
+     *
+     * Excludes:
+     *
+     * consolidated-evidence.json
+     * temporary files
+     * lock directories
+     */
+    const workerFilePattern =
+      /^(?:[a-zA-Z0-9_-]+-)?worker-\d+\.json$/;
+
     const workerFiles = entries
       .filter(
         entry =>
           entry.isFile() &&
-          /^worker-\d+\.json$/.test(entry.name),
+          workerFilePattern.test(entry.name),
       )
       .map(entry => entry.name)
       .sort();
@@ -103,7 +136,9 @@ export class EvidenceAggregator<
 
         evidence.push(...records);
       }
-    } else if (await this.fileExists(this.consolidatedFilePath)) {
+    } else if (
+      await this.fileExists(this.consolidatedFilePath)
+    ) {
       evidence = await this.readEvidenceArray(
         this.consolidatedFilePath,
       );

@@ -15,8 +15,16 @@ export interface FileEvidenceStoreConfig {
  * Stores all evidence attempts for one logical worker
  * in a single JSON array.
  *
+ * Supports worker identifiers such as:
+ *
+ * worker-0
+ * chrome-worker-0
+ * edge-worker-1
+ * firefox-worker-2
+ *
  * Example:
- * results/RUN-001/evidence/worker-0.json
+ *
+ * results/RUN-001/evidence/chrome-worker-0.json
  */
 export class FileEvidenceStore<
   TData extends Record<string, unknown>,
@@ -26,9 +34,30 @@ export class FileEvidenceStore<
   constructor(
     private readonly config: FileEvidenceStoreConfig,
   ) {
-    if (!/^worker-\d+$/.test(config.workerId)) {
+    /*
+     * Accept both legacy worker identifiers and
+     * project-specific worker identifiers.
+     *
+     * Legacy:
+     * worker-0
+     *
+     * Project-specific:
+     * chrome-worker-0
+     * edge-worker-1
+     * firefox-worker-2
+     *
+     * The project-specific format allows evidence
+     * files to be separated by Playwright project
+     * and worker process.
+     */
+    if (
+      !/^(?:[a-zA-Z0-9_-]+-)?worker-\d+$/.test(
+        config.workerId,
+      )
+    ) {
       throw new Error(
-        'workerId must have the form "worker-0", "worker-1", etc.',
+        'workerId must have the form "worker-0" ' +
+        'or "chrome-worker-0".',
       );
     }
 
