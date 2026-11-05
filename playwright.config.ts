@@ -1,22 +1,36 @@
 import { defineConfig, devices } from '@playwright/test';
 
+import {
+  evidenceFields,
+} from './configLayer/schema/evidence/evidence-schema';
+
+import {
+  summarySchema,
+} from './configLayer/schema/evidence/summary-schema';
+
 export default defineConfig({
 
   /*
-   * We currently have framework/configuration tests here.
-   * UI automation will later live under automationLayer/tests.
+   * Framework and application automation test locations.
    */
   testDir: '.',
 
-  /*
-   * Prevent Playwright from treating files outside our
-   * intended test locations as tests.
-   */
   testMatch: [
     'tests/**/*.spec.ts',
     'automationLayer/tests/**/*.spec.ts',
   ],
 
+  /*
+   * EvidenceFactory regression tests are executed
+   * separately using playwright.evidence.config.ts.
+   */
+  testIgnore: [
+    'tests/framework/evidence-factory/**/*.spec.ts',
+  ],
+
+  /*
+   * Parallel execution.
+   */
   fullyParallel: true,
 
   forbidOnly: !!process.env.CI,
@@ -25,28 +39,45 @@ export default defineConfig({
 
   workers: process.env.CI ? 1 : undefined,
 
+  /*
+   * Consumer-owned EvidenceFactory schemas.
+   */
+  metadata: {
+    evidence: {
+      evidenceFields,
+      summarySchema,
+    },
+  },
+
+  /*
+   * EvidenceFactory execution lifecycle.
+   */
+  globalSetup:
+    './evidenceFactory/fixtures/evidence.setup.ts',
+
+  globalTeardown:
+    './evidenceFactory/fixtures/evidence.finalize.ts',
+
   reporter: [
-    ['html', {
-      outputFolder: 'playwright-report',
-      open: 'never',
-    }],
+    [
+      'html',
+      {
+        outputFolder: 'playwright-report',
+        open: 'never',
+      },
+    ],
   ],
 
   use: {
     trace: 'on-first-retry',
-
     screenshot: 'only-on-failure',
-
     video: 'retain-on-failure',
   },
 
   projects: [
 
     /*
-     * Framework-level tests.
-     *
-     * These execute once and do not need
-     * Chromium / Firefox / WebKit duplication.
+     * Framework and configuration tests.
      */
     {
       name: 'framework',
@@ -62,12 +93,81 @@ export default defineConfig({
     },
 
     /*
-     * UI automation.
+     * Google Chrome.
      *
-     * These tests execute against Chromium.
+     * Uses the installed Google Chrome browser.
+     */
+    {
+      name: 'chrome',
+
+      testMatch: [
+        'automationLayer/tests/**/*.spec.ts',
+      ],
+
+      use: {
+        ...devices['Desktop Chrome'],
+        channel: 'chrome',
+      },
+    },
+
+    /*
+     * Microsoft Edge.
      *
-     * BrowserStack and additional browser projects
-     * will be added later.
+     * Uses the installed Microsoft Edge browser.
+     */
+    {
+      name: 'edge',
+
+      testMatch: [
+        'automationLayer/tests/**/*.spec.ts',
+      ],
+
+      use: {
+        ...devices['Desktop Chrome'],
+        channel: 'msedge',
+      },
+    },
+
+    /*
+     * Mozilla Firefox.
+     *
+     * Uses Playwright's Firefox build.
+     */
+    {
+      name: 'firefox',
+
+      testMatch: [
+        'automationLayer/tests/**/*.spec.ts',
+      ],
+
+      use: {
+        ...devices['Desktop Firefox'],
+      },
+    },
+
+    /*
+     * WebKit.
+     *
+     * Uses Playwright's WebKit browser engine.
+     * This is Safari-compatible testing, not
+     * execution of the installed Safari application.
+     */
+    {
+      name: 'webkit',
+
+      testMatch: [
+        'automationLayer/tests/**/*.spec.ts',
+      ],
+
+      use: {
+        ...devices['Desktop Safari'],
+      },
+    },
+
+    /*
+     * Chromium.
+     *
+     * Uses Playwright's bundled Chromium browser.
      */
     {
       name: 'chromium',

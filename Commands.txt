@@ -1,0 +1,50 @@
+Windows
+=========
+
+$profile = Join-Path $env:TEMP ("edge-cdp-" + (Get-Date -Format "yyyyMMdd-HHmmss")); `
+Start-Process "C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe" "--remote-debugging-port=9222 --user-data-dir=$profile"; `
+Start-Sleep -Seconds 2; `
+$CDP = (Invoke-RestMethod http://localhost:9222/json/version).webSocketDebuggerUrl;
+
+
+=======
+Mac
+=======
+
+PROFILE="/tmp/edge-cdp-$(date +%Y%m%d-%H%M%S)"
+
+open -na "Microsoft Edge" --args \
+  --remote-debugging-port=9222 \
+  --user-data-dir="$PROFILE"
+
+sleep 2
+
+CDP=$(curl -s http://localhost:9222/json/version | \
+  node -pe "JSON.parse(require('fs').readFileSync(0,'utf8')).webSocketDebuggerUrl")
+
+echo "$CDP"
+
+=============
+
+npm install exceljs
+
+npm install --save-dev typescript @types/node @playwright/test tsx
+
+npm install archiver
+npm install --save-dev @types/archiver
+
+npx tsc --noEmit
+
+npx tsx tests/framework/evidence-factory/initialize-run.ts
+
+npx playwright test tests/framework/evidence-factory/evidence-factory-excel.spec.ts --project=framework --workers=4
+
+npx playwright test tests/framework/evidence-factory/evidence-report.spec.ts --project=framework --workers=1
+
+=============
+
+EVIDENCE_RUN_ID="RUN-$(date +%Y%m%d-%H%M%S)" \
+npx playwright test automationLayer/tests/evidence-e2e.spec.ts \
+  --project=edge
+
+=============

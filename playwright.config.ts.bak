@@ -1,0 +1,147 @@
+import { defineConfig, devices } from '@playwright/test';
+
+export default defineConfig({
+
+  /*
+   * Framework and automation test locations.
+   */
+  testDir: '.',
+
+  testMatch: [
+    'tests/**/*.spec.ts',
+    'automationLayer/tests/**/*.spec.ts',
+  ],
+
+  /*
+   * Allow independent tests to execute in parallel.
+   */
+  fullyParallel: true,
+
+  forbidOnly: !!process.env.CI,
+
+  retries: process.env.CI ? 2 : 0,
+
+  workers: process.env.CI ? 1 : undefined,
+
+  reporter: [
+    [
+      'html',
+      {
+        outputFolder: 'playwright-report',
+        open: 'never',
+      },
+    ],
+  ],
+
+  use: {
+    trace: 'on-first-retry',
+    screenshot: 'only-on-failure',
+    video: 'retain-on-failure',
+  },
+
+  projects: [
+
+    /*
+     * General framework and configuration tests.
+     *
+     * The evidence collection and reporting tests
+     * are excluded because they have their own
+     * execution lifecycle.
+     *
+     * Independent EvidenceFactory tests, including
+     * failure-recovery tests, run here.
+     */
+    {
+      name: 'framework',
+
+      testMatch: [
+        'tests/config/**/*.spec.ts',
+        'tests/framework/**/*.spec.ts',
+      ],
+
+      testIgnore: [
+        'tests/framework/evidence-factory/evidence-factory-excel.spec.ts',
+        'tests/framework/evidence-factory/evidence-report.spec.ts',
+      ],
+
+      use: {
+        ...devices['Desktop Chrome'],
+      },
+    },
+
+    /*
+     * Evidence collection.
+     *
+     * Four logical workers record evidence into:
+     *
+     * worker-0.json
+     * worker-1.json
+     * worker-2.json
+     * worker-3.json
+     *
+     * Each file contains a JSON array of attempts.
+     */
+    {
+      name: 'evidence-collection',
+
+      testMatch: [
+        'tests/framework/evidence-factory/evidence-factory-excel.spec.ts',
+      ],
+
+      workers: 4,
+
+      fullyParallel: true,
+
+      use: {
+        ...devices['Desktop Chrome'],
+      },
+    },
+
+    /*
+     * Evidence finalization.
+     *
+     * Playwright waits for evidence-collection
+     * to complete successfully before running
+     * this project.
+     *
+     * This prevents finalization from racing
+     * with active evidence writes.
+     */
+    {
+      name: 'evidence-report',
+
+      testMatch: [
+        'tests/framework/evidence-factory/evidence-report.spec.ts',
+      ],
+
+      dependencies: [
+        'evidence-collection',
+      ],
+
+      workers: 1,
+
+      fullyParallel: false,
+
+      use: {
+        ...devices['Desktop Chrome'],
+      },
+    },
+
+    /*
+     * UI automation.
+     */
+    {
+      name: 'chromium',
+
+      testMatch: [
+        'automationLayer/tests/**/*.spec.ts',
+      ],
+
+      use: {
+        ...devices['Desktop Chrome'],
+      },
+    },
+
+  ],
+
+});

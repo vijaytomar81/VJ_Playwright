@@ -1,0 +1,29 @@
+const evidence: Evidence<Record<string, unknown>> = {
+  runId,
+  workerId,
+  attempt: testInfo.retry + 1,
+
+  scenarioId: testInfo.testId,
+  scenarioName: testInfo.title,
+
+  status: testInfo.errors.length > 0
+    ? EvidenceStatus.FAILED
+    : EvidenceStatus.PASSED,
+
+  startTime: startTime.toISOString(),
+  endTime: endTime.toISOString(),
+  durationMs: endTime.getTime() - startTime.getTime(),
+
+  data: {
+    policyNumber,
+    customerNumber,
+    premium,
+  },
+
+  error: testInfo.errors[0]
+    ? {
+        message: testInfo.errors[0].message,
+        stack: testInfo.errors[0].stack,
+      }
+    : undefined,
+};
