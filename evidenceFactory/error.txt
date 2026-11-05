@@ -1,0 +1,41 @@
+PS C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\Athena_Automation\integration-tests> npx cross-env PROJECT=britannia ENV=test AGENT_PORTAL_AUTH=skip playwright test -g "TC1_BRI_DJ_PRE_NB001"
+[dotenv@17.2.3] injecting env (7) from configLayer\environments\britannia\.env.test -- tip: 🔐 prevent committing .env to code: https://dotenvx.com/precommit
+[dotenv@17.2.3] injecting env (7) from configLayer\environments\britannia\.env.local.test -- tip: 🔑 add access controls to secrets: https://dotenvx.com/ops
+Project: britannia
+Environment project: britannia
+Environment: test
+Environment file: C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\Athena_Automation\integration-tests\configLayer\environments\britannia\.env.test
+Local environment file: C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\Athena_Automation\integration-tests\configLayer\environments\britannia\.env.local.test
+Error: EVIDENCE_RUN_ID is required. Set it before starting Playwright.
+
+   at ..\..\..\..\..\evidenceFactory\fixtures\evidence.setup.ts:33
+
+  31 |
+  32 |   if (!runId) {
+> 33 |     throw new Error(
+     |           ^
+  34 |       'EVIDENCE_RUN_ID is required. Set it before starting Playwright.',
+  35 |     );
+  36 |   }
+    at setupEvidence (C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\Athena_Automation\integration-tests\evidenceFactory\fixtures\evidence.setup.ts:33:11)
+    at globalSetup (C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\Athena_Automation\integration-tests\global-setup.ts:23:22)
+Error: EVIDENCE_RUN_ID is required for evidence finalization.
+
+   at ..\..\..\..\..\evidenceFactory\fixtures\evidence.finalize.ts:27
+
+  25 |
+  26 |   if (!runId) {
+> 27 |     throw new Error(
+     |           ^
+  28 |       'EVIDENCE_RUN_ID is required for evidence finalization.',
+  29 |     );
+  30 |   }
+    at finalizeEvidence (C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\Athena_Automation\integration-tests\evidenceFactory\fixtures\evidence.finalize.ts:27:11)
+Test run folder created: C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\Athena_Automation\integration-tests\custom-test-reports\run-2026-11-05T12-18-42-118Z
+
+
+To open last HTML report run:
+
+  npx playwright show-report
+
+PS C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\Athena_Automation\integration-tests>
