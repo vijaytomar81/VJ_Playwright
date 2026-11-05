@@ -1,6 +1,6 @@
 Below is "TC1_BRI_DJ_PRE_NB001.spec.ts" from existing repo:
 
-import { test } from '@playwright/test';
+// import { test } from '@playwright/test';
 import { Pages } from 'automationLayer/athena/carInsurance/britannia/pages/Pages';
 import britanniaDJData from '../../../data/Britannia_NB.json';
 import {
@@ -14,9 +14,12 @@ import {
   getAllCoverPricesForAnnualPayment,
 } from '../../../utils/pageUtils.js';
 import { attachValueInTestReport } from 'reportingLayer/reporterHelper';
+import { test } from '../../../../../../../evidenceFactory/fixtures/evidence.fixture';
+import { EvidenceData } from '../../../../../../../configLayer/schema/evidence/evidence-schema';
 
 test('TC1_BRI_DJ_PRE_NB001 @Britannia_Premier @Bri_Premier_Annual @Bri_Annual', async ({
   page,
+  evidence,
 }) => {
   const pages = new Pages(page);
   const email = `bri.test.team+${Date.now()}@gmail.com`;
@@ -34,6 +37,10 @@ test('TC1_BRI_DJ_PRE_NB001 @Britannia_Premier @Bri_Premier_Annual @Bri_Annual', 
   await test.step('User navigates through car details page', async () => {
     await pages.nbJourney.carDetails.searchCar(tc.VRN);
     attachValueInTestReport({ VRN: tc.VRN });
+    evidence.add({
+      [EvidenceData.scenarioId]: "BRI_DJ_PRE_NB001",
+      [EvidenceData.VRN]: tc.VRN,
+    });
     await fetchAndAttach(getInteractionId, page, 'InteractionID');
   });
 
@@ -153,6 +160,7 @@ test('TC1_BRI_DJ_PRE_NB001 @Britannia_Premier @Bri_Premier_Annual @Bri_Annual', 
     await fetchAndAttach(getPolicyNumber, page, 'AnnualCoverPolicyNumber');
   });
 });
+
 
 
 and below is "reporterHelper.ts":
