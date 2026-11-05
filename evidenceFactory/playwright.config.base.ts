@@ -1,4 +1,6 @@
 
+import path from 'node:path';
+
 import './configLayer/execution/loadEnvironment';
 
 import { defineConfig, devices } from '@playwright/test';
@@ -7,6 +9,14 @@ import { getProjectConfig } from './configLayer/execution/projectsRegistry';
 // EvidenceFactory - consumer-owned schemas
 import { evidenceFields } from './configLayer/schema/evidence/evidence-schema';
 import { summarySchema } from './configLayer/schema/evidence/summary-schema';
+
+// EvidenceFactory - centralized configuration
+import { evidenceConfig } from './configLayer/execution/evidenceConfig';
+import { defaultEvidenceConfig } from './evidenceFactory/config/evidence-defaults';
+
+import type {
+  EvidenceConfiguration,
+} from './evidenceFactory/config/evidence-config';
 
 // EvidenceFactory - automatic run ID initialization
 import { initializeEvidenceRunId } from './evidenceFactory/fixtures/evidence.run';
@@ -24,6 +34,53 @@ export function createConfig(project: string | undefined) {
    * - Supports Windows, macOS, Linux, CLI and Jenkins.
    */
   initializeEvidenceRunId();
+
+  /**
+   * Resolve centralized EvidenceFactory configuration.
+   *
+   * The consumer supplies only project-specific overrides.
+   * All remaining settings come from EvidenceFactory defaults.
+   *
+   * The storage root is the single parent directory for
+   * evidence, reports, metadata and archives.
+   */
+  const resolvedEvidenceConfig: EvidenceConfiguration = {
+    storage: {
+      ...defaultEvidenceConfig.storage,
+      ...evidenceConfig.storage,
+    },
+
+    report: {
+      ...defaultEvidenceConfig.report,
+      ...evidenceConfig.report,
+    },
+
+    archive: {
+      ...defaultEvidenceConfig.archive,
+      ...evidenceConfig.archive,
+
+      policy: {
+        ...defaultEvidenceConfig.archive.policy,
+        ...evidenceConfig.archive?.policy,
+      },
+    },
+  };
+
+  /**
+   * Synchronize the EvidenceFactory root directory.
+   *
+   * Existing evidence fixtures, aggregators and global
+   * teardown use EVIDENCE_RESULTS_DIR.
+   *
+   * Example:
+   *   custom-test-reports/
+   *
+   * All run-specific files are stored under:
+   *   custom-test-reports/<runId>/
+   */
+  process.env.EVIDENCE_RESULTS_DIR = path.resolve(
+    resolvedEvidenceConfig.storage.resultsDirectory,
+  );
 
   const env = process.env.ENV ?? 'dev';
   const authMode = process.env.AGENT_PORTAL_AUTH;
@@ -61,22 +118,27 @@ export function createConfig(project: string | undefined) {
     /**
      * EvidenceFactory finalization.
      *
-     * Consolidates evidence and generates the Excel report.
+     * Consolidates evidence, generates the Excel report,
+     * and creates an optional ZIP archive.
      */
     globalTeardown: require.resolve(
       './evidenceFactory/fixtures/evidence.finalize.ts',
     ),
 
     /**
-     * EvidenceFactory schemas.
+     * EvidenceFactory schemas and centralized configuration.
      *
-     * Report columns and summary sections are controlled
-     * by the consumer repository.
+     * The resolved configuration is supplied to global setup
+     * through Playwright metadata.
+     *
+     * EvidenceFactory setup then persists the report and
+     * archive settings in run-config.json for global teardown.
      */
     metadata: {
       evidence: {
         evidenceFields,
         summarySchema,
+        config: resolvedEvidenceConfig,
       },
     },
 

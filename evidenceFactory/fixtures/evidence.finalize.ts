@@ -1,3 +1,4 @@
+
 import path from 'node:path';
 import fs from 'node:fs/promises';
 
@@ -5,12 +6,20 @@ import { EvidenceFactory } from '../index';
 
 import type { ReportConfig } from '../contracts/report-config';
 import type { ReportField } from '../contracts/report-field';
+import type { ArchiveConfig } from '../archive/archive-config';
 
+/**
+ * Persisted execution configuration.
+ *
+ * Written by evidence.setup.ts during global setup
+ * and consumed here during global teardown.
+ */
 interface EvidenceRunConfig {
   runId: string;
   resultsDir: string;
   evidenceFields: readonly ReportField[];
   reportConfig: ReportConfig;
+  archiveConfig: ArchiveConfig;
 }
 
 interface BrowserMetadata {
@@ -29,6 +38,13 @@ export default async function finalizeEvidence(): Promise<void> {
     );
   }
 
+  /**
+   * Read the EvidenceFactory root directory.
+   *
+   * The directory is configured centrally in
+   * configLayer/execution/evidenceConfig.ts
+   * and synchronized by playwright.config.base.ts.
+   */
   const resultsDir = path.resolve(
     process.env.EVIDENCE_RESULTS_DIR ?? 'results',
   );
@@ -39,10 +55,19 @@ export default async function finalizeEvidence(): Promise<void> {
     'run-config.json',
   );
 
-  const configContent = await fs.readFile(configPath, 'utf8');
+  const configContent = await fs.readFile(
+    configPath,
+    'utf8',
+  );
 
-  const runConfig = JSON.parse(configContent) as EvidenceRunConfig;
+  const runConfig = JSON.parse(
+    configContent,
+  ) as EvidenceRunConfig;
 
+  /**
+   * Validate that the persisted run configuration
+   * belongs to the current execution.
+   */
   if (runConfig.runId !== runId) {
     throw new Error(
       `Run configuration ID "${runConfig.runId}" does not match "${runId}".`,
@@ -213,13 +238,31 @@ export default async function finalizeEvidence(): Promise<void> {
       : {}),
   };
 
+  /**
+   * Initialize EvidenceFactory using the persisted
+   * centralized execution configuration.
+   *
+   * The archive settings are supplied directly
+   * from run-config.json.
+   *
+   * EvidenceFactory.finalize() will:
+   * 1. Consolidate worker evidence.
+   * 2. Generate the Excel report.
+   * 3. Create the ZIP archive when enabled.
+   * 4. Clean up worker evidence files.
+   */
   const factory = new EvidenceFactory<Record<string, unknown>>({
     runId: runConfig.runId,
     resultsDir: runConfig.resultsDir,
     fields: runConfig.evidenceFields,
+
+    // Centralized archive configuration
+    archive: runConfig.archiveConfig,
   });
 
-  const result = await factory.finalize(runConfig.reportConfig);
+  const result = await factory.finalize(
+    runConfig.reportConfig,
+  );
 
   console.log('\nEvidence finalization completed.');
   console.log(`Run ID: ${runId}`);
