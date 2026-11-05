@@ -8,10 +8,23 @@ import { getProjectConfig } from './configLayer/execution/projectsRegistry';
 import { evidenceFields } from './configLayer/schema/evidence/evidence-schema';
 import { summarySchema } from './configLayer/schema/evidence/summary-schema';
 
+// EvidenceFactory - automatic run ID initialization
+import { initializeEvidenceRunId } from './evidenceFactory/fixtures/evidence.run';
+
 /**
  * @see https://playwright.dev/docs/test-configuration
  */
 export function createConfig(project: string | undefined) {
+  /**
+   * Initialize EvidenceFactory run ID.
+   *
+   * - Preserves an externally supplied EVIDENCE_RUN_ID.
+   * - Generates a unique run ID when not supplied.
+   * - Includes Jenkins BUILD_NUMBER when available.
+   * - Supports Windows, macOS, Linux, CLI and Jenkins.
+   */
+  initializeEvidenceRunId();
+
   const env = process.env.ENV ?? 'dev';
   const authMode = process.env.AGENT_PORTAL_AUTH;
 
@@ -40,8 +53,8 @@ export function createConfig(project: string | undefined) {
     /**
      * Existing global setup.
      *
-     * global-setup.ts now initializes EvidenceFactory
-     * before executing existing data generation and authentication.
+     * global-setup.ts initializes EvidenceFactory before
+     * executing existing data generation and authentication.
      */
     globalSetup: require.resolve('./global-setup.ts'),
 
