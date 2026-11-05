@@ -1,27 +1,45 @@
+
 import path from 'node:path';
+import type { FullConfig } from '@playwright/test';
+
 import sapiensAgentPortalAuth from './automationLayer/agentPortalAuth/sapiensAgentPortalAuth';
 import allianzAgentPortalAuth from 'automationLayer/agentPortalAuth/allianzAgentPortalAuth';
 import { getAllData } from './dataLayer/dataGenerator/excelToJson';
 import sapiensAgentPortalAuthKeycloak from 'automationLayer/agentPortalAuth/sapiensAgentPortalAuthKeycloak';
 import { getProjectConfig } from './configLayer/execution/projectsRegistry';
 
+// EvidenceFactory initialization
+import setupEvidence from './evidenceFactory/fixtures/evidence.setup';
+
 declare global {
   var testData: ReturnType<typeof getAllData>;
 }
 
-async function globalSetup(): Promise<void> {
+async function globalSetup(config: FullConfig): Promise<void> {
+  /**
+   * Initialize EvidenceFactory before executing
+   * the existing project setup.
+   */
+  await setupEvidence(config);
+
   const project = process.env.PROJECT;
   const { excelFile, outputFolder } = getProjectConfig(project);
 
   console.log(`Generating JSON for project: ${project}`);
 
-  globalThis.testData = getAllData(path.resolve(excelFile), path.resolve(outputFolder));
+  globalThis.testData = getAllData(
+    path.resolve(excelFile),
+    path.resolve(outputFolder),
+  );
 
   const authMode = process.env.AGENT_PORTAL_AUTH;
 
   if (!authMode) {
-    throw new Error('AGENT_PORTAL_AUTH must be set to one of: skip, allianz, sapiens');
+    throw new Error(
+      'AGENT_PORTAL_AUTH must be set to one of: skip, allianz, sapiens',
+    );
   }
+
   switch (authMode) {
     case 'skip':
       console.log('Skipping agent portal authentication');
