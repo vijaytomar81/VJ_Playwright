@@ -1,12 +1,7 @@
-
 import './configLayer/execution/loadEnvironment';
 
 import { defineConfig, devices } from '@playwright/test';
 import { getProjectConfig } from './configLayer/execution/projectsRegistry';
-
-// EvidenceFactory - consumer-owned schemas
-import { evidenceFields } from './configLayer/schema/evidence/evidence-schema';
-import { summarySchema } from './configLayer/schema/evidence/summary-schema';
 
 /**
  * @see https://playwright.dev/docs/test-configuration
@@ -17,78 +12,35 @@ export function createConfig(project: string | undefined) {
 
   return defineConfig({
     testDir: getProjectConfig(project).testDir,
-
     /* Run tests in files in parallel */
     fullyParallel: true,
-
     /* Fail the build on CI if you accidentally left test.only in the source code. */
     forbidOnly: !!process.env.CI,
-
     /* Retry on CI and local */
     retries: 0,
-
     /* Opt out of parallel tests on CI. */
     workers: 3,
-
     /* Reporter to use. See https://playwright.dev/docs/test-reporters */
     reporter: [
       ['list'],
       ['html', { outputFolder: 'playwright-report', open: 'never' }],
       ['./reportingLayer/custom-html-reporter.js'],
     ],
-
-    /**
-     * Existing global setup, now enhanced to initialize EvidenceFactory.
-     *
-     * Preserves:
-     * - Project-specific Excel-to-JSON data generation
-     * - Allianz authentication
-     * - Sapiens authentication
-     * - Sapiens Keycloak authentication
-     * - Skip authentication
-     */
-    globalSetup: require.resolve('./global-setup.ts'),
-
-    /**
-     * EvidenceFactory global teardown.
-     *
-     * Consolidates recorded evidence and generates the Excel report
-     * after test execution.
-     */
-    globalTeardown: require.resolve(
-      './evidenceFactory/fixtures/evidence.finalize.ts',
-    ),
-
-    /**
-     * EvidenceFactory report configuration.
-     *
-     * Column definitions and summary sections remain
-     * controlled by the consumer repository.
-     */
-    metadata: {
-      evidence: {
-        evidenceFields,
-        summarySchema,
-      },
-    },
-
+    globalSetup: require.resolve('./global-setup.js'),
     timeout: 300000, // 5 minutes for all tests
-
-    /* Shared settings for all the projects below. */
+    /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
     use: {
       /* Base URL to use in actions like `await page.goto('')`. */
       // baseURL: 'http://localhost:3000',
 
-      /* Collect trace when retrying the failed test. */
+      /* Collect trace when retrying the failed test. See https://playwright.dev/docs/trace-viewer */
       actionTimeout: 30 * 1000,
       screenshot: 'only-on-failure',
       trace: 'on-first-retry',
       headless: process.env.CI === 'true',
 
       storageState:
-        authMode === 'skip'
-          ? undefined
-          : 'automationLayer/athena/agentPortalAuth/auth.json',
+        authMode === 'skip' ? undefined : `automationLayer/athena/agentPortalAuth/auth.json`,
     },
 
     /* Configure projects for major browsers */
