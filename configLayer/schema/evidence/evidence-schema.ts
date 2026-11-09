@@ -20,7 +20,7 @@ export const evidenceFields = [
   { field: 'premium', label: 'Premium', order: 6 },
 
   // Execution metadata
-  { field: 'attempt', label: 'Attempt', order: 7 },
+  { field: 'retry', label: 'Retry', order: 7 },
   { field: 'workerId', label: 'Worker ID', order: 8 },
   { field: 'startTime', label: 'Start Time', order: 9 },
   { field: 'endTime', label: 'End Time', order: 10 },
