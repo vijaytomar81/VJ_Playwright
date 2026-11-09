@@ -1,29 +1,52 @@
-import { test } from '@playwright/test';
+import path from 'node:path';
+import sapiensAgentPortalAuth from './automationLayer/agentPortalAuth/sapiensAgentPortalAuth';
+import allianzAgentPortalAuth from 'automationLayer/agentPortalAuth/allianzAgentPortalAuth';
+import { getAllData } from './dataLayer/dataGenerator/excelToJson';
+import sapiensAgentPortalAuthKeycloak from 'automationLayer/agentPortalAuth/sapiensAgentPortalAuthKeycloak';
+import { getProjectConfig } from './configLayer/execution/projectsRegistry';
 
-export type FieldValue = string | number | boolean | Date | object | null | undefined;
-
-export interface FieldMap {
-  [key: string]: FieldValue;
+declare global {
+  var testData: ReturnType<typeof getAllData>;
 }
 
-export function attachValueInTestReport(fields: FieldMap): void {
-  for (const [key, value] of Object.entries(fields)) {
-    let description: string;
+async function globalSetup(): Promise<void> {
+  const project = process.env.PROJECT;
+  const { excelFile, outputFolder } = getProjectConfig(project);
 
-    if (value === null || value === undefined) {
-      description = '';
-    } else if (value instanceof Date) {
-      description = value.toISOString();
-    } else if (typeof value === 'object') {
-      try {
-        description = JSON.stringify(value);
-      } catch {
-        description = '[object Object]';
-      }
-    } else {
-      description = String(value);
-    }
+  console.log(`Generating JSON for project: ${project}`);
 
-    test.info().annotations.push({ type: key, description });
+  globalThis.testData = getAllData(path.resolve(excelFile), path.resolve(outputFolder));
+
+  const authMode = process.env.AGENT_PORTAL_AUTH;
+
+  if (!authMode) {
+    throw new Error('AGENT_PORTAL_AUTH must be set to one of: skip, allianz, sapiens');
   }
+  switch (authMode) {
+    case 'skip':
+      console.log('Skipping agent portal authentication');
+      break;
+
+    case 'allianz':
+      console.log('Running Allianz Agent Portal authentication');
+      await allianzAgentPortalAuth();
+      break;
+
+    case 'sapiens':
+      console.log('Running Sapiens Agent Portal authentication');
+      await sapiensAgentPortalAuth();
+      break;
+
+    case 'sapiensKeycloak':
+      console.log('Running Sapiens Agent Portal authentication');
+      await sapiensAgentPortalAuthKeycloak();
+      break;
+
+    default:
+      throw new Error(`Unknown AGENT_PORTAL_AUTH method: ${authMode}`);
+  }
+
+  console.log('Global setup complete.');
 }
+
+export default globalSetup;
