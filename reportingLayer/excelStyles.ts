@@ -1,61 +1,29 @@
 
-import type { Cell, Worksheet, Fill, Borders } from 'exceljs';
+import type {
+    Cell,
+    Worksheet,
+    Fill,
+    Borders,
+    Row,
+} from 'exceljs';
+
+import { EXCEL_STYLE_CONFIG } from './excelStyleConfig';
 
 /**
  * EvidenceFactory Excel formatting.
- * All presentation rules are centralized here.
  *
- * Change colors in COLORS using VS Code Color Picker.
- * Colors use #RRGGBB and are converted to ExcelJS ARGB.
+ * All configurable presentation settings are defined
+ * in excelStyleConfig.ts.
  */
 
-const COLORS = {
-    // Summary worksheet
-    summaryTitle: '#102846',
-    summaryTitleText: '#FFFFFF',
-    summarySection: '#14529A',
-    summarySectionText: '#FFFFFF',
-    summaryField: '#E5EFF9',
-    summaryFieldText: '#202B38',
-
-    // All worksheet
-    allHeader: '#1769C2',
-
-    // Passed worksheet and status
-    passed: '#208047',
-    passedLight: '#C7EBCB',
-    passedText: '#155B2E',
-
-    // Failed worksheet and status
-    failed: '#BD3038',
-    failedLight: '#F3C4C8',
-    failedText: '#8D1723',
-
-    // Not Executed worksheet and status
-    notExecuted: '#DB790F',
-    notExecutedLight: '#FFD998',
-    notExecutedText: '#8B4A00',
-
-    // Missing Reporting Fields worksheet
-    missingFieldsHeader: '#102846',
-
-    // Summary pass-rate backgrounds
-    passRateHigh: '#C7EBCB',
-    passRateMedium: '#FFD998',
-    passRateLow: '#F3C4C8',
-    passRateText: '#102846',
-
-    // Common formatting
-    white: '#FFFFFF',
-    black: '#202B38',
-    border: '#B9C8D7',
-} as const;
-
-// Pass Rate values are stored from 0 to 100.
-const PASS_RATE_RANGES = {
-    high: 90,
-    medium: 70,
-} as const;
+const {
+    colors: COLORS,
+    passRateRanges: PASS_RATE_RANGES,
+    fonts: FONTS,
+    rowHeights: ROW_HEIGHTS,
+    columnWidths: COLUMN_WIDTHS,
+    alignment: ALIGNMENT,
+} = EXCEL_STYLE_CONFIG;
 
 const toArgb = (color: string): string =>
     `FF${color.replace('#', '')}`;
@@ -130,6 +98,19 @@ function solidFill(color: string): Fill {
     };
 }
 
+/**
+ * Apply custom row height only when configured.
+ * null leaves Excel's default row height unchanged.
+ */
+function applyRowHeight(
+    row: Row,
+    height: number | null,
+): void {
+    if (height !== null) {
+        row.height = height;
+    }
+}
+
 function styleCell(
     cell: Cell,
     background: string,
@@ -139,8 +120,8 @@ function styleCell(
     cell.fill = solidFill(background);
 
     cell.font = {
-        name: 'Aptos',
-        size: 11,
+        name: FONTS.name,
+        size: FONTS.size,
         bold,
         color: { argb: toArgb(fontColor) },
     };
@@ -168,18 +149,15 @@ function styleSummaryValue(
 
     cell.alignment = {
         vertical: 'middle',
-        horizontal: 'left',
+        horizontal: ALIGNMENT.summaryValue,
         wrapText: true,
     };
 }
 
-// Set true to enable worksheet-specific tab colors.
-const ENABLE_TAB_COLORS = false;
-
 export function styleWorksheetTab(
     worksheet: Worksheet,
 ): void {
-    if (!ENABLE_TAB_COLORS) return;
+    if (!EXCEL_STYLE_CONFIG.enableTabColors) return;
 
     const theme = getWorksheetTheme(worksheet.name);
 
@@ -194,8 +172,11 @@ export function styleWorksheetTab(
 export function styleSummaryLayout(
     worksheet: Worksheet,
 ): void {
-    worksheet.getColumn(1).width = 30;
-    worksheet.getColumn(2).width = 105;
+    worksheet.getColumn(1).width =
+        COLUMN_WIDTHS.summaryField;
+
+    worksheet.getColumn(2).width =
+        COLUMN_WIDTHS.summaryValue;
 
     worksheet.views = [
         {
@@ -222,7 +203,11 @@ export function styleTitle(
     }
 
     const row = worksheet.getRow(rowNumber);
-    row.height = 38;
+
+    applyRowHeight(
+        row,
+        ROW_HEIGHTS.summaryTitle,
+    );
 
     for (let column = 1; column <= lastColumn; column++) {
         styleCell(
@@ -234,8 +219,8 @@ export function styleTitle(
     }
 
     row.getCell(1).font = {
-        name: 'Aptos Display',
-        size: 16,
+        name: FONTS.titleName,
+        size: FONTS.titleSize,
         bold: true,
         color: { argb: toArgb(COLORS.summaryTitleText) },
     };
@@ -254,7 +239,10 @@ export function styleTableHeader(
     const theme = getWorksheetTheme(worksheet.name);
     const row = worksheet.getRow(headerRowNumber);
 
-    row.height = 32;
+    applyRowHeight(
+        row,
+        ROW_HEIGHTS.detailHeader,
+    );
 
     for (let column = 1; column <= columnCount; column++) {
         const cell = row.getCell(column);
@@ -268,7 +256,7 @@ export function styleTableHeader(
 
         cell.alignment = {
             vertical: 'middle',
-            horizontal: 'center',
+            horizontal: ALIGNMENT.detailHeader,
             wrapText: true,
         };
     }
@@ -295,7 +283,8 @@ export function styleTableHeader(
 }
 
 /**
- * Detail data rows use Excel's default height.
+ * Detail data rows use Excel's default height
+ * unless a custom height is configured.
  */
 export function styleDataRow(
     worksheet: Worksheet,
@@ -303,6 +292,11 @@ export function styleDataRow(
     columnCount: number,
 ): void {
     const row = worksheet.getRow(rowNumber);
+
+    applyRowHeight(
+        row,
+        ROW_HEIGHTS.detailData,
+    );
 
     for (let column = 1; column <= columnCount; column++) {
         styleCell(
@@ -352,7 +346,7 @@ export function styleStatusCell(
 
     cell.alignment = {
         vertical: 'middle',
-        horizontal: 'center',
+        horizontal: ALIGNMENT.status,
         wrapText: true,
     };
 }
@@ -374,7 +368,11 @@ export function styleSummarySection(
     }
 
     const row = worksheet.getRow(rowNumber);
-    row.height = 29;
+
+    applyRowHeight(
+        row,
+        ROW_HEIGHTS.summarySection,
+    );
 
     for (let column = 1; column <= lastColumn; column++) {
         styleCell(
@@ -386,8 +384,8 @@ export function styleSummarySection(
     }
 
     row.getCell(1).font = {
-        name: 'Aptos',
-        size: 12,
+        name: FONTS.name,
+        size: FONTS.sectionSize,
         bold: true,
         color: { argb: toArgb(COLORS.summarySectionText) },
     };
@@ -404,7 +402,12 @@ export function styleSummaryField(
 ): void {
     const row = worksheet.getRow(rowNumber);
 
-    row.height = field === 'evidenceDirectory' ? 34 : 26;
+    const height =
+        field === 'evidenceDirectory'
+            ? ROW_HEIGHTS.evidenceDirectory
+            : ROW_HEIGHTS.summaryField;
+
+    applyRowHeight(row, height);
 
     styleCell(
         row.getCell(1),
@@ -420,6 +423,7 @@ export function styleSummaryField(
  * Summary result values:
  * - Passed, Failed and Not Executed retain colored fonts.
  * - Only Pass Rate receives a colored background.
+ * - All Summary values are left-aligned.
  */
 export function styleSummaryResult(
     worksheet: Worksheet,
@@ -463,6 +467,12 @@ export function styleSummaryResult(
                 true,
             );
 
+            cell.alignment = {
+                vertical: 'middle',
+                horizontal: ALIGNMENT.summaryValue,
+                wrapText: true,
+            };
+
             cell.numFmt = '0.00"%"';
             break;
         }
@@ -474,8 +484,8 @@ export function styleSummaryResult(
  */
 export function setColumnWidths(
     worksheet: Worksheet,
-    minimumWidth = 16,
-    maximumWidth = 55,
+    minimumWidth: number = COLUMN_WIDTHS.detailMinimum,
+    maximumWidth: number = COLUMN_WIDTHS.detailMaximum,
 ): void {
     worksheet.columns.forEach(column => {
         let longest = minimumWidth;
