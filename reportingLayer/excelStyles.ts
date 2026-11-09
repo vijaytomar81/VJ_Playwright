@@ -163,6 +163,7 @@ function styleSummaryValue(
     cell.fill = {
         type: 'pattern',
         pattern: 'none',
+        fgColor: { argb: toArgb(COLORS.white) },
     };
 }
 
