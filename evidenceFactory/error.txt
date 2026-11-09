@@ -1,109 +1,73 @@
-import { defineConfig, devices } from '@playwright/test';
-import { loadEnvironment } from './configLayer/execution/loadEnvironment';
-import { getProjectConfig } from './configLayer/execution/projectsRegistry';
-import { parseRetries, videoOption } from './configLayer/execution/playwrightArtifacts';
-import {
-  ACTION_TIMEOUT,
-  EXPECT_TIMEOUT,
-  NAVIGATION_TIMEOUT,
-} from './configLayer/execution/timeouts';
-
-/**
- * @see https://playwright.dev/docs/test-configuration
- */
-export function createConfig(project: string | undefined) {
-  const { testDir } = getProjectConfig(project);
-  loadEnvironment(project);
-
-  const env = process.env.ENV ?? 'dev';
-  const authMode = process.env.AGENT_PORTAL_AUTH;
-  const retries = parseRetries();
-
-  return defineConfig({
-    testDir,
-    /* Run tests in files in parallel */
-    fullyParallel: true,
-    /* Fail the build on CI if you accidentally left test.only in the source code. */
-    forbidOnly: !!process.env.CI,
-    /* 0 unless RETRIES is set: a retried purchase could pay twice. Needed for VIDEO_MODE=on-first-retry. */
-    retries,
-    /* Opt out of parallel tests on CI. */
-    workers: 3,
-    /* Reporter to use. See https://playwright.dev/docs/test-reporters */
-    reporter: [
-      ['list'],
-      ['./reportingLayer/custom-html-reporter.js'],
-      ['html', { open: 'never', outputFolder: 'playwright-report' }],
-      ['junit', { outputFile: 'results.xml' }],
-      ['allure-playwright', { resultsDir: 'allure-results' }],
-    ],
-    globalSetup: require.resolve('./global-setup.ts'),
-    timeout: 300000, // 5 minutes for all tests
-    expect: { timeout: EXPECT_TIMEOUT },
-    /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
-    use: {
-      /* Base URL to use in actions like `await page.goto('')`. */
-      // baseURL: 'http://localhost:3000',
-
-      trace: 'on-first-retry',
-      /* Capture a screenshot right after a test fails, saved under test-results/ */
-      screenshot: 'only-on-failure',
-      /* VIDEO_MODE: off (default), on, retain-on-failure, on-first-retry. See docs/Reporting.md. */
-      video: videoOption(retries),
-      /* Without these, a single stuck click/waitFor/goto waits out the whole 5-minute test
-         timeout (e.g. when an environment shows an error page). Calls that pass their own
-         `timeout` keep it. Raise per call for genuinely slow steps rather than here. */
-      actionTimeout: ACTION_TIMEOUT,
-      navigationTimeout: NAVIGATION_TIMEOUT,
-      headless: process.env.CI === 'true',
-
-      storageState:
-        authMode === 'skip' ? undefined : `automationLayer/athena/agentPortalAuth/auth.json`,
-    },
-
-    /* Configure projects for major browsers */
-    projects: [
-      {
-        name: 'chromium',
-        use: { ...devices['Desktop Chrome'] },
-      },
-
-      // {
-      //   name: 'firefox',
-      //   use: { ...devices['Desktop Firefox'] },
-      // },
-
-      // {
-      //   name: 'webkit',
-      //   use: { ...devices['Desktop Safari'] },
-      // },
-
-      /* Test against mobile viewports. */
-      // {
-      //   name: 'Mobile Chrome',
-      //   use: { ...devices['Pixel 5'] },
-      // },
-      // {
-      //   name: 'Mobile Safari',
-      //   use: { ...devices['iPhone 12'] },
-      // },
-
-      /* Test against branded browsers. */
-      // {
-      //   name: 'Microsoft Edge',
-      //   use: { ...devices['Desktop Edge'], channel: 'msedge' },
-      // },
-      // {
-      //   name: 'Google Chrome',
-      //   use: { ...devices['Desktop Chrome'], channel: 'chrome' },
-      // },
-    ],
-
-    /* Run your local dev server before starting the tests */
-    // webServer: {
-    //   command: 'npm run start',
-    //   url: 'http://localhost:3000',
-    //   reuseExistingServer: !process.env.CI,
-    // },
-  });
+{
+  "name": "ferryplaywright",
+  "version": "1.0.0",
+  "description": "",
+  "scripts": {
+    "test:jenkins": "node --test configLayer/execution/commonJob/*.test.cjs",
+    "test:unit": "playwright test -c automationLayer/insurance/unitTests/playwright.config.ts",
+    "typecheck:unit": "tsc --noEmit -p automationLayer/insurance/unitTests/tsconfig.json",
+    "typecheck:insurance": "tsc --noEmit -p automationLayer/insurance/tsconfig.json",
+    "test:ferry:dev": "cross-env PROJECT=ferry ENV=dev AGENT_PORTAL_AUTH=skip playwright test",
+    "test:ferry:test": "cross-env PROJECT=ferry ENV=test AGENT_PORTAL_AUTH=skip playwright test",
+    "test:britannia:test": "cross-env PROJECT=britannia ENV=test AGENT_PORTAL_AUTH=skip playwright test",
+    "test:britannia:uat": "cross-env PROJECT=britannia ENV=uat AGENT_PORTAL_AUTH=skip playwright test",
+    "test:britannia:nft": "cross-env PROJECT=britannia ENV=nft AGENT_PORTAL_AUTH=skip playwright test",
+    "test:allianzOnlineMotor:test": "cross-env PROJECT=allianzOnlineMotor ENV=test AGENT_PORTAL_AUTH=skip playwright test",
+    "test:allianzOnlineHome:test": "cross-env PROJECT=allianzOnlineHome ENV=test AGENT_PORTAL_AUTH=skip playwright test",
+    "docs:check": "node automationLayer/insurance/docs/checkDocs.js",
+    "brands:allianz:test": "cross-env ENV=test playwright test -c playwright.brands.config.ts --project=allianz",
+    "brands:britannia:test": "cross-env ENV=test playwright test -c playwright.brands.config.ts --project=britannia",
+    "brands:audi:test": "cross-env ENV=test playwright test -c playwright.brands.config.ts --project=audi",
+    "brands:cupra:test": "cross-env ENV=test playwright test -c playwright.brands.config.ts --project=cupra",
+    "brands:seat:test": "cross-env ENV=test playwright test -c playwright.brands.config.ts --project=seat",
+    "brands:skoda:test": "cross-env ENV=test playwright test -c playwright.brands.config.ts --project=skoda",
+    "brands:vw:test": "cross-env ENV=test playwright test -c playwright.brands.config.ts --project=vw",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "prepare": "husky",
+    "deps:check": "depcruise automationLayer/insurance --config .dependency-cruiser.cjs"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "engines": {
+    "node": "^20.19.0 || ^22.13.0 || >=24"
+  },
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "@playwright/test": "^1.62.1",
+    "@types/node": "^25.2.0",
+    "allure-js-commons": "^3.13.0",
+    "allure-playwright": "^3.13.0",
+    "chance": "^1.1.13",
+    "cross-env": "^10.1.0",
+    "dependency-cruiser": "^18.7.1",
+    "eslint": "^10.11.0",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-playwright": "^2.12.0",
+    "husky": "^9.1.7",
+    "lint-staged": "^16.4.0",
+    "prettier": "^3.9.9",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.9.3",
+    "typescript-eslint": "^8.70.1",
+    "xlsx": "^0.18.5"
+  },
+  "dependencies": {
+    "dotenv": "^17.2.3",
+    "googleapis": "^170.1.0",
+    "imap-simple": "^1.6.3",
+    "mailparser": "^3.9.1",
+    "open": "^11.0.0"
+  },
+  "lint-staged": {
+    "*.ts": [
+      "eslint --fix",
+      "prettier --write"
+    ]
+  }
 }
