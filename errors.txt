@@ -1,60 +1,11 @@
-PS C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\Athena_Automation\integration-tests> npx cross-env PROJECT=britannia ENV=test AGENT_PORTAL_AUTH=skip playwright test -g "TC1_BRI_DJ_PRE_NB001"
-[dotenv@17.2.3] injecting env (7) from configLayer\environments\britannia\.env.test -- tip: ⚙️  load multiple .env files with { path: ['.env.local', '.env'] }
-[dotenv@17.2.3] injecting env (7) from configLayer\environments\britannia\.env.local.test -- tip: ⚙️  enable debug logging with { debug: true }
-Project: britannia
-Environment project: britannia
-Environment: test
-Environment file: C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\Athena_Automation\integration-tests\configLayer\environments\britannia\.env.test
-Local environment file: C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\Athena_Automation\integration-tests\configLayer\environments\britannia\.env.local.test
-Generating JSON for project: britannia
-Reading Excel from: C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\Athena_Automation\integration-tests\automationLayer\athena\carInsurance\britannia\data\Britannia_NB_DJ.xlsx
-No changes for sheet: Britannia_NB
-No changes for sheet: Regression_AnnualOnlyTC
-No changes for sheet: RenewalTC_OptIn
-No changes for sheet: RenewalTC_OptOut
-No changes for sheet: NCD_ClaimTC
-No changes for sheet: SmokeTests_MotorAnnual
-Skipping agent portal authentication
-Global setup complete.
+import { defineConfig } from '@playwright/test';
+import { createConfig } from './playwright.config.base';
 
-Running 1 test using 1 worker
-
-Test run folder created: C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\Athena_Automation\integration-tests\custom-test-reports\run-2026-11-09T11-21-41-287Z
-[dotenv@17.2.3] injecting env (0) from configLayer\environments\britannia\.env.test -- tip: ⚙️  specify custom .env file path with { path: '/custom/path/.env' }
-[dotenv@17.2.3] injecting env (7) from configLayer\environments\britannia\.env.local.test -- tip: 🔐 prevent building .env in docker: https://dotenvx.com/prebuild
-Project: britannia
-Environment project: britannia
-Environment: test
-Environment file: C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\Athena_Automation\integration-tests\configLayer\environments\britannia\.env.test
-Local environment file: C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\Athena_Automation\integration-tests\configLayer\environments\britannia\.env.local.test
-  ✓  1 …ionLayer\athena\carInsurance\britannia\tests\Regression\Britannia_Hexa\TC1_BRI_DJ_PRE_NB001.spec.ts:16:5 › TC1_BRI_DJ_PRE_NB001 @Britannia_Premier @Bri_Premier_Annual @Bri_Annual (1.0m)
-Looking for verification email for bri.test.team+1794223306658@gmail.com...
-Verification code found: 153373
-Skipped pop-up
-Fields attached for "TC1_BRI_DJ_PRE_NB001 @Britannia_Premier @Bri_Premier_Annual @Bri_Annual": {
-  NBStartTime: '2026-11-09T11:21:46.658Z',
-  VRN: 'HJ64GZC',
-  InteractionID: '6af1acce219c981b42c2fb33',
-  Email: 'bri.test.team+1794223306658@gmail.com',
-  AnnualCoverStartDate: '18 Nov 2026',
-  BritanniaEssentialsTierAnnualPrice: '£1,589.31',
-  BritanniaTierAnnualPrice: '£1,614.64',
-  BritanniaPremierTierAnnualPrice: '£1,699.63',
-  BreakDownCoverPrice: '£133',
-  MLEPrice: 'Included as standard',
-  GHCPrice: 'Included as standard',
-  NCDPrice: '£193.76',
-  CoverPriceAfterAddOns: '£1,901.27',
-  CardNumber: '5312000000000150',
-  AnnualCoverPolicyNumber: 'BRI493863704791'
-}
-
-  1 passed (1.2m)
-Excel report generated: C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\Athena_Automation\integration-tests\custom-test-reports\run-2026-11-09T11-21-41-287Z\custom-report-2026-11-09_12-22-47.xlsx
-Custom HTML report generated: C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\Athena_Automation\integration-tests\custom-test-reports\run-2026-11-09T11-21-41-287Z\custom-report-2026-11-09_12-22-47.html
-
-To open last HTML report run:
-
-  npx playwright show-report
-
-PS C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\Athena_Automation\integration-tests>
+// Real invocations always set PROJECT explicitly: npm scripts pass it via cross-env, and the
+// VS Code extension uses the brand-specific playwright.<brand>.config.ts files instead of this
+// one. If PROJECT is missing, this file is being probed for metadata only (e.g. the extension's
+// workspace-wide config scan) - resolve to an empty test dir rather than throwing, so it doesn't
+// block discovery of the brand-specific configs.
+export default process.env.PROJECT
+  ? createConfig(process.env.PROJECT)
+  : defineConfig({ testDir: './__no_pw_tests__' });
