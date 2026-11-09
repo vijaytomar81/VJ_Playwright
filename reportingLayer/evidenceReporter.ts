@@ -22,10 +22,6 @@ import {
     type ExcelEvidenceTest,
 } from './excelGenerator';
 
-/* ============================================================
- * SCHEMA TYPES
- * ============================================================ */
-
 interface SchemaField {
     readonly field: string;
     readonly label: string;
@@ -38,20 +34,12 @@ interface SummarySection {
     readonly fields: readonly SchemaField[];
 }
 
-/* ============================================================
- * REPORTER OPTIONS
- * ============================================================ */
-
 interface ReporterOptions {
     readonly evidenceSchema: readonly SchemaField[];
     readonly summarySchema: readonly SummarySection[];
     readonly product: string;
     readonly outputDirectory?: string;
 }
-
-/* ============================================================
- * INTERNAL TYPES
- * ============================================================ */
 
 interface CollectedTest {
     readonly test: TestCase;
@@ -62,18 +50,111 @@ interface BrowserMetadata {
     readonly browser: string;
     readonly browserChannel: string;
     readonly browserVersion: string;
-    readonly headless: boolean | string;
+    readonly headless: string;
+    readonly device: string;
 }
 
-/* ============================================================
- * EVIDENCE REPORTER
- * ============================================================ */
+const NOT_KNOWN = 'Not Known';
+
+const SENSITIVE_FIELD =
+    /cardnumber|cvv|cvc|securitycode|password|secret|token/i;
+
+function known(value: unknown): string {
+    if (value === undefined || value === null) {
+        return NOT_KNOWN;
+    }
+
+    const text = String(value).trim();
+
+    return text || NOT_KNOWN;
+}
+
+function formatDuration(milliseconds: number): string {
+    const totalSeconds = Math.floor(
+        Math.max(0, milliseconds) / 1000,
+    );
+
+    const minutes = Math.floor(totalSeconds / 60);
+    const seconds = totalSeconds % 60;
+
+    return `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+}
+
+function getStatus(
+    result?: TestResult,
+): ExcelEvidenceTest['status'] {
+    if (
+        !result ||
+        result.status === 'skipped' ||
+        result.status === 'interrupted'
+    ) {
+        return 'notExecuted';
+    }
+
+    return result.status === 'passed'
+        ? 'passed'
+        : 'failed';
+}
+
+function getAnnotations(
+    attempts: readonly TestResult[],
+): Record<string, string> {
+    const annotations: Record<string, string> = {};
+
+    for (const attempt of attempts) {
+        for (const annotation of attempt.annotations) {
+            const key = annotation.type;
+
+            if (SENSITIVE_FIELD.test(key)) {
+                continue;
+            }
+
+            annotations[key] = annotation.description ?? '';
+        }
+    }
+
+    return annotations;
+}
+
+function getBrowserMetadata(
+    project?: FullConfig['projects'][number],
+    annotations: Record<string, string> = {},
+): BrowserMetadata {
+    const use = project?.use;
+
+    const browser = known(use?.browserName);
+    const browserChannel = known(use?.channel);
+    const browserVersion = known(annotations.browserVersion);
+    const headless = known(use?.headless);
+
+    let device = NOT_KNOWN;
+
+    if (use?.isMobile === true) {
+        device = 'Mobile (Emulated)';
+    } else if (use?.isMobile === false) {
+        device = 'Desktop (Emulated Profile)';
+    }
+
+    return {
+        browser,
+        browserChannel,
+        browserVersion,
+        headless,
+        device,
+    };
+}
+
+function getError(result?: TestResult): string {
+    return (
+        result?.errors
+            .map(error => error.stack ?? error.message ?? '')
+            .filter(Boolean)
+            .join('\n') ?? ''
+    );
+}
 
 export default class EvidenceReporter implements Reporter {
-    private readonly tests = new Map<
-        string,
-        CollectedTest
-    >();
+    private readonly tests = new Map<string, CollectedTest>();
 
     private config?: FullConfig;
     private startedAt = new Date();
@@ -82,14 +163,7 @@ export default class EvidenceReporter implements Reporter {
         private readonly options: ReporterOptions,
     ) { }
 
-    /* ========================================================
-     * EXECUTION START
-     * ======================================================== */
-
-    onBegin(
-        config: FullConfig,
-        suite: Suite,
-    ): void {
+    onBegin(config: FullConfig, suite: Suite): void {
         this.config = config;
         this.startedAt = new Date();
         this.tests.clear();
@@ -106,280 +180,76 @@ export default class EvidenceReporter implements Reporter {
         );
     }
 
-    /* ========================================================
-     * TEST RESULT COLLECTION
-     * ======================================================== */
-
-    onTestEnd(
-        test: TestCase,
-        result: TestResult,
-    ): void {
+    onTestEnd(test: TestCase, result: TestResult): void {
         const entry = this.tests.get(test.id);
 
         if (entry) {
             entry.attempts.push(result);
-        } else {
-            this.tests.set(test.id, {
-                test,
-                attempts: [result],
-            });
-        }
-    }
-
-    /* ========================================================
-     * BROWSER METADATA
-     *
-     * Uses Playwright project configuration only.
-     *
-     * Does NOT launch Chromium, Firefox, or WebKit.
-     * Does NOT execute browser binaries.
-     * ======================================================== */
-
-    private getBrowserMetadata(
-        project?: FullConfig['projects'][number],
-    ): BrowserMetadata {
-        const browser = String(
-            project?.use.browserName ?? 'chromium',
-        );
-
-        const configuredChannel =
-            project?.use.channel;
-
-        const browserChannel =
-            configuredChannel &&
-                String(configuredChannel).trim()
-                ? String(configuredChannel)
-                : 'bundled';
-
-        /*
-         * Playwright configuration does not expose
-         * the actual running browser version.
-         *
-         * This optional environment variable can
-         * be populated by the execution environment.
-         *
-         * If not provided, leave the field blank
-         * rather than launching another browser.
-         */
-        const browserVersion =
-            process.env.PLAYWRIGHT_BROWSER_VERSION ?? '';
-
-        return {
-            browser,
-            browserChannel,
-            browserVersion,
-            headless:
-                project?.use.headless ?? false,
-        };
-    }
-
-    /* ========================================================
-     * ANNOTATION COLLECTION
-     * ======================================================== */
-
-    private getAnnotations(
-        entry: CollectedTest,
-    ): Record<string, string> {
-        const attempts = [
-            ...entry.attempts,
-        ].reverse();
-
-        const source = attempts.find(
-            (attempt) =>
-                attempt.annotations.length > 0,
-        );
-
-        const annotations: Record<
-            string,
-            string
-        > = {};
-
-        for (
-            const annotation of
-            source?.annotations ?? []
-        ) {
-            const key = annotation.type;
-
-            /*
-             * Never export sensitive payment
-             * or authentication data.
-             */
-            if (
-                /cardnumber|cvv|cvc|securitycode|password|secret|token/i.test(
-                    key,
-                )
-            ) {
-                continue;
-            }
-
-            annotations[key] =
-                annotation.description ?? '';
+            return;
         }
 
-        return annotations;
+        this.tests.set(test.id, {
+            test,
+            attempts: [result],
+        });
     }
-
-    /* ========================================================
-     * BUILD EXCEL TEST ROWS
-     * ======================================================== */
 
     private buildTests(): ExcelEvidenceTest[] {
         const rows: ExcelEvidenceTest[] = [];
 
-        /*
-         * Cache browser metadata for each
-         * configured Playwright project.
-         *
-         * No browser process is started.
-         */
-        const browserMetadata = new Map<
-            string,
-            BrowserMetadata
-        >();
+        for (const entry of this.tests.values()) {
+            const { test, attempts } = entry;
+            const last = attempts[attempts.length - 1];
 
-        for (
-            const entry of this.tests.values()
-        ) {
-            const attempts = entry.attempts;
+            const status = getStatus(last);
+            const annotations = getAnnotations(attempts);
+            const project = test.parent.project();
 
-            const last =
-                attempts[attempts.length - 1];
+            const metadata = getBrowserMetadata(
+                project,
+                annotations,
+            );
 
-            let status:
-                ExcelEvidenceTest['status'];
-
-            if (
-                !last ||
-                last.status === 'skipped' ||
-                last.status === 'interrupted'
-            ) {
-                status = 'notExecuted';
-            } else if (
-                last.status === 'passed'
-            ) {
-                status = 'passed';
-            } else {
-                status = 'failed';
-            }
-
-            const started =
-                attempts[0]?.startTime;
+            const started = attempts[0]?.startTime;
 
             const finished = last
                 ? new Date(
-                    last.startTime.getTime() +
-                    last.duration,
+                    last.startTime.getTime() + last.duration,
                 )
                 : undefined;
 
-            const durationMs =
-                attempts.reduce(
-                    (sum, attempt) =>
-                        sum + attempt.duration,
-                    0,
-                );
+            const durationMs = attempts.reduce(
+                (sum, attempt) => sum + attempt.duration,
+                0,
+            );
 
-            const project =
-                entry.test.parent.project();
+            const retry = last?.retry ?? 0;
 
-            const projectName =
-                project?.name ?? 'chromium';
-
-            let metadata =
-                browserMetadata.get(
-                    projectName,
-                );
-
-            if (!metadata) {
-                metadata =
-                    this.getBrowserMetadata(
-                        project,
-                    );
-
-                browserMetadata.set(
-                    projectName,
-                    metadata,
-                );
-            }
-
-            const values: Record<
-                string,
-                unknown
-            > = {
-                scenarioId:
-                    entry.test.id,
-
-                scenarioName:
-                    entry.test.title,
-
+            const values: Record<string, unknown> = {
+                scenarioId: test.id,
+                scenarioName: test.title,
                 status,
-
-                retry:
-                    last?.retry ?? 0,
-
-                attempt:
-                    last?.retry ?? 0,
-
-                workerId:
-                    last?.workerIndex ?? '',
-
-                startTime:
-                    started?.toISOString() ?? '',
-
-                endTime:
-                    finished?.toISOString() ?? '',
-
-                durationMs,
-
-                error:
-                    last?.errors
-                        .map(
-                            (error) =>
-                                error.stack ??
-                                error.message ??
-                                '',
-                        )
-                        .filter(Boolean)
-                        .join('\n') ?? '',
-
-                mode:
-                    process.env.CI === 'true'
-                        ? 'CI'
-                        : 'Local',
-
-                device:
-                    projectName,
-
-                browser:
-                    metadata.browser,
-
-                browserChannel:
-                    metadata.browserChannel,
-
-                browserVersion:
-                    metadata.browserVersion,
-
-                headless:
-                    String(metadata.headless),
+                retry,
+                attempt: retry,
+                workerId: last?.workerIndex ?? NOT_KNOWN,
+                startTime: started?.toISOString() ?? NOT_KNOWN,
+                endTime: finished?.toISOString() ?? NOT_KNOWN,
+                durationMs: formatDuration(durationMs),
+                error: getError(last),
+                mode: process.env.CI === 'true' ? 'CI' : 'Local',
+                device: metadata.device,
+                browser: metadata.browser,
+                browserChannel: metadata.browserChannel,
+                browserVersion: metadata.browserVersion,
+                headless: metadata.headless,
             };
 
             rows.push({
-                testId:
-                    entry.test.id,
-
-                testName:
-                    entry.test.title,
-
+                testId: test.id,
+                testName: test.title,
                 status,
-
-                retry:
-                    last?.retry ?? 0,
-
-                annotations:
-                    this.getAnnotations(
-                        entry,
-                    ),
-
+                retry,
+                annotations,
                 values,
             });
         }
@@ -387,60 +257,63 @@ export default class EvidenceReporter implements Reporter {
         return rows;
     }
 
-    /* ========================================================
-     * EXECUTION END
-     * ======================================================== */
+    private getSummaryBrowserMetadata(
+        rows: readonly ExcelEvidenceTest[],
+    ): BrowserMetadata {
+        const project = this.config?.projects[0];
 
-    async onEnd(
-        _result: FullResult,
-    ): Promise<void> {
+        const versions = [
+            ...new Set(
+                rows
+                    .map(row => known(row.annotations.browserVersion))
+                    .filter(value => value !== NOT_KNOWN),
+            ),
+        ];
+
+        const metadata = getBrowserMetadata(project);
+
+        return {
+            ...metadata,
+            browserVersion:
+                versions.length === 1
+                    ? versions[0]
+                    : versions.length > 1
+                        ? 'Multiple'
+                        : NOT_KNOWN,
+        };
+    }
+
+    async onEnd(_result: FullResult): Promise<void> {
         const finishedAt = new Date();
+        const rows = this.buildTests();
 
-        const rows =
-            this.buildTests();
+        const passed = rows.filter(
+            row => row.status === 'passed',
+        ).length;
 
-        const passed =
-            rows.filter(
-                (row) =>
-                    row.status === 'passed',
-            ).length;
+        const failed = rows.filter(
+            row => row.status === 'failed',
+        ).length;
 
-        const failed =
-            rows.filter(
-                (row) =>
-                    row.status === 'failed',
-            ).length;
+        const notExecuted = rows.filter(
+            row => row.status === 'notExecuted',
+        ).length;
 
-        const notExecuted =
-            rows.filter(
-                (row) =>
-                    row.status === 'notExecuted',
-            ).length;
-
-        const totalItems =
-            rows.length;
+        const totalItems = rows.length;
 
         const elapsedMs =
-            finishedAt.getTime() -
-            this.startedAt.getTime();
+            finishedAt.getTime() - this.startedAt.getTime();
 
-        const projectName =
-            process.env.PROJECT ??
-            this.config?.projects[0]?.name ??
-            'unknown';
-
-        const browserProject =
-            this.config?.projects[0];
+        const projectName = known(
+            process.env.PROJECT ?? this.config?.projects[0]?.name,
+        );
 
         const browserMetadata =
-            this.getBrowserMetadata(
-                browserProject,
-            );
+            this.getSummaryBrowserMetadata(rows);
 
-        const runId =
-            this.startedAt
-                .toISOString()
-                .replace(/[:.]/g, '-');
+        const runId = this.startedAt
+            .toISOString()
+            .replace(/[:.]/g, '-');
 
         const outputDirectory =
             this.options.outputDirectory ??
@@ -450,102 +323,40 @@ export default class EvidenceReporter implements Reporter {
                 `run-${runId}`,
             );
 
-        /* ====================================================
-         * SUMMARY DATA
-         * ==================================================== */
-
-        const summaryData: Record<
-            string,
-            unknown
-        > = {
+        const summaryData: Record<string, unknown> = {
             runId,
-
-            mode:
-                process.env.CI === 'true'
-                    ? 'CI'
-                    : 'Local',
-
-            environment:
-                process.env.ENV ?? '',
-
-            evidenceDirectory:
-                outputDirectory,
-
-            machineName:
-                hostname(),
-
-            user:
-                userInfo().username,
-
-            platform:
-                platform(),
-
-            osVersion:
-                release(),
-
-            browser:
-                browserMetadata.browser,
-
-            browserChannel:
-                browserMetadata.browserChannel,
-
-            browserVersion:
-                browserMetadata.browserVersion,
-
-            headless:
-                browserMetadata.headless,
-
+            mode: process.env.CI === 'true' ? 'CI' : 'Local',
+            environment: known(process.env.ENV),
+            evidenceDirectory: outputDirectory,
+            machineName: hostname(),
+            user: userInfo().username,
+            platform: platform(),
+            osVersion: release(),
+            browser: browserMetadata.browser,
+            browserChannel: browserMetadata.browserChannel,
+            browserVersion: browserMetadata.browserVersion,
+            headless: browserMetadata.headless,
             totalItems,
-
             passed,
-
             failed,
-
             notExecuted,
-
             passRate:
                 totalItems > 0
-                    ? Number(
-                        (
-                            (passed / totalItems) *
-                            100
-                        ).toFixed(2),
-                    )
+                    ? Number(((passed / totalItems) * 100).toFixed(2))
                     : 0,
-
-            executionTime:
-                elapsedMs,
-
-            startedAt:
-                this.startedAt.toISOString(),
-
-            finishedAt:
-                finishedAt.toISOString(),
+            executionTime: formatDuration(elapsedMs),
+            startedAt: this.startedAt.toISOString(),
+            finishedAt: finishedAt.toISOString(),
         };
-
-        /* ====================================================
-         * GENERATE EXCEL REPORT
-         * ==================================================== */
 
         await generateEvidenceExcel({
             outputDirectory,
-
-            project:
-                projectName,
-
-            product:
-                this.options.product,
-
-            evidenceSchema:
-                this.options.evidenceSchema,
-
-            summarySchema:
-                this.options.summarySchema,
-
+            project: projectName,
+            product: this.options.product,
+            evidenceSchema: this.options.evidenceSchema,
+            summarySchema: this.options.summarySchema,
             summaryData,
-
-            tests:
-                rows,
+            tests: rows,
         });
 
         console.log(
