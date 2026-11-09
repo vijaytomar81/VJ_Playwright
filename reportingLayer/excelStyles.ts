@@ -165,15 +165,23 @@ function styleCell(
 /**
  * Set worksheet tab color using WORKSHEET_THEMES.
  */
+
+const ENABLE_TAB_COLORS = false;
+
 export function styleWorksheetTab(
     worksheet: Worksheet,
 ): void {
+    if (!ENABLE_TAB_COLORS) {
+        return;
+    }
+
     const theme = getWorksheetTheme(worksheet.name);
 
     worksheet.properties.tabColor = {
         argb: theme.tab,
     };
 }
+
 
 /* ============================================================
  * SUMMARY WORKSHEET LAYOUT
