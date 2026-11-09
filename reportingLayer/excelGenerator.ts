@@ -3,9 +3,7 @@ import ExcelJS from 'exceljs';
 import { mkdir } from 'node:fs/promises';
 import { join } from 'node:path';
 
-import {
-    findMissingReportingFields,
-} from './missingFields';
+import { findMissingReportingFields } from './missingFields';
 
 import {
     styleTitle,
@@ -14,13 +12,10 @@ import {
     styleStatusCell,
     styleSummarySection,
     styleSummaryField,
+    styleSummaryResult,
+    styleWorksheetTab,
     setColumnWidths,
 } from './excelStyles';
-
-/**
- * Consumer schemas are passed to this generator.
- * They are never imported directly.
- */
 
 interface SchemaField {
     readonly field: string;
@@ -54,9 +49,7 @@ export interface ExcelGenerationOptions {
 }
 
 function excelValue(value: unknown): ExcelJS.CellValue {
-    if (value === null || value === undefined) {
-        return '';
-    }
+    if (value === null || value === undefined) return '';
 
     if (
         typeof value === 'string' ||
@@ -73,9 +66,94 @@ function excelValue(value: unknown): ExcelJS.CellValue {
 function orderedFields(
     fields: readonly SchemaField[],
 ): SchemaField[] {
-    return [...fields].sort(
-        (a, b) => a.order - b.order,
-    );
+    return [...fields].sort((a, b) => a.order - b.order);
+}
+
+function formatDateTime(value: unknown): string {
+    if (value === null || value === undefined || value === '') {
+        return '';
+    }
+
+    const date = value instanceof Date
+        ? value
+        : new Date(String(value));
+
+    if (Number.isNaN(date.getTime())) {
+        return String(value);
+    }
+
+    const day = String(date.getDate()).padStart(2, '0');
+    const month = [
+        'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+        'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
+    ][date.getMonth()];
+
+    const year = date.getFullYear();
+    const hours = String(date.getHours()).padStart(2, '0');
+    const minutes = String(date.getMinutes()).padStart(2, '0');
+    const seconds = String(date.getSeconds()).padStart(2, '0');
+
+    return `${day}-${month}-${year} ${hours}:${minutes}:${seconds}`;
+}
+
+function formatDuration(value: unknown): string {
+    if (typeof value === 'number') {
+        const totalSeconds = Math.floor(value / 1000);
+        const hours = Math.floor(totalSeconds / 3600);
+        const minutes = Math.floor((totalSeconds % 3600) / 60);
+        const seconds = totalSeconds % 60;
+
+        return [hours, minutes, seconds]
+            .map((part) => String(part).padStart(2, '0'))
+            .join(':');
+    }
+
+    if (typeof value === 'string') {
+        const secondsMatch = value.match(
+            /^([\d.]+)\s+seconds?$/i,
+        );
+
+        if (secondsMatch) {
+            return formatDuration(
+                Number(secondsMatch[1]) * 1000,
+            );
+        }
+    }
+
+    return String(value ?? '');
+}
+
+function formatSummaryValue(
+    field: string,
+    value: unknown,
+): ExcelJS.CellValue {
+    switch (field) {
+        case 'startedAt':
+        case 'finishedAt':
+            return formatDateTime(value);
+
+        case 'executionTime':
+            return formatDuration(value);
+
+        case 'headless':
+            if (value === true || value === 'true') return 'Yes';
+            if (value === false || value === 'false') return 'No';
+            return excelValue(value);
+
+        case 'platform':
+            if (value === 'win32') return 'Windows';
+            if (value === 'darwin') return 'macOS';
+            if (value === 'linux') return 'Linux';
+            return excelValue(value);
+
+        case 'runId': {
+            const text = String(value ?? '');
+            return text.startsWith('run-') ? text : `run-${text}`;
+        }
+
+        default:
+            return excelValue(value);
+    }
 }
 
 function createSummarySheet(
@@ -84,10 +162,15 @@ function createSummarySheet(
 ): void {
     const sheet = workbook.addWorksheet('Summary');
 
+    // Wider value column, matching the reference layout.
+    sheet.getColumn(1).width = 30;
+    sheet.getColumn(2).width = 105;
+
     sheet.getCell('A1').value =
-        `Execution Summary | Project: ${options.project} | Product: ${options.product}`;
+        `Execution Summary  |  Project: ${options.project}  |  Product: ${options.product}`;
 
     styleTitle(sheet, 1, 2);
+    styleWorksheetTab(sheet);
 
     let rowNumber = 3;
 
@@ -98,17 +181,20 @@ function createSummarySheet(
     for (const section of sections) {
         sheet.getCell(rowNumber, 1).value = section.section;
 
-        styleSummarySection(sheet, rowNumber);
+        styleSummarySection(sheet, rowNumber, 2);
         rowNumber++;
 
         for (const field of orderedFields(section.fields)) {
             sheet.getCell(rowNumber, 1).value = field.label;
 
-            sheet.getCell(rowNumber, 2).value = excelValue(
-                options.summaryData[field.field],
-            );
+            sheet.getCell(rowNumber, 2).value =
+                formatSummaryValue(
+                    field.field,
+                    options.summaryData[field.field],
+                );
 
             styleSummaryField(sheet, rowNumber);
+            styleSummaryResult(sheet, rowNumber, field.field);
 
             if (field.field === 'passRate') {
                 const cell = sheet.getCell(rowNumber, 2);
@@ -118,14 +204,15 @@ function createSummarySheet(
                 }
             }
 
+            if (field.field === 'evidenceDirectory') {
+                sheet.getRow(rowNumber).height = 34;
+            }
+
             rowNumber++;
         }
 
         rowNumber++;
     }
-
-    sheet.getColumn(1).width = 28;
-    sheet.getColumn(2).width = 55;
 
     sheet.views = [
         {
@@ -142,7 +229,6 @@ function createDetailSheet(
     evidenceSchema: readonly SchemaField[],
 ): void {
     const sheet = workbook.addWorksheet(sheetName);
-
     const fields = orderedFields(evidenceSchema);
 
     fields.forEach((field, index) => {
@@ -206,9 +292,7 @@ function createMissingFieldsSheet(
         evidenceSchema,
     );
 
-    if (missing.length === 0) {
-        return;
-    }
+    if (missing.length === 0) return;
 
     const sheet = workbook.addWorksheet(
         'Missing Reporting Fields',
@@ -240,19 +324,6 @@ function createMissingFieldsSheet(
     setColumnWidths(sheet);
 }
 
-/**
- * Generates one Excel workbook per execution.
- *
- * Standard sheets:
- * 1. Summary
- * 2. All
- * 3. Passed
- * 4. Failed
- * 5. Not Executed
- *
- * Conditional sheet:
- * 6. Missing Reporting Fields
- */
 export async function generateEvidenceExcel(
     options: ExcelGenerationOptions,
 ): Promise<string> {
