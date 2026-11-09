@@ -1,26 +1,60 @@
-C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\Athena_Automation\integration-tests>git branch --show-current
-evidence_factory
+PS C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\Athena_Automation\integration-tests> npx cross-env PROJECT=britannia ENV=test AGENT_PORTAL_AUTH=skip playwright test -g "TC1_BRI_DJ_PRE_NB001"
+[dotenv@17.2.3] injecting env (7) from configLayer\environments\britannia\.env.test -- tip: ⚙️  override existing env vars with { override: true }
+[dotenv@17.2.3] injecting env (7) from configLayer\environments\britannia\.env.local.test -- tip: ⚙️  suppress all logs with { quiet: true }
+Project: britannia
+Environment project: britannia
+Environment: test
+Environment file: C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\Athena_Automation\integration-tests\configLayer\environments\britannia\.env.test
+Local environment file: C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\Athena_Automation\integration-tests\configLayer\environments\britannia\.env.local.test
+Generating JSON for project: britannia
+Reading Excel from: C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\Athena_Automation\integration-tests\automationLayer\athena\carInsurance\britannia\data\Britannia_NB_DJ.xlsx
+No changes for sheet: Britannia_NB
+No changes for sheet: Regression_AnnualOnlyTC
+No changes for sheet: RenewalTC_OptIn
+No changes for sheet: RenewalTC_OptOut
+No changes for sheet: NCD_ClaimTC
+No changes for sheet: SmokeTests_MotorAnnual
+Skipping agent portal authentication
+Global setup complete.
 
-C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\Athena_Automation\integration-tests>git status
-On branch evidence_factory
-Your branch is up to date with 'origin/evidence_factory'.
+Running 1 test using 1 worker
 
-Changes not staged for commit:
-  (use "git add <file>..." to update what will be committed)
-  (use "git restore <file>..." to discard changes in working directory)
-        modified:   configLayer/execution/evidenceConfig.ts
-        modified:   global-setup.ts
-        modified:   package-lock.json
-        modified:   package.json
-        modified:   playwright.config.base.ts
+Test run folder created: C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\Athena_Automation\integration-tests\custom-test-reports\run-2026-11-09T09-37-22-609Z
+[dotenv@17.2.3] injecting env (0) from configLayer\environments\britannia\.env.test -- tip: 🔑 add access controls to secrets: https://dotenvx.com/ops
+[dotenv@17.2.3] injecting env (7) from configLayer\environments\britannia\.env.local.test -- tip: 👥 sync secrets across teammates & machines: https://dotenvx.com/ops
+Project: britannia
+Environment project: britannia
+Environment: test
+Environment file: C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\Athena_Automation\integration-tests\configLayer\environments\britannia\.env.test
+Local environment file: C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\Athena_Automation\integration-tests\configLayer\environments\britannia\.env.local.test
+  ✓  1 …onLayer\athena\carInsurance\britannia\tests\Regression\Britannia_Hexa\TC1_BRI_DJ_PRE_NB001.spec.ts:16:5 › TC1_BRI_DJ_PRE_NB001 @Britannia_Premier @Bri_Premier_Annual @Bri_Annual (54.1s)
+Looking for verification email for bri.test.team+1794217049770@gmail.com...
+Verification code found: 560496
+Skipped pop-up
+Fields attached for "TC1_BRI_DJ_PRE_NB001 @Britannia_Premier @Bri_Premier_Annual @Bri_Annual": {
+  NBStartTime: '2026-11-09T09:37:29.770Z',
+  VRN: 'HJ64GZC',
+  InteractionID: '6af1945d219c981b42c2fa0e',
+  Email: 'bri.test.team+1794217049770@gmail.com',
+  AnnualCoverStartDate: '18 Nov 2026',
+  BritanniaEssentialsTierAnnualPrice: '£1,589.31',
+  BritanniaTierAnnualPrice: '£1,614.64',
+  BritanniaPremierTierAnnualPrice: '£1,699.63',
+  BreakDownCoverPrice: '£133',
+  MLEPrice: 'Included as standard',
+  GHCPrice: 'Included as standard',
+  NCDPrice: '£193.76',
+  CoverPriceAfterAddOns: '£1,901.27',
+  CardNumber: '5312000000000150',
+  AnnualCoverPolicyNumber: 'BRI831627229137'
+}
 
-Untracked files:
-  (use "git add <file>..." to include in what will be committed)
-        automationLayer/athena/carInsurance/britannia/tests/Regression/Britannia_Hexa/TC1_BRI_DJ_PRE_NB001_COPY.spec.ts
-        configLayer/schema/
-        evidenceFactory/
-        playwright.config.base.ts.bak
+  1 passed (1.4m)
+Excel report generated: C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\Athena_Automation\integration-tests\custom-test-reports\run-2026-11-09T09-37-22-609Z\custom-report-2026-11-09_10-38-23.xlsx
+Custom HTML report generated: C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\Athena_Automation\integration-tests\custom-test-reports\run-2026-11-09T09-37-22-609Z\custom-report-2026-11-09_10-38-23.html
 
-no changes added to commit (use "git add" and/or "git commit -a")
+To open last HTML report run:
 
-C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\Athena_Automation\integration-tests>
+  npx playwright show-report
+
+PS C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\Athena_Automation\integration-tests> 
