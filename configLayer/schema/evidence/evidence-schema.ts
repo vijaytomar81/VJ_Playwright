@@ -24,7 +24,7 @@ export const evidenceFields = [
   { field: 'workerId', label: 'Worker ID', order: 8 },
   { field: 'startTime', label: 'Start Time', order: 9 },
   { field: 'endTime', label: 'End Time', order: 10 },
-  { field: 'durationMs', label: 'Duration (ms)', order: 11 },
+  { field: 'durationMs', label: 'Duration', order: 11 },
   { field: 'error', label: 'Error', order: 12 },
   
   // Execution environment
