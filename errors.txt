@@ -1,7 +1,4 @@
-PS C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\Athena_Automation\integration-tests> npm ls @playwright/test playwright playwright-core
-ferryplaywright@1.0.0 C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\Athena_Automation\integration-tests
-└─┬ @playwright/test@1.62.1
-  └─┬ playwright@1.62.1
-    └── playwright-core@1.62.1
-
-PS C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\Athena_Automation\integration-tests> 
+Get-ChildItem -Path .\automationLayer,.\configLayer -Recurse -File -Filter *.ts -ErrorAction SilentlyContinue |
+Select-String -Pattern "from ['""]@playwright/test['""]|test\.extend|base\.extend|browser\.version\(" |
+Select-Object Path, LineNumber, Line |
+Format-List
