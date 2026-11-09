@@ -1,60 +1,155 @@
-PS C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\Athena_Automation\integration-tests> npx cross-env PROJECT=britannia ENV=test AGENT_PORTAL_AUTH=skip playwright test -g "TC1_BRI_DJ_PRE_NB001"
-[dotenv@17.2.3] injecting env (7) from configLayer\environments\britannia\.env.test -- tip: ⚙️  override existing env vars with { override: true }
-[dotenv@17.2.3] injecting env (7) from configLayer\environments\britannia\.env.local.test -- tip: ⚙️  suppress all logs with { quiet: true }
-Project: britannia
-Environment project: britannia
-Environment: test
-Environment file: C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\Athena_Automation\integration-tests\configLayer\environments\britannia\.env.test
-Local environment file: C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\Athena_Automation\integration-tests\configLayer\environments\britannia\.env.local.test
-Generating JSON for project: britannia
-Reading Excel from: C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\Athena_Automation\integration-tests\automationLayer\athena\carInsurance\britannia\data\Britannia_NB_DJ.xlsx
-No changes for sheet: Britannia_NB
-No changes for sheet: Regression_AnnualOnlyTC
-No changes for sheet: RenewalTC_OptIn
-No changes for sheet: RenewalTC_OptOut
-No changes for sheet: NCD_ClaimTC
-No changes for sheet: SmokeTests_MotorAnnual
-Skipping agent portal authentication
-Global setup complete.
+import { existsSync, mkdirSync, writeFileSync } from 'fs';
+import { join } from 'path';
+import { utils, writeFile } from 'xlsx';
 
-Running 1 test using 1 worker
+class CustomHtmlReporter {
+  constructor() {
+    this.results = [];
 
-Test run folder created: C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\Athena_Automation\integration-tests\custom-test-reports\run-2026-11-09T09-37-22-609Z
-[dotenv@17.2.3] injecting env (0) from configLayer\environments\britannia\.env.test -- tip: 🔑 add access controls to secrets: https://dotenvx.com/ops
-[dotenv@17.2.3] injecting env (7) from configLayer\environments\britannia\.env.local.test -- tip: 👥 sync secrets across teammates & machines: https://dotenvx.com/ops
-Project: britannia
-Environment project: britannia
-Environment: test
-Environment file: C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\Athena_Automation\integration-tests\configLayer\environments\britannia\.env.test
-Local environment file: C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\Athena_Automation\integration-tests\configLayer\environments\britannia\.env.local.test
-  ✓  1 …onLayer\athena\carInsurance\britannia\tests\Regression\Britannia_Hexa\TC1_BRI_DJ_PRE_NB001.spec.ts:16:5 › TC1_BRI_DJ_PRE_NB001 @Britannia_Premier @Bri_Premier_Annual @Bri_Annual (54.1s)
-Looking for verification email for bri.test.team+1794217049770@gmail.com...
-Verification code found: 560496
-Skipped pop-up
-Fields attached for "TC1_BRI_DJ_PRE_NB001 @Britannia_Premier @Bri_Premier_Annual @Bri_Annual": {
-  NBStartTime: '2026-11-09T09:37:29.770Z',
-  VRN: 'HJ64GZC',
-  InteractionID: '6af1945d219c981b42c2fa0e',
-  Email: 'bri.test.team+1794217049770@gmail.com',
-  AnnualCoverStartDate: '18 Nov 2026',
-  BritanniaEssentialsTierAnnualPrice: '£1,589.31',
-  BritanniaTierAnnualPrice: '£1,614.64',
-  BritanniaPremierTierAnnualPrice: '£1,699.63',
-  BreakDownCoverPrice: '£133',
-  MLEPrice: 'Included as standard',
-  GHCPrice: 'Included as standard',
-  NCDPrice: '£193.76',
-  CoverPriceAfterAddOns: '£1,901.27',
-  CardNumber: '5312000000000150',
-  AnnualCoverPolicyNumber: 'BRI831627229137'
+    this.baseReportDir = join(process.cwd(), 'custom-test-reports');
+    if (!existsSync(this.baseReportDir)) {
+      mkdirSync(this.baseReportDir, { recursive: true });
+    }
+
+    this.runReportDir = null;
+  }
+
+  onBegin() {
+    const now = new Date();
+    let dateStr = now.toISOString().replaceAll(':', '-').replaceAll('.', '-');
+
+    this.runReportDir = join(this.baseReportDir, `run-${dateStr}`);
+    mkdirSync(this.runReportDir, { recursive: true });
+
+    console.log(`Test run folder created: ${this.runReportDir}`);
+  }
+
+  formatDuration(durationMs) {
+    if (typeof durationMs !== 'number') return '';
+    const totalSeconds = Math.floor(durationMs / 1000);
+    const minutes = Math.floor(totalSeconds / 60);
+    const seconds = totalSeconds % 60;
+    return minutes > 0 ? `${minutes}m ${seconds}s` : `${seconds}s`;
+  }
+
+  async onTestEnd(test, result) {
+    const fields = {};
+    result.annotations?.forEach((a) => {
+      fields[a.type] = a.description;
+    });
+
+    const errorMessage =
+      result.status === 'failed' && result.error
+        ? result.error.stack || result.error.message || ''
+        : '';
+
+    this.results.push({
+      testName: test.title,
+      status: result.status,
+      duration: result.duration,
+      fields,
+      error: errorMessage,
+    });
+
+    if (Object.keys(fields).length) {
+      console.log(`Fields attached for "${test.title}":`, fields);
+    }
+    if (result.status === 'failed') {
+      console.error(`Test failed: ${test.title}`);
+      console.error(errorMessage);
+    }
+  }
+
+  onEnd() {
+    if (!this.results.length) return;
+
+    const allKeys = Array.from(new Set(this.results.flatMap((r) => Object.keys(r.fields))));
+
+    const headerColumns = ['Test Name', 'Status', ...allKeys, 'Duration', 'Error'];
+
+    const excelRows = this.results.map((r) => {
+      const row = {
+        'Test Name': r.testName,
+        Status: r.status,
+        Duration: this.formatDuration(r.duration),
+        Error: r.error,
+      };
+      allKeys.forEach((key) => {
+        row[key] = r.fields[key] || '';
+      });
+      return row;
+    });
+
+    const worksheet = utils.json_to_sheet(excelRows);
+    const workbook = utils.book_new();
+    utils.book_append_sheet(workbook, worksheet, 'Test Results');
+
+    worksheet['!cols'] = Object.keys(excelRows[0]).map((key) => ({
+      wch: Math.max(key.length, ...excelRows.map((r) => (r[key] ? String(r[key]).length : 0))) + 2,
+    }));
+
+    const now = new Date();
+    const formattedDateTime =
+      now.getFullYear() +
+      '-' +
+      String(now.getMonth() + 1).padStart(2, '0') +
+      '-' +
+      String(now.getDate()).padStart(2, '0') +
+      '_' +
+      String(now.getHours()).padStart(2, '0') +
+      '-' +
+      String(now.getMinutes()).padStart(2, '0') +
+      '-' +
+      String(now.getSeconds()).padStart(2, '0');
+
+    const excelFile = join(this.runReportDir, `custom-report-${formattedDateTime}.xlsx`);
+    writeFile(workbook, excelFile);
+    console.log(`Excel report generated: ${excelFile}`);
+
+    const html = `
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Custom Playwright Report</title>
+  <style>
+    body { font-family: Arial; padding: 20px; }
+    table { border-collapse: collapse; width: 100%; }
+    th, td { border: 1px solid #ccc; padding: 8px; vertical-align: top; }
+    th { background: #f4f4f4; }
+    .passed { color: green; }
+    .failed { color: red; }
+    pre { white-space: pre-wrap; word-wrap: break-word; font-size: 12px; color: #a00; }
+  </style>
+</head>
+<body>
+  <h1>Test Execution Report</h1>
+  <table>
+    <thead>
+      <tr>${headerColumns.map((c) => `<th>${c}</th>`).join('')}</tr>
+    </thead>
+    <tbody>
+      ${this.results
+        .map(
+          (r) => `
+        <tr>
+          <td>${r.testName}</td>
+          <td class="${r.status}">${r.status}</td>
+          ${allKeys.map((k) => `<td>${r.fields[k] || ''}</td>`).join('')}
+          <td>${this.formatDuration(r.duration)}</td>
+          <td>${r.error ? `<pre>${r.error}</pre>` : ''}</td>
+        </tr>
+      `
+        )
+        .join('')}
+    </tbody>
+  </table>
+</body>
+</html>`;
+
+    const htmlFile = join(this.runReportDir, `custom-report-${formattedDateTime}.html`);
+    writeFileSync(htmlFile, html);
+    console.log(`Custom HTML report generated: ${htmlFile}`);
+  }
 }
 
-  1 passed (1.4m)
-Excel report generated: C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\Athena_Automation\integration-tests\custom-test-reports\run-2026-11-09T09-37-22-609Z\custom-report-2026-11-09_10-38-23.xlsx
-Custom HTML report generated: C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\Athena_Automation\integration-tests\custom-test-reports\run-2026-11-09T09-37-22-609Z\custom-report-2026-11-09_10-38-23.html
-
-To open last HTML report run:
-
-  npx playwright show-report
-
-PS C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\Athena_Automation\integration-tests> 
+export default CustomHtmlReporter;
