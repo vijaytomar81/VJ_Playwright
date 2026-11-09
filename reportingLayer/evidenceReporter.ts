@@ -8,8 +8,10 @@ import type {
     TestResult,
 } from '@playwright/test/reporter';
 
+import { chromium, firefox, webkit } from '@playwright/test';
 import { hostname, platform, release, userInfo } from 'node:os';
 import { join } from 'node:path';
+import { execFileSync } from 'node:child_process';
 
 import {
     generateEvidenceExcel,
@@ -40,6 +42,13 @@ interface CollectedTest {
     readonly attempts: TestResult[];
 }
 
+interface BrowserMetadata {
+    readonly browser: string;
+    readonly browserChannel: string;
+    readonly browserVersion: string;
+    readonly headless: boolean | string;
+}
+
 export default class EvidenceReporter implements Reporter {
     private readonly tests = new Map<string, CollectedTest>();
 
@@ -53,8 +62,6 @@ export default class EvidenceReporter implements Reporter {
         this.startedAt = new Date();
         this.tests.clear();
 
-        // Register discovered tests, including tests that
-        // may be skipped without executing a test body.
         for (const test of suite.allTests()) {
             this.tests.set(test.id, {
                 test,
@@ -80,23 +87,96 @@ export default class EvidenceReporter implements Reporter {
         }
     }
 
+    /**
+     * Read the installed browser version without launching
+     * another browser instance.
+     *
+     * This is the executable's version, not a value
+     * collected from the running test browser.
+     */
+    private getBrowserVersion(
+        browserName: string,
+        channel?: string,
+    ): string {
+        try {
+            const browserType =
+                browserName === 'firefox'
+                    ? firefox
+                    : browserName === 'webkit'
+                        ? webkit
+                        : chromium;
+
+            const executablePath = browserType.executablePath();
+
+            // Browser executable version output differs by platform.
+            const output = execFileSync(
+                executablePath,
+                ['--version'],
+                {
+                    encoding: 'utf8',
+                    timeout: 10000,
+                    windowsHide: true,
+                },
+            ).trim();
+
+            const versionMatch = output.match(
+                /\d+(?:\.\d+){1,4}/,
+            );
+
+            return versionMatch?.[0] ?? output;
+        } catch (error) {
+            console.warn(
+                `EvidenceReporter: Could not determine browser version: ${error instanceof Error ? error.message : String(error)
+                }`,
+            );
+
+            return '';
+        }
+    }
+
+    /**
+     * Browser details for a configured Playwright project.
+     */
+    private getBrowserMetadata(
+        project?: FullConfig['projects'][number],
+    ): BrowserMetadata {
+        const browser = String(
+            project?.use.browserName ?? 'chromium',
+        );
+
+        const configuredChannel = project?.use.channel;
+
+        const browserChannel =
+            configuredChannel && String(configuredChannel).trim()
+                ? String(configuredChannel)
+                : 'bundled';
+
+        return {
+            browser,
+            browserChannel,
+            browserVersion: this.getBrowserVersion(
+                browser,
+                configuredChannel,
+            ),
+            headless: project?.use.headless ?? false,
+        };
+    }
+
     private getAnnotations(
         entry: CollectedTest,
     ): Record<string, string> {
-        // Prefer final-attempt annotations.
-        // Fall back to an earlier attempt only when
-        // the final attempt has no annotations.
         const attempts = [...entry.attempts].reverse();
 
-        const source =
-            attempts.find((attempt) => attempt.annotations.length > 0);
+        const source = attempts.find(
+            (attempt) => attempt.annotations.length > 0,
+        );
 
         const annotations: Record<string, string> = {};
 
         for (const annotation of source?.annotations ?? []) {
             const key = annotation.type;
 
-            // Do not export payment-card credentials.
+            // Never export sensitive payment or authentication data.
             if (
                 /cardnumber|cvv|cvc|securitycode|password|secret|token/i.test(
                     key,
@@ -114,14 +194,24 @@ export default class EvidenceReporter implements Reporter {
     private buildTests(): ExcelEvidenceTest[] {
         const rows: ExcelEvidenceTest[] = [];
 
+        // Cache browser metadata so we don't repeatedly
+        // invoke the browser executable for every test.
+        const browserMetadata = new Map<
+            string,
+            BrowserMetadata
+        >();
+
         for (const entry of this.tests.values()) {
             const attempts = entry.attempts;
             const last = attempts[attempts.length - 1];
 
             let status: ExcelEvidenceTest['status'];
 
-            if (!last || last.status === 'skipped' ||
-                last.status === 'interrupted') {
+            if (
+                !last ||
+                last.status === 'skipped' ||
+                last.status === 'interrupted'
+            ) {
                 status = 'notExecuted';
             } else if (last.status === 'passed') {
                 status = 'passed';
@@ -130,6 +220,7 @@ export default class EvidenceReporter implements Reporter {
             }
 
             const started = attempts[0]?.startTime;
+
             const finished = last
                 ? new Date(
                     last.startTime.getTime() + last.duration,
@@ -142,6 +233,14 @@ export default class EvidenceReporter implements Reporter {
             );
 
             const project = entry.test.parent.project();
+            const projectName = project?.name ?? 'chromium';
+
+            let metadata = browserMetadata.get(projectName);
+
+            if (!metadata) {
+                metadata = this.getBrowserMetadata(project);
+                browserMetadata.set(projectName, metadata);
+            }
 
             const values: Record<string, unknown> = {
                 scenarioId: entry.test.id,
@@ -153,16 +252,20 @@ export default class EvidenceReporter implements Reporter {
                 startTime: started?.toISOString() ?? '',
                 endTime: finished?.toISOString() ?? '',
                 durationMs,
-                error: last?.errors
-                    .map((error) => error.stack ?? error.message ?? '')
-                    .filter(Boolean)
-                    .join('\n') ?? '',
+                error:
+                    last?.errors
+                        .map(
+                            (error) =>
+                                error.stack ?? error.message ?? '',
+                        )
+                        .filter(Boolean)
+                        .join('\n') ?? '',
                 mode: process.env.CI === 'true' ? 'CI' : 'Local',
-                device: project?.name ?? '',
-                browser: project?.use.browserName ?? 'chromium',
-                browserChannel: project?.use.channel ?? '',
-                browserVersion: '',
-                headless: String(project?.use.headless ?? ''),
+                device: projectName,
+                browser: metadata.browser,
+                browserChannel: metadata.browserChannel,
+                browserVersion: metadata.browserVersion,
+                headless: String(metadata.headless),
             };
 
             rows.push({
@@ -195,6 +298,7 @@ export default class EvidenceReporter implements Reporter {
         ).length;
 
         const totalItems = rows.length;
+
         const elapsedMs =
             finishedAt.getTime() - this.startedAt.getTime();
 
@@ -204,6 +308,9 @@ export default class EvidenceReporter implements Reporter {
             'unknown';
 
         const browserProject = this.config?.projects[0];
+
+        const browserMetadata =
+            this.getBrowserMetadata(browserProject);
 
         const runId = this.startedAt
             .toISOString()
@@ -228,10 +335,10 @@ export default class EvidenceReporter implements Reporter {
             platform: platform(),
             osVersion: release(),
 
-            browser: browserProject?.use.browserName ?? 'chromium',
-            browserChannel: browserProject?.use.channel ?? '',
-            browserVersion: '',
-            headless: String(browserProject?.use.headless ?? ''),
+            browser: browserMetadata.browser,
+            browserChannel: browserMetadata.browserChannel,
+            browserVersion: browserMetadata.browserVersion,
+            headless: browserMetadata.headless,
 
             totalItems,
             passed,
@@ -239,10 +346,12 @@ export default class EvidenceReporter implements Reporter {
             notExecuted,
             passRate:
                 totalItems > 0
-                    ? Number(((passed / totalItems) * 100).toFixed(2))
+                    ? Number(
+                        ((passed / totalItems) * 100).toFixed(2),
+                    )
                     : 0,
 
-            executionTime: `${(elapsedMs / 1000).toFixed(2)} seconds`,
+            executionTime: elapsedMs,
             startedAt: this.startedAt.toISOString(),
             finishedAt: finishedAt.toISOString(),
         };
