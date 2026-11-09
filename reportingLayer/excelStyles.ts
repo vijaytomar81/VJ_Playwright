@@ -7,41 +7,37 @@ import type {
 } from 'exceljs';
 
 /**
- * Shared Excel formatting utilities.
+ * EvidenceFactory Excel formatting.
  *
- * Responsibilities:
- * - Report titles
- * - Table headers
- * - Data rows
- * - Status colors
- * - Summary sections
- * - Summary fields
- * - Column widths
- *
- * This file does not read annotations or reporting schemas.
+ * All colors and presentation rules are centralized here.
+ * No consumer reporting schemas are imported.
  */
 
 const COLORS = {
-    navy: 'FF17365D',
-    paleBlue: 'FFDCEAF7',
+    navy: 'FF102846',
+    blue: 'FF14529A',
+    brightBlue: 'FF1769C2',
+
+    paleBlue: 'FFE5EFF9',
     white: 'FFFFFFFF',
-    black: 'FF222222',
-    border: 'FFD6DEE8',
+    black: 'FF202B38',
+    border: 'FFB9C8D7',
 
-    green: 'FFDDF3E4',
-    darkGreen: 'FF176B36',
+    green: 'FF208047',
+    paleGreen: 'FFC7EBCB',
+    darkGreen: 'FF155B2E',
 
-    red: 'FFFCE4E4',
-    darkRed: 'FFA61B1B',
+    red: 'FFBD3038',
+    paleRed: 'FFF3C4C8',
+    darkRed: 'FF8D1723',
 
-    amber: 'FFFFF0C2',
-    darkAmber: 'FF8A5900',
+    orange: 'FFDB790F',
+    paleOrange: 'FFFFD998',
+    darkOrange: 'FF8B4A00',
+
+    paleRate: 'FFD4EAF4',
 } as const;
 
-/**
- * ExcelJS uses Borders for the complete cell border
- * and Border for an individual side.
- */
 const thinBorder: Partial<Borders> = {
     top: {
         style: 'thin',
@@ -61,9 +57,6 @@ const thinBorder: Partial<Borders> = {
     },
 };
 
-/**
- * Creates a solid background fill.
- */
 function solidFill(color: string): Fill {
     return {
         type: 'pattern',
@@ -72,9 +65,6 @@ function solidFill(color: string): Fill {
     };
 }
 
-/**
- * Applies common formatting to an Excel cell.
- */
 function styleCell(
     cell: Cell,
     background: string,
@@ -99,10 +89,7 @@ function styleCell(
 }
 
 /**
- * Styles the main report title/banner.
- *
- * Example:
- * Execution Summary | Project: britannia | Product: Car Insurance
+ * Main Summary title.
  */
 export function styleTitle(
     worksheet: Worksheet,
@@ -121,7 +108,7 @@ export function styleTitle(
     }
 
     const row = worksheet.getRow(rowNumber);
-    row.height = 34;
+    row.height = 38;
 
     for (let column = 1; column <= lastColumn; column++) {
         styleCell(
@@ -141,14 +128,61 @@ export function styleTitle(
 }
 
 /**
- * Styles a detailed worksheet header.
+ * Set worksheet tab colors.
  *
- * Features:
- * - Navy background
- * - White bold text
- * - Center alignment
- * - Auto filters
- * - Frozen header rows
+ * Summary      = Blue
+ * All          = Blue
+ * Passed       = Green
+ * Failed       = Red
+ * Not Executed = Orange
+ */
+export function styleWorksheetTab(
+    worksheet: Worksheet,
+): void {
+    const tabColors: Record<string, string> = {
+        Summary: COLORS.blue,
+        All: COLORS.brightBlue,
+        Passed: COLORS.green,
+        Failed: COLORS.red,
+        'Not Executed': COLORS.orange,
+        'Missing Reporting Fields': COLORS.orange,
+    };
+
+    const color = tabColors[worksheet.name];
+
+    if (color) {
+        worksheet.properties.tabColor = {
+            argb: color,
+        };
+    }
+}
+
+/**
+ * Apply a worksheet-specific header color.
+ */
+function getHeaderColor(
+    worksheetName: string,
+): string {
+    switch (worksheetName) {
+        case 'All':
+            return COLORS.brightBlue;
+
+        case 'Passed':
+            return COLORS.green;
+
+        case 'Failed':
+            return COLORS.red;
+
+        case 'Not Executed':
+            return COLORS.orange;
+
+        default:
+            return COLORS.navy;
+    }
+}
+
+/**
+ * Detailed worksheet header with filters and frozen rows.
  */
 export function styleTableHeader(
     worksheet: Worksheet,
@@ -157,15 +191,17 @@ export function styleTableHeader(
 ): void {
     if (columnCount < 1) return;
 
+    const headerColor = getHeaderColor(worksheet.name);
     const row = worksheet.getRow(headerRowNumber);
-    row.height = 30;
+
+    row.height = 32;
 
     for (let column = 1; column <= columnCount; column++) {
         const cell = row.getCell(column);
 
         styleCell(
             cell,
-            COLORS.navy,
+            headerColor,
             COLORS.white,
             true,
         );
@@ -194,10 +230,12 @@ export function styleTableHeader(
             ySplit: headerRowNumber,
         },
     ];
+
+    styleWorksheetTab(worksheet);
 }
 
 /**
- * Styles a regular data row.
+ * Regular detail row.
  */
 export function styleDataRow(
     worksheet: Worksheet,
@@ -205,7 +243,7 @@ export function styleDataRow(
     columnCount: number,
 ): void {
     const row = worksheet.getRow(rowNumber);
-    row.height = 25;
+    row.height = 26;
 
     for (let column = 1; column <= columnCount; column++) {
         styleCell(
@@ -217,11 +255,7 @@ export function styleDataRow(
 }
 
 /**
- * Applies status-specific colors.
- *
- * Passed       = Green
- * Failed       = Red
- * Not Executed = Amber
+ * Color the status cell in detailed worksheets.
  */
 export function styleStatusCell(
     cell: Cell,
@@ -232,14 +266,14 @@ export function styleStatusCell(
     if (normalized === 'passed') {
         styleCell(
             cell,
-            COLORS.green,
+            COLORS.paleGreen,
             COLORS.darkGreen,
             true,
         );
     } else if (normalized === 'failed') {
         styleCell(
             cell,
-            COLORS.red,
+            COLORS.paleRed,
             COLORS.darkRed,
             true,
         );
@@ -251,8 +285,8 @@ export function styleStatusCell(
     ) {
         styleCell(
             cell,
-            COLORS.amber,
-            COLORS.darkAmber,
+            COLORS.paleOrange,
+            COLORS.darkOrange,
             true,
         );
     }
@@ -265,14 +299,8 @@ export function styleStatusCell(
 }
 
 /**
- * Styles a Summary worksheet section heading.
- *
- * Example sections:
- * Run
- * Runtime
- * Browser
- * Results
- * Timing
+ * Summary section heading:
+ * Run, Runtime, Browser, Results, Timing.
  */
 export function styleSummarySection(
     worksheet: Worksheet,
@@ -291,30 +319,34 @@ export function styleSummarySection(
     }
 
     const row = worksheet.getRow(rowNumber);
-    row.height = 28;
+    row.height = 29;
 
     for (let column = 1; column <= lastColumn; column++) {
         styleCell(
             row.getCell(column),
-            COLORS.navy,
+            COLORS.blue,
             COLORS.white,
             true,
         );
     }
+
+    row.getCell(1).font = {
+        name: 'Aptos',
+        size: 12,
+        bold: true,
+        color: { argb: COLORS.white },
+    };
 }
 
 /**
- * Styles a Summary label/value row.
- *
- * Column A = Label (pale blue)
- * Column B = Value (white)
+ * Summary label and value row.
  */
 export function styleSummaryField(
     worksheet: Worksheet,
     rowNumber: number,
 ): void {
     const row = worksheet.getRow(rowNumber);
-    row.height = 25;
+    row.height = 26;
 
     styleCell(
         row.getCell(1),
@@ -331,12 +363,56 @@ export function styleSummaryField(
 }
 
 /**
- * Automatically adjusts worksheet column widths.
- *
- * Minimum width = 16
- * Maximum width = 55
- *
- * Long text remains wrapped within the maximum width.
+ * Highlight Summary results based on schema field keys.
+ */
+export function styleSummaryResult(
+    worksheet: Worksheet,
+    rowNumber: number,
+    field: string,
+): void {
+    const cell = worksheet.getCell(rowNumber, 2);
+
+    switch (field) {
+        case 'passed':
+            styleCell(
+                cell,
+                COLORS.paleGreen,
+                COLORS.darkGreen,
+                true,
+            );
+            break;
+
+        case 'failed':
+            styleCell(
+                cell,
+                COLORS.paleRed,
+                COLORS.darkRed,
+                true,
+            );
+            break;
+
+        case 'notExecuted':
+            styleCell(
+                cell,
+                COLORS.paleOrange,
+                COLORS.darkOrange,
+                true,
+            );
+            break;
+
+        case 'passRate':
+            styleCell(
+                cell,
+                COLORS.paleRate,
+                COLORS.navy,
+                true,
+            );
+            break;
+    }
+}
+
+/**
+ * Set readable widths for detailed worksheets.
  */
 export function setColumnWidths(
     worksheet: Worksheet,
@@ -354,10 +430,13 @@ export function setColumnWidths(
                 let text = '';
 
                 if (value !== null && value !== undefined) {
-                    if (typeof value === 'object' && 'text' in value) {
-                        text = String(value.text);
-                    } else if (value instanceof Date) {
+                    if (value instanceof Date) {
                         text = value.toISOString();
+                    } else if (
+                        typeof value === 'object' &&
+                        'text' in value
+                    ) {
+                        text = String(value.text);
                     } else {
                         text = String(value);
                     }
