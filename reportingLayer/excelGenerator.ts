@@ -51,38 +51,12 @@ export interface ExcelGenerationOptions {
 
 const UNKNOWN = 'Not Known';
 
-/**
- * Technical annotations are captured internally.
- * They must not be treated as missing business fields.
- */
+// Exclude captured technical annotations from missing business fields.
 const INTERNAL_FIELDS = new Set([
     'browser',
     'browserChannel',
     'browserVersion',
     'viewport',
-]);
-
-/**
- * These fields are populated by evidenceReporter.ts.
- * Other evidence fields prefer test annotations.
- */
-const REPORTER_FIELDS = new Set([
-    'scenarioId',
-    'scenarioName',
-    'status',
-    'retry',
-    'attempt',
-    'workerId',
-    'startTime',
-    'endTime',
-    'durationMs',
-    'error',
-    'mode',
-    'device',
-    'browser',
-    'browserChannel',
-    'browserVersion',
-    'headless',
 ]);
 
 const ordered = (fields: readonly SchemaField[]): SchemaField[] =>
@@ -141,6 +115,7 @@ function formatDate(value: unknown): string {
     if (Number.isNaN(date.getTime())) return String(value);
 
     const day = String(date.getDate()).padStart(2, '0');
+
     const month = [
         'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
         'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
@@ -155,10 +130,6 @@ function formatDate(value: unknown): string {
     return `${day}-${month}-${date.getFullYear()} ${time}`;
 }
 
-/**
- * Format Summary values without modifying the
- * original summary schema or reporter data.
- */
 function summaryValue(field: string, value: unknown): ExcelJS.CellValue {
     switch (field) {
         case 'startedAt':
@@ -182,7 +153,9 @@ function summaryValue(field: string, value: unknown): ExcelJS.CellValue {
 
         case 'runId': {
             const id = String(value ?? '');
-            return id ? (id.startsWith('run-') ? id : `run-${id}`) : UNKNOWN;
+            return id
+                ? (id.startsWith('run-') ? id : `run-${id}`)
+                : UNKNOWN;
         }
 
         default:
@@ -190,19 +163,9 @@ function summaryValue(field: string, value: unknown): ExcelJS.CellValue {
     }
 }
 
-/**
- * Reporter owns technical fields.
- * Annotations own business fields.
- */
+// Reporter has already merged annotations and execution metadata.
 function detailValue(test: ExcelEvidenceTest, field: string): unknown {
-    if (field === 'status') return test.status;
-    if (field === 'retry') return test.retry;
-
-    if (REPORTER_FIELDS.has(field)) {
-        return test.values[field] ?? UNKNOWN;
-    }
-
-    return test.annotations[field] ?? test.values[field] ?? '';
+    return test.values[field] ?? '';
 }
 
 function createSummary(
@@ -294,7 +257,10 @@ function createMissingFields(
             testName: test.testName,
             annotations: Object.entries(test.annotations)
                 .filter(([type]) => !INTERNAL_FIELDS.has(type))
-                .map(([type, description]) => ({ type, description })),
+                .map(([type, description]) => ({
+                    type,
+                    description,
+                })),
         })),
         schema,
     );
@@ -302,6 +268,7 @@ function createMissingFields(
     if (!missing.length) return;
 
     const sheet = workbook.addWorksheet('Missing Reporting Fields');
+
     const headers = [
         'Missing Field',
         'Affected Tests',
@@ -331,9 +298,6 @@ function createMissingFields(
     setColumnWidths(sheet);
 }
 
-/**
- * Generate the complete EvidenceFactory workbook.
- */
 export async function generateEvidenceExcel(
     options: ExcelGenerationOptions,
 ): Promise<string> {
@@ -346,18 +310,27 @@ export async function generateEvidenceExcel(
     createSummary(workbook, options);
 
     const sheets = [
-        { name: 'All', tests: options.tests },
+        {
+            name: 'All',
+            tests: options.tests,
+        },
         {
             name: 'Passed',
-            tests: options.tests.filter(test => test.status === 'passed'),
+            tests: options.tests.filter(
+                test => test.status === 'passed',
+            ),
         },
         {
             name: 'Failed',
-            tests: options.tests.filter(test => test.status === 'failed'),
+            tests: options.tests.filter(
+                test => test.status === 'failed',
+            ),
         },
         {
             name: 'Not Executed',
-            tests: options.tests.filter(test => test.status === 'notExecuted'),
+            tests: options.tests.filter(
+                test => test.status === 'notExecuted',
+            ),
         },
     ];
 
@@ -376,7 +349,10 @@ export async function generateEvidenceExcel(
         options.evidenceSchema,
     );
 
-    const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+    const timestamp = new Date()
+        .toISOString()
+        .replace(/[:.]/g, '-');
+
     const filePath = join(
         options.outputDirectory,
         `evidence-report-${timestamp}.xlsx`,
@@ -384,7 +360,9 @@ export async function generateEvidenceExcel(
 
     await workbook.xlsx.writeFile(filePath);
 
-    console.log(`EvidenceFactory: Excel report generated: ${filePath}`);
+    console.log(
+        `EvidenceFactory: Excel report generated: ${filePath}`,
+    );
 
     return filePath;
 }

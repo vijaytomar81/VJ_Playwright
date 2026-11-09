@@ -1,20 +1,11 @@
 
 import type {
-    Reporter,
-    FullConfig,
-    FullResult,
-    Suite,
-    TestCase,
-    TestResult,
+    Reporter, FullConfig, FullResult, Suite, TestCase, TestResult,
 } from '@playwright/test/reporter';
 
 import { hostname, platform, release, userInfo } from 'node:os';
 import { join } from 'node:path';
-
-import {
-    generateEvidenceExcel,
-    type ExcelEvidenceTest,
-} from './excelGenerator';
+import { generateEvidenceExcel, type ExcelEvidenceTest } from './excelGenerator';
 
 interface SchemaField {
     readonly field: string;
@@ -36,12 +27,7 @@ interface ReporterOptions {
 }
 
 type Project = FullConfig['projects'][number];
-
-type BrowserField =
-    | 'browser'
-    | 'browserChannel'
-    | 'browserVersion'
-    | 'headless';
+type BrowserField = 'browser' | 'browserChannel' | 'browserVersion' | 'headless';
 
 const UNKNOWN = 'Not Known';
 const SENSITIVE = /cardnumber|cvv|cvc|securitycode|password|secret|token/i;
@@ -57,7 +43,6 @@ function firstKnown(...values: unknown[]): string {
 
 function duration(milliseconds: number): string {
     const seconds = Math.floor(Math.max(0, milliseconds) / 1000);
-
     return `${String(Math.floor(seconds / 60)).padStart(2, '0')}:` +
         `${String(seconds % 60).padStart(2, '0')}`;
 }
@@ -90,20 +75,18 @@ function browserMetadata(
     annotations: Readonly<Record<string, string>>,
 ) {
     const use = project?.use;
+    const channel = firstKnown(annotations.browserChannel, use?.channel);
 
     return {
         browser: firstKnown(annotations.browser, use?.browserName),
-        browserChannel: firstKnown(
-            annotations.browserChannel,
-            use?.channel,
-        ),
+        browserChannel: channel === UNKNOWN && project
+            ? 'Not Specified'
+            : channel,
         browserVersion: firstKnown(annotations.browserVersion),
+        viewport: firstKnown(annotations.viewport),
         headless: known(use?.headless),
-        device: use?.isMobile === true
-            ? 'Mobile (Emulated)'
-            : use?.isMobile === false
-                ? 'Desktop (Emulated Profile)'
-                : UNKNOWN,
+        device: use?.isMobile === true ? 'Mobile (Emulated)' :
+            use?.isMobile === false ? 'Desktop (Emulated Profile)' : UNKNOWN,
     };
 }
 
@@ -112,8 +95,7 @@ function summaryValue(
     field: BrowserField,
 ): string {
     const values = new Set(
-        rows
-            .map(row => known(row.values[field]))
+        rows.map(row => known(row.values[field]))
             .filter(value => value !== UNKNOWN),
     );
 
@@ -124,8 +106,7 @@ function summaryValue(
 
 export default class EvidenceReporter implements Reporter {
     private readonly tests = new Map<
-        string,
-        { test: TestCase; results: TestResult[] }
+        string, { test: TestCase; results: TestResult[] }
     >();
 
     private config?: FullConfig;
@@ -142,19 +123,14 @@ export default class EvidenceReporter implements Reporter {
             this.tests.set(test.id, { test, results: [] });
         }
 
-        console.log(
-            `EvidenceReporter: ${this.tests.size} test cases discovered`,
-        );
+        console.log(`EvidenceReporter: ${this.tests.size} test cases discovered`);
     }
 
     onTestEnd(test: TestCase, result: TestResult): void {
         const existing = this.tests.get(test.id);
 
-        if (existing) {
-            existing.results.push(result);
-        } else {
-            this.tests.set(test.id, { test, results: [result] });
-        }
+        if (existing) existing.results.push(result);
+        else this.tests.set(test.id, { test, results: [result] });
     }
 
     private buildTests(): ExcelEvidenceTest[] {
@@ -166,14 +142,11 @@ export default class EvidenceReporter implements Reporter {
             const status: ExcelEvidenceTest['status'] =
                 !last || last.status === 'skipped' || last.status === 'interrupted'
                     ? 'notExecuted'
-                    : last.status === 'passed'
-                        ? 'passed'
-                        : 'failed';
+                    : last.status === 'passed' ? 'passed' : 'failed';
 
             const retry = last?.retry ?? 0;
             const totalDuration = results.reduce(
-                (sum, result) => sum + result.duration,
-                0,
+                (sum, result) => sum + result.duration, 0,
             );
 
             const finishedAt = last
@@ -187,6 +160,7 @@ export default class EvidenceReporter implements Reporter {
                 retry,
                 annotations,
                 values: {
+                    ...annotations,
                     scenarioId: test.id,
                     scenarioName: test.title,
                     status,
