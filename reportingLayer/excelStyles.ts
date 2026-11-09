@@ -1,55 +1,64 @@
 
-import type {
-    Cell,
-    Worksheet,
-    Fill,
-    Borders,
-} from 'exceljs';
+import type { Cell, Worksheet, Fill, Borders } from 'exceljs';
 
 /**
  * EvidenceFactory Excel formatting.
+ * All presentation rules are centralized here.
  *
- * All Excel colors, fonts, borders, alignment,
- * worksheet layout and presentation rules
- * are centralized here.
- *
- * No consumer reporting schemas are imported.
+ * Change colors in COLORS using VS Code Color Picker.
+ * Colors use #RRGGBB and are converted to ExcelJS ARGB.
  */
 
-/* ============================================================
- * COLOR PALETTE
- * ============================================================ */
-
 const COLORS = {
-    navy: 'FF102846',
-    blue: 'FF14529A',
-    brightBlue: 'FF1769C2',
+    // Summary worksheet
+    summaryTitle: '#102846',
+    summaryTitleText: '#FFFFFF',
+    summarySection: '#14529A',
+    summarySectionText: '#FFFFFF',
+    summaryField: '#E5EFF9',
+    summaryFieldText: '#202B38',
 
-    paleBlue: 'FFE5EFF9',
-    white: 'FFFFFFFF',
-    black: 'FF202B38',
-    border: 'FFB9C8D7',
+    // All worksheet
+    allHeader: '#1769C2',
 
-    green: 'FF208047',
-    paleGreen: 'FFC7EBCB',
-    darkGreen: 'FF155B2E',
+    // Passed worksheet and status
+    passed: '#208047',
+    passedLight: '#C7EBCB',
+    passedText: '#155B2E',
 
-    red: 'FFBD3038',
-    paleRed: 'FFF3C4C8',
-    darkRed: 'FF8D1723',
+    // Failed worksheet and status
+    failed: '#BD3038',
+    failedLight: '#F3C4C8',
+    failedText: '#8D1723',
 
-    orange: 'FFDB790F',
-    paleOrange: 'FFFFD998',
-    darkOrange: 'FF8B4A00',
+    // Not Executed worksheet and status
+    notExecuted: '#DB790F',
+    notExecutedLight: '#FFD998',
+    notExecutedText: '#8B4A00',
 
-    paleRate: 'FFD4EAF4',
+    // Missing Reporting Fields worksheet
+    missingFieldsHeader: '#102846',
+
+    // Summary pass-rate backgrounds
+    passRateHigh: '#C7EBCB',
+    passRateMedium: '#FFD998',
+    passRateLow: '#F3C4C8',
+    passRateText: '#102846',
+
+    // Common formatting
+    white: '#FFFFFF',
+    black: '#202B38',
+    border: '#B9C8D7',
 } as const;
 
-/* ============================================================
- * WORKSHEET THEMES
- *
- * Change worksheet tab and header colors here.
- * ============================================================ */
+// Pass Rate values are stored from 0 to 100.
+const PASS_RATE_RANGES = {
+    high: 90,
+    medium: 70,
+} as const;
+
+const toArgb = (color: string): string =>
+    `FF${color.replace('#', '')}`;
 
 interface WorksheetTheme {
     readonly tab: string;
@@ -60,70 +69,56 @@ const WORKSHEET_THEMES: Readonly<
     Record<string, WorksheetTheme>
 > = {
     Summary: {
-        tab: COLORS.blue,
-        header: COLORS.navy,
+        tab: COLORS.summarySection,
+        header: COLORS.summaryTitle,
     },
-
     All: {
-        tab: COLORS.brightBlue,
-        header: COLORS.brightBlue,
+        tab: COLORS.allHeader,
+        header: COLORS.allHeader,
     },
-
     Passed: {
-        tab: COLORS.green,
-        header: COLORS.green,
+        tab: COLORS.passed,
+        header: COLORS.passed,
     },
-
     Failed: {
-        tab: COLORS.red,
-        header: COLORS.red,
+        tab: COLORS.failed,
+        header: COLORS.failed,
     },
-
     'Not Executed': {
-        tab: COLORS.orange,
-        header: COLORS.orange,
+        tab: COLORS.notExecuted,
+        header: COLORS.notExecuted,
     },
-
     'Missing Reporting Fields': {
-        tab: COLORS.orange,
-        header: COLORS.navy,
+        tab: COLORS.notExecuted,
+        header: COLORS.missingFieldsHeader,
     },
 };
 
 const DEFAULT_THEME: WorksheetTheme = {
-    tab: COLORS.blue,
-    header: COLORS.navy,
+    tab: COLORS.summarySection,
+    header: COLORS.summaryTitle,
 };
 
-function getWorksheetTheme(
-    worksheetName: string,
-): WorksheetTheme {
-    return (
-        WORKSHEET_THEMES[worksheetName] ??
-        DEFAULT_THEME
-    );
+function getWorksheetTheme(name: string): WorksheetTheme {
+    return WORKSHEET_THEMES[name] ?? DEFAULT_THEME;
 }
-
-/* ============================================================
- * COMMON STYLES
- * ============================================================ */
 
 const thinBorder: Partial<Borders> = {
     top: {
         style: 'thin',
-        color: { argb: COLORS.border },
+        color: { argb: toArgb(COLORS.border) },
     },
     bottom: {
         style: 'thin',
-        color: { argb: COLORS.border },
+        color: { argb: toArgb(COLORS.border) },
     },
     left: {
         style: 'thin',
-        color: { argb: COLORS.border },
+        color: { argb: toArgb(COLORS.border) },
     },
     right: {
         style: 'thin',
-        color: { argb: COLORS.border },
+        color: { argb: toArgb(COLORS.border) },
     },
 };
 
@@ -131,7 +126,7 @@ function solidFill(color: string): Fill {
     return {
         type: 'pattern',
         pattern: 'solid',
-        fgColor: { argb: color },
+        fgColor: { argb: toArgb(color) },
     };
 }
 
@@ -147,7 +142,7 @@ function styleCell(
         name: 'Aptos',
         size: 11,
         bold,
-        color: { argb: fontColor },
+        color: { argb: toArgb(fontColor) },
     };
 
     cell.border = thinBorder;
@@ -158,41 +153,36 @@ function styleCell(
     };
 }
 
-/* ============================================================
- * WORKSHEET TAB COLORS
- * ============================================================ */
+function styleSummaryValue(
+    cell: Cell,
+    fontColor: string = COLORS.black,
+    bold = false,
+): void {
+    styleCell(cell, COLORS.white, fontColor, bold);
 
-/**
- * Set worksheet tab color using WORKSHEET_THEMES.
- */
+    cell.fill = {
+        type: 'pattern',
+        pattern: 'none',
+    };
+}
 
+// Set true to enable worksheet-specific tab colors.
 const ENABLE_TAB_COLORS = false;
 
 export function styleWorksheetTab(
     worksheet: Worksheet,
 ): void {
-    if (!ENABLE_TAB_COLORS) {
-        return;
-    }
+    if (!ENABLE_TAB_COLORS) return;
 
     const theme = getWorksheetTheme(worksheet.name);
 
     worksheet.properties.tabColor = {
-        argb: theme.tab,
+        argb: toArgb(theme.tab),
     };
 }
 
-
-/* ============================================================
- * SUMMARY WORKSHEET LAYOUT
- * ============================================================ */
-
 /**
- * Configure Summary worksheet column widths
- * and frozen title row.
- *
- * All Summary layout settings belong here,
- * not in excelGenerator.ts.
+ * Summary worksheet layout.
  */
 export function styleSummaryLayout(
     worksheet: Worksheet,
@@ -208,12 +198,8 @@ export function styleSummaryLayout(
     ];
 }
 
-/* ============================================================
- * SUMMARY TITLE
- * ============================================================ */
-
 /**
- * Main Summary title.
+ * Summary title.
  */
 export function styleTitle(
     worksheet: Worksheet,
@@ -224,28 +210,18 @@ export function styleTitle(
 
     if (lastColumn > 1) {
         worksheet.mergeCells(
-            rowNumber,
-            1,
-            rowNumber,
-            lastColumn,
+            rowNumber, 1, rowNumber, lastColumn,
         );
     }
 
     const row = worksheet.getRow(rowNumber);
     row.height = 38;
 
-    const headerColor =
-        getWorksheetTheme(worksheet.name).header;
-
-    for (
-        let column = 1;
-        column <= lastColumn;
-        column++
-    ) {
+    for (let column = 1; column <= lastColumn; column++) {
         styleCell(
             row.getCell(column),
-            headerColor,
-            COLORS.white,
+            COLORS.summaryTitle,
+            COLORS.summaryTitleText,
             true,
         );
     }
@@ -254,20 +230,12 @@ export function styleTitle(
         name: 'Aptos Display',
         size: 16,
         bold: true,
-        color: { argb: COLORS.white },
+        color: { argb: toArgb(COLORS.summaryTitleText) },
     };
 }
 
-/* ============================================================
- * DETAILED WORKSHEET HEADER
- * ============================================================ */
-
 /**
- * Detailed worksheet header with:
- * - Worksheet-specific header color
- * - Auto filters
- * - Frozen header rows
- * - Center-aligned text
+ * Detail worksheet headers.
  */
 export function styleTableHeader(
     worksheet: Worksheet,
@@ -281,11 +249,7 @@ export function styleTableHeader(
 
     row.height = 32;
 
-    for (
-        let column = 1;
-        column <= columnCount;
-        column++
-    ) {
+    for (let column = 1; column <= columnCount; column++) {
         const cell = row.getCell(column);
 
         styleCell(
@@ -323,12 +287,8 @@ export function styleTableHeader(
     styleWorksheetTab(worksheet);
 }
 
-/* ============================================================
- * DETAILED WORKSHEET DATA ROWS
- * ============================================================ */
-
 /**
- * Regular detail row.
+ * Detail data rows use Excel's default height.
  */
 export function styleDataRow(
     worksheet: Worksheet,
@@ -336,13 +296,8 @@ export function styleDataRow(
     columnCount: number,
 ): void {
     const row = worksheet.getRow(rowNumber);
-    row.height = 26;
 
-    for (
-        let column = 1;
-        column <= columnCount;
-        column++
-    ) {
+    for (let column = 1; column <= columnCount; column++) {
         styleCell(
             row.getCell(column),
             COLORS.white,
@@ -351,12 +306,8 @@ export function styleDataRow(
     }
 }
 
-/* ============================================================
- * STATUS CELL FORMATTING
- * ============================================================ */
-
 /**
- * Color the status cell in detailed worksheets.
+ * Status highlighting in detailed worksheets.
  */
 export function styleStatusCell(
     cell: Cell,
@@ -367,15 +318,15 @@ export function styleStatusCell(
     if (normalized === 'passed') {
         styleCell(
             cell,
-            COLORS.paleGreen,
-            COLORS.darkGreen,
+            COLORS.passedLight,
+            COLORS.passedText,
             true,
         );
     } else if (normalized === 'failed') {
         styleCell(
             cell,
-            COLORS.paleRed,
-            COLORS.darkRed,
+            COLORS.failedLight,
+            COLORS.failedText,
             true,
         );
     } else if (
@@ -386,8 +337,8 @@ export function styleStatusCell(
     ) {
         styleCell(
             cell,
-            COLORS.paleOrange,
-            COLORS.darkOrange,
+            COLORS.notExecutedLight,
+            COLORS.notExecutedText,
             true,
         );
     }
@@ -399,13 +350,8 @@ export function styleStatusCell(
     };
 }
 
-/* ============================================================
- * SUMMARY SECTION HEADINGS
- * ============================================================ */
-
 /**
- * Summary section heading:
- * Run, Runtime, Browser, Results, Timing.
+ * Summary section headings.
  */
 export function styleSummarySection(
     worksheet: Worksheet,
@@ -416,25 +362,18 @@ export function styleSummarySection(
 
     if (lastColumn > 1) {
         worksheet.mergeCells(
-            rowNumber,
-            1,
-            rowNumber,
-            lastColumn,
+            rowNumber, 1, rowNumber, lastColumn,
         );
     }
 
     const row = worksheet.getRow(rowNumber);
     row.height = 29;
 
-    for (
-        let column = 1;
-        column <= lastColumn;
-        column++
-    ) {
+    for (let column = 1; column <= lastColumn; column++) {
         styleCell(
             row.getCell(column),
-            COLORS.blue,
-            COLORS.white,
+            COLORS.summarySection,
+            COLORS.summarySectionText,
             true,
         );
     }
@@ -443,18 +382,13 @@ export function styleSummarySection(
         name: 'Aptos',
         size: 12,
         bold: true,
-        color: { argb: COLORS.white },
+        color: { argb: toArgb(COLORS.summarySectionText) },
     };
 }
 
-/* ============================================================
- * SUMMARY LABEL AND VALUE ROWS
- * ============================================================ */
-
 /**
- * Style Summary label and value rows.
- *
- * Field-specific row sizing is also handled here.
+ * Summary field names retain their background color.
+ * Summary values have no background fill.
  */
 export function styleSummaryField(
     worksheet: Worksheet,
@@ -463,32 +397,22 @@ export function styleSummaryField(
 ): void {
     const row = worksheet.getRow(rowNumber);
 
-    row.height =
-        field === 'evidenceDirectory'
-            ? 34
-            : 26;
+    row.height = field === 'evidenceDirectory' ? 34 : 26;
 
     styleCell(
         row.getCell(1),
-        COLORS.paleBlue,
-        COLORS.black,
+        COLORS.summaryField,
+        COLORS.summaryFieldText,
         true,
     );
 
-    styleCell(
-        row.getCell(2),
-        COLORS.white,
-        COLORS.black,
-    );
+    styleSummaryValue(row.getCell(2));
 }
 
-/* ============================================================
- * SUMMARY RESULT HIGHLIGHTING
- * ============================================================ */
-
 /**
- * Highlight Summary results and apply
- * field-specific number formatting.
+ * Summary result values:
+ * - Passed, Failed and Not Executed retain colored fonts.
+ * - Only Pass Rate receives a colored background.
  */
 export function styleSummaryResult(
     worksheet: Worksheet,
@@ -499,73 +423,63 @@ export function styleSummaryResult(
 
     switch (field) {
         case 'passed':
-            styleCell(
-                cell,
-                COLORS.paleGreen,
-                COLORS.darkGreen,
-                true,
-            );
+            styleSummaryValue(cell, COLORS.passedText, true);
             break;
 
         case 'failed':
-            styleCell(
-                cell,
-                COLORS.paleRed,
-                COLORS.darkRed,
-                true,
-            );
+            styleSummaryValue(cell, COLORS.failedText, true);
             break;
 
         case 'notExecuted':
-            styleCell(
-                cell,
-                COLORS.paleOrange,
-                COLORS.darkOrange,
-                true,
-            );
+            styleSummaryValue(cell, COLORS.notExecutedText, true);
             break;
 
-        case 'passRate':
-            styleCell(
-                cell,
-                COLORS.paleRate,
-                COLORS.navy,
-                true,
-            );
+        case 'passRate': {
+            const rate = Number(cell.value);
 
-            if (typeof cell.value === 'number') {
-                cell.numFmt = '0.00"%"';
+            if (!Number.isFinite(rate) || cell.value === null) {
+                styleSummaryValue(cell);
+                break;
             }
+
+            const background =
+                rate >= PASS_RATE_RANGES.high
+                    ? COLORS.passRateHigh
+                    : rate >= PASS_RATE_RANGES.medium
+                        ? COLORS.passRateMedium
+                        : COLORS.passRateLow;
+
+            styleCell(
+                cell,
+                background,
+                COLORS.passRateText,
+                true,
+            );
+
+            cell.numFmt = '0.00"%"';
             break;
+        }
     }
 }
 
-/* ============================================================
- * COLUMN WIDTHS
- * ============================================================ */
-
 /**
- * Set readable widths for detailed worksheets.
+ * Automatically calculate readable column widths.
  */
 export function setColumnWidths(
     worksheet: Worksheet,
     minimumWidth = 16,
     maximumWidth = 55,
 ): void {
-    worksheet.columns.forEach((column) => {
+    worksheet.columns.forEach(column => {
         let longest = minimumWidth;
 
         column.eachCell?.(
             { includeEmpty: false },
-            (cell) => {
+            cell => {
                 const value = cell.value;
-
                 let text = '';
 
-                if (
-                    value !== null &&
-                    value !== undefined
-                ) {
+                if (value !== null && value !== undefined) {
                     if (value instanceof Date) {
                         text = value.toISOString();
                     } else if (
