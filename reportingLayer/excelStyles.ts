@@ -165,6 +165,12 @@ function styleSummaryValue(
         pattern: 'none',
         fgColor: { argb: toArgb(COLORS.white) },
     };
+
+    cell.alignment = {
+        vertical: 'middle',
+        horizontal: 'left',
+        wrapText: true,
+    };
 }
 
 // Set true to enable worksheet-specific tab colors.

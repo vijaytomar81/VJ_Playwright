@@ -18,6 +18,7 @@ export const evidenceFields = [
   { field: 'policyNumber', label: 'Policy Number', order: 4 },
   { field: 'customerNumber', label: 'Customer Number', order: 5 },
   { field: 'premium', label: 'Premium', order: 6 },
+  { field: 'Bripremium', label: 'Premium', order: 6 },
 
   // Execution metadata
   { field: 'retry', label: 'Retry', order: 7 },
