@@ -8,13 +8,7 @@ import type {
     TestResult,
 } from '@playwright/test/reporter';
 
-import {
-    hostname,
-    platform,
-    release,
-    userInfo,
-} from 'node:os';
-
+import { hostname, platform, release, userInfo } from 'node:os';
 import { join } from 'node:path';
 
 import {
@@ -41,127 +35,103 @@ interface ReporterOptions {
     readonly outputDirectory?: string;
 }
 
-interface CollectedTest {
-    readonly test: TestCase;
-    readonly attempts: TestResult[];
+type Project = FullConfig['projects'][number];
+
+type BrowserField =
+    | 'browser'
+    | 'browserChannel'
+    | 'browserVersion'
+    | 'headless';
+
+const UNKNOWN = 'Not Known';
+const SENSITIVE = /cardnumber|cvv|cvc|securitycode|password|secret|token/i;
+
+const known = (value: unknown): string =>
+    value === undefined || value === null || String(value).trim() === ''
+        ? UNKNOWN
+        : String(value).trim();
+
+function firstKnown(...values: unknown[]): string {
+    return values.map(known).find(value => value !== UNKNOWN) ?? UNKNOWN;
 }
 
-interface BrowserMetadata {
-    readonly browser: string;
-    readonly browserChannel: string;
-    readonly browserVersion: string;
-    readonly headless: string;
-    readonly device: string;
+function duration(milliseconds: number): string {
+    const seconds = Math.floor(Math.max(0, milliseconds) / 1000);
+
+    return `${String(Math.floor(seconds / 60)).padStart(2, '0')}:` +
+        `${String(seconds % 60).padStart(2, '0')}`;
 }
 
-const NOT_KNOWN = 'Not Known';
-
-const SENSITIVE_FIELD =
-    /cardnumber|cvv|cvc|securitycode|password|secret|token/i;
-
-function known(value: unknown): string {
-    if (value === undefined || value === null) {
-        return NOT_KNOWN;
-    }
-
-    const text = String(value).trim();
-
-    return text || NOT_KNOWN;
-}
-
-function formatDuration(milliseconds: number): string {
-    const totalSeconds = Math.floor(
-        Math.max(0, milliseconds) / 1000,
-    );
-
-    const minutes = Math.floor(totalSeconds / 60);
-    const seconds = totalSeconds % 60;
-
-    return `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
-}
-
-function getStatus(
-    result?: TestResult,
-): ExcelEvidenceTest['status'] {
-    if (
-        !result ||
-        result.status === 'skipped' ||
-        result.status === 'interrupted'
-    ) {
-        return 'notExecuted';
-    }
-
-    return result.status === 'passed'
-        ? 'passed'
-        : 'failed';
-}
-
-function getAnnotations(
-    attempts: readonly TestResult[],
-): Record<string, string> {
+function annotationsOf(results: readonly TestResult[]): Record<string, string> {
     const annotations: Record<string, string> = {};
 
-    for (const attempt of attempts) {
-        for (const annotation of attempt.annotations) {
-            const key = annotation.type;
+    for (const result of results) {
+        for (const annotation of result.annotations) {
+            if (SENSITIVE.test(annotation.type)) continue;
 
-            if (SENSITIVE_FIELD.test(key)) {
-                continue;
+            const value = annotation.description ?? '';
+            const previous = annotations[annotation.type];
+
+            if (
+                value !== UNKNOWN ||
+                previous === undefined ||
+                previous === UNKNOWN
+            ) {
+                annotations[annotation.type] = value;
             }
-
-            annotations[key] = annotation.description ?? '';
         }
     }
 
     return annotations;
 }
 
-function getBrowserMetadata(
-    project?: FullConfig['projects'][number],
-    annotations: Record<string, string> = {},
-): BrowserMetadata {
+function browserMetadata(
+    project: Project | undefined,
+    annotations: Readonly<Record<string, string>>,
+) {
     const use = project?.use;
 
-    const browser = known(use?.browserName);
-    const browserChannel = known(use?.channel);
-    const browserVersion = known(annotations.browserVersion);
-    const headless = known(use?.headless);
-
-    let device = NOT_KNOWN;
-
-    if (use?.isMobile === true) {
-        device = 'Mobile (Emulated)';
-    } else if (use?.isMobile === false) {
-        device = 'Desktop (Emulated Profile)';
-    }
-
     return {
-        browser,
-        browserChannel,
-        browserVersion,
-        headless,
-        device,
+        browser: firstKnown(annotations.browser, use?.browserName),
+        browserChannel: firstKnown(
+            annotations.browserChannel,
+            use?.channel,
+        ),
+        browserVersion: firstKnown(annotations.browserVersion),
+        headless: known(use?.headless),
+        device: use?.isMobile === true
+            ? 'Mobile (Emulated)'
+            : use?.isMobile === false
+                ? 'Desktop (Emulated Profile)'
+                : UNKNOWN,
     };
 }
 
-function getError(result?: TestResult): string {
-    return (
-        result?.errors
-            .map(error => error.stack ?? error.message ?? '')
-            .filter(Boolean)
-            .join('\n') ?? ''
+function summaryValue(
+    rows: readonly ExcelEvidenceTest[],
+    field: BrowserField,
+): string {
+    const values = new Set(
+        rows
+            .map(row => known(row.values[field]))
+            .filter(value => value !== UNKNOWN),
     );
+
+    return values.size > 1
+        ? 'Multiple'
+        : values.values().next().value ?? UNKNOWN;
 }
 
 export default class EvidenceReporter implements Reporter {
-    private readonly tests = new Map<string, CollectedTest>();
+    private readonly tests = new Map<
+        string,
+        { test: TestCase; results: TestResult[] }
+    >();
 
     private config?: FullConfig;
     private startedAt = new Date();
 
-    constructor(
-        private readonly options: ReporterOptions,
-    ) { }
+    constructor(private readonly options: ReporterOptions) { }
 
     onBegin(config: FullConfig, suite: Suite): void {
         this.config = config;
@@ -169,10 +139,7 @@ export default class EvidenceReporter implements Reporter {
         this.tests.clear();
 
         for (const test of suite.allTests()) {
-            this.tests.set(test.id, {
-                test,
-                attempts: [],
-            });
+            this.tests.set(test.id, { test, results: [] });
         }
 
         console.log(
@@ -181,147 +148,85 @@ export default class EvidenceReporter implements Reporter {
     }
 
     onTestEnd(test: TestCase, result: TestResult): void {
-        const entry = this.tests.get(test.id);
+        const existing = this.tests.get(test.id);
 
-        if (entry) {
-            entry.attempts.push(result);
-            return;
+        if (existing) {
+            existing.results.push(result);
+        } else {
+            this.tests.set(test.id, { test, results: [result] });
         }
-
-        this.tests.set(test.id, {
-            test,
-            attempts: [result],
-        });
     }
 
     private buildTests(): ExcelEvidenceTest[] {
-        const rows: ExcelEvidenceTest[] = [];
+        return [...this.tests.values()].map(({ test, results }) => {
+            const last = results[results.length - 1];
+            const annotations = annotationsOf(results);
+            const metadata = browserMetadata(test.parent.project(), annotations);
 
-        for (const entry of this.tests.values()) {
-            const { test, attempts } = entry;
-            const last = attempts[attempts.length - 1];
+            const status: ExcelEvidenceTest['status'] =
+                !last || last.status === 'skipped' || last.status === 'interrupted'
+                    ? 'notExecuted'
+                    : last.status === 'passed'
+                        ? 'passed'
+                        : 'failed';
 
-            const status = getStatus(last);
-            const annotations = getAnnotations(attempts);
-            const project = test.parent.project();
-
-            const metadata = getBrowserMetadata(
-                project,
-                annotations,
-            );
-
-            const started = attempts[0]?.startTime;
-
-            const finished = last
-                ? new Date(
-                    last.startTime.getTime() + last.duration,
-                )
-                : undefined;
-
-            const durationMs = attempts.reduce(
-                (sum, attempt) => sum + attempt.duration,
+            const retry = last?.retry ?? 0;
+            const totalDuration = results.reduce(
+                (sum, result) => sum + result.duration,
                 0,
             );
 
-            const retry = last?.retry ?? 0;
+            const finishedAt = last
+                ? new Date(last.startTime.getTime() + last.duration)
+                : undefined;
 
-            const values: Record<string, unknown> = {
-                scenarioId: test.id,
-                scenarioName: test.title,
-                status,
-                retry,
-                attempt: retry,
-                workerId: last?.workerIndex ?? NOT_KNOWN,
-                startTime: started?.toISOString() ?? NOT_KNOWN,
-                endTime: finished?.toISOString() ?? NOT_KNOWN,
-                durationMs: formatDuration(durationMs),
-                error: getError(last),
-                mode: process.env.CI === 'true' ? 'CI' : 'Local',
-                device: metadata.device,
-                browser: metadata.browser,
-                browserChannel: metadata.browserChannel,
-                browserVersion: metadata.browserVersion,
-                headless: metadata.headless,
-            };
-
-            rows.push({
+            return {
                 testId: test.id,
                 testName: test.title,
                 status,
                 retry,
                 annotations,
-                values,
-            });
-        }
-
-        return rows;
-    }
-
-    private getSummaryBrowserMetadata(
-        rows: readonly ExcelEvidenceTest[],
-    ): BrowserMetadata {
-        const project = this.config?.projects[0];
-
-        const versions = [
-            ...new Set(
-                rows
-                    .map(row => known(row.annotations.browserVersion))
-                    .filter(value => value !== NOT_KNOWN),
-            ),
-        ];
-
-        const metadata = getBrowserMetadata(project);
-
-        return {
-            ...metadata,
-            browserVersion:
-                versions.length === 1
-                    ? versions[0]
-                    : versions.length > 1
-                        ? 'Multiple'
-                        : NOT_KNOWN,
-        };
+                values: {
+                    scenarioId: test.id,
+                    scenarioName: test.title,
+                    status,
+                    retry,
+                    attempt: retry,
+                    workerId: last?.workerIndex ?? UNKNOWN,
+                    startTime: results[0]?.startTime.toISOString() ?? UNKNOWN,
+                    endTime: finishedAt?.toISOString() ?? UNKNOWN,
+                    durationMs: duration(totalDuration),
+                    error: last?.errors
+                        .map(error => error.stack ?? error.message ?? '')
+                        .filter(Boolean)
+                        .join('\n') ?? '',
+                    mode: process.env.CI === 'true' ? 'CI' : 'Local',
+                    ...metadata,
+                },
+            };
+        });
     }
 
     async onEnd(_result: FullResult): Promise<void> {
         const finishedAt = new Date();
         const rows = this.buildTests();
 
-        const passed = rows.filter(
-            row => row.status === 'passed',
-        ).length;
-
-        const failed = rows.filter(
-            row => row.status === 'failed',
-        ).length;
-
+        const passed = rows.filter(row => row.status === 'passed').length;
+        const failed = rows.filter(row => row.status === 'failed').length;
         const notExecuted = rows.filter(
             row => row.status === 'notExecuted',
         ).length;
 
-        const totalItems = rows.length;
+        const runId = this.startedAt.toISOString().replace(/[:.]/g, '-');
+        const outputDirectory = this.options.outputDirectory ??
+            join(process.cwd(), 'custom-test-reports', `run-${runId}`);
 
-        const elapsedMs =
-            finishedAt.getTime() - this.startedAt.getTime();
-
-        const projectName = known(
-            process.env.PROJECT ?? this.config?.projects[0]?.name,
-        );
-
-        const browserMetadata =
-            this.getSummaryBrowserMetadata(rows);
-
-        const runId = this.startedAt
-            .toISOString()
-            .replace(/[:.]/g, '-');
-
-        const outputDirectory =
-            this.options.outputDirectory ??
-            join(
-                process.cwd(),
-                'custom-test-reports',
-                `run-${runId}`,
-            );
+        const browserFields: BrowserField[] = [
+            'browser',
+            'browserChannel',
+            'browserVersion',
+            'headless',
+        ];
 
         const summaryData: Record<string, unknown> = {
             runId,
@@ -332,26 +237,29 @@ export default class EvidenceReporter implements Reporter {
             user: userInfo().username,
             platform: platform(),
             osVersion: release(),
-            browser: browserMetadata.browser,
-            browserChannel: browserMetadata.browserChannel,
-            browserVersion: browserMetadata.browserVersion,
-            headless: browserMetadata.headless,
-            totalItems,
+            totalItems: rows.length,
             passed,
             failed,
             notExecuted,
-            passRate:
-                totalItems > 0
-                    ? Number(((passed / totalItems) * 100).toFixed(2))
-                    : 0,
-            executionTime: formatDuration(elapsedMs),
+            passRate: rows.length
+                ? Number(((passed / rows.length) * 100).toFixed(2))
+                : 0,
+            executionTime: duration(
+                finishedAt.getTime() - this.startedAt.getTime(),
+            ),
             startedAt: this.startedAt.toISOString(),
             finishedAt: finishedAt.toISOString(),
         };
 
+        for (const field of browserFields) {
+            summaryData[field] = summaryValue(rows, field);
+        }
+
         await generateEvidenceExcel({
             outputDirectory,
-            project: projectName,
+            project: known(
+                process.env.PROJECT ?? this.config?.projects[0]?.name,
+            ),
             product: this.options.product,
             evidenceSchema: this.options.evidenceSchema,
             summarySchema: this.options.summarySchema,
@@ -361,8 +269,7 @@ export default class EvidenceReporter implements Reporter {
 
         console.log(
             `EvidenceReporter: ${passed} passed, ` +
-            `${failed} failed, ` +
-            `${notExecuted} not executed`,
+            `${failed} failed, ${notExecuted} not executed`,
         );
     }
 }
