@@ -1,0 +1,155 @@
+import { existsSync, mkdirSync, writeFileSync } from 'fs';
+import { join } from 'path';
+import { utils, writeFile } from 'xlsx';
+
+class CustomHtmlReporter {
+  constructor() {
+    this.results = [];
+
+    this.baseReportDir = join(process.cwd(), 'custom-test-reports');
+    if (!existsSync(this.baseReportDir)) {
+      mkdirSync(this.baseReportDir, { recursive: true });
+    }
+
+    this.runReportDir = null;
+  }
+
+  onBegin() {
+    const now = new Date();
+    let dateStr = now.toISOString().replaceAll(':', '-').replaceAll('.', '-');
+
+    this.runReportDir = join(this.baseReportDir, `run-${dateStr}`);
+    mkdirSync(this.runReportDir, { recursive: true });
+
+    console.log(`Test run folder created: ${this.runReportDir}`);
+  }
+
+  formatDuration(durationMs) {
+    if (typeof durationMs !== 'number') return '';
+    const totalSeconds = Math.floor(durationMs / 1000);
+    const minutes = Math.floor(totalSeconds / 60);
+    const seconds = totalSeconds % 60;
+    return minutes > 0 ? `${minutes}m ${seconds}s` : `${seconds}s`;
+  }
+
+  async onTestEnd(test, result) {
+    const fields = {};
+    result.annotations?.forEach((a) => {
+      fields[a.type] = a.description;
+    });
+
+    const errorMessage =
+      result.status === 'failed' && result.error
+        ? result.error.stack || result.error.message || ''
+        : '';
+
+    this.results.push({
+      testName: test.title,
+      status: result.status,
+      duration: result.duration,
+      fields,
+      error: errorMessage,
+    });
+
+    if (Object.keys(fields).length) {
+      console.log(`Fields attached for "${test.title}":`, fields);
+    }
+    if (result.status === 'failed') {
+      console.error(`Test failed: ${test.title}`);
+      console.error(errorMessage);
+    }
+  }
+
+  onEnd() {
+    if (!this.results.length) return;
+
+    const allKeys = Array.from(new Set(this.results.flatMap((r) => Object.keys(r.fields))));
+
+    const headerColumns = ['Test Name', 'Status', ...allKeys, 'Duration', 'Error'];
+
+    const excelRows = this.results.map((r) => {
+      const row = {
+        'Test Name': r.testName,
+        Status: r.status,
+        Duration: this.formatDuration(r.duration),
+        Error: r.error,
+      };
+      allKeys.forEach((key) => {
+        row[key] = r.fields[key] || '';
+      });
+      return row;
+    });
+
+    const worksheet = utils.json_to_sheet(excelRows);
+    const workbook = utils.book_new();
+    utils.book_append_sheet(workbook, worksheet, 'Test Results');
+
+    worksheet['!cols'] = Object.keys(excelRows[0]).map((key) => ({
+      wch: Math.max(key.length, ...excelRows.map((r) => (r[key] ? String(r[key]).length : 0))) + 2,
+    }));
+
+    const now = new Date();
+    const formattedDateTime =
+      now.getFullYear() +
+      '-' +
+      String(now.getMonth() + 1).padStart(2, '0') +
+      '-' +
+      String(now.getDate()).padStart(2, '0') +
+      '_' +
+      String(now.getHours()).padStart(2, '0') +
+      '-' +
+      String(now.getMinutes()).padStart(2, '0') +
+      '-' +
+      String(now.getSeconds()).padStart(2, '0');
+
+    const excelFile = join(this.runReportDir, `custom-report-${formattedDateTime}.xlsx`);
+    writeFile(workbook, excelFile);
+    console.log(`Excel report generated: ${excelFile}`);
+
+    const html = `
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Custom Playwright Report</title>
+  <style>
+    body { font-family: Arial; padding: 20px; }
+    table { border-collapse: collapse; width: 100%; }
+    th, td { border: 1px solid #ccc; padding: 8px; vertical-align: top; }
+    th { background: #f4f4f4; }
+    .passed { color: green; }
+    .failed { color: red; }
+    pre { white-space: pre-wrap; word-wrap: break-word; font-size: 12px; color: #a00; }
+  </style>
+</head>
+<body>
+  <h1>Test Execution Report</h1>
+  <table>
+    <thead>
+      <tr>${headerColumns.map((c) => `<th>${c}</th>`).join('')}</tr>
+    </thead>
+    <tbody>
+      ${this.results
+        .map(
+          (r) => `
+        <tr>
+          <td>${r.testName}</td>
+          <td class="${r.status}">${r.status}</td>
+          ${allKeys.map((k) => `<td>${r.fields[k] || ''}</td>`).join('')}
+          <td>${this.formatDuration(r.duration)}</td>
+          <td>${r.error ? `<pre>${r.error}</pre>` : ''}</td>
+        </tr>
+      `
+        )
+        .join('')}
+    </tbody>
+  </table>
+</body>
+</html>`;
+
+    const htmlFile = join(this.runReportDir, `custom-report-${formattedDateTime}.html`);
+    writeFileSync(htmlFile, html);
+    console.log(`Custom HTML report generated: ${htmlFile}`);
+  }
+}
+
+export default CustomHtmlReporter;
