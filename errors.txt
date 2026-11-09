@@ -1,86 +1,166 @@
-npm ls @playwright/test playwright typescript --depth=0
+PS C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\Athena_Automation\integration-tests> npm install exceljs
+npm warn deprecated inflight@1.0.6: This module is not supported, and leaks memory. Do not use it. Check out lru-cache if you want a good and tested way to coalesce async requests by a key value, which is much more comprehensive and powerful.
+npm warn deprecated lodash.isequal@4.5.0: This package is deprecated. Use require('node:util').isDeepStrictEqual instead.
+npm warn deprecated rimraf@2.7.1: Rimraf versions prior to v4 are no longer supported
+npm warn deprecated glob@7.2.3: Old versions of glob are not supported, and contain widely publicized security vulnerabilities, which have been fixed in the current version. Please update. Support for old versions may be purchased (at exorbitant rates) by contacting i@izs.me
+npm warn deprecated glob@7.2.3: Old versions of glob are not supported, and contain widely publicized security vulnerabilities, which have been fixed in the current version. Please update. Support for old versions may be purchased (at exorbitant rates) by contacting i@izs.me
+npm warn deprecated glob@7.2.3: Old versions of glob are not supported, and contain widely publicized security vulnerabilities, which have been fixed in the current version. Please update. Support for old versions may be purchased (at exorbitant rates) by contacting i@izs.me
+npm warn deprecated fstream@1.0.12: This package is no longer supported.
+npm warn deprecated uuid@8.3.2: uuid@10 and below is no longer supported.  For ESM codebases, update to uuid@latest.  For CommonJS codebases, use uuid@11 (but be aware this version will likely be deprecated in 2028).
 
-Test-Path .\node_modules\.bin\playwright.cmd
+added 48 packages, removed 91 packages, changed 208 packages, and audited 497 packages in 2m
 
-Test-Path .\node_modules\.bin\tsc.cmd
+177 packages are looking for funding
+  run `npm fund` for details
 
-$env:NODE_USE_SYSTEM_CA = "1"
+25 vulnerabilities (16 moderate, 9 high)
 
-npm ping
+To address issues that do not require attention, run:
+  npm audit fix
 
-============
+To address all issues possible (including breaking changes), run:
+  npm audit fix --force
 
-# Install framework dependencies
-npm install --save-dev @playwright/test typescript @types/node tsx
+Some issues need review, and may require choosing
+a different dependency.
 
-# Install report dependencies
-npm install exceljs archiver
+Run `npm audit` for details.
+PS C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\Athena_Automation\integration-tests>  npm audit fix --force
+npm warn using --force Recommended protections disabled.
+npm warn audit No fix available for xlsx@*
+npm warn audit Updating eslint to 9.39.5, which is a SemVer major change.
+npm warn audit Updating exceljs to 3.4.0, which is a SemVer major change.
+npm warn audit Updating @eslint/js to 9.39.5, which is a SemVer major change.
+npm warn audit Updating typescript-eslint to 8.36.0, which is a SemVer major change.
+npm warn ERESOLVE overriding peer dependency
+npm warn ERESOLVE overriding peer dependency
+npm warn ERESOLVE overriding peer dependency
+npm warn ERESOLVE overriding peer dependency
+npm warn While resolving: typescript-eslint@8.36.0
+npm warn Found: typescript@5.9.3
+npm warn node_modules/typescript
+npm warn   peer typescript@">=4.8.4 <5.9.0" from @typescript-eslint/eslint-plugin@8.36.0
+npm warn   node_modules/typescript-eslint/node_modules/@typescript-eslint/eslint-plugin
+npm warn     @typescript-eslint/eslint-plugin@"8.36.0" from typescript-eslint@8.36.0
+npm warn     node_modules/typescript-eslint
+npm warn
+npm warn Could not resolve dependency:
+npm warn peer typescript@">=4.8.4 <5.9.0" from typescript-eslint@8.36.0
+npm warn node_modules/typescript-eslint
+npm warn   dev typescript-eslint@"8.36.0" from the root project
+npm warn
+npm warn Conflicting peer dependency: typescript@5.8.3
+npm warn node_modules/typescript
+npm warn   peer typescript@">=4.8.4 <5.9.0" from typescript-eslint@8.36.0
+npm warn   node_modules/typescript-eslint
+npm warn     dev typescript-eslint@"8.36.0" from the root project
+npm warn ERESOLVE overriding peer dependency
+npm warn ERESOLVE overriding peer dependency
+npm warn While resolving: @typescript-eslint/eslint-plugin@8.36.0
+npm warn Found: peer eslint@"^8.57.0 || ^9.0.0" from the root project
+npm warn
+npm warn Could not resolve dependency:
+npm warn peer eslint@"^8.57.0 || ^9.0.0" from the root project
+npm warn ERESOLVE overriding peer dependency
+npm warn While resolving: @typescript-eslint/eslint-plugin@8.36.0
+npm warn Found: peer typescript@">=4.8.4 <5.9.0" from the root project
+npm warn
+npm warn Could not resolve dependency:
+npm warn peer typescript@">=4.8.4 <5.9.0" from the root project
+npm warn ERESOLVE overriding peer dependency
+npm warn ERESOLVE overriding peer dependency
+npm warn ERESOLVE overriding peer dependency
+npm warn ERESOLVE overriding peer dependency
+npm warn While resolving: @typescript-eslint/type-utils@8.36.0
+npm warn Found: peer eslint@"^8.57.0 || ^9.0.0" from the root project
+npm warn
+npm warn Could not resolve dependency:
+npm warn peer eslint@"^8.57.0 || ^9.0.0" from the root project
+npm warn ERESOLVE overriding peer dependency
+npm warn While resolving: @typescript-eslint/type-utils@8.36.0
+npm warn Found: peer typescript@">=4.8.4 <5.9.0" from the root project
+npm warn
+npm warn Could not resolve dependency:
+npm warn peer typescript@">=4.8.4 <5.9.0" from the root project
+npm warn ERESOLVE overriding peer dependency
+npm warn ERESOLVE overriding peer dependency
+npm warn ERESOLVE overriding peer dependency
+npm warn ERESOLVE overriding peer dependency
+npm warn ERESOLVE overriding peer dependency
+npm warn ERESOLVE overriding peer dependency
+npm warn deprecated rimraf@2.7.1: Rimraf versions prior to v4 are no longer supported
+npm warn deprecated glob@7.2.3: Old versions of glob are not supported, and contain widely publicized security vulnerabilities, which have been fixed in the current version. Please update. Support for old versions may be purchased (at exorbitant rates) by contacting i@izs.me
+npm warn deprecated eslint@9.39.5: This version is no longer supported. Please see https://eslint.org/version-support for other options.
 
-# Install archive type definitions
-npm install --save-dev @types/archiver
+added 58 packages, removed 79 packages, changed 46 packages, and audited 476 packages in 1m
 
-# Verify versions
-npx --no-install playwright --version
-npx --no-install tsc --version
+176 packages are looking for funding
+  run `npm fund` for details
 
-# Validate TypeScript
-npx --no-install tsc --noEmit
+# npm audit report
 
-======
+fast-csv  <4.3.6
+Denial of service in fast-csv - https://github.com/advisories/GHSA-8cv5-p934-3hwp
+fix available via `npm audit fix --force`
+Will install exceljs@3.10.0, which is outside the stated dependency range
+node_modules/fast-csv
+  exceljs  0.1.10 - 3.9.0
+  Depends on vulnerable versions of fast-csv
+  Depends on vulnerable versions of tmp
+  node_modules/exceljs
 
-# ============================================================
-# ALLIANZ PLAYWRIGHT FRAMEWORK - WINDOWS VALIDATION
-# ============================================================
+minimatch  7.0.0 - 11.0.0
+Severity: moderate
+minimatch has potential denial of service via globparts amplification - https://github.com/advisories/GHSA-g3hv-75wg-m249
+fix available via `npm audit fix --force`
+Will install typescript-eslint@7.3.1, which is a breaking change
+node_modules/typescript-eslint/node_modules/minimatch
+  @typescript-eslint/typescript-estree  >=6.16.0
+  Depends on vulnerable versions of minimatch
+  node_modules/typescript-eslint/node_modules/@typescript-eslint/eslint-plugin/node_modules/@typescript-eslint/type-utils/node_modules/@typescript-eslint/typescript-estree
+  node_modules/typescript-eslint/node_modules/@typescript-eslint/parser/node_modules/@typescript-eslint/typescript-estree
+  node_modules/typescript-eslint/node_modules/@typescript-eslint/utils/node_modules/@typescript-eslint/typescript-estree
+    @typescript-eslint/parser  >=6.16.0
+    Depends on vulnerable versions of @typescript-eslint/typescript-estree
+    node_modules/typescript-eslint/node_modules/@typescript-eslint/parser
+      @typescript-eslint/eslint-plugin  >=6.16.0
+      Depends on vulnerable versions of @typescript-eslint/parser
+      Depends on vulnerable versions of @typescript-eslint/type-utils
+      Depends on vulnerable versions of @typescript-eslint/utils
+      node_modules/typescript-eslint/node_modules/@typescript-eslint/eslint-plugin
+        typescript-eslint  *
+        Depends on vulnerable versions of @typescript-eslint/eslint-plugin
+        Depends on vulnerable versions of @typescript-eslint/parser
+        Depends on vulnerable versions of @typescript-eslint/utils
+        node_modules/typescript-eslint
+    @typescript-eslint/type-utils  >=6.16.0
+    Depends on vulnerable versions of @typescript-eslint/typescript-estree
+    Depends on vulnerable versions of @typescript-eslint/utils
+    node_modules/typescript-eslint/node_modules/@typescript-eslint/eslint-plugin/node_modules/@typescript-eslint/type-utils
+    @typescript-eslint/utils  >=6.16.0
+    Depends on vulnerable versions of @typescript-eslint/typescript-estree
+    node_modules/typescript-eslint/node_modules/@typescript-eslint/utils
 
-# 1. Enable Windows trusted certificates for Node.js
-$env:NODE_USE_SYSTEM_CA = "1"
+tmp  <=0.2.5
+Severity: high
+tmp allows arbitrary temporary file / directory write via symbolic link `dir` parameter - https://github.com/advisories/GHSA-52f5-9888-hmc6
+tmp has Path Traversal via unsanitized prefix/postfix that enables directory escape - https://github.com/advisories/GHSA-ph9p-34f9-6g65
+fix available via `npm audit fix --force`
+Will install exceljs@3.10.0, which is outside the stated dependency range
+node_modules/tmp
 
-# 2. Verify installed versions
-node --version
-npm --version
-npx --no-install playwright --version
-npx --no-install tsc --version
+xlsx  *
+Severity: high
+Prototype Pollution in sheetJS - https://github.com/advisories/GHSA-4r6h-8v6p-xvw6
+SheetJS Regular Expression Denial of Service (ReDoS) - https://github.com/advisories/GHSA-5pgg-2g8v-p4x9
+No fix available
+node_modules/xlsx
 
-# 3. Validate TypeScript
-npx --no-install tsc --noEmit
-if ($LASTEXITCODE -ne 0) { throw "TypeScript validation failed." }
+11 vulnerabilities (2 low, 7 moderate, 2 high)
 
-# 4. Install Playwright Chromium browser
-npx --no-install playwright install chromium
-if ($LASTEXITCODE -ne 0) { throw "Chromium installation failed." }
+To address all issues possible (including breaking changes), run:
+  npm audit fix --force
 
-# 5. Initialize EvidenceFactory run
-npx --no-install tsx tests/framework/evidence-factory/initialize-run.ts
-if ($LASTEXITCODE -ne 0) { throw "EvidenceFactory initialization failed." }
-
-# 6. Execute EvidenceFactory scenarios
-npx --no-install playwright test tests/framework/evidence-factory/evidence-factory-excel.spec.ts --project=framework --workers=4
-if ($LASTEXITCODE -ne 0) { throw "EvidenceFactory scenario tests failed." }
-
-# 7. Generate and validate Excel evidence report
-npx --no-install playwright test tests/framework/evidence-factory/evidence-report.spec.ts --project=framework --workers=1
-if ($LASTEXITCODE -ne 0) { throw "Excel report generation test failed." }
-
-# 8. Run POM Generator tests
-npx --no-install playwright test tests/framework/pom-generator --project=framework --workers=4
-if ($LASTEXITCODE -ne 0) { throw "POM Generator tests failed." }
-
-# 9. Read current run ID
-$runId = (Get-Content .\results\.current-test-run.json | ConvertFrom-Json).runId
-
-# 10. Open generated Excel report folder
-$reportDir = ".\results\$runId\report"
-
-if (Test-Path $reportDir) {
-    explorer $reportDir
-} else {
-    Write-Host "Report folder not found: $reportDir"
-}
-
-# 11. Display completion message
-Write-Host ""
-Write-Host "=========================================="
-Write-Host " PLAYWRIGHT FRAMEWORK VALIDATION COMPLETE"
-Write-Host "=========================================="
-Write-Host "Run ID: $runId"
-Write-Host "Report Directory: $reportDir"
+Some issues need review, and may require choosing
+a different dependency.
+PS C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\Athena_Automation\integration-tests> 
