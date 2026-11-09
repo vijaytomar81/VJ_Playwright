@@ -6,6 +6,7 @@ import { join } from 'node:path';
 import { findMissingReportingFields } from './missingFields';
 
 import {
+    styleSummaryLayout,
     styleTitle,
     styleTableHeader,
     styleDataRow,
@@ -48,6 +49,10 @@ export interface ExcelGenerationOptions {
     readonly tests: readonly ExcelEvidenceTest[];
 }
 
+/* ============================================================
+ * VALUE CONVERSION
+ * ============================================================ */
+
 function excelValue(value: unknown): ExcelJS.CellValue {
     if (value === null || value === undefined) return '';
 
@@ -63,14 +68,26 @@ function excelValue(value: unknown): ExcelJS.CellValue {
     return JSON.stringify(value);
 }
 
+/* ============================================================
+ * SCHEMA ORDERING
+ * ============================================================ */
+
 function orderedFields(
     fields: readonly SchemaField[],
 ): SchemaField[] {
     return [...fields].sort((a, b) => a.order - b.order);
 }
 
+/* ============================================================
+ * DATE AND DURATION FORMATTING
+ * ============================================================ */
+
 function formatDateTime(value: unknown): string {
-    if (value === null || value === undefined || value === '') {
+    if (
+        value === null ||
+        value === undefined ||
+        value === ''
+    ) {
         return '';
     }
 
@@ -83,28 +100,50 @@ function formatDateTime(value: unknown): string {
     }
 
     const day = String(date.getDate()).padStart(2, '0');
+
     const month = [
         'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
         'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
     ][date.getMonth()];
 
     const year = date.getFullYear();
-    const hours = String(date.getHours()).padStart(2, '0');
-    const minutes = String(date.getMinutes()).padStart(2, '0');
-    const seconds = String(date.getSeconds()).padStart(2, '0');
 
-    return `${day}-${month}-${year} ${hours}:${minutes}:${seconds}`;
+    const hours = String(
+        date.getHours(),
+    ).padStart(2, '0');
+
+    const minutes = String(
+        date.getMinutes(),
+    ).padStart(2, '0');
+
+    const seconds = String(
+        date.getSeconds(),
+    ).padStart(2, '0');
+
+    return (
+        `${day}-${month}-${year} ` +
+        `${hours}:${minutes}:${seconds}`
+    );
 }
 
 function formatDuration(value: unknown): string {
     if (typeof value === 'number') {
         const totalSeconds = Math.floor(value / 1000);
-        const hours = Math.floor(totalSeconds / 3600);
-        const minutes = Math.floor((totalSeconds % 3600) / 60);
+
+        const hours = Math.floor(
+            totalSeconds / 3600,
+        );
+
+        const minutes = Math.floor(
+            (totalSeconds % 3600) / 60,
+        );
+
         const seconds = totalSeconds % 60;
 
         return [hours, minutes, seconds]
-            .map((part) => String(part).padStart(2, '0'))
+            .map((part) =>
+                String(part).padStart(2, '0'),
+            )
             .join(':');
     }
 
@@ -123,6 +162,13 @@ function formatDuration(value: unknown): string {
     return String(value ?? '');
 }
 
+/* ============================================================
+ * SUMMARY VALUE FORMATTING
+ *
+ * Only data conversion is handled here.
+ * Excel cell styling is handled by excelStyles.ts.
+ * ============================================================ */
+
 function formatSummaryValue(
     field: string,
     value: unknown,
@@ -136,19 +182,35 @@ function formatSummaryValue(
             return formatDuration(value);
 
         case 'headless':
-            if (value === true || value === 'true') return 'Yes';
-            if (value === false || value === 'false') return 'No';
+            if (
+                value === true ||
+                value === 'true'
+            ) {
+                return 'Yes';
+            }
+
+            if (
+                value === false ||
+                value === 'false'
+            ) {
+                return 'No';
+            }
+
             return excelValue(value);
 
         case 'platform':
             if (value === 'win32') return 'Windows';
             if (value === 'darwin') return 'macOS';
             if (value === 'linux') return 'Linux';
+
             return excelValue(value);
 
         case 'runId': {
             const text = String(value ?? '');
-            return text.startsWith('run-') ? text : `run-${text}`;
+
+            return text.startsWith('run-')
+                ? text
+                : `run-${text}`;
         }
 
         default:
@@ -156,15 +218,18 @@ function formatSummaryValue(
     }
 }
 
+/* ============================================================
+ * SUMMARY WORKSHEET
+ * ============================================================ */
+
 function createSummarySheet(
     workbook: ExcelJS.Workbook,
     options: ExcelGenerationOptions,
 ): void {
     const sheet = workbook.addWorksheet('Summary');
 
-    // Wider value column, matching the reference layout.
-    sheet.getColumn(1).width = 30;
-    sheet.getColumn(2).width = 105;
+    // All Summary layout rules are in excelStyles.ts.
+    styleSummaryLayout(sheet);
 
     sheet.getCell('A1').value =
         `Execution Summary  |  Project: ${options.project}  |  Product: ${options.product}`;
@@ -179,13 +244,24 @@ function createSummarySheet(
     );
 
     for (const section of sections) {
-        sheet.getCell(rowNumber, 1).value = section.section;
+        sheet.getCell(rowNumber, 1).value =
+            section.section;
 
-        styleSummarySection(sheet, rowNumber, 2);
+        styleSummarySection(
+            sheet,
+            rowNumber,
+            2,
+        );
+
         rowNumber++;
 
-        for (const field of orderedFields(section.fields)) {
-            sheet.getCell(rowNumber, 1).value = field.label;
+        for (
+            const field of orderedFields(
+                section.fields,
+            )
+        ) {
+            sheet.getCell(rowNumber, 1).value =
+                field.label;
 
             sheet.getCell(rowNumber, 2).value =
                 formatSummaryValue(
@@ -193,34 +269,32 @@ function createSummarySheet(
                     options.summaryData[field.field],
                 );
 
-            styleSummaryField(sheet, rowNumber);
-            styleSummaryResult(sheet, rowNumber, field.field);
+            // Field-specific layout is handled
+            // entirely by excelStyles.ts.
+            styleSummaryField(
+                sheet,
+                rowNumber,
+                field.field,
+            );
 
-            if (field.field === 'passRate') {
-                const cell = sheet.getCell(rowNumber, 2);
-
-                if (typeof cell.value === 'number') {
-                    cell.numFmt = '0.00"%"';
-                }
-            }
-
-            if (field.field === 'evidenceDirectory') {
-                sheet.getRow(rowNumber).height = 34;
-            }
+            styleSummaryResult(
+                sheet,
+                rowNumber,
+                field.field,
+            );
 
             rowNumber++;
         }
 
         rowNumber++;
     }
-
-    sheet.views = [
-        {
-            state: 'frozen',
-            ySplit: 1,
-        },
-    ];
 }
+
+/* ============================================================
+ * DETAIL WORKSHEETS
+ *
+ * All, Passed, Failed, Not Executed
+ * ============================================================ */
 
 function createDetailSheet(
     workbook: ExcelJS.Workbook,
@@ -229,43 +303,60 @@ function createDetailSheet(
     evidenceSchema: readonly SchemaField[],
 ): void {
     const sheet = workbook.addWorksheet(sheetName);
+
     const fields = orderedFields(evidenceSchema);
 
     fields.forEach((field, index) => {
-        sheet.getCell(1, index + 1).value = field.label;
+        sheet.getCell(1, index + 1).value =
+            field.label;
     });
 
-    styleTableHeader(sheet, 1, fields.length);
+    styleTableHeader(
+        sheet,
+        1,
+        fields.length,
+    );
+
+    const statusIndex = fields.findIndex(
+        (field) => field.field === 'status',
+    );
 
     tests.forEach((test, index) => {
         const rowNumber = index + 2;
 
-        fields.forEach((field, columnIndex) => {
-            const value =
-                field.field === 'retry'
-                    ? test.retry
-                    : field.field === 'status'
-                        ? test.status
-                        : Object.prototype.hasOwnProperty.call(
-                            test.annotations,
-                            field.field,
-                        )
-                            ? test.annotations[field.field]
-                            : test.values[field.field];
+        fields.forEach(
+            (field, columnIndex) => {
+                const value =
+                    field.field === 'retry'
+                        ? test.retry
+                        : field.field === 'status'
+                            ? test.status
+                            : Object.prototype.hasOwnProperty.call(
+                                test.annotations,
+                                field.field,
+                            )
+                                ? test.annotations[field.field]
+                                : test.values[field.field];
 
-            sheet.getCell(rowNumber, columnIndex + 1).value =
-                excelValue(value);
-        });
+                sheet.getCell(
+                    rowNumber,
+                    columnIndex + 1,
+                ).value = excelValue(value);
+            },
+        );
 
-        styleDataRow(sheet, rowNumber, fields.length);
-
-        const statusIndex = fields.findIndex(
-            (field) => field.field === 'status',
+        styleDataRow(
+            sheet,
+            rowNumber,
+            fields.length,
         );
 
         if (statusIndex >= 0) {
             styleStatusCell(
-                sheet.getCell(rowNumber, statusIndex + 1),
+                sheet.getCell(
+                    rowNumber,
+                    statusIndex + 1,
+                ),
                 test.status,
             );
         }
@@ -273,6 +364,10 @@ function createDetailSheet(
 
     setColumnWidths(sheet);
 }
+
+/* ============================================================
+ * MISSING REPORTING FIELDS WORKSHEET
+ * ============================================================ */
 
 function createMissingFieldsSheet(
     workbook: ExcelJS.Workbook,
@@ -282,17 +377,19 @@ function createMissingFieldsSheet(
     const missing = findMissingReportingFields(
         tests.map((test) => ({
             testName: test.testName,
-            annotations: Object.entries(test.annotations).map(
-                ([type, description]) => ({
-                    type,
-                    description,
-                }),
-            ),
+            annotations: Object.entries(
+                test.annotations,
+            ).map(([type, description]) => ({
+                type,
+                description,
+            })),
         })),
         evidenceSchema,
     );
 
-    if (missing.length === 0) return;
+    if (missing.length === 0) {
+        return;
+    }
 
     const sheet = workbook.addWorksheet(
         'Missing Reporting Fields',
@@ -305,39 +402,64 @@ function createMissingFieldsSheet(
     ];
 
     headers.forEach((header, index) => {
-        sheet.getCell(1, index + 1).value = header;
+        sheet.getCell(1, index + 1).value =
+            header;
     });
 
-    styleTableHeader(sheet, 1, headers.length);
+    styleTableHeader(
+        sheet,
+        1,
+        headers.length,
+    );
 
     missing.forEach((item, index) => {
         const rowNumber = index + 2;
 
-        sheet.getCell(rowNumber, 1).value = item.field;
+        sheet.getCell(rowNumber, 1).value =
+            item.field;
+
         sheet.getCell(rowNumber, 2).value =
             item.affectedTests.join(', ');
-        sheet.getCell(rowNumber, 3).value = item.occurrences;
 
-        styleDataRow(sheet, rowNumber, headers.length);
+        sheet.getCell(rowNumber, 3).value =
+            item.occurrences;
+
+        styleDataRow(
+            sheet,
+            rowNumber,
+            headers.length,
+        );
     });
 
     setColumnWidths(sheet);
 }
 
+/* ============================================================
+ * GENERATE EVIDENCE EXCEL
+ * ============================================================ */
+
 export async function generateEvidenceExcel(
     options: ExcelGenerationOptions,
 ): Promise<string> {
-    await mkdir(options.outputDirectory, {
-        recursive: true,
-    });
+    await mkdir(
+        options.outputDirectory,
+        {
+            recursive: true,
+        },
+    );
 
     const workbook = new ExcelJS.Workbook();
 
     workbook.creator = 'EvidenceFactory';
     workbook.created = new Date();
 
-    createSummarySheet(workbook, options);
+    // Summary worksheet
+    createSummarySheet(
+        workbook,
+        options,
+    );
 
+    // All test results
     createDetailSheet(
         workbook,
         'All',
@@ -345,6 +467,7 @@ export async function generateEvidenceExcel(
         options.evidenceSchema,
     );
 
+    // Passed test results
     createDetailSheet(
         workbook,
         'Passed',
@@ -354,6 +477,7 @@ export async function generateEvidenceExcel(
         options.evidenceSchema,
     );
 
+    // Failed test results
     createDetailSheet(
         workbook,
         'Failed',
@@ -363,15 +487,19 @@ export async function generateEvidenceExcel(
         options.evidenceSchema,
     );
 
+    // Not executed test results
     createDetailSheet(
         workbook,
         'Not Executed',
         options.tests.filter(
-            (test) => test.status === 'notExecuted',
+            (test) =>
+                test.status === 'notExecuted',
         ),
         options.evidenceSchema,
     );
 
+    // Fields reported by tests but absent
+    // from the consumer evidence schema
     createMissingFieldsSheet(
         workbook,
         options.tests,

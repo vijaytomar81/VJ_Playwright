@@ -9,9 +9,16 @@ import type {
 /**
  * EvidenceFactory Excel formatting.
  *
- * All colors and presentation rules are centralized here.
+ * All Excel colors, fonts, borders, alignment,
+ * worksheet layout and presentation rules
+ * are centralized here.
+ *
  * No consumer reporting schemas are imported.
  */
+
+/* ============================================================
+ * COLOR PALETTE
+ * ============================================================ */
 
 const COLORS = {
     navy: 'FF102846',
@@ -37,6 +44,69 @@ const COLORS = {
 
     paleRate: 'FFD4EAF4',
 } as const;
+
+/* ============================================================
+ * WORKSHEET THEMES
+ *
+ * Change worksheet tab and header colors here.
+ * ============================================================ */
+
+interface WorksheetTheme {
+    readonly tab: string;
+    readonly header: string;
+}
+
+const WORKSHEET_THEMES: Readonly<
+    Record<string, WorksheetTheme>
+> = {
+    Summary: {
+        tab: COLORS.blue,
+        header: COLORS.navy,
+    },
+
+    All: {
+        tab: COLORS.brightBlue,
+        header: COLORS.brightBlue,
+    },
+
+    Passed: {
+        tab: COLORS.green,
+        header: COLORS.green,
+    },
+
+    Failed: {
+        tab: COLORS.red,
+        header: COLORS.red,
+    },
+
+    'Not Executed': {
+        tab: COLORS.orange,
+        header: COLORS.orange,
+    },
+
+    'Missing Reporting Fields': {
+        tab: COLORS.orange,
+        header: COLORS.navy,
+    },
+};
+
+const DEFAULT_THEME: WorksheetTheme = {
+    tab: COLORS.blue,
+    header: COLORS.navy,
+};
+
+function getWorksheetTheme(
+    worksheetName: string,
+): WorksheetTheme {
+    return (
+        WORKSHEET_THEMES[worksheetName] ??
+        DEFAULT_THEME
+    );
+}
+
+/* ============================================================
+ * COMMON STYLES
+ * ============================================================ */
 
 const thinBorder: Partial<Borders> = {
     top: {
@@ -88,6 +158,52 @@ function styleCell(
     };
 }
 
+/* ============================================================
+ * WORKSHEET TAB COLORS
+ * ============================================================ */
+
+/**
+ * Set worksheet tab color using WORKSHEET_THEMES.
+ */
+export function styleWorksheetTab(
+    worksheet: Worksheet,
+): void {
+    const theme = getWorksheetTheme(worksheet.name);
+
+    worksheet.properties.tabColor = {
+        argb: theme.tab,
+    };
+}
+
+/* ============================================================
+ * SUMMARY WORKSHEET LAYOUT
+ * ============================================================ */
+
+/**
+ * Configure Summary worksheet column widths
+ * and frozen title row.
+ *
+ * All Summary layout settings belong here,
+ * not in excelGenerator.ts.
+ */
+export function styleSummaryLayout(
+    worksheet: Worksheet,
+): void {
+    worksheet.getColumn(1).width = 30;
+    worksheet.getColumn(2).width = 105;
+
+    worksheet.views = [
+        {
+            state: 'frozen',
+            ySplit: 1,
+        },
+    ];
+}
+
+/* ============================================================
+ * SUMMARY TITLE
+ * ============================================================ */
+
 /**
  * Main Summary title.
  */
@@ -110,10 +226,17 @@ export function styleTitle(
     const row = worksheet.getRow(rowNumber);
     row.height = 38;
 
-    for (let column = 1; column <= lastColumn; column++) {
+    const headerColor =
+        getWorksheetTheme(worksheet.name).header;
+
+    for (
+        let column = 1;
+        column <= lastColumn;
+        column++
+    ) {
         styleCell(
             row.getCell(column),
-            COLORS.navy,
+            headerColor,
             COLORS.white,
             true,
         );
@@ -127,62 +250,16 @@ export function styleTitle(
     };
 }
 
-/**
- * Set worksheet tab colors.
- *
- * Summary      = Blue
- * All          = Blue
- * Passed       = Green
- * Failed       = Red
- * Not Executed = Orange
- */
-export function styleWorksheetTab(
-    worksheet: Worksheet,
-): void {
-    const tabColors: Record<string, string> = {
-        Summary: COLORS.blue,
-        All: COLORS.brightBlue,
-        Passed: COLORS.green,
-        Failed: COLORS.red,
-        'Not Executed': COLORS.orange,
-        'Missing Reporting Fields': COLORS.orange,
-    };
-
-    const color = tabColors[worksheet.name];
-
-    if (color) {
-        worksheet.properties.tabColor = {
-            argb: color,
-        };
-    }
-}
+/* ============================================================
+ * DETAILED WORKSHEET HEADER
+ * ============================================================ */
 
 /**
- * Apply a worksheet-specific header color.
- */
-function getHeaderColor(
-    worksheetName: string,
-): string {
-    switch (worksheetName) {
-        case 'All':
-            return COLORS.brightBlue;
-
-        case 'Passed':
-            return COLORS.green;
-
-        case 'Failed':
-            return COLORS.red;
-
-        case 'Not Executed':
-            return COLORS.orange;
-
-        default:
-            return COLORS.navy;
-    }
-}
-
-/**
- * Detailed worksheet header with filters and frozen rows.
+ * Detailed worksheet header with:
+ * - Worksheet-specific header color
+ * - Auto filters
+ * - Frozen header rows
+ * - Center-aligned text
  */
 export function styleTableHeader(
     worksheet: Worksheet,
@@ -191,17 +268,21 @@ export function styleTableHeader(
 ): void {
     if (columnCount < 1) return;
 
-    const headerColor = getHeaderColor(worksheet.name);
+    const theme = getWorksheetTheme(worksheet.name);
     const row = worksheet.getRow(headerRowNumber);
 
     row.height = 32;
 
-    for (let column = 1; column <= columnCount; column++) {
+    for (
+        let column = 1;
+        column <= columnCount;
+        column++
+    ) {
         const cell = row.getCell(column);
 
         styleCell(
             cell,
-            headerColor,
+            theme.header,
             COLORS.white,
             true,
         );
@@ -234,6 +315,10 @@ export function styleTableHeader(
     styleWorksheetTab(worksheet);
 }
 
+/* ============================================================
+ * DETAILED WORKSHEET DATA ROWS
+ * ============================================================ */
+
 /**
  * Regular detail row.
  */
@@ -245,7 +330,11 @@ export function styleDataRow(
     const row = worksheet.getRow(rowNumber);
     row.height = 26;
 
-    for (let column = 1; column <= columnCount; column++) {
+    for (
+        let column = 1;
+        column <= columnCount;
+        column++
+    ) {
         styleCell(
             row.getCell(column),
             COLORS.white,
@@ -253,6 +342,10 @@ export function styleDataRow(
         );
     }
 }
+
+/* ============================================================
+ * STATUS CELL FORMATTING
+ * ============================================================ */
 
 /**
  * Color the status cell in detailed worksheets.
@@ -298,6 +391,10 @@ export function styleStatusCell(
     };
 }
 
+/* ============================================================
+ * SUMMARY SECTION HEADINGS
+ * ============================================================ */
+
 /**
  * Summary section heading:
  * Run, Runtime, Browser, Results, Timing.
@@ -321,7 +418,11 @@ export function styleSummarySection(
     const row = worksheet.getRow(rowNumber);
     row.height = 29;
 
-    for (let column = 1; column <= lastColumn; column++) {
+    for (
+        let column = 1;
+        column <= lastColumn;
+        column++
+    ) {
         styleCell(
             row.getCell(column),
             COLORS.blue,
@@ -338,15 +439,26 @@ export function styleSummarySection(
     };
 }
 
+/* ============================================================
+ * SUMMARY LABEL AND VALUE ROWS
+ * ============================================================ */
+
 /**
- * Summary label and value row.
+ * Style Summary label and value rows.
+ *
+ * Field-specific row sizing is also handled here.
  */
 export function styleSummaryField(
     worksheet: Worksheet,
     rowNumber: number,
+    field?: string,
 ): void {
     const row = worksheet.getRow(rowNumber);
-    row.height = 26;
+
+    row.height =
+        field === 'evidenceDirectory'
+            ? 34
+            : 26;
 
     styleCell(
         row.getCell(1),
@@ -362,8 +474,13 @@ export function styleSummaryField(
     );
 }
 
+/* ============================================================
+ * SUMMARY RESULT HIGHLIGHTING
+ * ============================================================ */
+
 /**
- * Highlight Summary results based on schema field keys.
+ * Highlight Summary results and apply
+ * field-specific number formatting.
  */
 export function styleSummaryResult(
     worksheet: Worksheet,
@@ -407,9 +524,17 @@ export function styleSummaryResult(
                 COLORS.navy,
                 true,
             );
+
+            if (typeof cell.value === 'number') {
+                cell.numFmt = '0.00"%"';
+            }
             break;
     }
 }
+
+/* ============================================================
+ * COLUMN WIDTHS
+ * ============================================================ */
 
 /**
  * Set readable widths for detailed worksheets.
@@ -429,7 +554,10 @@ export function setColumnWidths(
 
                 let text = '';
 
-                if (value !== null && value !== undefined) {
+                if (
+                    value !== null &&
+                    value !== undefined
+                ) {
                     if (value instanceof Date) {
                         text = value.toISOString();
                     } else if (
