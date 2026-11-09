@@ -1,6 +1,39 @@
-Get-ChildItem -Recurse -File -Include *.ts,*.js |
-Where-Object {
-    $_.FullName -notmatch 'node_modules|dist|test-results|playwright-report'
-} |
-Select-String -Pattern 'test\.beforeEach|test\.beforeAll|browser\.newContext|chromium\.launch|browser\.version\(' |
-Select-Object Path, LineNumber, Line
+C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\Athena_Automation\integration-tests> 
+PS C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\Athena_Automation\integration-tests> Get-ChildItem -Recurse -File -Include *.ts,*.js |
+>> Where-Object {
+>>     $_.FullName -notmatch 'node_modules|dist|test-results|playwright-report'
+>> } |
+>> Select-String -Pattern 'test\.beforeEach|test\.beforeAll|browser\.newContext|chromium\.launch|browser\.version\(' |
+>> Select-Object Path, LineNumber, Line
+
+Path                                                                                                                                                              LineNumber Line                              
+----                                                                                                                                                              ---------- ----                              
+C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\Athena_Automation\integration-tests\automationLayer\agentPortalAuth\allianzAgentPortalAuth.ts                  4   const browser: Browser = awai...
+C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\Athena_Automation\integration-tests\automationLayer\agentPortalAuth\allianzAgentPortalAuth.ts                 10   const context: BrowserContext...
+C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\Athena_Automation\integration-tests\automationLayer\agentPortalAuth\sapiensAgentPortalAuth.ts                  6   const browser: Browser = awai...
+C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\Athena_Automation\integration-tests\automationLayer\agentPortalAuth\sapiensAgentPortalAuth.ts                  8   const context: BrowserContext...
+C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\Athena_Automation\integration-tests\automationLayer\agentPortalAuth\sapiensAgentPortalAuthKeycloak.ts          6   const browser: Browser = awai...
+C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\Athena_Automation\integration-tests\automationLayer\agentPortalAuth\sapiensAgentPortalAuthKeycloak.ts          8   const context: BrowserContext...
+Get-ChildItem : Could not find item C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\Athena_Automation\integration-tests\automationLayer\athena\carInsurance\az_motor\pages\CustomerPortal\Dashboard
+\PolicySummary\MTARemoveAdditionalDriver\MTARemoveAdditionalDriverTermsAndConditionsPage.ts.
+At line:1 char:1
++ Get-ChildItem -Recurse -File -Include *.ts,*.js |
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : ObjectNotFound: (C:\Users\tp7070...nditionsPage.ts:String) [Get-ChildItem], IOException
+    + FullyQualifiedErrorId : ItemNotFound,Microsoft.PowerShell.Commands.GetChildItemCommand
+ 
+Get-ChildItem : Could not find item C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\Athena_Automation\integration-tests\automationLayer\athena\carInsurance\britannia\pages\CustomerPortal\Dashboar
+d\PolicySummary\MTAEditAdditionalDriver\MTAEditAdditionalDriver1TermsAndConditionsPage.ts.
+At line:1 char:1
++ Get-ChildItem -Recurse -File -Include *.ts,*.js |
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : ObjectNotFound: (C:\Users\tp7070...nditionsPage.ts:String) [Get-ChildItem], IOException
+    + FullyQualifiedErrorId : ItemNotFound,Microsoft.PowerShell.Commands.GetChildItemCommand
+ 
+Get-ChildItem : Could not find item C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\Athena_Automation\integration-tests\automationLayer\athena\carInsurance\britannia\pages\CustomerPortal\Dashboar
+d\PolicySummary\MTARemoveAdditionalDriver\MTARemoveAdditionalDriverTermsAndConditionsPage.ts.
+At line:1 char:1
++ Get-ChildItem -Recurse -File -Include *.ts,*.js |
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : ObjectNotFound: (C:\Users\tp7070...nditionsPage.ts:String) [Get-ChildItem], IOException
+    + FullyQualifiedErrorId : ItemNotFound,Microsoft.PowerShell.Commands.GetChildItemCommand
