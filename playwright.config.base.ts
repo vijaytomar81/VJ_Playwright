@@ -11,13 +11,13 @@ import { summarySchema } from './configLayer/schema/evidence/summary-schema';
  * @see https://playwright.dev/docs/test-configuration
  */
 export function createConfig(project: string | undefined) {
-  const env = process.env.ENV ?? 'dev';
   const authMode = process.env.AGENT_PORTAL_AUTH;
 
+  // Resolve consumer-specific test directory.
   const projectConfig = getProjectConfig(project);
 
-  // Product name is configurable without changing EvidenceFactory.
-  // Example: PRODUCT="Car Insurance"
+  // Product name for the EvidenceFactory Summary heading.
+  // Can be overridden using the PRODUCT environment variable.
   const product = process.env.PRODUCT ?? 'Car Insurance';
 
   return defineConfig({
@@ -26,40 +26,55 @@ export function createConfig(project: string | undefined) {
     /* Run tests in files in parallel */
     fullyParallel: true,
 
-    /* Fail the build on CI if you accidentally left test.only in the source code. */
+    /* Fail the build on CI if test.only is present */
     forbidOnly: !!process.env.CI,
 
-    /* Retry on CI and local */
+    /* Retry configuration */
     retries: 0,
 
-    /* Opt out of parallel tests on CI. */
+    /* Number of parallel workers */
     workers: 3,
 
-    /* Reporters */
+    /*
+     * REPORTERS
+     *
+     * 1. Playwright list reporter
+     * 2. Playwright HTML reporter
+     * 3. Existing custom HTML + XLSX reporter
+     * 4. New EvidenceFactory ExcelJS reporter
+     */
     reporter: [
       ['list'],
 
-      ['html', {
-        outputFolder: 'playwright-report',
-        open: 'never',
-      }],
+      [
+        'html',
+        {
+          outputFolder: 'playwright-report',
+          open: 'never',
+        },
+      ],
 
-      // Existing reporter - retained for comparison.
+      // Existing reporter: retained during migration.
       ['./reportingLayer/custom-html-reporter.js'],
 
       // New schema-driven Excel evidence reporter.
-      ['./reportingLayer/evidenceReporter.ts', {
-        evidenceSchema: evidenceFields,
-        summarySchema,
-        product,
-      }],
+      [
+        './reportingLayer/evidenceReporter.ts',
+        {
+          evidenceSchema: evidenceFields,
+          summarySchema,
+          product,
+        },
+      ],
     ],
 
+    /* Global setup */
     globalSetup: require.resolve('./global-setup.js'),
 
-    timeout: 300000, // 5 minutes for all tests
+    /* Maximum duration per test: 5 minutes */
+    timeout: 300000,
 
-    /* Shared settings for all the projects below. */
+    /* Shared browser/test settings */
     use: {
       actionTimeout: 30 * 1000,
 
@@ -75,45 +90,53 @@ export function createConfig(project: string | undefined) {
           : 'automationLayer/athena/agentPortalAuth/auth.json',
     },
 
-    /* Configure projects for major browsers */
+    /* Browser projects */
     projects: [
       {
         name: 'chromium',
-        use: { ...devices['Desktop Chrome'] },
+        use: {
+          ...devices['Desktop Chrome'],
+        },
       },
 
+      // Firefox
       // {
       //   name: 'firefox',
       //   use: { ...devices['Desktop Firefox'] },
       // },
 
+      // WebKit
       // {
       //   name: 'webkit',
       //   use: { ...devices['Desktop Safari'] },
       // },
 
+      // Mobile Chrome
       // {
       //   name: 'Mobile Chrome',
       //   use: { ...devices['Pixel 5'] },
       // },
 
+      // Mobile Safari
       // {
       //   name: 'Mobile Safari',
       //   use: { ...devices['iPhone 12'] },
       // },
 
+      // Microsoft Edge
       // {
       //   name: 'Microsoft Edge',
       //   use: { ...devices['Desktop Edge'], channel: 'msedge' },
       // },
 
+      // Google Chrome
       // {
       //   name: 'Google Chrome',
       //   use: { ...devices['Desktop Chrome'], channel: 'chrome' },
       // },
     ],
 
-    /* Run your local dev server before starting the tests */
+    /* Optional local development server */
     // webServer: {
     //   command: 'npm run start',
     //   url: 'http://localhost:3000',
