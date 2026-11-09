@@ -1,2 +1,5 @@
-Start Time	End Time	Duration (ms)	Error	Execution Mode	Device	Browser	Browser Channel	Browser Version	Headless
-2026-11-09T12:43:33.269Z	2026-11-09T12:44:28.947Z	55678		Local	chromium	chromium	bundled		false
+Runtime	
+Machine Name	AVD-HEX-73
+User	tp70707
+Platform	Windows
+OS Version	10.0.26200
