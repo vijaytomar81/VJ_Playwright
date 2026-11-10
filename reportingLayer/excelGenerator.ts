@@ -339,17 +339,18 @@ export async function generateEvidenceExcel(
     ];
 
     for (const sheet of sheets) {
-        // Always create All; create other worksheets only when data exists.
         if (sheet.name !== 'All' && sheet.tests.length === 0) {
             continue;
         }
 
-        createDetail(
-            workbook,
-            sheet.name,
-            sheet.tests,
-            options.evidenceSchema,
-        );
+        const fields = ['All', 'Failed'].includes(sheet.name)
+            ? options.evidenceSchema
+            : options.evidenceSchema.filter(
+                field => field.field !== 'error' &&
+                    field.field !== 'screenshot',
+            );
+
+        createDetail(workbook, sheet.name, sheet.tests, fields);
     }
 
     createMissingFields(

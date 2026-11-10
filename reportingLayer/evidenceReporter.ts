@@ -137,6 +137,16 @@ export default class EvidenceReporter implements Reporter {
         return [...this.tests.values()].map(({ test, results }) => {
             const last = results[results.length - 1];
             const annotations = annotationsOf(results);
+
+            // Collect screenshots from all test attempts, including retries.
+            const screenshots = results
+                .flatMap(result => result.attachments)
+                .filter(attachment =>
+                    attachment.contentType === 'image/png' &&
+                    attachment.path,
+                )
+                .map(attachment => attachment.path!);
+
             const metadata = browserMetadata(test.parent.project(), annotations);
 
             const status: ExcelEvidenceTest['status'] =
@@ -174,6 +184,7 @@ export default class EvidenceReporter implements Reporter {
                         .map(error => error.stack ?? error.message ?? '')
                         .filter(Boolean)
                         .join('\n') ?? '',
+                    screenshot: screenshots.join('\n'),
                     mode: process.env.CI === 'true' ? 'CI' : 'Local',
                     ...metadata,
                 },
