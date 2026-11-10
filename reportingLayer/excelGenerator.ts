@@ -176,9 +176,13 @@ function createSummary(
 
     styleSummaryLayout(sheet);
 
+    const product = options.product?.trim();
+
     sheet.getCell('A1').value =
         `Execution Summary  |  Project: ${options.project}` +
-        `  |  Product: ${options.product}`;
+        (product && !['unknown', 'not known'].includes(product.toLocaleLowerCase())
+            ? `  |  Product: ${product}`
+            : '');
 
     styleTitle(sheet, 1, 2);
     styleWorksheetTab(sheet);
