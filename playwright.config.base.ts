@@ -4,7 +4,6 @@ import './configLayer/execution/loadEnvironment';
 import { defineConfig, devices } from '@playwright/test';
 import { mkdirSync } from 'node:fs';
 import { join } from 'node:path';
-import { randomUUID } from 'node:crypto';
 
 import { getProjectConfig } from './configLayer/execution/projectsRegistry';
 
@@ -27,25 +26,86 @@ export function createConfig(project: string | undefined) {
   /*
    * EVIDENCEFACTORY RUN DIRECTORY
    *
-   * Create one unique directory for this Playwright invocation.
+   * Create one unique directory for each Playwright execution.
    *
-   * All execution evidence and reports are stored under
-   * the same run directory.
+   * Use a UTC timestamp with milliseconds.
    *
-   * The UUID prevents collisions between concurrent executions,
-   * including parallel Jenkins builds.
+   * If two executions start in the same millisecond,
+   * append a numeric suffix to avoid folder collisions.
+   *
+   * Atomic directory creation prevents two concurrent
+   * executions from reserving the same new directory.
+   *
+   * Workers inheriting EVIDENCEFACTORY_RUN_ID reuse
+   * the directory belonging to the current execution.
+   *
+   * Directory creation is owned exclusively by this file.
    */
+
   const timestamp = new Date()
     .toISOString()
     .replace(/[:.]/g, '-');
 
-  const runId = `${timestamp}-${randomUUID()}`;
-
-  const runDirectory = join(
+  const resultsRoot = join(
     process.cwd(),
     'test-results',
-    `run-${runId}`,
   );
+
+  // Ensure the parent directory exists.
+  mkdirSync(resultsRoot, { recursive: true });
+
+  let runId = process.env.EVIDENCEFACTORY_RUN_ID;
+  let runDirectory: string;
+
+  if (runId) {
+    /*
+     * Reuse the run directory when the run ID
+     * is inherited from the parent process.
+     */
+    runDirectory = join(
+      resultsRoot,
+      `run-${runId}`,
+    );
+  } else {
+    /*
+     * Atomically reserve a unique run directory.
+     *
+     * Example:
+     * run-2026-11-10T18-04-45-123Z
+     * run-2026-11-10T18-04-45-123Z-1
+     */
+
+    let counter = 0;
+
+    while (true) {
+      runId = counter === 0
+        ? timestamp
+        : `${timestamp}-${counter}`;
+
+      runDirectory = join(
+        resultsRoot,
+        `run-${runId}`,
+      );
+
+      try {
+        // Exclusive directory reservation.
+        // Do not use recursive:true here.
+        mkdirSync(runDirectory);
+        break;
+      } catch (error) {
+        if (
+          (error as NodeJS.ErrnoException).code !== 'EEXIST'
+        ) {
+          throw error;
+        }
+
+        counter++;
+      }
+    }
+
+    // Share the run ID with child processes.
+    process.env.EVIDENCEFACTORY_RUN_ID = runId;
+  }
 
   const screenshotsDirectory = join(
     runDirectory,
@@ -62,8 +122,7 @@ export function createConfig(project: string | undefined) {
     'playwright-report',
   );
 
-  // Directory creation is owned by Playwright configuration.
-  mkdirSync(runDirectory, { recursive: true });
+  // Screenshot directory is created only by configuration.
   mkdirSync(screenshotsDirectory, { recursive: true });
 
   return defineConfig({
@@ -189,13 +248,19 @@ export function createConfig(project: string | undefined) {
       // Microsoft Edge
       // {
       //   name: 'Microsoft Edge',
-      //   use: { ...devices['Desktop Edge'], channel: 'msedge' },
+      //   use: {
+      //     ...devices['Desktop Edge'],
+      //     channel: 'msedge',
+      //   },
       // },
 
       // Google Chrome
       // {
       //   name: 'Google Chrome',
-      //   use: { ...devices['Desktop Chrome'], channel: 'chrome' },
+      //   use: {
+      //     ...devices['Desktop Chrome'],
+      //     channel: 'chrome',
+      //   },
       // },
     ],
 
