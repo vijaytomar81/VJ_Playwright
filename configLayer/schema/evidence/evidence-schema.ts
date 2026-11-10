@@ -18,13 +18,14 @@ export const evidenceFields = [
   { field: 'policyNumber', label: 'Policy Number', order: 4 },
   { field: 'customerNumber', label: 'Customer Number', order: 5 },
   { field: 'premium', label: 'Premium', order: 6 },
+  { field: 'Bripremium', label: 'Premium', order: 6 },
 
   // Execution metadata
-  { field: 'attempt', label: 'Attempt', order: 7 },
+  { field: 'retry', label: 'Retry', order: 7 },
   { field: 'workerId', label: 'Worker ID', order: 8 },
   { field: 'startTime', label: 'Start Time', order: 9 },
   { field: 'endTime', label: 'End Time', order: 10 },
-  { field: 'durationMs', label: 'Duration (ms)', order: 11 },
+  { field: 'durationMs', label: 'Duration', order: 11 },
   { field: 'error', label: 'Error', order: 12 },
   
   // Execution environment
