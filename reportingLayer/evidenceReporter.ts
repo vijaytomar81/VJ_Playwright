@@ -5,7 +5,6 @@ import type {
 
 import { hostname, platform, release, userInfo } from 'node:os';
 import { existsSync, statSync } from 'node:fs';
-import { relative } from 'node:path';
 import { generateEvidenceExcel, type ExcelEvidenceTest } from './excelGenerator';
 
 interface SchemaField {
@@ -168,22 +167,16 @@ export default class EvidenceReporter implements Reporter {
             const annotations = annotationsOf(results);
 
             // Collect original screenshots from all attempts, including retries.
-            // Store paths relative to the EvidenceFactory run directory.
+            // The attachment name contains the original screenshot filename.
             const screenshots = results
-                .flatMap(result => result.annotations)
-                .filter(annotation =>
-                    annotation.type === 'evidence-screenshot' &&
-                    annotation.description,
+                .flatMap(result => result.attachments)
+                .filter(attachment =>
+                    attachment.name.startsWith('full-page-failure:') &&
+                    attachment.contentType === 'image/png',
                 )
-                .map(annotation =>
-                    relative(
-                        this.options.outputDirectory,
-                        annotation.description!,
-                    ).replace(/\\/g, '/'),
+                .map(attachment =>
+                    `screenshots/${attachment.name.substring('full-page-failure:'.length)}`,
                 );
-
-            // Do not expose the absolute screenshot path in other evidence fields.
-            delete annotations['evidence-screenshot'];
 
             const metadata = browserMetadata(
                 test.parent.project(),
