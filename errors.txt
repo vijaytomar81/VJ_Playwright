@@ -1,26 +1,35 @@
-PS C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\Athena_Automation\integration-tests> treee automationLayer\common
-common
-├── basePage.ts
-├── baseTest.ts
-└── browserMetadata.ts
-PS C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\Athena_Automation\integration-tests>
+$oldImport = "import { test, expect } from '@playwright/test';"
+$newImport = "import { test, expect } from '@common/baseTest';"
 
+$updated = 0
+$skipped = 0
+$failed = 0
 
-{
-  "compilerOptions": {
-    "target": "ES2022",
-    "module": "commonjs",
-    "moduleResolution": "node",
-    "types": ["node"],
-    "esModuleInterop": true,
-    "resolveJsonModule": true,
-    "skipLibCheck": true,
-    "strict": false,
-    "baseUrl": "./",
-    "paths": {
-      "@pages/*": ["automationLayer/ferry/pages/*"]
-    },
-    "noEmit": true
-  },
-  "include": ["**/*.ts", "**/*.js"]
+Get-ChildItem ".\automationLayer" -Recurse -Filter "*.spec.ts" -File |
+ForEach-Object {
+    try {
+        $content = [System.IO.File]::ReadAllText($_.FullName)
+
+        if ($content.Contains($oldImport)) {
+            $content = $content.Replace($oldImport, $newImport)
+
+            [System.IO.File]::WriteAllText(
+                $_.FullName,
+                $content
+            )
+
+            $updated++
+        }
+        else {
+            $skipped++
+        }
+    }
+    catch {
+        $failed++
+        Write-Warning "Failed: $($_.FullName) - $($_.Exception.Message)"
+    }
 }
+
+Write-Host "Updated: $updated"
+Write-Host "Skipped: $skipped"
+Write-Host "Failed: $failed"
