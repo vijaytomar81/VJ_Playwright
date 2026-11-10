@@ -2,6 +2,10 @@
 import './configLayer/execution/loadEnvironment';
 
 import { defineConfig, devices } from '@playwright/test';
+import { mkdirSync } from 'node:fs';
+import { join } from 'node:path';
+import { randomUUID } from 'node:crypto';
+
 import { getProjectConfig } from './configLayer/execution/projectsRegistry';
 
 import { evidenceFields } from './configLayer/schema/evidence/evidence-schema';
@@ -20,8 +24,58 @@ export function createConfig(project: string | undefined) {
   // Can be overridden using the PRODUCT environment variable.
   const product = process.env.PRODUCT ?? 'Not Known';
 
+  /*
+   * EVIDENCEFACTORY RUN DIRECTORY
+   *
+   * Create one unique directory for this Playwright invocation.
+   *
+   * All execution evidence and reports are stored under
+   * the same run directory.
+   *
+   * The UUID prevents collisions between concurrent executions,
+   * including parallel Jenkins builds.
+   */
+  const timestamp = new Date()
+    .toISOString()
+    .replace(/[:.]/g, '-');
+
+  const runId = `${timestamp}-${randomUUID()}`;
+
+  const runDirectory = join(
+    process.cwd(),
+    'test-results',
+    `run-${runId}`,
+  );
+
+  const screenshotsDirectory = join(
+    runDirectory,
+    'screenshots',
+  );
+
+  const artifactsDirectory = join(
+    runDirectory,
+    'test-artifacts',
+  );
+
+  const playwrightReportDirectory = join(
+    runDirectory,
+    'playwright-report',
+  );
+
+  // Directory creation is owned by Playwright configuration.
+  mkdirSync(runDirectory, { recursive: true });
+  mkdirSync(screenshotsDirectory, { recursive: true });
+
   return defineConfig({
     testDir: projectConfig.testDir,
+
+    /*
+     * PLAYWRIGHT TEST ARTIFACTS
+     *
+     * Keep Playwright-managed artifacts separate from
+     * screenshots, Excel, and HTML reports.
+     */
+    outputDir: artifactsDirectory,
 
     /* Run tests in files in parallel */
     fullyParallel: true,
@@ -41,7 +95,7 @@ export function createConfig(project: string | undefined) {
      * 1. Playwright list reporter
      * 2. Playwright HTML reporter
      * 3. Existing custom HTML + XLSX reporter
-     * 4. New EvidenceFactory ExcelJS reporter
+     * 4. EvidenceFactory ExcelJS reporter
      */
     reporter: [
       ['list'],
@@ -49,7 +103,7 @@ export function createConfig(project: string | undefined) {
       [
         'html',
         {
-          outputFolder: 'playwright-report',
+          outputFolder: playwrightReportDirectory,
           open: 'never',
         },
       ],
@@ -57,13 +111,15 @@ export function createConfig(project: string | undefined) {
       // Existing reporter: retained during migration.
       // ['./reportingLayer/custom-html-reporter.js'],
 
-      // New schema-driven Excel evidence reporter.
+      // Schema-driven Excel evidence reporter.
       [
         './reportingLayer/evidenceReporter.ts',
         {
           evidenceSchema: evidenceFields,
           summarySchema,
           product,
+          runId,
+          outputDirectory: runDirectory,
         },
       ],
     ],
@@ -78,7 +134,14 @@ export function createConfig(project: string | undefined) {
     use: {
       actionTimeout: 30 * 1000,
 
-      screenshot: 'only-on-failure',
+      /*
+       * Full-page failure screenshots will be captured
+       * by automationLayer/common/baseTest.ts.
+       *
+       * Disable built-in viewport screenshots to avoid
+       * capturing the same failure twice.
+       */
+      screenshot: 'off',
 
       trace: 'on-first-retry',
 

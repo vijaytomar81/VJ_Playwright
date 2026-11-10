@@ -1,6 +1,5 @@
 
 import ExcelJS from 'exceljs';
-import { mkdir } from 'node:fs/promises';
 import { join } from 'node:path';
 
 import { findMissingReportingFields } from './missingFields';
@@ -305,7 +304,8 @@ function createMissingFields(
 export async function generateEvidenceExcel(
     options: ExcelGenerationOptions,
 ): Promise<string> {
-    await mkdir(options.outputDirectory, { recursive: true });
+    // The run directory is created by playwright.config.base.ts.
+    // This generator only writes the Excel file.
 
     const workbook = new ExcelJS.Workbook();
     workbook.creator = 'EvidenceFactory';
