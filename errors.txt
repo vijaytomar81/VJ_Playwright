@@ -1,41 +1,6 @@
-Get-ChildItem -Path .\automationLayer -Recurse -Filter "*.spec.ts" -File |
-    Select-String -Pattern "@playwright/test" |
-    Select-Object -First 10 |
-    ForEach-Object { $_.Line }
-
-
-Get-ChildItem -Path .\automationLayer -Recurse -Filter "*.spec.ts" -File |
-    Select-String -Pattern "import\s*\{[^}]*\btest\b[^}]*\}\s*from\s*['""]@playwright/test['""]" |
-    Measure-Object
-
-===
-
-PS C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\Athena_Automation\integration-tests> Get-ChildItem -Path .\automationLayer -Recurse -Filter "*.spec.ts" -File |
->>     Select-String -Pattern "@playwright/test" |                                                   
->>     Select-Object -First 10 |
->>     ForEach-Object { $_.Line }
-import { test, expect } from '@playwright/test';
-import { test, expect } from '@playwright/test';
-import { test, expect } from '@playwright/test';
-import { test, expect } from '@playwright/test';
-import { test, expect } from '@playwright/test';
-import { test, expect } from '@playwright/test';
-import { test, expect } from '@playwright/test';
-import { test, expect } from '@playwright/test';
-import { test, expect } from '@playwright/test';
-import { test, expect } from '@playwright/test';
-PS C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\Athena_Automation\integration-tests> 
-
-========
-
-PS C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\Athena_Automation\integration-tests> Get-ChildItem -Path .\automationLayer -Recurse -Filter "*.spec.ts" -File |
->>     Select-String -Pattern "import\s*\{[^}]*\btest\b[^}]*\}\s*from\s*['""]@playwright/test['""]" |
->>     Measure-Object
-Select-String : The file C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\Athena_Automation\integration-tests\automationLayer\athena\carInsurance\britannia\tests\NCD_Claims\Claims_After_Renewal_Invite
-\TC19_Premier_MonthlyPayment_One_PartialFault_Claim_No_PNCD_High_NCD.spec.ts cannot be read: Could not find a part of the path 'C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\Athena_Automation\integ
-ration-tests\automationLayer\athena\carInsurance\britannia\tests\NCD_Claims\Claims_After_Renewal_Invite\TC19_Premier_MonthlyPayment_One_PartialFault_Claim_No_PNCD_High_NCD.spec.ts'.
-At line:2 char:5
-+     Select-String -Pattern "import\s*\{[^}]*\btest\b[^}]*\}\s*from\s* ...
-+     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    + CategoryInfo          : InvalidArgument: (:) [Select-String], ArgumentException
-    + FullyQualifiedErrorId : ProcessingFile,Microsoft.PowerShell.Commands.SelectStringCommand
+PS C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\Athena_Automation\integration-tests> treee automationLayer\common
+common
+├── basePage.ts
+├── baseTest.ts
+└── browserMetadata.ts
+PS C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\Athena_Automation\integration-tests>
