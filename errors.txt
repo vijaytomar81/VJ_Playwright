@@ -1,20 +1,11 @@
-PS X:\> treee /test-results/
-test-results
-├── run-2026-11-10T18-04-45-000Z-77b98568-8175-4ed2-adc8-445c842eeb11
-│   ├── evidence-report-2026-11-10T18-05-36-982Z.xlsx
-│   ├── playwright-report
-│   │   ├── data
-│   │   │   ├── 0909d2590ea6d8bbf2356dd3382eb3b3a7c46659.md
-│   │   │   └── cb3866e765e623bf6b45a0c1cc1e2f732bf50cde.png
-│   │   └── index.html
-│   ├── screenshots
-│   └── test-artifacts
-└── run-2026-11-10T18-04-52-030Z-b183f33e-adc4-4d00-bc30-729725533493
-    ├── screenshots
-    │   └── failure-chromium-837c5718d03cf37a-retry-0-repeat-0-worker-0.png
-    └── test-artifacts
-        └── Regression-Britannia_Hexa--3877c-i-Premier-Annual-Bri-Annual-chromium
-            ├── attachments
-            │   └── full-page-failure-fd7de6fef1ba4bc916d11280af1054e3183fb431.png
-            └── error-context.md
-PS X:\> 
+import { defineConfig } from '@playwright/test';
+import { createConfig } from './playwright.config.base';
+
+// Real invocations always set PROJECT explicitly: npm scripts pass it via cross-env, and the
+// VS Code extension uses the brand-specific playwright.<brand>.config.ts files instead of this
+// one. If PROJECT is missing, this file is being probed for metadata only (e.g. the extension's
+// workspace-wide config scan) - resolve to an empty test dir rather than throwing, so it doesn't
+// block discovery of the brand-specific configs.
+export default process.env.PROJECT
+  ? createConfig(process.env.PROJECT)
+  : defineConfig({ testDir: './__no_pw_tests__' });
