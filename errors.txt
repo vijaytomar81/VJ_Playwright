@@ -1,29 +1,94 @@
+C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\Athena_Automation\integration-tests> subst X: "C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\Athena_Automation\integration-tests"
+PS C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\Athena_Automation\integration-tests> Set-Location X:\
+PS X:\> $replacements = @{
+>>     "import { test, expect } from '@playwright/test';" = "import { test, expect } from '@common/baseTest';"
+>>     "import { test } from '@playwright/test';" = "import { test } from '@common/baseTest';"
+>>     "import { expect, test } from '@playwright/test';" = "import { expect, test } from '@common/baseTest';"
+>> }
+>> 
+>> $updated = 0
+>> $skipped = 0
+>> $failed = 0
+>> 
+>> $failedFiles = @()
+>> 
+>> Get-ChildItem ".\automationLayer" -Recurse -Filter "*.spec.ts" -File |
+>> ForEach-Object {
+>>     $file = $_
+>> 
+>>     try {
+>>         $content = [System.IO.File]::ReadAllText($file.FullName)
+>>         $newContent = $content
+>> 
+>>         foreach ($oldImport in $replacements.Keys) {
+>>             $newContent = $newContent.Replace(
+>>                 $oldImport,
+>>                 $replacements[$oldImport]
+>>             )
+>>         }
+>> 
+>>         if ($newContent -cne $content) {
+>>             [System.IO.File]::WriteAllText(
+>>                 $file.FullName,
+>>                 $newContent
+>>             )
+>>             $updated++
+>>         }
+>>         else {
+>>             $skipped++
+>>         }
+>>     }
+>>     catch {
+>>         $failed++
+>> 
+>>         $failedFiles += [PSCustomObject]@{
+>>             File  = $file.FullName
+>>             Error = $_.Exception.Message
+>>         }
+>>     }
+>> }
+>> 
+>> Write-Host ""
+>> Write-Host "========== Replacement Summary =========="
+>> Write-Host "Updated : $updated"
+>> Write-Host "Skipped : $skipped"
+>> Write-Host "Failed  : $failed"
+>> Write-Host "========================================="
+>> 
+>> $failedFiles | Format-List
+
 ========== Replacement Summary ==========
-Updated : 549
-Skipped : 0
-Failed  : 216
+Updated : 216
+Skipped : 549
+Failed  : 0
 =========================================
-
-
-PS C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\Athena_Automation\integration-tests> Get-ChildItem ".\automationLayer" -Recurse -Filter "*.spec.ts" -File |
+PS X:\> $old = 0
+>> $new = 0
+>> $unreadable = 0
+>> 
+>> Get-ChildItem ".\automationLayer" -Recurse -Filter "*.spec.ts" -File |
 >> ForEach-Object {
 >>     try {
 >>         $content = [System.IO.File]::ReadAllText($_.FullName)
 >> 
 >>         if ($content.Contains("from '@playwright/test'")) {
->>             Write-Host "Remaining: $($_.FullName)" -ForegroundColor Yellow
+>>             $old++
+>>         }
+>> 
+>>         if ($content.Contains("from '@common/baseTest'")) {
+>>             $new++
 >>         }
 >>     }
 >>     catch {
->>         Write-Warning "Cannot read: $($_.FullName)"
+>>         $unreadable++
+>>         Write-Warning "Cannot read: $($_.FullName) - $($_.Exception.Message)"
 >>     }
 >> }
-WARNING: Cannot read: 
-WARNING: Cannot read: 
-WARNING: Cannot read: 
-WARNING: Cannot read: 
-WARNING: Cannot read: 
-WARNING: Cannot read: 
-WARNING: Cannot read: 
-WARNING: Cannot read: 
-WARNING: Cannot read: 
+>> 
+>> Write-Host "Old imports : $old"
+>> Write-Host "New imports : $new"
+>> Write-Host "Unreadable  : $unreadable"
+Old imports : 0
+New imports : 765
+Unreadable  : 0
+PS X:\> 
