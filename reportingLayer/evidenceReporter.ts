@@ -169,7 +169,7 @@ export default class EvidenceReporter implements Reporter {
                     workerId: last?.workerIndex ?? UNKNOWN,
                     startTime: results[0]?.startTime.toISOString() ?? UNKNOWN,
                     endTime: finishedAt?.toISOString() ?? UNKNOWN,
-                    durationMs: duration(totalDuration),
+                    duration: duration(totalDuration),
                     error: last?.errors
                         .map(error => error.stack ?? error.message ?? '')
                         .filter(Boolean)
