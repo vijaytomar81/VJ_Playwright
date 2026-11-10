@@ -5,11 +5,17 @@ Measure-Object).Count
 ===
 
 
-PS C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\Athena_Automation\integration-tests> tree automationLayer\common
-Folder PATH listing for volume Windows
-Volume serial number is 6E09-9B97
-C:\USERS\TP70707\ONEDRIVE - ALLIANZ\MY DOCUMENTS\AUTOMATION\ATHENA_AUTOMATION\INTEGRATION-TESTS\AUTOMATIONLAYER\COMMON
-No subfolders exist 
+PS C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\Athena_Automation\integration-tests> treee automationLayer\common
+treee : The term 'treee' is not recognized as the name of a cmdlet, function, script file, or operable program. Check the spelling of the name, or if a path was included, verify that the 
+path is correct and try again.
+At line:1 char:1
++ treee automationLayer\common
++ ~~~~~
+    + CategoryInfo          : ObjectNotFound: (treee:String) [], CommandNotFoundException
+    + FullyQualifiedErrorId : CommandNotFoundException
+ 
+PS C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\Athena_Automation\integration-tests> npm list -g tree-node-cli --depth=0
+C:\Users\tp70707\AppData\Roaming\npm
+└── tree-node-cli@3.0.0
 
-PS C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\Athena_Automation\integration-tests> npx tsc --noEmit
 PS C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\Athena_Automation\integration-tests> 
