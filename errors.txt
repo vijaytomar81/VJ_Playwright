@@ -25,3 +25,13 @@ test-results
     └── evidence-report-2026-11-10T16-59-37-370Z.xlsx
 PS C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\Athena_Automation\integration-tests>
 
+PS C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\Athena_Automation\integration-tests> treee playwright-report
+playwright-report
+├── data
+│   ├── 06c76dc1ca3148dc34745eca3bc7f238f156205c.md
+│   └── f42e8afe4a439f7caaea65de894bb5652def170b.png
+└── index.html
+PS C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\Athena_Automation\integration-tests> 
+
+
+
