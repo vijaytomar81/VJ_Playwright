@@ -5,17 +5,20 @@ Measure-Object).Count
 ===
 
 
-PS C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\Athena_Automation\integration-tests> treee automationLayer\common
-treee : The term 'treee' is not recognized as the name of a cmdlet, function, script file, or operable program. Check the spelling of the name, or if a path was included, verify that the 
-path is correct and try again.
-At line:1 char:1
-+ treee automationLayer\common
-+ ~~~~~
-    + CategoryInfo          : ObjectNotFound: (treee:String) [], CommandNotFoundException
-    + FullyQualifiedErrorId : CommandNotFoundException
- 
-PS C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\Athena_Automation\integration-tests> npm list -g tree-node-cli --depth=0
-C:\Users\tp70707\AppData\Roaming\npm
-└── tree-node-cli@3.0.0
+PS C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\Athena_Automation\integration-tests> Get-ChildItem "$env:APPDATA\npm" -Filter "*tree*"
+
+
+    Directory: C:\Users\tp70707\AppData\Roaming\npm
+
+
+Mode                 LastWriteTime         Length Name                                                                                                                                        
+----                 -------------         ------ ----                                                                                                                                        
+-a----        11/10/2026   5:35 PM            421 tree                                                                                                                                        
+-a----        11/10/2026   5:35 PM            341 tree.cmd                                                                                                                                    
+-a----        11/10/2026   5:35 PM            869 tree.ps1                                                                                                                                    
+-a----        11/10/2026   5:35 PM            421 treee                                                                                                                                       
+-a----        11/10/2026   5:35 PM            341 treee.cmd                                                                                                                                   
+-a----        11/10/2026   5:35 PM            869 treee.ps1                                                                                                                                   
+
 
 PS C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\Athena_Automation\integration-tests> 
