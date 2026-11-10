@@ -2,7 +2,9 @@
 import './configLayer/execution/loadEnvironment';
 
 import { defineConfig, devices } from '@playwright/test';
+import { join } from 'node:path';
 import { getProjectConfig } from './configLayer/execution/projectsRegistry';
+import { runContext } from './configLayer/execution/runContext';
 
 import { evidenceFields } from './configLayer/schema/evidence/evidence-schema';
 import { summarySchema } from './configLayer/schema/evidence/summary-schema';
@@ -22,6 +24,9 @@ export function createConfig(project: string | undefined) {
 
   return defineConfig({
     testDir: projectConfig.testDir,
+
+    // Save Playwright screenshots and artifacts inside the EvidenceFactory run folder.
+    outputDir: join(runContext.outputDirectory, 'test-artifacts'),
 
     /* Run tests in files in parallel */
     fullyParallel: true,
@@ -64,6 +69,8 @@ export function createConfig(project: string | undefined) {
           evidenceSchema: evidenceFields,
           summarySchema,
           product,
+          runId: runContext.runId,
+          outputDirectory: runContext.outputDirectory,
         },
       ],
     ],
