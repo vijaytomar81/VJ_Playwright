@@ -9,3 +9,8 @@ import { createConfig } from './playwright.config.base';
 export default process.env.PROJECT
   ? createConfig(process.env.PROJECT)
   : defineConfig({ testDir: './__no_pw_tests__' });
+
+
+below is the test command:
+
+npx cross-env PROJECT=britannia ENV=test AGENT_PORTAL_AUTH=skip playwright test -g "TC1_BRI_DJ_PRE_NB001"
