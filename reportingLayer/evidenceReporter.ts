@@ -23,7 +23,6 @@ interface ReporterOptions {
     readonly evidenceSchema: readonly SchemaField[];
     readonly summarySchema: readonly SummarySection[];
     readonly product: string;
-    readonly runId: string;
     readonly outputDirectory?: string;
 }
 
@@ -203,9 +202,7 @@ export default class EvidenceReporter implements Reporter {
             row => row.status === 'notExecuted',
         ).length;
 
-        // Use the shared Run ID supplied by playwright.config.base.ts.
-        const runId = this.options.runId;
-
+        const runId = this.startedAt.toISOString().replace(/[:.]/g, '-');
         const outputDirectory = this.options.outputDirectory ??
             join(process.cwd(), 'custom-test-reports', `run-${runId}`);
 
@@ -221,12 +218,6 @@ export default class EvidenceReporter implements Reporter {
             mode: process.env.CI === 'true' ? 'CI' : 'Local',
             environment: known(process.env.ENV),
             evidenceDirectory: outputDirectory,
-
-            // Jenkins metadata (optional for local execution).
-            buildNumber: known(process.env.BUILD_NUMBER),
-            buildId: known(process.env.BUILD_ID),
-            jobName: known(process.env.JOB_NAME),
-
             machineName: hostname(),
             user: userInfo().username,
             platform: platform(),
