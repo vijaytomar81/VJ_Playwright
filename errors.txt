@@ -4,32 +4,6 @@ Measure-Object).Count
 
 ===
 
-
-PS C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\Athena_Automation\integration-tests> Get-ChildItem "$env:APPDATA\npm" -Filter "*tree*"
-
-
-    Directory: C:\Users\tp70707\AppData\Roaming\npm
-
-
-Mode                 LastWriteTime         Length Name                                                                                                                                        
-----                 -------------         ------ ----                                                                                                                                        
--a----        11/10/2026   5:35 PM            421 tree                                                                                                                                        
--a----        11/10/2026   5:35 PM            341 tree.cmd                                                                                                                                    
--a----        11/10/2026   5:35 PM            869 tree.ps1                                                                                                                                    
--a----        11/10/2026   5:35 PM            421 treee                                                                                                                                       
--a----        11/10/2026   5:35 PM            341 treee.cmd                                                                                                                                   
--a----        11/10/2026   5:35 PM            869 treee.ps1                                                                                                                                   
-
-
-PS C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\Athena_Automation\integration-tests> 
-
-
-=====
-
-[Environment]::GetEnvironmentVariable('Path', 'User') -split ';'
-
-%APPDATA%\npm
-
 ========
 
 $userPath = [Environment]::GetEnvironmentVariable('Path', 'User')
@@ -40,3 +14,14 @@ $npmPath = "$env:APPDATA\npm"
     "$userPath;$npmPath",
     'User'
 )
+==========
+
+PS C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\Athena_Automation\integration-tests> treee test-results
+test-results
+├── Regression-Britannia_Hexa--3877c-i-Premier-Annual-Bri-Annual-chromium
+│   ├── error-context.md
+│   └── test-failed-1.png
+└── run-2026-11-10T16-58-50-679Z
+    └── evidence-report-2026-11-10T16-59-37-370Z.xlsx
+PS C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\Athena_Automation\integration-tests>
+
