@@ -161,7 +161,7 @@ export default class EvidenceReporter implements Reporter {
                 annotations,
                 values: {
                     ...annotations,
-                    scenarioId: test.id,
+                    scenarioId: annotations.scenarioId || test.id,
                     scenarioName: test.title,
                     status,
                     retry,
