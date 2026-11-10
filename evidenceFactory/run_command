@@ -1,7 +1,0 @@
-$env:EVIDENCE_RUN_ID = "RUN-$(Get-Date -Format 'yyyyMMdd-HHmmss')"
-
-npx playwright test automationLayer/tests/evidence-e2e.spec.ts --project=chrome --project=edge --project=firefox --project=webkit --project=chromium --workers=5 --reporter=line
-
-
-npx cross-env PROJECT=britannia ENV=test AGENT_PORTAL_AUTH=skip playwright test -g "TC1_BRI_DJ_PRE_NB001"
-
