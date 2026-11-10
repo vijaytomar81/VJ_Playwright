@@ -23,6 +23,7 @@ const {
     rowHeights: ROW_HEIGHTS,
     columnWidths: COLUMN_WIDTHS,
     alignment: ALIGNMENT,
+    spacing: SPACING,
     wrapText: WRAPTEXT,
 } = EXCEL_STYLE_CONFIG;
 
@@ -225,6 +226,13 @@ export function styleTitle(
         bold: true,
         color: { argb: toArgb(COLORS.summaryTitleText) },
     };
+
+    row.getCell(1).alignment = {
+        vertical: 'middle',
+        horizontal: 'left',
+        indent: SPACING.summaryTitle,
+        wrapText: WRAPTEXT,
+    };
 }
 
 /**
@@ -390,6 +398,13 @@ export function styleSummarySection(
         bold: true,
         color: { argb: toArgb(COLORS.summarySectionText) },
     };
+
+    row.getCell(1).alignment = {
+        vertical: 'middle',
+        horizontal: 'left',
+        indent: SPACING.summarySection,
+        wrapText: WRAPTEXT,
+    };
 }
 
 /**
@@ -416,6 +431,13 @@ export function styleSummaryField(
         COLORS.summaryFieldText,
         true,
     );
+
+    row.getCell(1).alignment = {
+        vertical: 'middle',
+        horizontal: 'left',
+        indent: SPACING.summaryField,
+        wrapText: WRAPTEXT,
+    };
 
     styleSummaryValue(row.getCell(2));
 }

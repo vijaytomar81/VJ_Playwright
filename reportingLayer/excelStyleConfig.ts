@@ -91,6 +91,18 @@ export const EXCEL_STYLE_CONFIG = {
         status: 'center',
     } as const,
 
+    /**
+     * Horizontal indentation in Summary worksheet.
+     * 0 = no indentation.
+     * 1 = small spacing.
+     * 2 = larger spacing.
+     */
+    spacing: {
+        summaryTitle: 1,
+        summarySection: 1,
+        summaryField: 1,
+    },
+
     wrapText: false,
 
     enableTabColors: false,
