@@ -20,74 +20,57 @@ const {
     colors: COLORS,
     passRateRanges: PASS_RATE_RANGES,
     fonts: FONTS,
+    fontStyles: FONT_STYLES,
     rowHeights: ROW_HEIGHTS,
     columnWidths: COLUMN_WIDTHS,
     alignment: ALIGNMENT,
     spacing: SPACING,
     wrapText: WRAPTEXT,
+    border: BORDER,
+    fill: FILL,
+    freezePanes: FREEZE_PANES,
+    numberFormats: NUMBER_FORMATS,
 } = EXCEL_STYLE_CONFIG;
 
 const toArgb = (color: string): string =>
     `FF${color.replace('#', '')}`;
+
+type ColorKey = keyof typeof COLORS;
 
 interface WorksheetTheme {
     readonly tab: string;
     readonly header: string;
 }
 
-const WORKSHEET_THEMES: Readonly<
-    Record<string, WorksheetTheme>
-> = {
-    Summary: {
-        tab: COLORS.summarySection,
-        header: COLORS.summaryTitle,
-    },
-    All: {
-        tab: COLORS.allHeader,
-        header: COLORS.allHeader,
-    },
-    Passed: {
-        tab: COLORS.passed,
-        header: COLORS.passed,
-    },
-    Failed: {
-        tab: COLORS.failed,
-        header: COLORS.failed,
-    },
-    'Not Executed': {
-        tab: COLORS.notExecuted,
-        header: COLORS.notExecuted,
-    },
-    'Missing Reporting Fields': {
-        tab: COLORS.notExecuted,
-        header: COLORS.missingFieldsHeader,
-    },
-};
-
-const DEFAULT_THEME: WorksheetTheme = {
-    tab: COLORS.summarySection,
-    header: COLORS.summaryTitle,
-};
-
 function getWorksheetTheme(name: string): WorksheetTheme {
-    return WORKSHEET_THEMES[name] ?? DEFAULT_THEME;
+    const themes = EXCEL_STYLE_CONFIG.worksheetThemes;
+
+    const theme =
+        name in themes
+            ? themes[name as keyof typeof themes]
+            : EXCEL_STYLE_CONFIG.defaultWorksheetTheme;
+
+    return {
+        tab: COLORS[theme.tab as ColorKey],
+        header: COLORS[theme.header as ColorKey],
+    };
 }
 
 const thinBorder: Partial<Borders> = {
     top: {
-        style: 'thin',
+        style: BORDER.style,
         color: { argb: toArgb(COLORS.border) },
     },
     bottom: {
-        style: 'thin',
+        style: BORDER.style,
         color: { argb: toArgb(COLORS.border) },
     },
     left: {
-        style: 'thin',
+        style: BORDER.style,
         color: { argb: toArgb(COLORS.border) },
     },
     right: {
-        style: 'thin',
+        style: BORDER.style,
         color: { argb: toArgb(COLORS.border) },
     },
 };
@@ -95,7 +78,7 @@ const thinBorder: Partial<Borders> = {
 function solidFill(color: string): Fill {
     return {
         type: 'pattern',
-        pattern: 'solid',
+        pattern: FILL.solid,
         fgColor: { argb: toArgb(color) },
     };
 }
@@ -131,7 +114,7 @@ function styleCell(
     cell.border = thinBorder;
 
     cell.alignment = {
-        vertical: 'middle',
+        vertical: ALIGNMENT.vertical,
         wrapText: WRAPTEXT,
     };
 }
@@ -145,12 +128,12 @@ function styleSummaryValue(
 
     cell.fill = {
         type: 'pattern',
-        pattern: 'none',
+        pattern: FILL.none,
         fgColor: { argb: toArgb(COLORS.white) },
     };
 
     cell.alignment = {
-        vertical: 'middle',
+        vertical: ALIGNMENT.vertical,
         horizontal: ALIGNMENT.summaryValue,
         wrapText: WRAPTEXT,
     };
@@ -180,12 +163,14 @@ export function styleSummaryLayout(
     worksheet.getColumn(2).width =
         COLUMN_WIDTHS.summaryValue;
 
-    worksheet.views = [
-        {
-            state: 'frozen',
-            ySplit: 1,
-        },
-    ];
+    if (FREEZE_PANES.enabled) {
+        worksheet.views = [
+            {
+                state: 'frozen',
+                ySplit: FREEZE_PANES.summaryRows,
+            },
+        ];
+    }
 }
 
 /**
@@ -216,20 +201,20 @@ export function styleTitle(
             row.getCell(column),
             COLORS.summaryTitle,
             COLORS.summaryTitleText,
-            true,
+            FONT_STYLES.titleBold,
         );
     }
 
     row.getCell(1).font = {
         name: FONTS.titleName,
         size: FONTS.titleSize,
-        bold: true,
+        bold: FONT_STYLES.titleBold,
         color: { argb: toArgb(COLORS.summaryTitleText) },
     };
 
     row.getCell(1).alignment = {
-        vertical: 'middle',
-        horizontal: 'left',
+        vertical: ALIGNMENT.vertical,
+        horizontal: ALIGNMENT.summaryTitle,
         indent: SPACING.summaryTitle,
         wrapText: WRAPTEXT,
     };
@@ -260,11 +245,11 @@ export function styleTableHeader(
             cell,
             theme.header,
             COLORS.white,
-            true,
+            FONT_STYLES.headerBold,
         );
 
         cell.alignment = {
-            vertical: 'middle',
+            vertical: ALIGNMENT.vertical,
             horizontal: ALIGNMENT.detailHeader,
             wrapText: WRAPTEXT,
         };
@@ -281,12 +266,14 @@ export function styleTableHeader(
         },
     };
 
-    worksheet.views = [
-        {
-            state: 'frozen',
-            ySplit: headerRowNumber,
-        },
-    ];
+    if (FREEZE_PANES.enabled && FREEZE_PANES.detailHeader) {
+        worksheet.views = [
+            {
+                state: 'frozen',
+                ySplit: headerRowNumber,
+            },
+        ];
+    }
 
     styleWorksheetTab(worksheet);
 }
@@ -330,14 +317,14 @@ export function styleStatusCell(
             cell,
             COLORS.passedLight,
             COLORS.passedText,
-            true,
+            FONT_STYLES.statusBold,
         );
     } else if (normalized === 'failed') {
         styleCell(
             cell,
             COLORS.failedLight,
             COLORS.failedText,
-            true,
+            FONT_STYLES.statusBold,
         );
     } else if (
         normalized === 'notexecuted' ||
@@ -349,12 +336,12 @@ export function styleStatusCell(
             cell,
             COLORS.notExecutedLight,
             COLORS.notExecutedText,
-            true,
+            FONT_STYLES.statusBold,
         );
     }
 
     cell.alignment = {
-        vertical: 'middle',
+        vertical: ALIGNMENT.vertical,
         horizontal: ALIGNMENT.status,
         wrapText: WRAPTEXT,
     };
@@ -388,20 +375,20 @@ export function styleSummarySection(
             row.getCell(column),
             COLORS.summarySection,
             COLORS.summarySectionText,
-            true,
+            FONT_STYLES.sectionBold,
         );
     }
 
     row.getCell(1).font = {
         name: FONTS.name,
         size: FONTS.sectionSize,
-        bold: true,
+        bold: FONT_STYLES.sectionBold,
         color: { argb: toArgb(COLORS.summarySectionText) },
     };
 
     row.getCell(1).alignment = {
-        vertical: 'middle',
-        horizontal: 'left',
+        vertical: ALIGNMENT.vertical,
+        horizontal: ALIGNMENT.summarySection,
         indent: SPACING.summarySection,
         wrapText: WRAPTEXT,
     };
@@ -429,12 +416,12 @@ export function styleSummaryField(
         row.getCell(1),
         COLORS.summaryField,
         COLORS.summaryFieldText,
-        true,
+        FONT_STYLES.summaryFieldBold,
     );
 
     row.getCell(1).alignment = {
-        vertical: 'middle',
-        horizontal: 'left',
+        vertical: ALIGNMENT.vertical,
+        horizontal: ALIGNMENT.summaryField,
         indent: SPACING.summaryField,
         wrapText: WRAPTEXT,
     };
@@ -457,15 +444,27 @@ export function styleSummaryResult(
 
     switch (field) {
         case 'passed':
-            styleSummaryValue(cell, COLORS.passedText, true);
+            styleSummaryValue(
+                cell,
+                COLORS.passedText,
+                FONT_STYLES.summaryResultBold,
+            );
             break;
 
         case 'failed':
-            styleSummaryValue(cell, COLORS.failedText, true);
+            styleSummaryValue(
+                cell,
+                COLORS.failedText,
+                FONT_STYLES.summaryResultBold,
+            );
             break;
 
         case 'notExecuted':
-            styleSummaryValue(cell, COLORS.notExecutedText, true);
+            styleSummaryValue(
+                cell,
+                COLORS.notExecutedText,
+                FONT_STYLES.summaryResultBold,
+            );
             break;
 
         case 'passRate': {
@@ -487,16 +486,16 @@ export function styleSummaryResult(
                 cell,
                 background,
                 COLORS.passRateText,
-                true,
+                FONT_STYLES.summaryResultBold,
             );
 
             cell.alignment = {
-                vertical: 'middle',
+                vertical: ALIGNMENT.vertical,
                 horizontal: ALIGNMENT.summaryValue,
                 wrapText: WRAPTEXT,
             };
 
-            cell.numFmt = '0.00"%"';
+            cell.numFmt = NUMBER_FORMATS.passRate;
             break;
         }
     }

@@ -65,6 +65,15 @@ export const EXCEL_STYLE_CONFIG = {
         sectionSize: 12,
     },
 
+    fontStyles: {
+        titleBold: true,
+        sectionBold: true,
+        headerBold: true,
+        summaryFieldBold: true,
+        summaryResultBold: true,
+        statusBold: true,
+    },
+
     /**
      * null = Excel's default row height.
      * Set a number to apply a custom height.
@@ -86,6 +95,10 @@ export const EXCEL_STYLE_CONFIG = {
     },
 
     alignment: {
+        vertical: 'middle',
+        summaryTitle: 'left',
+        summarySection: 'left',
+        summaryField: 'left',
         summaryValue: 'left',
         detailHeader: 'center',
         status: 'center',
@@ -93,9 +106,6 @@ export const EXCEL_STYLE_CONFIG = {
 
     /**
      * Horizontal indentation in Summary worksheet.
-     * 0 = no indentation.
-     * 1 = small spacing.
-     * 2 = larger spacing.
      */
     spacing: {
         summaryTitle: 1,
@@ -104,6 +114,57 @@ export const EXCEL_STYLE_CONFIG = {
     },
 
     wrapText: false,
+
+    border: {
+        style: 'thin',
+    } as const,
+
+    fill: {
+        solid: 'solid',
+        none: 'none',
+    } as const,
+
+    freezePanes: {
+        enabled: true,
+        summaryRows: 1,
+        detailHeader: true,
+    },
+
+    numberFormats: {
+        passRate: '0.00"%"',
+    },
+
+    worksheetThemes: {
+        Summary: {
+            tab: 'summarySection',
+            header: 'summaryTitle',
+        },
+        All: {
+            tab: 'allHeader',
+            header: 'allHeader',
+        },
+        Passed: {
+            tab: 'passed',
+            header: 'passed',
+        },
+        Failed: {
+            tab: 'failed',
+            header: 'failed',
+        },
+        'Not Executed': {
+            tab: 'notExecuted',
+            header: 'notExecuted',
+        },
+        'Missing Reporting Fields': {
+            tab: 'notExecuted',
+            header: 'missingFieldsHeader',
+        },
+    } as const,
+
+    defaultWorksheetTheme: {
+        tab: 'summarySection',
+        header: 'summaryTitle',
+    } as const,
 
     enableTabColors: false,
 } as const;
