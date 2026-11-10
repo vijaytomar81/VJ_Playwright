@@ -1,17 +1,2 @@
-PS X:\> treee test-results
-test-results
-└── run-2026-11-10T18-23-05-828Z
-    ├── evidence-report-2026-11-10T18-23-58-585Z.xlsx
-    ├── playwright-report
-    │   ├── data
-    │   │   ├── 411e0a2ddf5170651d1194044c14955b6376c669.md
-    │   │   └── b647f43c93f5e08b228cee912103df57ac95a676.png
-    │   └── index.html
-    ├── screenshots
-    │   └── failure-chromium-837c5718d03cf37a-retry-0-repeat-0-worker-0.png
-    └── test-artifacts
-        └── Regression-Britannia_Hexa--3877c-i-Premier-Annual-Bri-Annual-chromium
-            ├── attachments
-            │   └── full-page-failure-6728391a76b008e653396314045d831d959c7752.png
-            └── error-context.md
-PS X:\> 
+Screenshot
+X:\test-results\run-2026-11-10T18-23-05-828Z\test-artifacts\Regression-Britannia_Hexa--3877c-i-Premier-Annual-Bri-Annual-chromium\attachments\full-page-failure-6728391a76b008e653396314045d831d959c7752.png
