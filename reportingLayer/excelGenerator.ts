@@ -339,6 +339,11 @@ export async function generateEvidenceExcel(
     ];
 
     for (const sheet of sheets) {
+        // Always create All; create other worksheets only when data exists.
+        if (sheet.name !== 'All' && sheet.tests.length === 0) {
+            continue;
+        }
+
         createDetail(
             workbook,
             sheet.name,
