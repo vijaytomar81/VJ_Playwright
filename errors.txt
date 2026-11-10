@@ -5,11 +5,11 @@ Measure-Object).Count
 ===
 
 
-PS C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\Athena_Automation\integration-tests> tree integration-tests\automationLayer\common
+PS C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\Athena_Automation\integration-tests> tree automationLayer\common
 Folder PATH listing for volume Windows
 Volume serial number is 6E09-9B97
-C:\USERS\TP70707\ONEDRIVE - ALLIANZ\MY DOCUMENTS\AUTOMATION\ATHENA_AUTOMATION\INTEGRATION-TESTS\INTEGRATION-TESTS\AUTOMATIONLAYER\COMMON
-Invalid path - \USERS\TP70707\ONEDRIVE - ALLIANZ\MY DOCUMENTS\AUTOMATION\ATHENA_AUTOMATION\INTEGRATION-TESTS\INTEGRATION-TESTS\AUTOMATIONLAYER\COMMON
+C:\USERS\TP70707\ONEDRIVE - ALLIANZ\MY DOCUMENTS\AUTOMATION\ATHENA_AUTOMATION\INTEGRATION-TESTS\AUTOMATIONLAYER\COMMON
 No subfolders exist 
 
-PS C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\Athena_Automation\integration-tests>
+PS C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\Athena_Automation\integration-tests> npx tsc --noEmit
+PS C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\Athena_Automation\integration-tests> 
