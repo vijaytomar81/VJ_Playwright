@@ -23,6 +23,7 @@ const {
     rowHeights: ROW_HEIGHTS,
     columnWidths: COLUMN_WIDTHS,
     alignment: ALIGNMENT,
+    wrapText: WRAPTEXT,
 } = EXCEL_STYLE_CONFIG;
 
 const toArgb = (color: string): string =>
@@ -130,7 +131,7 @@ function styleCell(
 
     cell.alignment = {
         vertical: 'middle',
-        wrapText: true,
+        wrapText: WRAPTEXT,
     };
 }
 
@@ -150,7 +151,7 @@ function styleSummaryValue(
     cell.alignment = {
         vertical: 'middle',
         horizontal: ALIGNMENT.summaryValue,
-        wrapText: true,
+        wrapText: WRAPTEXT,
     };
 }
 
@@ -257,7 +258,7 @@ export function styleTableHeader(
         cell.alignment = {
             vertical: 'middle',
             horizontal: ALIGNMENT.detailHeader,
-            wrapText: true,
+            wrapText: WRAPTEXT,
         };
     }
 
@@ -347,7 +348,7 @@ export function styleStatusCell(
     cell.alignment = {
         vertical: 'middle',
         horizontal: ALIGNMENT.status,
-        wrapText: true,
+        wrapText: WRAPTEXT,
     };
 }
 
@@ -470,7 +471,7 @@ export function styleSummaryResult(
             cell.alignment = {
                 vertical: 'middle',
                 horizontal: ALIGNMENT.summaryValue,
-                wrapText: true,
+                wrapText: WRAPTEXT,
             };
 
             cell.numFmt = '0.00"%"';
