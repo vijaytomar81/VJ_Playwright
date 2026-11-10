@@ -32,14 +32,11 @@ PS C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\Athena_Automation
 
 ========
 
-PS C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\Athena_Automation\integration-tests> [Environment]::GetEnvironmentVariable('Path', 'User') -split ';'
-C:\Users\tp70707\AppData\Local\Microsoft\WindowsApps
-PS C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\Athena_Automation\integration-tests> %APPDATA%\npm
-%APPDATA%\npm : The module '%APPDATA%' could not be loaded. For more information, run 'Import-Module %APPDATA%'.
-At line:1 char:1
-+ %APPDATA%\npm
-+ ~~~~~~~~~~~~~
-    + CategoryInfo          : ObjectNotFound: (%APPDATA%\npm:String) [], CommandNotFoundException
-    + FullyQualifiedErrorId : CouldNotAutoLoadModule
- 
-PS C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\Athena_Automation\integration-tests> 
+$userPath = [Environment]::GetEnvironmentVariable('Path', 'User')
+$npmPath = "$env:APPDATA\npm"
+
+[Environment]::SetEnvironmentVariable(
+    'Path',
+    "$userPath;$npmPath",
+    'User'
+)
