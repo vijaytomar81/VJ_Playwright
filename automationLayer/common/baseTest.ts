@@ -12,6 +12,9 @@ import { dirname, join } from 'node:path';
  *
  * Directory creation is owned by playwright.config.base.ts.
  * This fixture only writes screenshot files.
+ *
+ * The original screenshot path is recorded as an annotation
+ * so evidenceReporter.ts can store a relative path in Excel.
  */
 export const test = base.extend({
     page: async ({ page }, use, testInfo) => {
@@ -117,10 +120,30 @@ export const test = base.extend({
             });
 
             /*
-             * Attach the screenshot to the test result.
+             * Record the ORIGINAL screenshot path.
              *
-             * evidenceReporter.ts collects image/png attachments
-             * and includes their paths in the Excel report.
+             * evidenceReporter.ts will read this annotation
+             * and convert the path to a relative path
+             * before writing it into the Excel report.
+             *
+             * Example Excel value:
+             *
+             * screenshots/failure-chromium-<hash>-retry-0-repeat-0-worker-0.png
+             */
+            testInfo.annotations.push({
+                type: 'evidence-screenshot',
+                description: screenshotPath,
+            });
+
+            /*
+             * Attach the screenshot to the Playwright test result.
+             *
+             * Playwright copies the screenshot into its managed
+             * test-artifacts/attachments directory.
+             *
+             * This attachment is retained for the HTML report.
+             * The Excel reporter should use the annotation above
+             * instead of the copied attachment path.
              */
             await testInfo.attach('full-page-failure', {
                 path: screenshotPath,
