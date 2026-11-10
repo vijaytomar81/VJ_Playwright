@@ -91,5 +91,7 @@ export const EXCEL_STYLE_CONFIG = {
         status: 'center',
     } as const,
 
+    wrapText: false,
+
     enableTabColors: false,
 } as const;
