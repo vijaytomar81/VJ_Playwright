@@ -1,37 +1,44 @@
-(Get-ChildItem -Path . -Recurse -Filter "*.spec.ts" -File |
-Where-Object { $_.FullName -notmatch 'node_modules' } |
-Measure-Object).Count
+PS C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\Athena_Automation\integration-tests> (Get-ChildItem -Path . -Recurse -Filter "*.spec.ts" -File).count
+>> 
+>> Get-ChildItem -Path . -Recurse -Filter "*.spec.ts" -File |
+>>     Select-String -Pattern "@playwright/test" | 
+>>     Select-Object -First 20 Path, LineNumber, Line
+>>     
+>> Test-Path ".\automationLayer\common\baseTest.ts"
+765
 
-===
+Path                                                                                                                                                                                                              L
+                                                                                                                                                                                                                  i
+                                                                                                                                                                                                                  n
+                                                                                                                                                                                                                  e
+                                                                                                                                                                                                                  N
+                                                                                                                                                                                                                  u
+                                                                                                                                                                                                                  m
+                                                                                                                                                                                                                  b
+                                                                                                                                                                                                                  e
+                                                                                                                                                                                                                  r
+----                                                                                                                                                                                                              -
+C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\Athena_Automation\integration-tests\automationLayer\athena\carInsurance\az_motor\tests\Regression\Reg_TC01_BritanniaEssentials_AnnualPayment.spec.ts  1
+C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\Athena_Automation\integration-tests\automationLayer\athena\carInsurance\az_motor\tests\Regression\Reg_TC02_BritanniaPremier_AnnualPayment.spec.ts     1
+C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\Athena_Automation\integration-tests\automationLayer\athena\carInsurance\az_motor\tests\Regression\Reg_TC03_BritanniaPremier_MonthlyPayment.spec.ts    1
+C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\Athena_Automation\integration-tests\automationLayer\athena\carInsurance\az_motor\tests\Regression\Reg_TC04_BritanniaCar_AnnualPayment.spec.ts         1
+C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\Athena_Automation\integration-tests\automationLayer\athena\carInsurance\az_motor\tests\Regression\Reg_TC05_BritanniaCar_AnnualPayment.spec.ts         1
+C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\Athena_Automation\integration-tests\automationLayer\athena\carInsurance\az_motor\tests\Regression\Reg_TC06_BritanniaEssentials_AnnualPayment.spec.ts  1
+C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\Athena_Automation\integration-tests\automationLayer\athena\carInsurance\az_motor\tests\Regression\Reg_TC07_BritanniaPremier_MonthlyPayment.spec.ts    1
+C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\Athena_Automation\integration-tests\automationLayer\athena\carInsurance\az_motor\tests\Regression\Reg_TC08_BritanniaCar_AnnualPayment.spec.ts         1
+C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\Athena_Automation\integration-tests\automationLayer\athena\carInsurance\az_motor\tests\Regression\Reg_TC09_BritanniaEssentials_MonthlyPayment.spec.ts 1
+C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\Athena_Automation\integration-tests\automationLayer\athena\carInsurance\az_motor\tests\Regression\Reg_TC10_BritanniaPremier_AnnualPayment.spec.ts     1
+C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\Athena_Automation\integration-tests\automationLayer\athena\carInsurance\az_motor\tests\Regression\Reg_TC11_BritanniaCar_MonthlyPayment.spec.ts        1
+C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\Athena_Automation\integration-tests\automationLayer\athena\carInsurance\az_motor\tests\Regression\Reg_TC12_BritanniaEssentials_MonthlyPayment.spec.ts 1
+C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\Athena_Automation\integration-tests\automationLayer\athena\carInsurance\az_motor\tests\SmokeTests\AnnualPayment_SmokeTest.spec.ts                     1
+C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\Athena_Automation\integration-tests\automationLayer\athena\carInsurance\az_motor\tests\SmokeTests\MonthlyPayment_SmokeTest.spec.ts                    1
+C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\Athena_Automation\integration-tests\automationLayer\athena\carInsurance\britannia\tests\Declines\Decline_Britannia_TC01.spec.ts                       1
+C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\Athena_Automation\integration-tests\automationLayer\athena\carInsurance\britannia\tests\Declines\Decline_Britannia_TC02.spec.ts                       1
+C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\Athena_Automation\integration-tests\automationLayer\athena\carInsurance\britannia\tests\Declines\Decline_Britannia_TC03.spec.ts                       1
+C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\Athena_Automation\integration-tests\automationLayer\athena\carInsurance\britannia\tests\Declines\Decline_Britannia_TC04.spec.ts                       1
+C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\Athena_Automation\integration-tests\automationLayer\athena\carInsurance\britannia\tests\Declines\Decline_Britannia_TC05.spec.ts                       1
+C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\Athena_Automation\integration-tests\automationLayer\athena\carInsurance\britannia\tests\Declines\Decline_Britannia_TC06.spec.ts                       1
+True
 
-========
 
-$userPath = [Environment]::GetEnvironmentVariable('Path', 'User')
-$npmPath = "$env:APPDATA\npm"
-
-[Environment]::SetEnvironmentVariable(
-    'Path',
-    "$userPath;$npmPath",
-    'User'
-)
-==========
-
-PS C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\Athena_Automation\integration-tests> treee test-results
-test-results
-├── Regression-Britannia_Hexa--3877c-i-Premier-Annual-Bri-Annual-chromium
-│   ├── error-context.md
-│   └── test-failed-1.png
-└── run-2026-11-10T16-58-50-679Z
-    └── evidence-report-2026-11-10T16-59-37-370Z.xlsx
-PS C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\Athena_Automation\integration-tests>
-
-PS C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\Athena_Automation\integration-tests> treee playwright-report
-playwright-report
-├── data
-│   ├── 06c76dc1ca3148dc34745eca3bc7f238f156205c.md
-│   └── f42e8afe4a439f7caaea65de894bb5652def170b.png
-└── index.html
 PS C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\Athena_Automation\integration-tests> 
-
-
-
