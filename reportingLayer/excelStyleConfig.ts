@@ -11,20 +11,20 @@
 export const EXCEL_STYLE_CONFIG = {
     colors: {
         // Summary worksheet
-        summaryTitle: '#102846',
+        summaryTitle: '#1F4E78',
         summaryTitleText: '#FFFFFF',
-        summarySection: '#14529A',
+        summarySection: '#5B7FAF',
         summarySectionText: '#FFFFFF',
         summaryField: '#E5EFF9',
         summaryFieldText: '#202B38',
 
         // All worksheet
-        allHeader: '#1769C2',
+        allHeader: '#4472C4',
 
         // Passed worksheet and status
-        passed: '#208047',
-        passedLight: '#C7EBCB',
-        passedText: '#155B2E',
+        passed: '#70AD47',
+        passedLight: '#E2F0D9',
+        passedText: '#000000',
 
         // Failed worksheet and status
         failed: '#BD3038',
@@ -70,7 +70,7 @@ export const EXCEL_STYLE_CONFIG = {
      * Set a number to apply a custom height.
      */
     rowHeights: {
-        summaryTitle: null as number | null,
+        summaryTitle: 38 as number | null,
         summarySection: null as number | null,
         summaryField: null as number | null,
         evidenceDirectory: null as number | null,
