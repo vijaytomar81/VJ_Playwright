@@ -1,33 +1,4 @@
-$fixture = (Resolve-Path ".\integration-tests\automationLayer\common\baseTest.ts").Path
+import { test } from '@common/basePage';
 
-Get-ChildItem ".\integration-tests" -Recurse -Filter "*.spec.ts" -File | ForEach-Object {
-    $file = $_
-    $content = [System.IO.File]::ReadAllText($file.FullName)
 
-    $relativePath = [System.IO.Path]::GetRelativePath(
-        $file.DirectoryName,
-        $fixture
-    ).Replace('\', '/')
-
-    $relativePath = $relativePath -replace '\.ts$', ''
-
-    if (-not $relativePath.StartsWith('.')) {
-        $relativePath = "./$relativePath"
-    }
-
-    $oldImport = "import { test, expect } from '@playwright/test';"
-    $newImport = "import { test, expect } from '$relativePath';"
-
-    if ($content.Contains($oldImport)) {
-        $updated = $content.Replace($oldImport, $newImport)
-        [System.IO.File]::WriteAllText($file.FullName, $updated)
-        Write-Host "Updated: $($file.FullName)"
-    }
-}
-
-====
-
-Get-ChildItem ".\integration-tests" -Recurse -Filter "*.spec.ts" -File |
-    Select-String -SimpleMatch "import { test, expect } from '@playwright/test';"
-
-====
+Module '"@common/basePage"' has no exported member 'test'.
