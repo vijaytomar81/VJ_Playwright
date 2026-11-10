@@ -4,3 +4,23 @@ common
 ├── baseTest.ts
 └── browserMetadata.ts
 PS C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\Athena_Automation\integration-tests>
+
+
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "commonjs",
+    "moduleResolution": "node",
+    "types": ["node"],
+    "esModuleInterop": true,
+    "resolveJsonModule": true,
+    "skipLibCheck": true,
+    "strict": false,
+    "baseUrl": "./",
+    "paths": {
+      "@pages/*": ["automationLayer/ferry/pages/*"]
+    },
+    "noEmit": true
+  },
+  "include": ["**/*.ts", "**/*.js"]
+}
