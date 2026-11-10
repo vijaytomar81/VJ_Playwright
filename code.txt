@@ -1,4 +1,67 @@
-import { test } from '@common/basePage';
+$replacements = @{
+    "import { test, expect } from '@playwright/test';" = "import { test, expect } from '@common/baseTest';"
+    "import { test } from '@playwright/test';" = "import { test } from '@common/baseTest';"
+    "import { expect, test } from '@playwright/test';" = "import { expect, test } from '@common/baseTest';"
+}
+
+$updated = 0
+$skipped = 0
+$failed = 0
+
+Get-ChildItem -Path ".\automationLayer" -Recurse -Filter "*.spec.ts" -File |
+ForEach-Object {
+    $file = $_
+
+    try {
+        $content = [System.IO.File]::ReadAllText($file.FullName)
+        $newContent = $content
+
+        foreach ($oldImport in $replacements.Keys) {
+            $newContent = $newContent.Replace(
+                $oldImport,
+                $replacements[$oldImport]
+            )
+        }
+
+        if ($newContent -ne $content) {
+            [System.IO.File]::WriteAllText(
+                $file.FullName,
+                $newContent
+            )
+
+            $updated++
+            Write-Host "Updated: $($file.Name)" -ForegroundColor Green
+        }
+        else {
+            $skipped++
+        }
+    }
+    catch {
+        $failed++
+        Write-Warning "Failed: $($file.FullName) - $($_.Exception.Message)"
+    }
+}
+
+Write-Host ""
+Write-Host "========== Replacement Summary =========="
+Write-Host "Updated : $updated" -ForegroundColor Green
+Write-Host "Skipped : $skipped" -ForegroundColor Yellow
+Write-Host "Failed  : $failed" -ForegroundColor Red
+Write-Host "========================================="
 
 
-Module '"@common/basePage"' has no exported member 'test'.
+Verify Import:
+
+Get-ChildItem ".\automationLayer" -Recurse -Filter "*.spec.ts" -File |
+ForEach-Object {
+    try {
+        $content = [System.IO.File]::ReadAllText($_.FullName)
+
+        if ($content.Contains("from '@playwright/test'")) {
+            Write-Host "Remaining: $($_.FullName)" -ForegroundColor Yellow
+        }
+    }
+    catch {
+        Write-Warning "Cannot read: $($_.FullName)"
+    }
+}
