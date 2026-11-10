@@ -1,15 +1,6 @@
-  "scripts": {
-    "test:ferry:dev": "cross-env PROJECT=ferry ENV=dev AGENT_PORTAL_AUTH=skip playwright test",
-    "test:ferry:test": "cross-env PROJECT=ferry ENV=test AGENT_PORTAL_AUTH=skip playwright test",
-    "test:britannia:test": "cross-env PROJECT=britannia ENV=test AGENT_PORTAL_AUTH=skip playwright test",
-    "test:britannia:uat": "cross-env PROJECT=britannia ENV=uat AGENT_PORTAL_AUTH=skip playwright test",
-    "test:britannia:nft": "cross-env PROJECT=britannia ENV=nft AGENT_PORTAL_AUTH=skip playwright test",
-    "test:allianzOnlineMotor:test": "cross-env PROJECT=allianzOnlineMotor ENV=test AGENT_PORTAL_AUTH=skip playwright test",
-    "test:allianzOnlineHome:test": "cross-env PROJECT=allianzOnlineHome ENV=test AGENT_PORTAL_AUTH=skip playwright test",
-    "typecheck": "tsc --noEmit",
-    "lint": "eslint .",
-    "lint:fix": "eslint . --fix",
-    "format": "prettier --write .",
-    "format:check": "prettier --check .",
-    "prepare": "husky"
-  },
+Scenario ID	Scenario Name	Status
+3dfd3ec840bb075523e9-6e0182652f77e637e1d3	TC1_BRI_DJ_PRE_NB001 @Britannia_Premier @Bri_Premier_Annual @Bri_Annual	failed
+
+
+even though I am doing like below in Test:
+attachValueInTestReport({ scenarioId: 'BRI_DJ_PRE_NB001' });
