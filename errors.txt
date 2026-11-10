@@ -1,35 +1,29 @@
-$oldImport = "import { test, expect } from '@playwright/test';"
-$newImport = "import { test, expect } from '@common/baseTest';"
+========== Replacement Summary ==========
+Updated : 549
+Skipped : 0
+Failed  : 216
+=========================================
 
-$updated = 0
-$skipped = 0
-$failed = 0
 
-Get-ChildItem ".\automationLayer" -Recurse -Filter "*.spec.ts" -File |
-ForEach-Object {
-    try {
-        $content = [System.IO.File]::ReadAllText($_.FullName)
-
-        if ($content.Contains($oldImport)) {
-            $content = $content.Replace($oldImport, $newImport)
-
-            [System.IO.File]::WriteAllText(
-                $_.FullName,
-                $content
-            )
-
-            $updated++
-        }
-        else {
-            $skipped++
-        }
-    }
-    catch {
-        $failed++
-        Write-Warning "Failed: $($_.FullName) - $($_.Exception.Message)"
-    }
-}
-
-Write-Host "Updated: $updated"
-Write-Host "Skipped: $skipped"
-Write-Host "Failed: $failed"
+PS C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\Athena_Automation\integration-tests> Get-ChildItem ".\automationLayer" -Recurse -Filter "*.spec.ts" -File |
+>> ForEach-Object {
+>>     try {
+>>         $content = [System.IO.File]::ReadAllText($_.FullName)
+>> 
+>>         if ($content.Contains("from '@playwright/test'")) {
+>>             Write-Host "Remaining: $($_.FullName)" -ForegroundColor Yellow
+>>         }
+>>     }
+>>     catch {
+>>         Write-Warning "Cannot read: $($_.FullName)"
+>>     }
+>> }
+WARNING: Cannot read: 
+WARNING: Cannot read: 
+WARNING: Cannot read: 
+WARNING: Cannot read: 
+WARNING: Cannot read: 
+WARNING: Cannot read: 
+WARNING: Cannot read: 
+WARNING: Cannot read: 
+WARNING: Cannot read: 
