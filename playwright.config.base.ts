@@ -18,7 +18,7 @@ export function createConfig(project: string | undefined) {
 
   // Product name for the EvidenceFactory Summary heading.
   // Can be overridden using the PRODUCT environment variable.
-  const product = process.env.PRODUCT ?? 'Car Insurance';
+  const product = process.env.PRODUCT ?? 'Not Known';
 
   return defineConfig({
     testDir: projectConfig.testDir,
@@ -55,7 +55,7 @@ export function createConfig(project: string | undefined) {
       ],
 
       // Existing reporter: retained during migration.
-      ['./reportingLayer/custom-html-reporter.js'],
+      // ['./reportingLayer/custom-html-reporter.js'],
 
       // New schema-driven Excel evidence reporter.
       [
