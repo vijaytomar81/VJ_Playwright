@@ -1,3 +1,8 @@
 git status --short --untracked-files=all |
     Where-Object { $_ -notmatch '\.spec\.ts$' } |
     Out-File ".\git-status-filtered.txt"
+
+
+    git status --short --untracked-files=all | findstr /V /R /C:"\.spec\.ts$" > git-status-filtered.txt
+
+    
