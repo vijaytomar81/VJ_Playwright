@@ -1,25 +1,21 @@
 {
-    "compilerOptions": {
-        "target": "ES2022",
-        "module": "NodeNext",
-        "moduleResolution": "NodeNext",
-        "strict": true,
-        "noEmit": true,
-        "esModuleInterop": true,
-        "resolveJsonModule": true,
-        "skipLibCheck": true,
-        "forceConsistentCasingInFileNames": true,
-        "types": [
-            "node"
-        ]
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "commonjs",
+    "moduleResolution": "node",
+    "types": ["node"],
+    "esModuleInterop": true,
+    "resolveJsonModule": true,
+    "skipLibCheck": true,
+    "strict": false,
+    "baseUrl": "./",
+    "paths": {
+      "@pages/*": ["automationLayer/ferry/pages/*"],
+      "@shared/*": ["automationLayer/insurance/shared/*"],
+      "@lv/*": ["automationLayer/insurance/lv/*"],
+      "@ferry/*": ["automationLayer/insurance/ferry/*"]
     },
-    "include": [
-        "**/*.ts"
-    ],
-    "exclude": [
-        "node_modules",
-        "executionResults",
-        "playwright-report",
-        "test-results"
-    ]
+    "noEmit": true
+  },
+  "include": ["**/*.ts", "**/*.js"]
 }
