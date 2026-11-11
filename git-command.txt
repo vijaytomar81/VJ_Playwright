@@ -1,0 +1,33 @@
+REM STEP 1: Confirm you are on evidence_factory
+git branch --show-current
+
+REM STEP 2: Review current changes
+git status
+
+REM STEP 3: Discard all tracked local changes
+git reset --hard HEAD
+
+REM STEP 4: Preview untracked files for deletion
+git clean -nd
+
+REM STEP 5: Delete untracked files and folders
+git clean -fd
+
+REM STEP 6: Fetch the latest develop branch
+git fetch origin develop
+
+REM STEP 7: Make evidence_factory exactly match develop
+git reset --hard origin/develop
+
+REM STEP 8: Verify current branch
+git branch --show-current
+
+REM STEP 9: Verify working tree is clean
+git status
+
+REM STEP 10: Verify no differences from develop
+git diff origin/develop
+
+REM STEP 11: Verify both branches point to the same commit
+git rev-parse HEAD
+git rev-parse origin/develop

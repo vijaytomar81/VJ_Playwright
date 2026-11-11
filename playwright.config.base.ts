@@ -1,84 +1,126 @@
 
 import './configLayer/execution/loadEnvironment';
 
-import { defineConfig, devices } from '@playwright/test';
-import { getProjectConfig } from './configLayer/execution/projectsRegistry';
+import { defineConfig } from '@playwright/test';
+import { mkdirSync } from 'node:fs';
+import { join } from 'node:path';
 
-import { evidenceFields } from './configLayer/schema/evidence/evidence-schema';
-import { summarySchema } from './configLayer/schema/evidence/summary-schema';
+import { getProjectConfig } from './configLayer/execution/projectsRegistry';
+import { getReporterConfig } from './configLayer/execution/reporterConfig';
+import { browserProjects } from './configLayer/execution/browserProjects';
 
 /**
- * @see https://playwright.dev/docs/test-configuration
+ * EvidenceFactory Playwright configuration.
+ *
+ * Directory creation is owned exclusively by this file.
+ * All generated evidence belongs to one run directory.
  */
 export function createConfig(project: string | undefined) {
   const authMode = process.env.AGENT_PORTAL_AUTH;
-
-  // Resolve consumer-specific test directory.
   const projectConfig = getProjectConfig(project);
-
-  // Product name for the EvidenceFactory Summary heading.
-  // Can be overridden using the PRODUCT environment variable.
   const product = process.env.PRODUCT ?? 'Not Known';
+
+  /*
+   * EVIDENCEFACTORY RUN DIRECTORY
+   *
+   * Reserve a unique directory for each execution.
+   * Child processes can reuse an inherited run ID.
+   */
+  const timestamp = new Date()
+    .toISOString()
+    .replace(/[:.]/g, '-');
+
+  const resultsRoot = join(
+    process.cwd(),
+    'test-results',
+  );
+
+  mkdirSync(resultsRoot, { recursive: true });
+
+  let runId = process.env.EVIDENCEFACTORY_RUN_ID;
+  let runDirectory: string;
+
+  if (runId) {
+    runDirectory = join(
+      resultsRoot,
+      `run-${runId}`,
+    );
+  } else {
+    let counter = 0;
+
+    while (true) {
+      runId = counter === 0
+        ? timestamp
+        : `${timestamp}-${counter}`;
+
+      runDirectory = join(
+        resultsRoot,
+        `run-${runId}`,
+      );
+
+      try {
+        // Atomically reserve the run directory.
+        mkdirSync(runDirectory);
+        break;
+      } catch (error) {
+        if (
+          (error as NodeJS.ErrnoException).code !== 'EEXIST'
+        ) {
+          throw error;
+        }
+
+        counter++;
+      }
+    }
+
+    process.env.EVIDENCEFACTORY_RUN_ID = runId;
+  }
+
+  const screenshotsDirectory = join(
+    runDirectory,
+    'screenshots',
+  );
+
+  const artifactsDirectory = join(
+    runDirectory,
+    'test-artifacts',
+  );
+
+  const playwrightReportDirectory = join(
+    runDirectory,
+    'playwright-report',
+  );
+
+  // Only this configuration file creates directories.
+  mkdirSync(screenshotsDirectory, { recursive: true });
 
   return defineConfig({
     testDir: projectConfig.testDir,
 
-    /* Run tests in files in parallel */
-    fullyParallel: true,
+    outputDir: artifactsDirectory,
 
-    /* Fail the build on CI if test.only is present */
+    fullyParallel: true,
     forbidOnly: !!process.env.CI,
 
-    /* Retry configuration */
     retries: 0,
-
-    /* Number of parallel workers */
     workers: 3,
 
-    /*
-     * REPORTERS
-     *
-     * 1. Playwright list reporter
-     * 2. Playwright HTML reporter
-     * 3. Existing custom HTML + XLSX reporter
-     * 4. New EvidenceFactory ExcelJS reporter
-     */
-    reporter: [
-      ['list'],
+    reporter: getReporterConfig({
+      runId,
+      runDirectory,
+      playwrightReportDirectory,
+      product,
+    }),
 
-      [
-        'html',
-        {
-          outputFolder: 'playwright-report',
-          open: 'never',
-        },
-      ],
-
-      // Existing reporter: retained during migration.
-      // ['./reportingLayer/custom-html-reporter.js'],
-
-      // New schema-driven Excel evidence reporter.
-      [
-        './reportingLayer/evidenceReporter.ts',
-        {
-          evidenceSchema: evidenceFields,
-          summarySchema,
-          product,
-        },
-      ],
-    ],
-
-    /* Global setup */
     globalSetup: require.resolve('./global-setup.js'),
 
-    /* Maximum duration per test: 5 minutes */
     timeout: 300000,
 
-    /* Shared browser/test settings */
     use: {
       actionTimeout: 30 * 1000,
 
-      screenshot: 'only-on-failure',
+      // Full-page screenshots are handled by baseTest.ts.
+      screenshot: 'off',
 
       trace: 'on-first-retry',
 
@@ -90,57 +132,6 @@ export function createConfig(project: string | undefined) {
           : 'automationLayer/athena/agentPortalAuth/auth.json',
     },
 
-    /* Browser projects */
-    projects: [
-      {
-        name: 'chromium',
-        use: {
-          ...devices['Desktop Chrome'],
-        },
-      },
-
-      // Firefox
-      // {
-      //   name: 'firefox',
-      //   use: { ...devices['Desktop Firefox'] },
-      // },
-
-      // WebKit
-      // {
-      //   name: 'webkit',
-      //   use: { ...devices['Desktop Safari'] },
-      // },
-
-      // Mobile Chrome
-      // {
-      //   name: 'Mobile Chrome',
-      //   use: { ...devices['Pixel 5'] },
-      // },
-
-      // Mobile Safari
-      // {
-      //   name: 'Mobile Safari',
-      //   use: { ...devices['iPhone 12'] },
-      // },
-
-      // Microsoft Edge
-      // {
-      //   name: 'Microsoft Edge',
-      //   use: { ...devices['Desktop Edge'], channel: 'msedge' },
-      // },
-
-      // Google Chrome
-      // {
-      //   name: 'Google Chrome',
-      //   use: { ...devices['Desktop Chrome'], channel: 'chrome' },
-      // },
-    ],
-
-    /* Optional local development server */
-    // webServer: {
-    //   command: 'npm run start',
-    //   url: 'http://localhost:3000',
-    //   reuseExistingServer: !process.env.CI,
-    // },
+    projects: browserProjects,
   });
 }

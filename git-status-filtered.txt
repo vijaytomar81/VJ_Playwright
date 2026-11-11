@@ -1,0 +1,29 @@
+ M automationLayer/common/basePage.ts
+ D configLayer/execution/evidenceConfig.ts
+ M package-lock.json
+ M package.json
+ M playwright.config.base.ts
+ D reportingLayer/archiving/archivingService.ts
+ M reportingLayer/custom-html-reporter.js
+ D reportingLayer/writer/console/consoleWriter.ts
+ D reportingLayer/writer/csv/csvWriter.ts
+ D reportingLayer/writer/excel/excelColors.ts
+ D reportingLayer/writer/excel/excelFormatter.ts
+ D reportingLayer/writer/excel/excelWriter.ts
+ D reportingLayer/writer/json/jsonWritter.ts
+ D reportingLayer/writer/xml/xmlWritter.ts
+ M tsconfig.json
+?? automationLayer/common/baseTest.ts
+?? automationLayer/common/browserMetadata.ts
+?? configLayer/execution/browserProjects.ts
+?? configLayer/execution/reporterConfig.ts
+?? configLayer/execution/timeouts.ts
+?? configLayer/schema/evidence/evidence-schema.ts
+?? configLayer/schema/evidence/summary-schema.ts
+?? git-status-filtered.txt
+?? git-status.txt
+?? reportingLayer/evidenceReporter.ts
+?? reportingLayer/excelGenerator.ts
+?? reportingLayer/excelStyleConfig.ts
+?? reportingLayer/excelStyles.ts
+?? reportingLayer/missingFields.ts

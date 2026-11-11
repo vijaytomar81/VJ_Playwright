@@ -4,7 +4,7 @@ import type {
 } from '@playwright/test/reporter';
 
 import { hostname, platform, release, userInfo } from 'node:os';
-import { join } from 'node:path';
+import { existsSync, statSync } from 'node:fs';
 import { generateEvidenceExcel, type ExcelEvidenceTest } from './excelGenerator';
 
 interface SchemaField {
@@ -23,7 +23,10 @@ interface ReporterOptions {
     readonly evidenceSchema: readonly SchemaField[];
     readonly summarySchema: readonly SummarySection[];
     readonly product: string;
-    readonly outputDirectory?: string;
+
+    // Supplied by playwright.config.base.ts.
+    readonly runId: string;
+    readonly outputDirectory: string;
 }
 
 type Project = FullConfig['projects'][number];
@@ -112,18 +115,43 @@ export default class EvidenceReporter implements Reporter {
     private config?: FullConfig;
     private startedAt = new Date();
 
-    constructor(private readonly options: ReporterOptions) { }
+    constructor(private readonly options: ReporterOptions) {
+        if (!options.runId?.trim()) {
+            throw new Error(
+                'EvidenceReporter: runId must be supplied by playwright.config.base.ts',
+            );
+        }
+
+        if (!options.outputDirectory?.trim()) {
+            throw new Error(
+                'EvidenceReporter: outputDirectory must be supplied by playwright.config.base.ts',
+            );
+        }
+    }
 
     onBegin(config: FullConfig, suite: Suite): void {
         this.config = config;
         this.startedAt = new Date();
         this.tests.clear();
 
+        // The reporter validates the directory but never creates it.
+        if (
+            !existsSync(this.options.outputDirectory) ||
+            !statSync(this.options.outputDirectory).isDirectory()
+        ) {
+            throw new Error(
+                'EvidenceReporter: Run directory does not exist: ' +
+                this.options.outputDirectory,
+            );
+        }
+
         for (const test of suite.allTests()) {
             this.tests.set(test.id, { test, results: [] });
         }
 
-        console.log(`EvidenceReporter: ${this.tests.size} test cases discovered`);
+        console.log(
+            `EvidenceReporter: ${this.tests.size} test cases discovered`,
+        );
     }
 
     onTestEnd(test: TestCase, result: TestResult): void {
@@ -138,16 +166,22 @@ export default class EvidenceReporter implements Reporter {
             const last = results[results.length - 1];
             const annotations = annotationsOf(results);
 
-            // Collect screenshots from all test attempts, including retries.
+            // Collect original screenshots from all attempts, including retries.
+            // The attachment name contains the original screenshot filename.
             const screenshots = results
                 .flatMap(result => result.attachments)
                 .filter(attachment =>
-                    attachment.contentType === 'image/png' &&
-                    attachment.path,
+                    attachment.name.startsWith('full-page-failure:') &&
+                    attachment.contentType === 'image/png',
                 )
-                .map(attachment => attachment.path!);
+                .map(attachment =>
+                    `screenshots/${attachment.name.substring('full-page-failure:'.length)}`,
+                );
 
-            const metadata = browserMetadata(test.parent.project(), annotations);
+            const metadata = browserMetadata(
+                test.parent.project(),
+                annotations,
+            );
 
             const status: ExcelEvidenceTest['status'] =
                 !last || last.status === 'skipped' || last.status === 'interrupted'
@@ -202,9 +236,9 @@ export default class EvidenceReporter implements Reporter {
             row => row.status === 'notExecuted',
         ).length;
 
-        const runId = this.startedAt.toISOString().replace(/[:.]/g, '-');
-        const outputDirectory = this.options.outputDirectory ??
-            join(process.cwd(), 'custom-test-reports', `run-${runId}`);
+        // Both values come from playwright.config.base.ts.
+        // No Run ID or directory is generated here.
+        const { runId, outputDirectory } = this.options;
 
         const browserFields: BrowserField[] = [
             'browser',
@@ -255,6 +289,10 @@ export default class EvidenceReporter implements Reporter {
         console.log(
             `EvidenceReporter: ${passed} passed, ` +
             `${failed} failed, ${notExecuted} not executed`,
+        );
+
+        console.log(
+            `EvidenceReporter: Excel report directory: ${outputDirectory}`,
         );
     }
 }
