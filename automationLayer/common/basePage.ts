@@ -1,18 +1,14 @@
-
-import { Page, expect } from '@playwright/test';
-import { captureBrowserMetadata } from './browserMetadata';
+import { errors, Page } from '@playwright/test';
+import { ACTION_TIMEOUT } from '../../configLayer/execution/timeouts';
 
 export class BasePage {
   protected page: Page;
 
   constructor(page: Page) {
     this.page = page;
-    captureBrowserMetadata(page);
   }
-
   setPage(page: Page): void {
     this.page = page;
-    captureBrowserMetadata(page);
   }
 
   async goto(url: string) {
@@ -21,16 +17,30 @@ export class BasePage {
 
   async acceptCookies() {
     const acceptButton = this.page.getByRole('button', { name: 'Accept All', exact: true });
-
     try {
       await acceptButton.waitFor({ state: 'visible', timeout: 7000 });
+    } catch (error) {
+      // Only an absent optional banner is expected. Browser/locator failures must surface.
+      if (!(error instanceof errors.TimeoutError)) throw error;
+      return;
+    }
+    try {
       await acceptButton.click();
-    } catch {
-      // Cookie banner not visible, skip it
+    } catch (error) {
+      // Consent can finish asynchronously after the banner was observed. A vanished
+      // button is safe only when its blocking overlay has also gone.
+      if (
+        error instanceof errors.TimeoutError &&
+        !(await acceptButton.isVisible()) &&
+        !(await this.page.locator('.onetrust-pc-dark-filter:visible').first().isVisible())
+      )
+        return;
+      throw error;
     }
   }
 
   async clickNextButton() {
+    await this.waitForOverlayToDisappear();
     await this.page.getByRole('button', { name: 'Next' }).click();
   }
 
@@ -47,11 +57,9 @@ export class BasePage {
   }
 
   async popupConfirmation() {
-    await expect(
-      this.page.getByRole('button', { name: 'Ok, I understand' })
-    ).toBeVisible();
-
-    await this.page.getByRole('button', { name: 'Ok, I understand' }).click({ force: true });
+    const understand = this.page.getByRole('button', { name: 'Ok, I understand' });
+    await understand.waitFor({ state: 'visible' });
+    await understand.click({ force: true });
   }
 
   async getStartedButton() {
@@ -110,12 +118,15 @@ export class BasePage {
   }
 
   async waitForElementToBeVisibleInAgentPortalCustomerPage() {
-    await this.page.locator('#copyUserID').waitFor({ state: 'visible' });
+    await this.page
+      .locator('#copyUserID')
+      .waitFor({ state: 'visible', timeout: 3 * ACTION_TIMEOUT });
   }
 
   async clickNoThanksButtonHome() {
     const button = this.page.getByRole('button', { name: 'No, thanks' });
-    const isVisible = await button.waitFor({ state: 'visible', timeout: 3000 })
+    const isVisible = await button
+      .waitFor({ state: 'visible', timeout: 3000 })
       .then(() => true)
       .catch(() => false);
 
@@ -126,7 +137,8 @@ export class BasePage {
 
   async clickOkIUnderstandHome() {
     const button = this.page.getByRole('button', { name: 'Ok, I understand' });
-    const isVisible = await button.waitFor({ state: 'visible', timeout: 3000 })
+    const isVisible = await button
+      .waitFor({ state: 'visible', timeout: 3000 })
       .then(() => true)
       .catch(() => false);
 
@@ -141,5 +153,25 @@ export class BasePage {
 
   inspectInformationPanel() {
     return this.page.locator('.plugin.plugin-panel');
+  }
+
+  //TODO: this method should be moved to and appropriate class which represents basePage for Lv project
+  async waitForOverlayToDisappear(): Promise<void> {
+    const overlay = this.page.locator('.overlay').nth(1);
+    try {
+      //Overlay may not be instantly shown as the page loads, so we need to wait sometime to be sure that it won't appear
+      await overlay.waitFor({
+        state: 'visible',
+        timeout: 1500,
+      });
+    } catch {
+      //If overlay is not shown
+      return;
+    }
+    //If overlay is shown, wait for it to disappear
+    await overlay.waitFor({
+      state: 'hidden',
+      timeout: 30000,
+    });
   }
 }

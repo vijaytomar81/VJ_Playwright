@@ -5,10 +5,13 @@ import { createHash } from 'node:crypto';
 import { existsSync } from 'node:fs';
 import { basename, dirname, join } from 'node:path';
 
+import { captureBrowserMetadata } from './browserMetadata';
+
 /**
  * EvidenceFactory custom Playwright fixture.
  *
- * Captures full-page screenshots for unexpected test failures.
+ * Captures browser metadata and full-page screenshots
+ * for unexpected test failures.
  *
  * Directory creation is owned by playwright.config.base.ts.
  * This fixture only writes screenshot files.
@@ -19,6 +22,21 @@ import { basename, dirname, join } from 'node:path';
  */
 export const test = base.extend({
     page: async ({ page }, use, testInfo) => {
+
+        /*
+         * Capture browser metadata before the test executes.
+         *
+         * This records:
+         * - Browser name
+         * - Browser version
+         * - Browser channel
+         * - Viewport
+         *
+         * Metadata is stored in Playwright test annotations
+         * and collected by evidenceReporter.ts.
+         */
+        captureBrowserMetadata(page);
+
         // Execute the test using Playwright's standard page fixture.
         await use(page);
 
