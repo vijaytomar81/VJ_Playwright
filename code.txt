@@ -1,9 +1,13 @@
-import { Page } from '@playwright/test';
+import { errors, Page } from '@playwright/test';
+import { ACTION_TIMEOUT } from 'configLayer/execution/timeouts';
 
 export class BasePage {
   protected page: Page;
 
   constructor(page: Page) {
+    this.page = page;
+  }
+  setPage(page: Page): void {
     this.page = page;
   }
 
@@ -12,26 +16,56 @@ export class BasePage {
   }
 
   async acceptCookies() {
-    const acceptButton = this.page.getByRole('button', { name: 'Accept All' });
-    if (await acceptButton.isVisible({ timeout: 7000 })) {
+    const acceptButton = this.page.getByRole('button', { name: 'Accept All', exact: true });
+    try {
+      await acceptButton.waitFor({ state: 'visible', timeout: 7000 });
+    } catch (error) {
+      // Only an absent optional banner is expected. Browser/locator failures must surface.
+      if (!(error instanceof errors.TimeoutError)) throw error;
+      return;
+    }
+    try {
       await acceptButton.click();
+    } catch (error) {
+      // Consent can finish asynchronously after the banner was observed. A vanished
+      // button is safe only when its blocking overlay has also gone.
+      if (
+        error instanceof errors.TimeoutError &&
+        !(await acceptButton.isVisible()) &&
+        !(await this.page.locator('.onetrust-pc-dark-filter:visible').first().isVisible())
+      )
+        return;
+      throw error;
     }
   }
 
   async clickNextButton() {
+    await this.waitForOverlayToDisappear();
     await this.page.getByRole('button', { name: 'Next' }).click();
+  }
+
+  async clickGetAQuoteButton() {
+    await this.page.getByRole('button', { name: 'Get a quote', exact: true }).click();
   }
 
   async clickSubmitButton() {
     await this.page.getByRole('button', { name: 'Submit' }).click();
   }
 
+  async clickAllDoneButton() {
+    await this.page.getByRole('button', { name: 'All done' }).click();
+  }
+
   async popupConfirmation() {
-    await this.page.getByRole('button', { name: 'Ok, I understand' }).click();
+    const understand = this.page.getByRole('button', { name: 'Ok, I understand' });
+    await understand.waitFor({ state: 'visible' });
+    await understand.click({ force: true });
   }
 
   async getStartedButton() {
-    await this.page.getByRole('button', { name: 'Get started' }).click();
+    const button = this.page.getByRole('button', { name: 'Get started' });
+    await button.waitFor({ state: 'visible', timeout: 50000 });
+    await button.click();
   }
 
   async clickBackButton() {
@@ -42,12 +76,12 @@ export class BasePage {
     await this.page.getByRole('button', { name: 'Save and confirm' }).click();
   }
 
-  async clickNoThanksButton() {
-    await this.page.getByRole('button', { name: 'No, thanks' }).click();
+  async clickSaveButton() {
+    await this.page.getByRole('button', { name: 'Save' }).click();
   }
 
-  async clickGetAQuoteButton() {
-    await this.page.getByRole('button', { name: 'Get a quote' }).click();
+  async upgradeTierPopUpNoThanks() {
+    await this.page.getByRole('dialog').getByRole('button', { name: 'No, thanks' }).click();
   }
 
   async changeVoluntaryExcess(newValue: string) {
@@ -71,12 +105,12 @@ export class BasePage {
     await this.page.getByRole('link', { name: 'Back to customer', exact: true }).click();
   }
 
-  async agentPortalPayWithSameCard() {
-    await this.page.getByRole('button', { name: /Pay with/i }).click();
+  async clickPayButtonAgentPortal() {
+    await this.page.locator('button.btn.btn-primary.btn-next', { hasText: /^Pay/ }).click();
   }
 
-  async clickPayButtonAgentPortal() {
-    await this.page.locator('button.btn.btn-primary.btn-next', { hasText: 'Pay with' }).click();
+  async agentPortalPayWithSameCard() {
+    await this.page.getByRole('button', { name: /Pay with/i }).click();
   }
 
   async customerPageAgentPortal() {
@@ -84,7 +118,33 @@ export class BasePage {
   }
 
   async waitForElementToBeVisibleInAgentPortalCustomerPage() {
-    await this.page.locator('#copyUserID').waitFor({ state: 'visible' });
+    await this.page
+      .locator('#copyUserID')
+      .waitFor({ state: 'visible', timeout: 3 * ACTION_TIMEOUT });
+  }
+
+  async clickNoThanksButtonHome() {
+    const button = this.page.getByRole('button', { name: 'No, thanks' });
+    const isVisible = await button
+      .waitFor({ state: 'visible', timeout: 3000 })
+      .then(() => true)
+      .catch(() => false);
+
+    if (isVisible) {
+      await button.click();
+    }
+  }
+
+  async clickOkIUnderstandHome() {
+    const button = this.page.getByRole('button', { name: 'Ok, I understand' });
+    const isVisible = await button
+      .waitFor({ state: 'visible', timeout: 3000 })
+      .then(() => true)
+      .catch(() => false);
+
+    if (isVisible) {
+      await button.click();
+    }
   }
 
   rootContainer() {
@@ -95,4 +155,23 @@ export class BasePage {
     return this.page.locator('.plugin.plugin-panel');
   }
 
+  //TODO: this method should be moved to and appropriate class which represents basePage for Lv project
+  async waitForOverlayToDisappear(): Promise<void> {
+    const overlay = this.page.locator('.overlay').nth(1);
+    try {
+      //Overlay may not be instantly shown as the page loads, so we need to wait sometime to be sure that it won't appear
+      await overlay.waitFor({
+        state: 'visible',
+        timeout: 1500,
+      });
+    } catch {
+      //If overlay is not shown
+      return;
+    }
+    //If overlay is shown, wait for it to disappear
+    await overlay.waitFor({
+      state: 'hidden',
+      timeout: 30000,
+    });
+  }
 }
