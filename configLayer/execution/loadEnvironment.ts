@@ -1,10 +1,13 @@
 import dotenv from 'dotenv';
 import path from 'node:path';
 
-const project = process.env.PROJECT;
-const env = process.env.ENV ?? 'dev';
+// Called from createConfig() rather than run on import: the per-brand configs know their project
+// only at call time, and import-time code would run before they could set it.
+export function loadEnvironment(project: string) {
+  // global-setup.ts and the test workers read PROJECT from the environment.
+  process.env.PROJECT = project;
+  const env = process.env.ENV ?? 'dev';
 
-if (project) {
   const environmentProjects: Record<string, string> = {
     allianzOnlineMotor: 'allianzOnline',
     allianzOnlineHome: 'allianzOnline',
