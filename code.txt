@@ -24,4 +24,10 @@ configLayer
 │   └── timeouts.ts
 └── schema
     └── evidence
-PS C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\Athena_Automation\integration-tests>
+PS C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\Athena_Automation\integration-tests> treee reportingLayer
+reportingLayer
+├── brand-allure-reporter.ts
+├── custom-html-reporter.js
+├── custom-html-reporter.test.mjs
+└── reporterHelper.ts
+PS C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\Athena_Automation\integration-tests> 
