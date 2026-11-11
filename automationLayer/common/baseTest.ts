@@ -1,10 +1,10 @@
-
-import { test as base, expect } from '@playwright/test';
+import { test as base, expect, type Page } from '@playwright/test';
 
 import { createHash } from 'node:crypto';
-import { existsSync } from 'node:fs';
-import { basename, dirname, join } from 'node:path';
+import { existsSync, statSync } from 'node:fs';
+import { basename, join } from 'node:path';
 
+import { initializeEvidenceRun } from '../../configLayer/evidenceFactory/evidenceRunDirectory';
 import { captureBrowserMetadata } from './browserMetadata';
 
 /**
@@ -13,32 +13,42 @@ import { captureBrowserMetadata } from './browserMetadata';
  * Captures browser metadata and full-page screenshots
  * for unexpected test failures.
  *
- * Directory creation is owned by playwright.config.base.ts.
+ * Supports the original page and popup/new-tab pages.
+ *
+ * Directory creation is owned by evidenceRunDirectory.ts.
  * This fixture only writes screenshot files.
  *
  * The original screenshot filename is included in the
- * Playwright attachment name so evidenceReporter.ts can
- * store its relative path in Excel.
+ * Playwright attachment name for future Excel integration.
  */
 export const test = base.extend({
     page: async ({ page }, use, testInfo) => {
 
         /*
          * Capture browser metadata before the test executes.
-         *
-         * This records:
-         * - Browser name
-         * - Browser version
-         * - Browser channel
-         * - Viewport
-         *
-         * Metadata is stored in Playwright test annotations
-         * and collected by evidenceReporter.ts.
          */
         captureBrowserMetadata(page);
 
-        // Execute the test using Playwright's standard page fixture.
-        await use(page);
+        /*
+         * Track pages opened during the test.
+         *
+         * The most recently opened page is preferred
+         * when capturing a failure screenshot.
+         */
+        const pages: Page[] = [page];
+
+        const onPage = (newPage: Page): void => {
+            pages.push(newPage);
+        };
+
+        page.context().on('page', onPage);
+
+        try {
+            // Execute the test using Playwright's standard page fixture.
+            await use(page);
+        } finally {
+            page.context().off('page', onPage);
+        }
 
         /*
          * Capture screenshots only for unexpected failures.
@@ -57,35 +67,38 @@ export const test = base.extend({
             return;
         }
 
-        // Screenshots cannot be captured from a closed page.
-        if (page.isClosed()) {
+        /*
+         * Prefer the most recently opened page that is still open.
+         * If a popup has closed, fall back to the original page
+         * or another available page.
+         */
+        const screenshotPage = [...pages]
+            .reverse()
+            .find(candidate => !candidate.isClosed());
+
+        if (!screenshotPage) {
             console.warn(
-                `EvidenceFactory: Screenshot skipped because page is closed: ` +
+                `EvidenceFactory: Screenshot skipped because all pages are closed: ` +
                 testInfo.title,
             );
             return;
         }
 
         /*
-         * Playwright project outputDir is configured as:
-         *
-         * test-results/run-<id>/test-artifacts
-         *
-         * Its parent is the shared EvidenceFactory run directory.
+         * Obtain the shared screenshot directory directly
+         * from the centralized EvidenceFactory utility.
          */
-        const runDirectory = dirname(testInfo.project.outputDir);
-
-        const screenshotsDirectory = join(
-            runDirectory,
-            'screenshots',
-        );
+        const screenshotsDirectory = initializeEvidenceRun().screenshotsDirectory;
 
         try {
             /*
              * Never create directories here.
              * The screenshots directory must already exist.
              */
-            if (!existsSync(screenshotsDirectory)) {
+            if (
+                !existsSync(screenshotsDirectory) ||
+                !statSync(screenshotsDirectory).isDirectory()
+            ) {
                 console.warn(
                     'EvidenceFactory: Screenshot directory does not exist: ' +
                     screenshotsDirectory,
@@ -127,11 +140,11 @@ export const test = base.extend({
 
             /*
              * Capture the complete page and save directly
-             * into the EvidenceFactory run directory.
+             * into the EvidenceFactory screenshots directory.
              *
              * No copying or moving is required.
              */
-            await page.screenshot({
+            await screenshotPage.screenshot({
                 path: screenshotPath,
                 fullPage: true,
                 timeout: 10000,
@@ -142,12 +155,7 @@ export const test = base.extend({
              * Attach the screenshot to the Playwright test result.
              *
              * Include the original filename in the attachment name
-             * so evidenceReporter.ts can reconstruct the relative
-             * screenshot path without using TestResult.annotations.
-             *
-             * Example Excel value:
-             *
-             * screenshots/failure-chromium-<hash>-retry-0-repeat-0-worker-0.png
+             * for future Excel screenshot-path integration.
              */
             await testInfo.attach(
                 `full-page-failure:${basename(screenshotPath)}`,

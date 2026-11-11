@@ -1,3 +1,4 @@
+
 node_modules/
 # Excel temporary lock files.
 ~$*.xlsx
@@ -16,6 +17,9 @@ configLayer/environments/**/.env.local.*
 !configLayer/environments/**/.env.local.example
 custom-test-reports/
 /common-job/
+# EvidenceFactory active run pointers.
+.evidencefactory-current-run.json
+.evidencefactory-direct-run.json
 # Workbook-generated Ferry test data.
 /generated/
 .vscode/*

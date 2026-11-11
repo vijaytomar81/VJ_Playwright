@@ -12,8 +12,10 @@ const input = {
   AUTH_MODE: 'default',
   VIDEO_MODE: 'off',
 };
+
 const available = () => true;
 const make = (changes = {}) => plan({ ...input, ...changes }, available);
+
 const summary = {
   status: 'finished',
   runtimeErrors: [],
@@ -27,6 +29,7 @@ const summary = {
 
 test('Athena Ferry derives its profile and defaults to startup skip without portal credentials', () => {
   const p = make();
+
   assert.equal(p.environment, 'dev');
   assert.equal(p.project, 'ferry');
   assert.equal(p.auth, 'skip');
@@ -36,6 +39,7 @@ test('Athena Ferry derives its profile and defaults to startup skip without port
 
 test('LV current Motor maps to its shared environment folder and existing credentials', () => {
   const p = make({ TARGET: 'athena-allianz-motor', TEST_ENV: 'test' });
+
   assert.equal(p.environmentFile, 'configLayer/environments/allianzOnline/.env.test');
   assert.equal(p.project, 'allianzOnlineMotor');
   assert.equal(p.gmailPrefix, 'falcon-gmail');
@@ -45,6 +49,7 @@ test('LV current Motor maps to its shared environment folder and existing creden
 test('all proposed Ferry marques map to Ferry, not to individual environment folders', () => {
   for (const brand of ['audi', 'cupra', 'seat', 'skoda', 'vw']) {
     const p = make({ TARGET: `insurance-${brand}` });
+
     assert.equal(p.environmentFile, 'configLayer/environments/ferry/.env.dev');
     assert.equal(p.bindPortal, true);
     assert.equal(p.auth, '');
@@ -68,6 +73,7 @@ test('removed credential overrides cannot change target-derived credentials', ()
     PORTAL_CREDENTIAL_ID: 'team-portal',
     AUTH_MODE: 'sapiens',
   });
+
   assert.equal(p.environment, 'test');
   assert.equal(p.gmailPrefix, 'ferry-gmail');
   assert.equal(p.portalCredential, 'ferry-agent-portal');
@@ -93,8 +99,9 @@ test('rejects invalid environments, suites, workers, timeouts, modes, and regula
     { VIDEO_MODE: 'invalid' },
     { VIDEO_MODE: 'on-first-retry', RETRIES: '0' },
     { RETRIES: '9' },
-  ])
+  ]) {
     assert.throws(() => make(changes));
+  }
 });
 
 test('paths cannot inject options or escape the selection root', () => {
@@ -109,7 +116,9 @@ test('path metacharacters are escaped while title regex remains one literal argu
     TEST_FILTER: 'title $(echo bad);.*',
     EXCLUDE_FILTER: '@Skip',
   });
+
   const args = argsFor(p, true);
+
   assert.ok(args.includes('--grep=title $(echo bad);.*'));
   assert.ok(args.includes('--grep-invert=@Skip'));
   assert.ok(!args.some((arg) => arg.startsWith('--shard')));
@@ -122,11 +131,18 @@ test('path metacharacters are escaped while title regex remains one literal argu
 test('discovery and execution use the same project and filters', () => {
   const p = make({ TARGET: 'insurance-audi', TEST_FILTER: '@Smoke' });
   const clean = (args) => args.filter((a) => a !== '--list' && !a.startsWith('--reporter='));
+
   assert.deepEqual(clean(argsFor(p, true)), clean(argsFor(p, false)));
   assert.ok(argsFor(p, false).includes('--project=audi'));
   assert.ok(argsFor(make(), false).includes('--project=chromium'));
-  assert.ok(argsFor(p, false).some((arg) => arg.includes('brand-allure-reporter.ts')));
-  assert.ok(argsFor(make(), false).some((arg) => arg.includes(',allure-playwright,')));
+
+  assert.ok(
+    argsFor(p, true).includes(
+      '--reporter=list,./configLayer/execution/commonJob/reporter.cjs'
+    )
+  );
+
+  assert.ok(!argsFor(p, false).some((arg) => arg.startsWith('--reporter=')));
   assert.ok(!argsFor(p, true).some((arg) => arg.includes('allure')));
 });
 
@@ -146,6 +162,7 @@ test('runner clears inherited framework/auth settings and forces CI browser beha
     },
     true
   );
+
   assert.equal(env.PROJECT, undefined);
   assert.equal(env.AGENT_PORTAL_AUTH, undefined);
   assert.equal(env.CI, 'true');
@@ -154,13 +171,42 @@ test('runner clears inherited framework/auth settings and forces CI browser beha
   assert.equal(env.INCLUDE_DEMOS, 'false');
   assert.equal(env.TEST_SUITE, 'tests');
   assert.equal(env.INCLUDE_NAVIGATION, undefined);
+
   assert.equal(
     envFor(make({ TARGET: 'insurance-audi', TEST_SUITE: 'navigation' }), {}, false).TEST_SUITE,
     'navigation'
   );
+
   assert.equal(env.SUPPORT_PORTAL_USERNAME, 'synthetic-user');
   assert.equal(env.SUPPORT_PORTAL_PASSWORD, 'synthetic-password');
   assert.equal(env.COMMON_JOB_PHASE, 'list');
+  assert.equal(env.EVIDENCEFACTORY_DISCOVERY_ONLY, 'true');
+  assert.equal(env.PLAYWRIGHT_HTML_OPEN, 'never');
+
+  assert.equal(
+    envFor(make(), {}, false).EVIDENCEFACTORY_DISCOVERY_ONLY,
+    'false'
+  );
+  assert.equal(
+    envFor(make(), {}, false).COMMON_JOB_PHASE,
+    'execute'
+  );
+});
+
+test('EvidenceFactory reporter paths cannot be overridden by inherited Playwright settings', () => {
+  const env = envFor(
+    make(),
+    {
+      EVIDENCEFACTORY_RUN_ID: 'shared-run-id',
+      PLAYWRIGHT_JUNIT_OUTPUT_FILE: 'legacy/results.xml',
+      PLAYWRIGHT_HTML_OUTPUT_DIR: 'legacy/playwright-report',
+    },
+    false
+  );
+
+  assert.equal(env.EVIDENCEFACTORY_RUN_ID, 'shared-run-id');
+  assert.equal(env.PLAYWRIGHT_JUNIT_OUTPUT_FILE, undefined);
+  assert.equal(env.PLAYWRIGHT_HTML_OUTPUT_DIR, undefined);
 });
 
 test('parameter plan records choices but never copies secrets', () => {
@@ -169,6 +215,7 @@ test('parameter plan records choices but never copies secrets', () => {
     AGENT_PORTAL_PASSWORD: 'do-not-record',
     CAMPAIGN_NAME: 'baseline',
   });
+
   assert.equal(p.campaign, undefined);
   assert.equal(p.shard, undefined);
   assert.ok(!JSON.stringify(p).includes('do-not-record'));
@@ -196,14 +243,18 @@ test('testing API credentials are optional for planning and remain runtime-only 
     { TARGET: 'insurance-britannia', TEST_ENV: 'test' },
   ]) {
     const p = make(options);
+
     assert.equal(envFor(p, {}, false).TESTING_API_KEY, undefined);
+
     const secrets = {
       TESTING_API_KEY: 'synthetic-api-key',
       TESTING_API_USER: 'synthetic-api-user',
       TESTING_API_PASSWORD: 'synthetic-api-password',
     };
+
     const prepared = make({ ...options, ...secrets });
     const runtime = envFor(prepared, secrets, false);
+
     for (const [key, value] of Object.entries(secrets)) {
       assert.equal(runtime[key], value);
       assert.ok(!JSON.stringify(prepared).includes(value));

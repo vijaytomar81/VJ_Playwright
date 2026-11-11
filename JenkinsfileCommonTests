@@ -1,6 +1,6 @@
-// One target and suite per build. Setup: docs/Jenkins-common-test-job.md.
-// Defaults only discover tests: the first build registers the parameter form without buying policies.
-// Build-local state: a Declarative environment value would mask later env assignments.
+ // One target and suite per build. Setup: docs/Jenkins-common-test-job.md.
+ // Defaults only discover tests: the first build registers the parameter form without buying policies.
+ // Build-local state: a Declarative environment value would mask later env assignments.
 def commonJobPrepared = false
 
 pipeline {
@@ -37,6 +37,17 @@ pipeline {
     }
 
     stages {
+        stage('Install dependencies') {
+            steps {
+                sh '''
+                    node --version
+                    npm --version
+                    npm ci
+                    node -e "if(require('@playwright/test/package.json').version !== '1.62.1') throw new Error('Update the common Jenkins Docker image to match the installed Playwright version')"
+                '''
+            }
+        }
+
         stage('Validate and prepare') {
             steps {
                 sh 'node configLayer/execution/commonJob/runner.cjs prepare'
@@ -49,21 +60,10 @@ pipeline {
             }
         }
 
-        stage('Install dependencies') {
-            steps {
-                sh '''
-                    node --version
-                    npm --version
-                    npm ci
-                    node -e "if(require('@playwright/test/package.json').version !== '1.62.1') throw new Error('Update the common Jenkins Docker image to match the installed Playwright version')"
-                '''
-            }
-        }
-
         stage('Discover selected tests') {
             steps {
-                // Always the same target, suite, path, filters, CI flags, and workers as execution.
-                // A standalone inventory is archived even if later setup/execution fails.
+                // Same target, suite, path, filters, CI flags and workers as execution.
+                // Inventory remains available even if later execution fails.
                 sh 'node configLayer/execution/commonJob/runner.cjs list'
             }
         }
@@ -86,8 +86,6 @@ pipeline {
                         withCredentials(bindings) {
                             def testingApi = load('configLayer/execution/optionalTestingApiCredentials.groovy')
                             testingApi.call {
-                                // The helper records the exit code; the next stage distinguishes
-                                // test failures from setup/infrastructure failures.
                                 sh returnStatus: true, script: 'node configLayer/execution/commonJob/runner.cjs execute'
                             }
                         }
@@ -101,8 +99,8 @@ pipeline {
             steps {
                 script {
                     def status = sh(returnStatus: true, script: 'node configLayer/execution/commonJob/runner.cjs evaluate')
-                    if (status == 1) error('Incomplete run, setup/discovery error, zero executed scenarios, or infrastructure failure. See common-job artifacts and console.')
-                    if (status == 2) unstable('Failed, skipped, or flaky scenarios. See common-job/results-summary.json and reports.')
+                    if (status == 1) error('Incomplete run, setup/discovery error, zero executed scenarios, or infrastructure failure. See EvidenceFactory common-job artifacts and console.')
+                    if (status == 2) unstable('Failed, skipped, or flaky scenarios. See EvidenceFactory results-summary.json and reports.')
                     if (status > 2) error("Unexpected result evaluation exit ${status}")
                 }
             }
@@ -113,62 +111,79 @@ pipeline {
         always {
             script {
                 echo "[REPORTS] prepared=${commonJobPrepared}; mode=${params.RUN_MODE}; HTML=${params.PUBLISH_HTML_REPORT}; Allure=${params.GENERATE_ALLURE_REPORT}"
+
+                def paths = commonJobPrepared ? readEvidenceRunPaths() : null
+
                 if (commonJobPrepared && params.RUN_MODE == 'Execute tests') {
-                    if (fileExists('results.xml')) {
-                        catchError(buildResult: 'UNSTABLE', stageResult: 'UNSTABLE', catchInterruptions: false,
-                            message: 'JUnit results could not be published; continuing with other reports') {
-                            echo '[REPORTS] Publishing JUnit results.xml'
-                            junit testResults: 'results.xml', allowEmptyResults: false
-                        }
+                    if (!paths) {
+                        unstable('[REPORTS] EvidenceFactory run paths are unavailable.')
                     } else {
-                        unstable('[REPORTS] Missing results.xml; no Jenkins test-results view can be published. Check execution output and archived artifacts.')
+                        echo "[REPORTS] EvidenceFactory directory: ${paths.runDirectory}"
+
+                        def junitFile = paths.junitFile
+                        if (fileExists(junitFile)) {
+                            catchError(buildResult: 'UNSTABLE', stageResult: 'UNSTABLE', catchInterruptions: false,
+                                message: 'JUnit results could not be published; continuing with other reports') {
+                                echo "[REPORTS] Publishing JUnit ${junitFile}"
+                                junit testResults: junitFile, allowEmptyResults: false
+                            }
+                        } else {
+                            unstable("[REPORTS] Missing ${junitFile}; no Jenkins test-results view can be published.")
+                        }
+
+                        def htmlDirectory = paths.playwrightReportDirectory
+                        if (!params.PUBLISH_HTML_REPORT) {
+                            echo '[REPORTS] Playwright HTML publication disabled; files will still be archived.'
+                        } else if (!fileExists("${htmlDirectory}/index.html")) {
+                            unstable("[REPORTS] Missing ${htmlDirectory}/index.html; Playwright HTML cannot be published.")
+                        } else {
+                            catchError(buildResult: 'UNSTABLE', stageResult: 'UNSTABLE', catchInterruptions: false,
+                                message: 'Playwright HTML could not be published; continuing with other reports') {
+                                echo '[REPORTS] Publishing Playwright HTML report'
+                                publishHTML(target: [allowMissing: false, alwaysLinkToLastBuild: true, keepAll: true,
+                                    reportDir: htmlDirectory, reportFiles: 'index.html', reportName: 'Playwright Report'])
+                            }
+                        }
+
+                        def allureDirectory = paths.allureResultsDirectory
+                        if (!params.GENERATE_ALLURE_REPORT) {
+                            echo '[REPORTS] Allure publication disabled. Raw results will still be archived.'
+                        } else if (!fileExists(allureDirectory)) {
+                            unstable("[REPORTS] Missing ${allureDirectory}; Allure cannot be generated.")
+                        } else {
+                            catchError(buildResult: 'UNSTABLE', stageResult: 'UNSTABLE', catchInterruptions: false,
+                                message: 'Allure report could not be generated; artifacts will still be archived') {
+                                echo '[REPORTS] Generating Allure report'
+                                sh '''
+                                    if [ ! -x .allure-jre/bin/java ]; then
+                                        mkdir -p .allure-jre
+                                        node -e "fetch('https://api.adoptium.net/v3/binary/latest/17/ga/linux/x64/jre/hotspot/normal/eclipse').then(r => { if (!r.ok) throw new Error('HTTP '+r.status); return r.arrayBuffer(); }).then(b => require('fs').writeFileSync('.allure-jre.tar.gz',Buffer.from(b)))"
+                                        tar -xzf .allure-jre.tar.gz -C .allure-jre --strip-components=1
+                                        rm -f .allure-jre.tar.gz
+                                    fi
+                                '''
+                                withEnv(["JAVA_HOME=${env.WORKSPACE}/.allure-jre"]) {
+                                    allure(includeProperties: false, results: [[path: allureDirectory]])
+                                }
+                            }
+                        }
+
+                        def evidenceFile = paths.evidenceReportFile
+                        if (fileExists(evidenceFile)) {
+                            echo "[REPORTS] EvidenceFactory Excel report available: ${evidenceFile}"
+                        } else {
+                            echo "[REPORTS] EvidenceFactory Excel report not found: ${evidenceFile}"
+                        }
                     }
                 } else {
                     echo '[REPORTS] Execution publication skipped: discovery-only build or preparation did not complete.'
                 }
-                if (commonJobPrepared && params.RUN_MODE == 'Execute tests') {
-                    if (!params.PUBLISH_HTML_REPORT) {
-                        echo '[REPORTS] Playwright HTML publication disabled by PUBLISH_HTML_REPORT=false; files will still be archived.'
-                    } else if (!fileExists('playwright-report/index.html')) {
-                        unstable('[REPORTS] Missing playwright-report/index.html; Playwright HTML cannot be published.')
-                    } else {
-                        catchError(buildResult: 'UNSTABLE', stageResult: 'UNSTABLE', catchInterruptions: false,
-                            message: 'Playwright HTML could not be published; continuing with other reports') {
-                            echo '[REPORTS] Publishing Playwright HTML report'
-                            publishHTML(target: [allowMissing: false, alwaysLinkToLastBuild: true, keepAll: true,
-                                reportDir: 'playwright-report', reportFiles: 'index.html', reportName: 'Playwright Report'])
-                        }
-                    }
+
+                if (paths) {
+                    echo "[REPORTS] Archiving current run: ${paths.runDirectory}"
+                    archiveArtifacts artifacts: "${paths.runDirectory}/**", allowEmptyArchive: true
                 }
-                if (commonJobPrepared && params.RUN_MODE == 'Execute tests') {
-                    if (!params.GENERATE_ALLURE_REPORT) {
-                        echo '[REPORTS] Allure publication disabled by GENERATE_ALLURE_REPORT=false. Enable it for the Jenkins Allure Report link; raw results will still be archived.'
-                    } else if (!fileExists('allure-results')) {
-                        unstable('[REPORTS] Missing allure-results; Allure cannot be generated.')
-                    } else {
-                        catchError(buildResult: 'UNSTABLE', stageResult: 'UNSTABLE', catchInterruptions: false,
-                            message: 'Allure report could not be generated; artifacts will still be archived') {
-                            echo '[REPORTS] Generating Allure report'
-                            sh '''
-                                if [ ! -x .allure-jre/bin/java ]; then
-                                    mkdir -p .allure-jre
-                                    node -e "fetch('https://api.adoptium.net/v3/binary/latest/17/ga/linux/x64/jre/hotspot/normal/eclipse').then(r => { if (!r.ok) throw new Error('HTTP '+r.status); return r.arrayBuffer(); }).then(b => require('fs').writeFileSync('.allure-jre.tar.gz',Buffer.from(b)))"
-                                    tar -xzf .allure-jre.tar.gz -C .allure-jre --strip-components=1
-                                    rm -f .allure-jre.tar.gz
-                                fi
-                            '''
-                            withEnv(["JAVA_HOME=${env.WORKSPACE}/.allure-jre"]) {
-                                allure(includeProperties: false, results: [[path: 'allure-results']])
-                            }
-                        }
-                    }
-                }
-            }
-            script {
-                if (commonJobPrepared) {
-                    echo '[REPORTS] Archiving run inventory, summaries, reports and attachments'
-                    archiveArtifacts artifacts: 'common-job/**,results.xml,playwright-report/**,test-results/**,allure-results/**,custom-test-reports/**', allowEmptyArchive: true
-                }
+
                 if (params.RECIPIENT_EMAILS?.trim()) {
                     try {
                         emailext(to: params.RECIPIENT_EMAILS.trim(),
@@ -187,14 +202,18 @@ pipeline {
     }
 }
 
+def readEvidenceRunPaths() {
+    if (!fileExists('.evidencefactory-current-run.json')) return null
+    return parseCommonPlan(readFile('.evidencefactory-current-run.json'))
+}
+
 def readCommonPlan() {
-    // Finish the Pipeline step before constructing a non-serializable parser.
-    def text = readFile('common-job/plan.json')
-    return parseCommonPlan(text)
+    def paths = readEvidenceRunPaths()
+    if (!paths) error('EvidenceFactory run paths are unavailable. Execute prepare first.')
+    return parseCommonPlan(readFile("${paths.commonJobDirectory}/plan.json"))
 }
 
 @com.cloudbees.groovy.cps.NonCPS
 def parseCommonPlan(String text) {
-    // Pure parsing only: no Pipeline steps, and only plain JSON values escape this method.
     return new groovy.json.JsonSlurperClassic().parseText(text)
 }

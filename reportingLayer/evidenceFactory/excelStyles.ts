@@ -183,12 +183,6 @@ export function styleTitle(
 ): void {
     if (lastColumn < 1) return;
 
-    if (lastColumn > 1) {
-        worksheet.mergeCells(
-            rowNumber, 1, rowNumber, lastColumn,
-        );
-    }
-
     const row = worksheet.getRow(rowNumber);
 
     applyRowHeight(
@@ -202,6 +196,12 @@ export function styleTitle(
             COLORS.summaryTitle,
             COLORS.summaryTitleText,
             FONT_STYLES.titleBold,
+        );
+    }
+
+    if (lastColumn > 1) {
+        worksheet.mergeCells(
+            rowNumber, 1, rowNumber, lastColumn,
         );
     }
 
@@ -357,12 +357,6 @@ export function styleSummarySection(
 ): void {
     if (lastColumn < 1) return;
 
-    if (lastColumn > 1) {
-        worksheet.mergeCells(
-            rowNumber, 1, rowNumber, lastColumn,
-        );
-    }
-
     const row = worksheet.getRow(rowNumber);
 
     applyRowHeight(
@@ -376,6 +370,12 @@ export function styleSummarySection(
             COLORS.summarySection,
             COLORS.summarySectionText,
             FONT_STYLES.sectionBold,
+        );
+    }
+
+    if (lastColumn > 1) {
+        worksheet.mergeCells(
+            rowNumber, 1, rowNumber, lastColumn,
         );
     }
 
@@ -470,7 +470,12 @@ export function styleSummaryResult(
         case 'passRate': {
             const rate = Number(cell.value);
 
-            if (!Number.isFinite(rate) || cell.value === null) {
+            if (
+                cell.value === null ||
+                cell.value === undefined ||
+                cell.value === '' ||
+                !Number.isFinite(rate)
+            ) {
                 styleSummaryValue(cell);
                 break;
             }

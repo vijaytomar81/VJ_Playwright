@@ -1,5 +1,5 @@
 
-import { Page, test } from '@playwright/test';
+import { test, type Page } from '@playwright/test';
 
 const NOT_KNOWN = 'Not Known';
 

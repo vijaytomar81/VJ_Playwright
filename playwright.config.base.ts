@@ -8,6 +8,9 @@ import {
   NAVIGATION_TIMEOUT,
 } from './configLayer/execution/timeouts';
 
+import { initializeEvidenceRun } from './configLayer/evidenceFactory/evidenceRunDirectory';
+import { getEvidenceReporterConfig } from './configLayer/evidenceFactory/reporterConfig';
+
 /**
  * @see https://playwright.dev/docs/test-configuration
  */
@@ -18,6 +21,29 @@ export function createConfig(project: string | undefined) {
   const env = process.env.ENV ?? 'dev';
   const authMode = process.env.AGENT_PORTAL_AUTH;
   const retries = parseRetries();
+
+  /*
+   * EvidenceFactory initializes the run for every invocation,
+   * including Common Job discovery.
+   *
+   * The runner supplies EVIDENCEFACTORY_RUN_ID so discovery
+   * and execution use the same run directory.
+   */
+  const paths = initializeEvidenceRun();
+
+  /*
+   * Discovery collects test inventory only.
+   * Execution uses the configured EvidenceFactory reporters.
+   */
+  const discoveryOnly =
+    process.env.EVIDENCEFACTORY_DISCOVERY_ONLY === 'true';
+
+  const reporter = discoveryOnly
+    ? [['list']]
+    : getEvidenceReporterConfig({
+      paths,
+      product: project ?? 'Not Known',
+    });
 
   return defineConfig({
     testDir,
@@ -30,13 +56,12 @@ export function createConfig(project: string | undefined) {
     /* Opt out of parallel tests on CI. */
     workers: 3,
     /* Reporter to use. See https://playwright.dev/docs/test-reporters */
-    reporter: [
-      ['list'],
-      ['./reportingLayer/custom-html-reporter.js'],
-      ['html', { open: 'never', outputFolder: 'playwright-report' }],
-      ['junit', { outputFile: 'results.xml' }],
-      ['allure-playwright', { resultsDir: 'allure-results' }],
-    ],
+    reporter: reporter as ReturnType<typeof getEvidenceReporterConfig>,
+    /*
+     * Store Playwright test artifacts inside the current
+     * EvidenceFactory run directory.
+     */
+    outputDir: paths.artifactsDirectory,
     globalSetup: require.resolve('./global-setup.ts'),
     timeout: 300000, // 5 minutes for all tests
     expect: { timeout: EXPECT_TIMEOUT },

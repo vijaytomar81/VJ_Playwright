@@ -1,10 +1,13 @@
 const fs = require('node:fs');
+const path = require('node:path');
 
 class CommonJobReporter {
   onBegin(_config, suite) {
     this.suite = suite;
     this.errors = [];
-    fs.mkdirSync('common-job', { recursive: true });
+    this.directory = process.env.EVIDENCEFACTORY_COMMON_JOB_DIRECTORY;
+    if (!this.directory) throw new Error('EvidenceFactory Common Job directory is missing.');
+
     const tests = suite.allTests().map((test) => ({
       id: test.id,
       project: test.parent.project()?.name || '',
@@ -15,12 +18,13 @@ class CommonJobReporter {
       line: test.location.line,
       setup: (test.parent.project()?.name || '').endsWith('-setup'),
     }));
+
+    const inventoryFile = path.join(this.directory, 'inventory.json');
     if (process.env.COMMON_JOB_PHASE === 'list') {
-      fs.writeFileSync('common-job/inventory.json', JSON.stringify({ tests }, null, 2));
-    } else if (fs.existsSync('common-job/inventory.json')) {
-      const planned = JSON.parse(fs.readFileSync('common-job/inventory.json', 'utf8'))
-        .tests.map((test) => test.id)
-        .sort();
+      fs.writeFileSync(inventoryFile, JSON.stringify({ tests }, null, 2));
+    } else if (fs.existsSync(inventoryFile)) {
+      const planned = JSON.parse(fs.readFileSync(inventoryFile, 'utf8'))
+        .tests.map((test) => test.id).sort();
       const actual = tests.map((test) => test.id).sort();
       if (JSON.stringify(planned) !== JSON.stringify(actual))
         this.errors.push('Selected test inventory changed between discovery and execution.');
@@ -74,8 +78,10 @@ class CommonJobReporter {
       else if (lastStatus === 'skipped' || lastStatus === 'not-run') summary.skipped++;
       else summary.passed++;
     }
-    fs.mkdirSync('common-job', { recursive: true });
-    fs.writeFileSync('common-job/results-summary.json', JSON.stringify(summary, null, 2));
+    fs.writeFileSync(
+      path.join(this.directory, 'results-summary.json'),
+      JSON.stringify(summary, null, 2),
+    );
   }
 }
 

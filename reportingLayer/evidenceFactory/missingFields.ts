@@ -1,10 +1,8 @@
-
 /**
- * Identifies annotation fields that are not included
- * in the consumer's evidence reporting schema.
+ * Identifies annotation fields not included in the
+ * consumer's evidence reporting schema.
  *
- * The schema is passed in by the caller.
- * This file does not import consumer-owned schemas.
+ * The schema is supplied by the caller.
  */
 
 export interface MissingReportingField {
@@ -19,11 +17,10 @@ interface EvidenceSchemaField {
 
 interface TestAnnotations {
     readonly testName: string;
-    readonly annotations: readonly {
-        readonly type: string;
-        readonly description?: string;
-    }[];
+    readonly annotations: Readonly<Record<string, string>>;
 }
+
+const SENSITIVE = /card.?number|card.?no|cvv|cvc|security.?code|password|secret|token|authorization|api.?key|access.?key|private.?key/i;
 
 export function findMissingReportingFields(
     tests: readonly TestAnnotations[],
@@ -42,10 +39,8 @@ export function findMissingReportingFields(
     >();
 
     for (const test of tests) {
-        for (const annotation of test.annotations) {
-            const field = annotation.type;
-
-            if (knownFields.has(field)) {
+        for (const field of Object.keys(test.annotations)) {
+            if (knownFields.has(field) || SENSITIVE.test(field)) {
                 continue;
             }
 

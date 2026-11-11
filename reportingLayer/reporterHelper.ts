@@ -7,6 +7,13 @@ export interface FieldMap {
   [key: string]: FieldValue;
 }
 
+const SENSITIVE_FIELD = /card.?number|card.?no|cvv|cvc|security.?code|password|secret|token|authorization|api.?key|access.?key|private.?key/i;
+const REDACTED = '[REDACTED]';
+
+function sanitizeValue(type: string, description: string): string {
+  return SENSITIVE_FIELD.test(type) ? REDACTED : description;
+}
+
 /**
  * Records a value on the running test in both reports.
  *
@@ -21,8 +28,9 @@ export interface FieldMap {
  * test's history id, so its Allure history stays one line.
  */
 export function annotate(type: string, description: string): void {
-  test.info().annotations.push({ type, description });
-  void parameter(type, description, { excluded: true });
+  const safeDescription = sanitizeValue(type, description);
+  test.info().annotations.push({ type, description: safeDescription });
+  void parameter(type, safeDescription, { excluded: true });
 }
 
 export function attachValueInTestReport(fields: FieldMap): void {

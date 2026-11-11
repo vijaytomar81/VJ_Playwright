@@ -1,6 +1,4 @@
-
 import ExcelJS from 'exceljs';
-import { join } from 'node:path';
 
 import { findMissingReportingFields } from './missingFields';
 
@@ -39,7 +37,7 @@ export interface ExcelEvidenceTest {
 }
 
 export interface ExcelGenerationOptions {
-    readonly outputDirectory: string;
+    readonly outputFile: string;
     readonly project: string;
     readonly product: string;
     readonly evidenceSchema: readonly SchemaField[];
@@ -49,20 +47,15 @@ export interface ExcelGenerationOptions {
 }
 
 const UNKNOWN = 'Not Known';
-
-// Exclude captured technical annotations from missing business fields.
-const INTERNAL_FIELDS = new Set([
-    'browser',
-    'browserChannel',
-    'browserVersion',
-    'viewport',
-]);
+const SENSITIVE = /card.?number|card.?no|cvv|cvc|security.?code|password|secret|token|authorization|api.?key|access.?key|private.?key/i;
 
 const ordered = (fields: readonly SchemaField[]): SchemaField[] =>
     [...fields].sort((a, b) => a.order - b.order);
 
 function cellValue(value: unknown): ExcelJS.CellValue {
-    if (value === null || value === undefined) return '';
+    if (value === null || value === undefined || value === '') {
+        return UNKNOWN;
+    }
 
     if (
         typeof value === 'string' ||
@@ -145,7 +138,7 @@ function summaryValue(field: string, value: unknown): ExcelJS.CellValue {
 
         case 'platform':
             return cellValue(
-                { win32: 'Windows', darwin: 'macOS', linux: 'Linux' }[
+                ({ win32: 'Windows', darwin: 'macOS', linux: 'Linux' } as Record<string, string>)[
                 String(value)
                 ] ?? value ?? UNKNOWN,
             );
@@ -162,9 +155,9 @@ function summaryValue(field: string, value: unknown): ExcelJS.CellValue {
     }
 }
 
-// Reporter has already merged annotations and execution metadata.
+// Evidence values are supplied by the reporter from test annotations.
 function detailValue(test: ExcelEvidenceTest, field: string): unknown {
-    return test.values[field] ?? '';
+    return test.values[field] ?? UNKNOWN;
 }
 
 function createSummary(
@@ -179,7 +172,7 @@ function createSummary(
 
     sheet.getCell('A1').value =
         `Execution Summary  |  Project: ${options.project}` +
-        (product && !['unknown', 'not known'].includes(product.toLocaleLowerCase())
+        (product && !['unknown', 'not known'].includes(product.toLowerCase())
             ? `  |  Product: ${product}`
             : '');
 
@@ -195,6 +188,8 @@ function createSummary(
         styleSummarySection(sheet, row++, 2);
 
         for (const field of ordered(section.fields)) {
+            if (SENSITIVE.test(field.field)) continue;
+
             sheet.getCell(row, 1).value = field.label;
             sheet.getCell(row, 2).value = summaryValue(
                 field.field,
@@ -216,7 +211,7 @@ function createDetail(
     schema: readonly SchemaField[],
 ): void {
     const sheet = workbook.addWorksheet(name);
-    const fields = ordered(schema);
+    const fields = ordered(schema).filter(field => !SENSITIVE.test(field.field));
 
     fields.forEach((field, index) => {
         sheet.getCell(1, index + 1).value = field.label;
@@ -240,10 +235,8 @@ function createDetail(
         styleDataRow(sheet, row, fields.length);
 
         if (statusColumn > 0) {
-            styleStatusCell(
-                sheet.getCell(row, statusColumn),
-                test.status,
-            );
+            const cell = sheet.getCell(row, statusColumn);
+            styleStatusCell(cell, String(cell.value ?? ''));
         }
     });
 
@@ -255,28 +248,12 @@ function createMissingFields(
     tests: readonly ExcelEvidenceTest[],
     schema: readonly SchemaField[],
 ): void {
-    const missing = findMissingReportingFields(
-        tests.map(test => ({
-            testName: test.testName,
-            annotations: Object.entries(test.annotations)
-                .filter(([type]) => !INTERNAL_FIELDS.has(type))
-                .map(([type, description]) => ({
-                    type,
-                    description,
-                })),
-        })),
-        schema,
-    );
+    const missing = findMissingReportingFields(tests, schema);
 
     if (!missing.length) return;
 
     const sheet = workbook.addWorksheet('Missing Reporting Fields');
-
-    const headers = [
-        'Missing Field',
-        'Affected Tests',
-        'Occurrences',
-    ];
+    const headers = ['Missing Field', 'Affected Tests', 'Occurrences'];
 
     headers.forEach((header, index) => {
         sheet.getCell(1, index + 1).value = header;
@@ -304,7 +281,7 @@ function createMissingFields(
 export async function generateEvidenceExcel(
     options: ExcelGenerationOptions,
 ): Promise<string> {
-    // The run directory is created by playwright.config.base.ts.
+    // The output directory is initialized centrally.
     // This generator only writes the Excel file.
 
     const workbook = new ExcelJS.Workbook();
@@ -314,27 +291,18 @@ export async function generateEvidenceExcel(
     createSummary(workbook, options);
 
     const sheets = [
-        {
-            name: 'All',
-            tests: options.tests,
-        },
+        { name: 'All', tests: options.tests },
         {
             name: 'Passed',
-            tests: options.tests.filter(
-                test => test.status === 'passed',
-            ),
+            tests: options.tests.filter(test => test.status === 'passed'),
         },
         {
             name: 'Failed',
-            tests: options.tests.filter(
-                test => test.status === 'failed',
-            ),
+            tests: options.tests.filter(test => test.status === 'failed'),
         },
         {
             name: 'Not Executed',
-            tests: options.tests.filter(
-                test => test.status === 'notExecuted',
-            ),
+            tests: options.tests.filter(test => test.status === 'notExecuted'),
         },
     ];
 
@@ -343,36 +311,14 @@ export async function generateEvidenceExcel(
             continue;
         }
 
-        const fields = ['All', 'Failed'].includes(sheet.name)
-            ? options.evidenceSchema
-            : options.evidenceSchema.filter(
-                field => field.field !== 'error' &&
-                    field.field !== 'screenshot',
-            );
-
-        createDetail(workbook, sheet.name, sheet.tests, fields);
+        createDetail(workbook, sheet.name, sheet.tests, options.evidenceSchema);
     }
 
-    createMissingFields(
-        workbook,
-        options.tests,
-        options.evidenceSchema,
-    );
+    createMissingFields(workbook, options.tests, options.evidenceSchema);
 
-    const timestamp = new Date()
-        .toISOString()
-        .replace(/[:.]/g, '-');
+    await workbook.xlsx.writeFile(options.outputFile);
 
-    const filePath = join(
-        options.outputDirectory,
-        `evidence-report-${timestamp}.xlsx`,
-    );
+    console.log(`EvidenceFactory: Excel report generated: ${options.outputFile}`);
 
-    await workbook.xlsx.writeFile(filePath);
-
-    console.log(
-        `EvidenceFactory: Excel report generated: ${filePath}`,
-    );
-
-    return filePath;
+    return options.outputFile;
 }

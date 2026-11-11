@@ -8,6 +8,9 @@ import {
   NAVIGATION_TIMEOUT,
 } from './configLayer/execution/timeouts';
 
+import { initializeEvidenceRun } from './configLayer/evidenceFactory/evidenceRunDirectory';
+import { getEvidenceReporterConfig } from './configLayer/evidenceFactory/reporterConfig';
+
 /**
  * Brand-agnostic suite: the same specs under automationLayer/insurance run once per brand,
  * as one Playwright project per brand. A brand only runs the product folders it sells
@@ -54,13 +57,13 @@ function brandProjects(name: BrandName): Project[] {
     definition.suite === 'ferry'
       ? ['ferry/automatedTests/**/*.spec.ts', 'ferry/automatedNavigation/**/*.spec.ts']
       : [
-          ...definition.products.flatMap((p) => [
-            `lv/automatedTests/${p}/**/*.spec.ts`,
-            `lv/automatedNavigation/customerPortal/${p}/**/*.spec.ts`,
-            `lv/automatedNavigation/agentPortal/${p}/**/*.spec.ts`,
-          ]),
-          'lv/automatedTests/agentPortal/**/*.spec.ts',
-        ];
+        ...definition.products.flatMap((p) => [
+          `lv/automatedTests/${p}/**/*.spec.ts`,
+          `lv/automatedNavigation/customerPortal/${p}/**/*.spec.ts`,
+          `lv/automatedNavigation/agentPortal/${p}/**/*.spec.ts`,
+        ]),
+        'lv/automatedTests/agentPortal/**/*.spec.ts',
+      ];
   const setupName = setupProjectName(name);
   // The brand project comes before its setup project: the VS Code extension enables only the
   // first project of a config by default. Setup still runs first, as a dependency.
@@ -107,6 +110,27 @@ function parseWorkers(value: string | undefined): number | string {
 
 const retries = parseRetries();
 
+/*
+ * Initialize EvidenceFactory for every invocation, including
+ * Common Job discovery. The runner supplies the existing run ID.
+ */
+const paths = initializeEvidenceRun();
+
+/*
+ * Discovery collects inventory only.
+ * Execution enables the EvidenceFactory reporters.
+ */
+const discoveryOnly =
+  process.env.EVIDENCEFACTORY_DISCOVERY_ONLY === 'true';
+
+const reporter = discoveryOnly
+  ? [['list']]
+  : getEvidenceReporterConfig({
+    paths,
+    product: 'Insurance',
+    useBrandAllureReporter: true,
+  });
+
 export default defineConfig({
   testDir: './automationLayer/insurance',
   testIgnore: isCI ? (includeNavigation ? [] : ['**/automatedNavigation/**']) : [],
@@ -117,13 +141,8 @@ export default defineConfig({
   // Parallel workers: WORKERS=4 or WORKERS=50% (of CPU cores); the --workers CLI flag overrides
   // it. Defaults to 1 because the test env is slow and every test pays with the same card.
   workers: parseWorkers(process.env.WORKERS),
-  reporter: [
-    ['list'],
-    ['./reportingLayer/custom-html-reporter.js'],
-    ['html', { open: 'never', outputFolder: 'playwright-report' }],
-    ['junit', { outputFile: 'results.xml' }],
-    ['./reportingLayer/brand-allure-reporter.ts', { resultsDir: 'allure-results' }],
-  ],
+  reporter: reporter as ReturnType<typeof getEvidenceReporterConfig>,
+  outputDir: paths.artifactsDirectory,
   // Per-test timeout comes from the shared fixtures (10 min, as in Selenium).
   expect: { timeout: EXPECT_TIMEOUT },
   use: {
