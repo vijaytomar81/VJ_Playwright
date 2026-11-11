@@ -1,90 +1,85 @@
+import './configLayer/execution/loadEnvironment';
 
-subst X: "C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\Athena_Automation\integration-tests"
+import { defineConfig, devices } from '@playwright/test';
+import { getProjectConfig } from './configLayer/execution/projectsRegistry';
 
-Set-Location X:\
+/**
+ * @see https://playwright.dev/docs/test-configuration
+ */
+export function createConfig(project: string | undefined) {
+  const env = process.env.ENV ?? 'dev';
+  const authMode = process.env.AGENT_PORTAL_AUTH;
 
-$replacements = @{
-    "import { test, expect } from '@playwright/test';" = "import { test, expect } from '@common/baseTest';"
-    "import { test } from '@playwright/test';" = "import { test } from '@common/baseTest';"
-    "import { expect, test } from '@playwright/test';" = "import { expect, test } from '@common/baseTest';"
+  return defineConfig({
+    testDir: getProjectConfig(project).testDir,
+    /* Run tests in files in parallel */
+    fullyParallel: true,
+    /* Fail the build on CI if you accidentally left test.only in the source code. */
+    forbidOnly: !!process.env.CI,
+    /* Retry on CI and local */
+    retries: 0,
+    /* Opt out of parallel tests on CI. */
+    workers: 1,
+    /* Reporter to use. See https://playwright.dev/docs/test-reporters */
+    reporter: [['list'], ['./reportingLayer/custom-html-reporter.js']],
+    globalSetup: require.resolve('./global-setup.js'),
+    timeout: 300000, // 5 minutes for all tests
+    /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
+    use: {
+      /* Base URL to use in actions like `await page.goto('')`. */
+      // baseURL: 'http://localhost:3000',
+
+      /* Collect trace when retrying the failed test. See https://playwright.dev/docs/trace-viewer */
+      trace: 'on-first-retry',
+      headless: process.env.CI === 'true',
+
+      storageState:
+        authMode === 'skip' ? undefined : `automationLayer/athena/agentPortalAuth/auth.json`,
+    },
+
+    /* Configure projects for major browsers */
+    projects: [
+      {
+        name: 'chromium',
+        use: { ...devices['Desktop Chrome'] },
+      },
+
+      // {
+      //   name: 'firefox',
+      //   use: { ...devices['Desktop Firefox'] },
+      // },
+
+      // {
+      //   name: 'webkit',
+      //   use: { ...devices['Desktop Safari'] },
+      // },
+
+      /* Test against mobile viewports. */
+      // {
+      //   name: 'Mobile Chrome',
+      //   use: { ...devices['Pixel 5'] },
+      // },
+      // {
+      //   name: 'Mobile Safari',
+      //   use: { ...devices['iPhone 12'] },
+      // },
+
+      /* Test against branded browsers. */
+      // {
+      //   name: 'Microsoft Edge',
+      //   use: { ...devices['Desktop Edge'], channel: 'msedge' },
+      // },
+      // {
+      //   name: 'Google Chrome',
+      //   use: { ...devices['Desktop Chrome'], channel: 'chrome' },
+      // },
+    ],
+
+    /* Run your local dev server before starting the tests */
+    // webServer: {
+    //   command: 'npm run start',
+    //   url: 'http://localhost:3000',
+    //   reuseExistingServer: !process.env.CI,
+    // },
+  });
 }
-
-$updated = 0
-$skipped = 0
-$failed = 0
-
-$failedFiles = @()
-
-Get-ChildItem ".\automationLayer" -Recurse -Filter "*.spec.ts" -File |
-ForEach-Object {
-    $file = $_
-
-    try {
-        $content = [System.IO.File]::ReadAllText($file.FullName)
-        $newContent = $content
-
-        foreach ($oldImport in $replacements.Keys) {
-            $newContent = $newContent.Replace(
-                $oldImport,
-                $replacements[$oldImport]
-            )
-        }
-
-        if ($newContent -cne $content) {
-            [System.IO.File]::WriteAllText(
-                $file.FullName,
-                $newContent
-            )
-            $updated++
-        }
-        else {
-            $skipped++
-        }
-    }
-    catch {
-        $failed++
-
-        $failedFiles += [PSCustomObject]@{
-            File  = $file.FullName
-            Error = $_.Exception.Message
-        }
-    }
-}
-
-Write-Host ""
-Write-Host "========== Replacement Summary =========="
-Write-Host "Updated : $updated"
-Write-Host "Skipped : $skipped"
-Write-Host "Failed  : $failed"
-Write-Host "========================================="
-
-$failedFiles | Format-List
-
-====
-
-$old = 0
-$new = 0
-$unreadable = 0
-
-Get-ChildItem ".\automationLayer" -Recurse -Filter "*.spec.ts" -File |
-ForEach-Object {
-    try {
-        $content = [System.IO.File]::ReadAllText($_.FullName)
-
-        if ($content.Contains("from '@playwright/test'")) {
-            $old++
-        }
-
-        if ($content.Contains("from '@common/baseTest'")) {
-            $new++
-        }
-    }
-    catch {
-        $unreadable++
-        Write-Warning "Cannot read: $($_.FullName) - $($_.Exception.Message)"
-    }
-}
-
-Write-Host "Old imports : $old"
-Write-Host "New imports : $new"
-Write-Host "Unreadable  : $unreadable"
