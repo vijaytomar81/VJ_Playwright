@@ -1,48 +1,33 @@
-REM ============================================================
-REM RESET evidence_factory TO THE LATEST develop BRANCH
-REM ============================================================
-
-REM STEP 1: Confirm current branch is evidence_factory
+REM STEP 1: Confirm you are on evidence_factory
 git branch --show-current
 
-REM STEP 2: Review current local changes
+REM STEP 2: Review current changes
 git status
 
-REM STEP 3: Fetch the latest develop branch from remote
-git fetch origin develop
+REM STEP 3: Discard all tracked local changes
+git reset --hard HEAD
 
-REM STEP 4: Reset local evidence_factory to origin/develop
-REM WARNING: Permanently discards tracked local changes
-git reset --hard origin/develop
-
-REM STEP 5: Preview untracked files and folders to be deleted
+REM STEP 4: Preview untracked files for deletion
 git clean -nd
 
-REM STEP 6: Delete all untracked files and folders
-REM WARNING: Permanently deletes untracked files
+REM STEP 5: Delete untracked files and folders
 git clean -fd
 
-REM ============================================================
-REM VERIFICATION
-REM ============================================================
+REM STEP 6: Fetch the latest develop branch
+git fetch origin develop
 
-REM STEP 7: Confirm current branch is still evidence_factory
+REM STEP 7: Make evidence_factory exactly match develop
+git reset --hard origin/develop
+
+REM STEP 8: Verify current branch
 git branch --show-current
 
-REM STEP 8: Confirm working tree is clean
+REM STEP 9: Verify working tree is clean
 git status
 
-REM STEP 9: Confirm no differences from origin/develop
+REM STEP 10: Verify no differences from develop
 git diff origin/develop
 
-REM STEP 10: Check current branch commit
+REM STEP 11: Verify both branches point to the same commit
 git rev-parse HEAD
-
-REM STEP 11: Check latest develop commit
-REM Both commit hashes should be identical
 git rev-parse origin/develop
-
-REM ============================================================
-REM RESET COMPLETE
-REM You can now manually implement EvidenceFactory changes
-REM ============================================================
