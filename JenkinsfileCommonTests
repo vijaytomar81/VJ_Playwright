@@ -1,0 +1,200 @@
+// One target and suite per build. Setup: docs/Jenkins-common-test-job.md.
+// Defaults only discover tests: the first build registers the parameter form without buying policies.
+// Build-local state: a Declarative environment value would mask later env assignments.
+def commonJobPrepared = false
+
+pipeline {
+    agent { label 'test-playwright-docker-agent' }
+
+    parameters {
+        choice(name: 'TEST_SUITE', choices: ['tests', 'navigation', 'all'], description: 'tests = automatedTests (Athena: legacy tests); navigation = automatedNavigation; all = both. Demo tests are excluded.')
+        choice(name: 'TARGET', choices: ['athena-ferry', 'athena-allianz-motor', 'athena-allianz-home', 'athena-britannia', 'insurance-allianz', 'insurance-britannia', 'insurance-audi', 'insurance-cupra', 'insurance-seat', 'insurance-skoda', 'insurance-vw'], description: 'Framework/project; determines server profile and credentials.')
+        choice(name: 'TEST_ENV', choices: ['dev', 'test'], description: 'Environment to run against. Missing environment files fail validation.')
+        choice(name: 'RUN_MODE', choices: ['List tests', 'Execute tests'], description: 'List tests never runs setup, opens browsers, or binds credentials.')
+        string(name: 'TEST_PATH', defaultValue: '', description: 'Optional relative folder/file path, preferably from repository root. Literal path, not a regex. Empty = whole target.')
+        string(name: 'TEST_FILTER', defaultValue: '', description: 'Optional title/tag regular expression. Empty = no title filter.')
+        string(name: 'EXCLUDE_FILTER', defaultValue: '', description: 'Optional title/tag regular expression to exclude.')
+        string(name: 'WORKERS', defaultValue: '1', description: 'Parallel tests: positive count or percentage, e.g. 1 or 50%. Start with 1.')
+        choice(name: 'RETRIES', choices: ['0', '1', '2'], description: 'Default 0 for baseline results. Retrying can repeat purchases.')
+        choice(name: 'AUTH_MODE', choices: ['default', 'skip', 'sapiens', 'allianz', 'sapiensKeycloak'], description: 'default: current skips startup login; proposed uses brand method. skip does not disable proposed on-demand login.')
+        choice(name: 'VIDEO_MODE', choices: ['off', 'on', 'retain-on-failure', 'on-first-retry'], description: 'on-first-retry requires RETRIES > 0.')
+        string(name: 'RUN_TIMEOUT_MINUTES', defaultValue: '180', description: 'Execution-stage timeout, 1..1440 minutes. A timed-out portion is incomplete.')
+        booleanParam(name: 'PUBLISH_HTML_REPORT', defaultValue: true, description: 'Publish Playwright HTML using HTML Publisher. Report files are archived regardless.')
+        booleanParam(name: 'GENERATE_ALLURE_REPORT', defaultValue: true, description: 'Needs the existing Allure Jenkins plugin/tool; downloads a JRE if required.')
+        string(name: 'RECIPIENT_EMAILS', defaultValue: '', description: 'Optional comma-separated recipients; needs configured Email Extension. Empty sends no email.')
+    }
+
+    environment {
+        npm_config_cache = "${WORKSPACE}/.npm-cache"
+        CI = 'true'
+        KEEP_BROWSER_OPEN = 'false'
+        PWDEBUG = ''
+    }
+
+    options {
+        disableConcurrentBuilds()
+        buildDiscarder(logRotator(daysToKeepStr: '60', numToKeepStr: '50'))
+    }
+
+    stages {
+        stage('Validate and prepare') {
+            steps {
+                sh 'node configLayer/execution/commonJob/runner.cjs prepare'
+                script {
+                    commonJobPrepared = true
+                    def plan = readCommonPlan()
+                    currentBuild.displayName = "#${env.BUILD_NUMBER} ${plan.target} ${plan.environment} ${plan.suite}"
+                    currentBuild.description = "${plan.mode}; commit=${plan.commit}"
+                }
+            }
+        }
+
+        stage('Install dependencies') {
+            steps {
+                sh '''
+                    node --version
+                    npm --version
+                    npm ci
+                    node -e "if(require('@playwright/test/package.json').version !== '1.62.1') throw new Error('Update the common Jenkins Docker image to match the installed Playwright version')"
+                '''
+            }
+        }
+
+        stage('Discover selected tests') {
+            steps {
+                // Always the same target, suite, path, filters, CI flags, and workers as execution.
+                // A standalone inventory is archived even if later setup/execution fails.
+                sh 'node configLayer/execution/commonJob/runner.cjs list'
+            }
+        }
+
+        stage('Execute selected tests') {
+            when { expression { params.RUN_MODE == 'Execute tests' } }
+            steps {
+                script {
+                    def plan = readCommonPlan()
+                    def bindings = [
+                        string(credentialsId: "${plan.gmailPrefix}-client-id", variable: 'GMAIL_CLIENT_ID'),
+                        string(credentialsId: "${plan.gmailPrefix}-client-secret", variable: 'GMAIL_CLIENT_SECRET'),
+                        string(credentialsId: "${plan.gmailPrefix}-refresh-token", variable: 'GMAIL_REFRESH_TOKEN')
+                    ]
+                    if (plan.bindPortal) {
+                        bindings << usernamePassword(credentialsId: plan.portalCredential,
+                            usernameVariable: 'AGENT_PORTAL_EMAIL', passwordVariable: 'AGENT_PORTAL_PASSWORD')
+                    }
+                    timeout(time: plan.timeout as Integer, unit: 'MINUTES') {
+                        withCredentials(bindings) {
+                            def testingApi = load('configLayer/execution/optionalTestingApiCredentials.groovy')
+                            testingApi.call {
+                                // The helper records the exit code; the next stage distinguishes
+                                // test failures from setup/infrastructure failures.
+                                sh returnStatus: true, script: 'node configLayer/execution/commonJob/runner.cjs execute'
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        stage('Evaluate results') {
+            when { expression { params.RUN_MODE == 'Execute tests' } }
+            steps {
+                script {
+                    def status = sh(returnStatus: true, script: 'node configLayer/execution/commonJob/runner.cjs evaluate')
+                    if (status == 1) error('Incomplete run, setup/discovery error, zero executed scenarios, or infrastructure failure. See common-job artifacts and console.')
+                    if (status == 2) unstable('Failed, skipped, or flaky scenarios. See common-job/results-summary.json and reports.')
+                    if (status > 2) error("Unexpected result evaluation exit ${status}")
+                }
+            }
+        }
+    }
+
+    post {
+        always {
+            script {
+                echo "[REPORTS] prepared=${commonJobPrepared}; mode=${params.RUN_MODE}; HTML=${params.PUBLISH_HTML_REPORT}; Allure=${params.GENERATE_ALLURE_REPORT}"
+                if (commonJobPrepared && params.RUN_MODE == 'Execute tests') {
+                    if (fileExists('results.xml')) {
+                        catchError(buildResult: 'UNSTABLE', stageResult: 'UNSTABLE', catchInterruptions: false,
+                            message: 'JUnit results could not be published; continuing with other reports') {
+                            echo '[REPORTS] Publishing JUnit results.xml'
+                            junit testResults: 'results.xml', allowEmptyResults: false
+                        }
+                    } else {
+                        unstable('[REPORTS] Missing results.xml; no Jenkins test-results view can be published. Check execution output and archived artifacts.')
+                    }
+                } else {
+                    echo '[REPORTS] Execution publication skipped: discovery-only build or preparation did not complete.'
+                }
+                if (commonJobPrepared && params.RUN_MODE == 'Execute tests') {
+                    if (!params.PUBLISH_HTML_REPORT) {
+                        echo '[REPORTS] Playwright HTML publication disabled by PUBLISH_HTML_REPORT=false; files will still be archived.'
+                    } else if (!fileExists('playwright-report/index.html')) {
+                        unstable('[REPORTS] Missing playwright-report/index.html; Playwright HTML cannot be published.')
+                    } else {
+                        catchError(buildResult: 'UNSTABLE', stageResult: 'UNSTABLE', catchInterruptions: false,
+                            message: 'Playwright HTML could not be published; continuing with other reports') {
+                            echo '[REPORTS] Publishing Playwright HTML report'
+                            publishHTML(target: [allowMissing: false, alwaysLinkToLastBuild: true, keepAll: true,
+                                reportDir: 'playwright-report', reportFiles: 'index.html', reportName: 'Playwright Report'])
+                        }
+                    }
+                }
+                if (commonJobPrepared && params.RUN_MODE == 'Execute tests') {
+                    if (!params.GENERATE_ALLURE_REPORT) {
+                        echo '[REPORTS] Allure publication disabled by GENERATE_ALLURE_REPORT=false. Enable it for the Jenkins Allure Report link; raw results will still be archived.'
+                    } else if (!fileExists('allure-results')) {
+                        unstable('[REPORTS] Missing allure-results; Allure cannot be generated.')
+                    } else {
+                        catchError(buildResult: 'UNSTABLE', stageResult: 'UNSTABLE', catchInterruptions: false,
+                            message: 'Allure report could not be generated; artifacts will still be archived') {
+                            echo '[REPORTS] Generating Allure report'
+                            sh '''
+                                if [ ! -x .allure-jre/bin/java ]; then
+                                    mkdir -p .allure-jre
+                                    node -e "fetch('https://api.adoptium.net/v3/binary/latest/17/ga/linux/x64/jre/hotspot/normal/eclipse').then(r => { if (!r.ok) throw new Error('HTTP '+r.status); return r.arrayBuffer(); }).then(b => require('fs').writeFileSync('.allure-jre.tar.gz',Buffer.from(b)))"
+                                    tar -xzf .allure-jre.tar.gz -C .allure-jre --strip-components=1
+                                    rm -f .allure-jre.tar.gz
+                                fi
+                            '''
+                            withEnv(["JAVA_HOME=${env.WORKSPACE}/.allure-jre"]) {
+                                allure(includeProperties: false, results: [[path: 'allure-results']])
+                            }
+                        }
+                    }
+                }
+            }
+            script {
+                if (commonJobPrepared) {
+                    echo '[REPORTS] Archiving run inventory, summaries, reports and attachments'
+                    archiveArtifacts artifacts: 'common-job/**,results.xml,playwright-report/**,test-results/**,allure-results/**,custom-test-reports/**', allowEmptyArchive: true
+                }
+                if (params.RECIPIENT_EMAILS?.trim()) {
+                    try {
+                        emailext(to: params.RECIPIENT_EMAILS.trim(),
+                            from: env.TEST_EMAIL_FROM?.trim() ?: 'noreply@athenapaas.com',
+                            subject: "${currentBuild.displayName}: ${currentBuild.currentResult}",
+                            mimeType: 'text/plain',
+                            body: "${currentBuild.displayName}\nResult: ${currentBuild.currentResult}\n${currentBuild.description}\nBuild, results and artifacts: ${env.BUILD_URL}")
+                    } catch (org.jenkinsci.plugins.workflow.steps.FlowInterruptedException e) {
+                        throw e
+                    } catch (Exception e) {
+                        echo "Email notification failed: ${e.message}"
+                    }
+                }
+            }
+        }
+    }
+}
+
+def readCommonPlan() {
+    // Finish the Pipeline step before constructing a non-serializable parser.
+    def text = readFile('common-job/plan.json')
+    return parseCommonPlan(text)
+}
+
+@com.cloudbees.groovy.cps.NonCPS
+def parseCommonPlan(String text) {
+    // Pure parsing only: no Pipeline steps, and only plain JSON values escape this method.
+    return new groovy.json.JsonSlurperClassic().parseText(text)
+}
