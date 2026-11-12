@@ -1,39 +1,37 @@
-Scenario ID	Scenario Name	Status	Policy Number	Customer Number	Premium	Premium	Retry	Worker ID	Start Time	End Time	Duration	Error	Execution Mode	Device	Browser	Browser Channel	Browser Version	Headless
-Not Known	Not Known	Not Known	Not Known	Not Known	Not Known	Not Known	Not Known	Not Known	Not Known	Not Known	Not Known	Not Known	Not Known	Not Known	chromium	Not Specified	151.0.7922.34	Not Known
+Scenario ID	Scenario Name	Status	VRN	Email	Interaction ID	Policy Number	Cover Start Date	NB Start Time	Bri Premium	Retry	Worker ID	Start Time	End Time	Duration	Error	Screenshot	Execution Mode	Device	Browser	Browser Channel	Browser Version	Headless
+BRI_DJ_PRE_NB001	TC1_BRI_DJ_PRE_NB001 @Britannia_Premier @Bri_Premier_Annual @Bri_Annual	failed	HJ64GZC	bri.test.team+1794500582486@gmail.com	6af5e7f0fad29c6d320aee84		21 Nov 2026	2026-11-12T16:23:02.487Z		0	0	2026-11-12T16:23:01.223Z	2026-11-12T16:24:00.479Z	00:59	"TimeoutError: locator.click: Timeout 30000ms exceeded."    Local		chromium	Not Specified	151.0.7922.34	
 
 
 PS C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\Athena_Automation\integration-tests> treee test-results
 test-results
-└── run-2026-11-12T13-03-03-341Z
+└── Britannia-run-2026-11-12T16-22-50-171Z
     ├── allure
     │   └── results
-    │       ├── 4c9d19a1-5171-4d07-88cb-677740b82689-attachment.md
-    │       ├── 7aadbfd1-7e08-48e1-97d0-1ab023897a8e-attachment.txt
-    │       ├── 946627f0-bfcd-4f34-9131-25470a444895-result.json
-    │       ├── 9948f81e-3511-49b9-a100-3e8b2747ff17-attachment.png
-    │       └── a230bbee-cb08-43a4-8344-2854d8210d4a-attachment.png
+    │       ├── 58bbab65-e05f-4482-92dc-1a07e3d936dc-attachment.txt
+    │       ├── 5e7d272f-d868-457c-a5cb-9eaf607ae0fa-attachment.png
+    │       ├── 7e218cb6-6fae-4742-a68b-dfe92a63d71d-result.json
+    │       └── 8735ea8f-a56b-40ef-8e90-2a5545c37ae2-attachment.md
     ├── artifacts
     │   ├── Regression-Britannia_Hexa--3877c-i-Premier-Annual-Bri-Annual-chromium
     │   │   ├── attachments
-    │   │   │   └── full-page-failure-failure-chromium-837c5718d03cf37a-retry-0-repeat-0-worker-0-png-6467b4e9a662276914a87236a90f07e52831ed80.png
-    │   │   ├── error-context.md
-    │   │   └── test-failed-1.png
+    │   │   │   └── full-page-failure-failure-chromium-837c5718d03cf37a-retry-0-repeat-0-worker-0-png-7608f84c342197c7b0ca02f3373ec5e180799bb0.png
+    │   │   └── error-context.md
     │   └── screenshots
     │       └── failure-chromium-837c5718d03cf37a-retry-0-repeat-0-worker-0.png
     ├── common-job
     ├── excel-report
-    │   └── evidence-report.xlsx
+    │   └── Britannia-report-run-2026-11-12T16-22-50-171Z.xlsx
     ├── junit
     │   └── results.xml
     └── playwright
         ├── data
-        │   ├── 20d4daf86e8db8c6a3feb6857b2ecfeaece41a30.png
+        │   ├── 20160739773c3ee2bf7999d41b817fdb47248a42.md
         │   ├── 29b987cac892214a8588105d053cb9b357767689.dat
-        │   ├── 2ec026977dffa6952f1569c23dc8a8076577bc62.png
-        │   ├── 3a4f2f9bdd5c6804298b30010449c62517c292a0.dat
-        │   ├── 85dc9589bd7c17d3168ec53392500c694e436517.dat
-        │   ├── 88a214b2aa83b08e29ac48817bdcf0d6dc39dafc.md
-        │   ├── dd1a11cfeb915e90d838afd85486dd1fd3bde674.dat
-        │   └── fe5af78e9bb4dfb42219716550d2ebc7a8b67e7e.dat
+        │   ├── 4e77c12262b3abdd2ac357a9bd78eafa7eafc9c5.dat
+        │   ├── 520ebaba6681f541dc9377665711cfc9e867af52.dat
+        │   ├── 52885f36eb01a9f4a1a1673e629592bb4025344c.dat
+        │   ├── 556292d74f65f70dd6c8ac31742415639a156dea.png
+        │   ├── 825d50ca90d27c9178803734252b6c24a15c2bf8.dat
+        │   └── 85dc9589bd7c17d3168ec53392500c694e436517.dat
         └── index.html
-PS C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\Athena_Automation\integration-tests>
+PS C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\Athena_Automation\integration-tests> 
