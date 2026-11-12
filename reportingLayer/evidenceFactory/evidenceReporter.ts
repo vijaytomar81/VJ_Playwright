@@ -1,4 +1,3 @@
-
 import type {
     Reporter, FullConfig, FullResult, Suite, TestCase, TestResult,
 } from '@playwright/test/reporter';
@@ -29,7 +28,7 @@ interface ReporterOptions {
     readonly outputFile: string;
 }
 
-const UNKNOWN = 'Not Known';
+const UNKNOWN = '';
 const SENSITIVE = /card.?number|card.?no|cvv|cvc|security.?code|password|secret|token|authorization|api.?key|access.?key|private.?key/i;
 
 const known = (value: unknown): string =>
