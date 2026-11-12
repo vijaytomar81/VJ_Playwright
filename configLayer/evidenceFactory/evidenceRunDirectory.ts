@@ -36,17 +36,44 @@ function validateRunId(runId: string): string {
     return runId;
 }
 
+function toPascalCase(value: string | undefined): string {
+    if (!value?.trim()) return '';
+
+    return value.trim()
+        .replace(/([a-z0-9])([A-Z])/g, '$1 $2')
+        .split(/[^a-zA-Z0-9]+/)
+        .filter(Boolean)
+        .map(word =>
+            word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()
+        )
+        .join('');
+}
+
 function createRunPaths(
     resultsRoot: string,
     runId: string
 ): EvidenceRunPaths {
-    const runDirectory = join(resultsRoot, `run-${runId}`);
+    const projectName = toPascalCase(process.env.PROJECT);
+    const productName = toPascalCase(process.env.PRODUCT);
+
+    const runPrefix = projectName || 'evidence';
+    const runDirectory = join(resultsRoot, `${runPrefix}-run-${runId}`);
+
     const commonJobDirectory = join(runDirectory, 'common-job');
     const excelReportDirectory = join(runDirectory, 'excel-report');
     const junitDirectory = join(runDirectory, 'junit');
     const playwrightReportDirectory = join(runDirectory, 'playwright');
     const artifactsDirectory = join(runDirectory, 'artifacts');
     const allureDirectory = join(runDirectory, 'allure');
+
+    const reportPrefix = [projectName, productName]
+        .filter(Boolean)
+        .join('-') || 'evidence';
+
+    const evidenceReportFile = join(
+        excelReportDirectory,
+        `${reportPrefix}-report-run-${runId}.xlsx`,
+    );
 
     return {
         runId,
@@ -59,7 +86,7 @@ function createRunPaths(
         screenshotsDirectory: join(artifactsDirectory, 'screenshots'),
         allureResultsDirectory: join(allureDirectory, 'results'),
         allureReportDirectory: join(allureDirectory, 'report'),
-        evidenceReportFile: join(excelReportDirectory, `evidence-report-${runId}.xlsx`),
+        evidenceReportFile,
         junitFile: join(junitDirectory, 'results.xml'),
     };
 }
