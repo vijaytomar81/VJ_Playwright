@@ -506,6 +506,7 @@ export function styleSummaryResult(
     }
 }
 
+
 /**
  * Automatically calculate readable column widths.
  */
@@ -514,10 +515,10 @@ export function setColumnWidths(
     minimumWidth: number = COLUMN_WIDTHS.detailMinimum,
     maximumWidth: number = COLUMN_WIDTHS.detailMaximum,
 ): void {
-    worksheet.columns.forEach(column => {
+    worksheet.columns.forEach((column, index) => {
         let longest = minimumWidth;
 
-        column.eachCell?.(
+        worksheet.getColumn(index + 1).eachCell(
             { includeEmpty: false },
             cell => {
                 const value = cell.value;
@@ -549,3 +550,4 @@ export function setColumnWidths(
         );
     });
 }
+
