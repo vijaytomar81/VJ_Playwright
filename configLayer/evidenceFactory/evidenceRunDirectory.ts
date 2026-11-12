@@ -16,6 +16,11 @@ export interface EvidenceRunPaths {
     readonly junitFile: string;
 }
 
+/**
+ * Base directory for all EvidenceFactory execution reports.
+ */
+const EVIDENCE_BASE_FOLDER = 'test-results';
+
 const RUN_ID_ENV = 'EVIDENCEFACTORY_RUN_ID';
 
 let activeRun: EvidenceRunPaths | undefined;
@@ -70,7 +75,7 @@ export function initializeEvidenceRun(): EvidenceRunPaths {
         return activeRun;
     }
 
-    const resultsRoot = resolve(process.cwd(), 'test-results');
+    const resultsRoot = resolve(process.cwd(), EVIDENCE_BASE_FOLDER);
     const inheritedRunId = process.env[RUN_ID_ENV];
 
     let paths: EvidenceRunPaths;

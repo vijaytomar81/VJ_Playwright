@@ -1,1 +1,16 @@
-https://jenkins-lv-dev.athenapaas.com/job/TestEnvPlaywrightBritannia/9/artifact/
+test-results/
+└── run-<timestamp>/
+    ├── common-job/
+    ├── excel-report/
+    │   └── evidence-report.xlsx
+    ├── junit/
+    │   └── results.xml
+    ├── playwright/
+    │   └── index.html
+    ├── artifacts/
+    │   └── screenshots/
+    │       ├── failure-chromium-<hash>-retry-0-repeat-0-worker-0.png
+    │       └── failure-audi-<hash>-retry-0-repeat-0-worker-1.png
+    └── allure/
+        ├── results/
+        └── report/
