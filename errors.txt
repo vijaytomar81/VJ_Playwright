@@ -1,20 +1,25 @@
 Scenario ID	Scenario Name	Status	Policy Number	Customer Number	Premium	Premium	Retry	Worker ID	Start Time	End Time	Duration	Error	Execution Mode	Device	Browser	Browser Channel	Browser Version	Headless
-Not Known	Not Known	Not Known	Not Known	Not Known	Not Known	Not Known	Not Known	Not Known	Not Known	Not Known	Not Known	Not Known	Not Known	Not Known	Not Known	Not Known	Not Known	Not Known
+Not Known	Not Known	Not Known	Not Known	Not Known	Not Known	Not Known	Not Known	Not Known	Not Known	Not Known	Not Known	Not Known	Not Known	Not Known	chromium	Not Specified	151.0.7922.34	Not Known
 
 
 PS C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\Athena_Automation\integration-tests> treee test-results
 test-results
-└── run-2026-11-12T12-49-07-769Z
+└── run-2026-11-12T13-03-03-341Z
     ├── allure
     │   └── results
-    │       ├── 41c00a45-1ab1-4e51-8a21-a45624dee311-result.json
-    │       ├── f90c976d-d185-4247-88eb-33791abf8533-attachment.md
-    │       └── ffe89e99-6828-45a2-ac90-7d8ee37cf007-attachment.png
+    │       ├── 4c9d19a1-5171-4d07-88cb-677740b82689-attachment.md
+    │       ├── 7aadbfd1-7e08-48e1-97d0-1ab023897a8e-attachment.txt
+    │       ├── 946627f0-bfcd-4f34-9131-25470a444895-result.json
+    │       ├── 9948f81e-3511-49b9-a100-3e8b2747ff17-attachment.png
+    │       └── a230bbee-cb08-43a4-8344-2854d8210d4a-attachment.png
     ├── artifacts
     │   ├── Regression-Britannia_Hexa--3877c-i-Premier-Annual-Bri-Annual-chromium
+    │   │   ├── attachments
+    │   │   │   └── full-page-failure-failure-chromium-837c5718d03cf37a-retry-0-repeat-0-worker-0-png-6467b4e9a662276914a87236a90f07e52831ed80.png
     │   │   ├── error-context.md
     │   │   └── test-failed-1.png
     │   └── screenshots
+    │       └── failure-chromium-837c5718d03cf37a-retry-0-repeat-0-worker-0.png
     ├── common-job
     ├── excel-report
     │   └── evidence-report.xlsx
@@ -22,12 +27,13 @@ test-results
     │   └── results.xml
     └── playwright
         ├── data
-        │   ├── 00180ade80f2e2513c1341e64e54cc5978a8d993.dat
+        │   ├── 20d4daf86e8db8c6a3feb6857b2ecfeaece41a30.png
         │   ├── 29b987cac892214a8588105d053cb9b357767689.dat
-        │   ├── 3d1f802d4996b398405622678960e3d5dba4957f.md
-        │   ├── 4aec2f7e7a30f79cfc64bd1809ee59640bb2caaf.png
-        │   ├── 7b2ab447c026c3332f4d6b81a097b350dc50216d.dat
+        │   ├── 2ec026977dffa6952f1569c23dc8a8076577bc62.png
+        │   ├── 3a4f2f9bdd5c6804298b30010449c62517c292a0.dat
         │   ├── 85dc9589bd7c17d3168ec53392500c694e436517.dat
-        │   └── ac4626ad738a43093f331d8c17b783732955ca78.dat
+        │   ├── 88a214b2aa83b08e29ac48817bdcf0d6dc39dafc.md
+        │   ├── dd1a11cfeb915e90d838afd85486dd1fd3bde674.dat
+        │   └── fe5af78e9bb4dfb42219716550d2ebc7a8b67e7e.dat
         └── index.html
 PS C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\Athena_Automation\integration-tests>
