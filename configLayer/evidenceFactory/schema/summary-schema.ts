@@ -28,8 +28,7 @@ export const summarySchema = [
         fields: [
             { field: 'machineName', label: 'Machine Name', order: 1 },
             { field: 'user', label: 'User', order: 2 },
-            { field: 'platform', label: 'Platform', order: 3 },
-            { field: 'osVersion', label: 'OS Version', order: 4 },
+            { field: 'device', label: 'Device', order: 3 },
         ],
     },
     {
