@@ -1,6 +1,10 @@
 Scenario ID	Scenario Name	Status	VRN	Email	Interaction ID	Policy Number	Cover Start Date	NB Start Time	Bri Premium	Retry	Worker ID	Start Time	End Time	Duration	Error	Screenshot	Execution Mode	Device	Browser	Browser Channel	Browser Version	Headless
 BRI_DJ_PRE_NB001	TC1_BRI_DJ_PRE_NB001 @Britannia_Premier @Bri_Premier_Annual @Bri_Annual	failed	HJ64GZC	bri.test.team+1794500582486@gmail.com	6af5e7f0fad29c6d320aee84		21 Nov 2026	2026-11-12T16:23:02.487Z		0	0	2026-11-12T16:23:01.223Z	2026-11-12T16:24:00.479Z	00:59	"TimeoutError: locator.click: Timeout 30000ms exceeded."    Local		chromium	Not Specified	151.0.7922.34	
 
+Missing Field	Affected Tests	Occurrences
+viewport	TC1_BRI_DJ_PRE_NB001 @Britannia_Premier @Bri_Premier_Annual @Bri_Annual	1
+
+
 
 PS C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\Athena_Automation\integration-tests> treee test-results
 test-results
