@@ -58,6 +58,7 @@ test('real Insurance discovery selects only the requested folders and all is the
           ...process.env,
           INCLUDE_NAVIGATION: 'true',
           PLAYWRIGHT_JSON_OUTPUT_FILE: output,
+          EVIDENCEFACTORY_RUN_ID: `suite-selection-${suite}`,
         },
         true
       );
