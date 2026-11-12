@@ -1,4 +1,3 @@
-
 /**
  * Consumer-owned evidence field configuration.
  *
@@ -19,18 +18,18 @@ export const evidenceFields = [
     { field: 'policyNumber', label: 'Policy Number', order: 4 },
     { field: 'customerNumber', label: 'Customer Number', order: 5 },
     { field: 'premium', label: 'Premium', order: 6 },
-    { field: 'Bripremium', label: 'Premium', order: 7 },
+    { field: 'Bripremium', label: 'Bri Premium', order: 7 },
 
     // Execution metadata
     { field: 'retry', label: 'Retry', order: 8 },
     { field: 'workerId', label: 'Worker ID', order: 9 },
     { field: 'startTime', label: 'Start Time', order: 10 },
     { field: 'endTime', label: 'End Time', order: 11 },
-    { field: 'durationMs', label: 'Duration', order: 12 },
+    { field: 'duration', label: 'Duration', order: 12 },
     { field: 'error', label: 'Error', order: 13 },
 
     // Execution environment
-    { field: 'mode', label: 'Execution Mode', order: 14 },
+    { field: 'executionMode', label: 'Execution Mode', order: 14 },
     { field: 'device', label: 'Device', order: 15 },
     { field: 'browser', label: 'Browser', order: 16 },
     { field: 'browserChannel', label: 'Browser Channel', order: 17 },
@@ -63,7 +62,7 @@ export type EvidenceData = Partial<
  * Examples:
  * EvidenceData.scenarioId    -> 'scenarioId'
  * EvidenceData.policyNumber  -> 'policyNumber'
- * EvidenceData.durationMs    -> 'durationMs'
+ * EvidenceData.duration      -> 'duration'
  * EvidenceData.browser       -> 'browser'
  */
 export const EvidenceData = Object.fromEntries(
