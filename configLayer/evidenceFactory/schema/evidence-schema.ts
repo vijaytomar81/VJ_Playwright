@@ -15,26 +15,31 @@ export const evidenceFields = [
     { field: 'status', label: 'Status', order: 3 },
 
     // Business fields
-    { field: 'policyNumber', label: 'Policy Number', order: 4 },
-    { field: 'customerNumber', label: 'Customer Number', order: 5 },
-    { field: 'premium', label: 'Premium', order: 6 },
-    { field: 'Bripremium', label: 'Bri Premium', order: 7 },
+    { field: 'VRN', label: 'VRN', order: 4 },
+    { field: 'Email', label: 'Email', order: 5 },
+    { field: 'InteractionID', label: 'Interaction ID', order: 6 },
+    { field: 'AnnualCoverPolicyNumber', label: 'Policy Number', order: 7 },
+    { field: 'AnnualCoverStartDate', label: 'Cover Start Date', order: 8 },
+    { field: 'premium', label: 'Premium', order: 9 },
+    { field: 'Bripremium', label: 'Bri Premium', order: 10 },
+    { field: 'CardNumber', label: 'Card Number', order: 11 },
 
     // Execution metadata
-    { field: 'retry', label: 'Retry', order: 8 },
-    { field: 'workerId', label: 'Worker ID', order: 9 },
-    { field: 'startTime', label: 'Start Time', order: 10 },
-    { field: 'endTime', label: 'End Time', order: 11 },
-    { field: 'duration', label: 'Duration', order: 12 },
-    { field: 'error', label: 'Error', order: 13 },
+    { field: 'retry', label: 'Retry', order: 12 },
+    { field: 'workerId', label: 'Worker ID', order: 13 },
+    { field: 'startTime', label: 'Start Time', order: 14 },
+    { field: 'endTime', label: 'End Time', order: 15 },
+    { field: 'duration', label: 'Duration', order: 16 },
+    { field: 'error', label: 'Error', order: 17 },
+    { field: 'screenshot', label: 'Screenshot', order: 18 },
 
     // Execution environment
-    { field: 'executionMode', label: 'Execution Mode', order: 14 },
-    { field: 'device', label: 'Device', order: 15 },
-    { field: 'browser', label: 'Browser', order: 16 },
-    { field: 'browserChannel', label: 'Browser Channel', order: 17 },
-    { field: 'browserVersion', label: 'Browser Version', order: 18 },
-    { field: 'headless', label: 'Headless', order: 19 },
+    { field: 'executionMode', label: 'Execution Mode', order: 19 },
+    { field: 'device', label: 'Device', order: 20 },
+    { field: 'browser', label: 'Browser', order: 21 },
+    { field: 'browserChannel', label: 'Browser Channel', order: 22 },
+    { field: 'browserVersion', label: 'Browser Version', order: 23 },
+    { field: 'headless', label: 'Headless', order: 24 },
 ] as const;
 
 /**
