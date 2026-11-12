@@ -1,10 +1,2 @@
-PS C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\Athena_Automation\integration-tests> npx tsc --noEmit
-reportingLayer/evidenceFactory/excelStyles.ts:520:16 - error TS2339: Property 'eachCell' does not exist on type 'Partial<Column>'.
-
-520         column.eachCell?.(
-                   ~~~~~~~~
-
-
-Found 1 error in reportingLayer/evidenceFactory/excelStyles.ts:520
-
-PS C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\Athena_Automation\integration-tests>
+Scenario ID	Scenario Name	Status	Policy Number	Customer Number	Premium	Premium	Retry	Worker ID	Start Time	End Time	Duration	Error	Execution Mode	Device	Browser	Browser Channel	Browser Version	Headless
+Not Known	Not Known	Not Known	Not Known	Not Known	Not Known	Not Known	Not Known	Not Known	Not Known	Not Known	Not Known	Not Known	Not Known	Not Known	Not Known	Not Known	Not Known	Not Known
