@@ -1,23 +1,37 @@
-
 {
   "compilerOptions": {
     "target": "ES2022",
     "module": "commonjs",
     "moduleResolution": "node",
-    "types": ["node"],
+    "types": [
+      "node"
+    ],
     "esModuleInterop": true,
     "resolveJsonModule": true,
     "skipLibCheck": true,
     "strict": false,
     "baseUrl": "./",
     "paths": {
-      "@pages/*": ["automationLayer/ferry/pages/*"],
-      "@shared/*": ["automationLayer/insurance/shared/*"],
-      "@lv/*": ["automationLayer/insurance/lv/*"],
-      "@ferry/*": ["automationLayer/insurance/ferry/*"],
-      "@baseTest": ["automationLayer/common/baseTest.ts"]
+      "@pages/*": [
+        "automationLayer/ferry/pages/*"
+      ],
+      "@shared/*": [
+        "automationLayer/insurance/shared/*"
+      ],
+      "@lv/*": [
+        "automationLayer/insurance/lv/*"
+      ],
+      "@ferry/*": [
+        "automationLayer/insurance/ferry/*"
+      ],
+      "@baseTest": [
+        "automationLayer/common/baseTest.ts"
+      ]
     },
     "noEmit": true
   },
-  "include": ["**/*.ts", "**/*.js"]
+  "include": [
+    "**/*.ts",
+    "**/*.js"
+  ]
 }
