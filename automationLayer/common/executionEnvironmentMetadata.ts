@@ -109,11 +109,11 @@ export function captureExecutionEnvironmentMetadata(page: Page): void {
                 ? `${viewport.width}x${viewport.height}`
                 : NOT_KNOWN,
 
-        platform:
-            hostPlatform,
+        // platform:
+        //     hostPlatform,
 
-        osVersion:
-            hostOSVersion,
+        // osVersion:
+        //     hostOSVersion,
 
         device,
 
