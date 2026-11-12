@@ -42,7 +42,7 @@ export function createConfig(project: string | undefined) {
     ? [['list']]
     : getEvidenceReporterConfig({
       paths,
-      product: project ?? 'Not Known',
+      product: process.env.PRODUCT?.trim() || 'Not Known',
     });
 
   return defineConfig({
