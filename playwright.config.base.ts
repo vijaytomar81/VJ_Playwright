@@ -72,7 +72,7 @@ export function createConfig(project: string | undefined) {
 
       trace: 'on-first-retry',
       /* Capture a screenshot right after a test fails, saved under test-results/ */
-      screenshot: 'only-on-failure',
+      // screenshot: 'only-on-failure',
       /* VIDEO_MODE: off (default), on, retain-on-failure, on-first-retry. See docs/Reporting.md. */
       video: videoOption(retries),
       /* Without these, a single stuck click/waitFor/goto waits out the whole 5-minute test
