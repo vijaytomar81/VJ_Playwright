@@ -20,7 +20,7 @@ export const evidenceFields = [
     { field: 'InteractionID', label: 'Interaction ID', order: 6 },
     { field: 'AnnualCoverPolicyNumber', label: 'Policy Number', order: 7 },
     { field: 'AnnualCoverStartDate', label: 'Cover Start Date', order: 8 },
-    { field: 'premium', label: 'Premium', order: 9 },
+    { field: 'NBStartTime', label: 'NB Start Time', order: 9 },
     { field: 'Bripremium', label: 'Bri Premium', order: 10 },
     { field: 'CardNumber', label: 'Card Number', order: 11 },
 
@@ -39,7 +39,8 @@ export const evidenceFields = [
     { field: 'browser', label: 'Browser', order: 21 },
     { field: 'browserChannel', label: 'Browser Channel', order: 22 },
     { field: 'browserVersion', label: 'Browser Version', order: 23 },
-    { field: 'headless', label: 'Headless', order: 24 },
+    { field: 'viewport', label: 'Viewport', order: 24 },
+    { field: 'headless', label: 'Headless', order: 25 },
 ] as const;
 
 /**
