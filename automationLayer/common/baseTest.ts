@@ -5,7 +5,7 @@ import { existsSync, statSync } from 'node:fs';
 import { basename, join, relative } from 'node:path';
 
 import { initializeEvidenceRun } from '../../configLayer/evidenceFactory/evidenceRunDirectory';
-import { captureBrowserMetadata } from './browserMetadata';
+import { captureExecutionEnvironmentMetadata } from './executionEnvironmentMetadata';
 
 /**
  * EvidenceFactory custom Playwright fixture.
@@ -27,7 +27,7 @@ export const test = base.extend({
         /*
          * Capture browser metadata before the test executes.
          */
-        captureBrowserMetadata(page);
+        captureExecutionEnvironmentMetadata(page);
 
         /*
          * Track pages opened during the test.

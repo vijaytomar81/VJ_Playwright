@@ -14,7 +14,7 @@ const NOT_KNOWN = '';
  * - Captures the Host OS and optional Remote Device information.
  * - Avoids duplicate metadata annotations.
  */
-export function captureBrowserMetadata(page: Page): void {
+export function captureExecutionEnvironmentMetadata(page: Page): void {
     const testInfo = test.info();
 
     const browser = page.context().browser();
