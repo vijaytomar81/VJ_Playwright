@@ -2,7 +2,7 @@ import type {
     Reporter, FullConfig, FullResult, Suite, TestCase, TestResult,
 } from '@playwright/test/reporter';
 
-import { hostname, platform, release, userInfo } from 'node:os';
+import { hostname, userInfo } from 'node:os';
 import { existsSync, statSync } from 'node:fs';
 import { dirname } from 'node:path';
 import { generateEvidenceExcel, type ExcelEvidenceTest } from './excelGenerator';
@@ -235,8 +235,6 @@ export default class EvidenceReporter implements Reporter {
             evidenceDirectory: runDirectory,
             machineName: hostname(),
             user: userInfo().username,
-            platform: platform(),
-            osVersion: release(),
             totalItems: rows.length,
             passed,
             failed,

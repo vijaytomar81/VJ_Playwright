@@ -30,8 +30,10 @@ export function captureBrowserMetadata(page: Page): void {
         darwin: 'macOS',
     };
 
-    const hostOS = operatingSystems[platform()] ?? platform();
-    const hostDevice = `${hostOS} (${release()})`;
+    const hostPlatform = platform();
+    const hostOSVersion = release();
+    const hostOS = operatingSystems[hostPlatform] ?? hostPlatform;
+    const hostDevice = `${hostOS} (${hostOSVersion})`;
 
     /*
      * Read remote device information from BrowserStack
@@ -106,6 +108,12 @@ export function captureBrowserMetadata(page: Page): void {
             viewport
                 ? `${viewport.width}x${viewport.height}`
                 : NOT_KNOWN,
+
+        platform:
+            hostPlatform,
+
+        osVersion:
+            hostOSVersion,
 
         device,
 
