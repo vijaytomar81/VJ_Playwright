@@ -1,4 +1,5 @@
 import { test, type Page } from '@playwright/test';
+import { platform, release } from 'node:os';
 
 const NOT_KNOWN = '';
 
@@ -10,6 +11,7 @@ const NOT_KNOWN = '';
  * - Does not execute browser binaries.
  * - Supports Chromium, Firefox and WebKit.
  * - Supports desktop and mobile-emulated contexts.
+ * - Captures the Host OS and optional Remote Device information.
  * - Avoids duplicate metadata annotations.
  */
 export function captureBrowserMetadata(page: Page): void {
@@ -17,6 +19,78 @@ export function captureBrowserMetadata(page: Page): void {
 
     const browser = page.context().browser();
     const viewport = page.viewportSize();
+
+    /*
+     * Capture the operating system running the Playwright
+     * test process, including its runtime OS version.
+     */
+    const operatingSystems: Record<string, string> = {
+        win32: 'Windows',
+        linux: 'Linux',
+        darwin: 'macOS',
+    };
+
+    const hostOS = operatingSystems[platform()] ?? platform();
+    const hostDevice = `${hostOS} (${release()})`;
+
+    /*
+     * Read remote device information from BrowserStack
+     * capabilities when available.
+     *
+     * Playwright does not expose remote device capabilities
+     * through Page or BrowserContext directly.
+     */
+    const projectUse = testInfo.project.use as Record<string, unknown>;
+
+    const capabilities = projectUse.capabilities &&
+        typeof projectUse.capabilities === 'object'
+        ? projectUse.capabilities as Record<string, unknown>
+        : {};
+
+    const browserStackOptions = capabilities['bstack:options'] &&
+        typeof capabilities['bstack:options'] === 'object'
+        ? capabilities['bstack:options'] as Record<string, unknown>
+        : {};
+
+    const getValue = (value: unknown): string =>
+        typeof value === 'string' || typeof value === 'number'
+            ? String(value).trim()
+            : NOT_KNOWN;
+
+    const remoteDevice =
+        getValue(browserStackOptions.deviceName) ||
+        getValue(capabilities.deviceName) ||
+        getValue(process.env.BROWSERSTACK_DEVICE_NAME);
+
+    const remoteOS =
+        getValue(browserStackOptions.os) ||
+        getValue(capabilities.os) ||
+        getValue(process.env.BROWSERSTACK_OS);
+
+    const remoteOSVersion =
+        getValue(browserStackOptions.osVersion) ||
+        getValue(capabilities.osVersion) ||
+        getValue(process.env.BROWSERSTACK_OS_VERSION);
+
+    /*
+     * Combine Host OS and Remote Device information.
+     *
+     * Host only:
+     * Windows (10.0.26200)
+     *
+     * Host + Remote:
+     * Windows (10.0.26200) - (iPhone 15 - iOS 17)
+     */
+    const remoteDetails = [
+        remoteDevice,
+        [remoteOS, remoteOSVersion]
+            .filter(Boolean)
+            .join(' '),
+    ].filter(Boolean).join(' - ');
+
+    const device = remoteDetails
+        ? `${hostDevice} - (${remoteDetails})`
+        : hostDevice;
 
     const metadata: Record<string, string> = {
         browser:
@@ -33,12 +107,7 @@ export function captureBrowserMetadata(page: Page): void {
                 ? `${viewport.width}x${viewport.height}`
                 : NOT_KNOWN,
 
-        device:
-            testInfo.project.use.isMobile === true
-                ? 'Mobile'
-                : testInfo.project.use.isMobile === false
-                    ? 'Desktop'
-                    : NOT_KNOWN,
+        device,
 
         headless:
             typeof testInfo.project.use.headless === 'boolean'
