@@ -1,3 +1,4 @@
+
 import type {
     Reporter, FullConfig, FullResult, Suite, TestCase, TestResult,
 } from '@playwright/test/reporter';
@@ -71,12 +72,16 @@ function annotationsOf(
 function evidenceValues(
     schema: readonly SchemaField[],
     annotations: Readonly<Record<string, string>>,
+    execution: Readonly<Record<string, unknown>>,
 ): Record<string, unknown> {
     const values: Record<string, unknown> = {};
 
     for (const { field } of schema) {
         if (SENSITIVE.test(field)) continue;
-        values[field] = known(annotations[field]);
+
+        values[field] = known(
+            execution[field] ?? annotations[field],
+        );
     }
 
     return values;
@@ -175,12 +180,36 @@ export default class EvidenceReporter implements Reporter {
         return [...this.tests.values()].map(({ test, results }) => {
             const last = results[results.length - 1];
             const annotations = annotationsOf(test, results);
-            const values = evidenceValues(this.options.evidenceSchema, annotations);
+            const status = testStatus(test, results);
+
+            const execution: Record<string, unknown> = {
+                scenarioName: test.title,
+                testName: test.title,
+                status,
+                retry: last?.retry ?? 0,
+                workerId: last?.workerIndex,
+                workerIndex: last?.workerIndex,
+                startTime: last?.startTime?.toISOString(),
+                endTime: last?.startTime
+                    ? new Date(
+                        last.startTime.getTime() + last.duration,
+                    ).toISOString()
+                    : undefined,
+                duration: last ? duration(last.duration) : undefined,
+                error: last?.error?.message,
+                executionMode: process.env.CI === 'true' ? 'CI' : 'Local',
+            };
+
+            const values = evidenceValues(
+                this.options.evidenceSchema,
+                annotations,
+                execution,
+            );
 
             return {
                 testId: test.id,
                 testName: test.title,
-                status: testStatus(test, results),
+                status,
                 retry: last?.retry ?? 0,
                 annotations,
                 values,
