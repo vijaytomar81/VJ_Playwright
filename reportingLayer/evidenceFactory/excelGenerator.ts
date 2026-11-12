@@ -46,7 +46,7 @@ export interface ExcelGenerationOptions {
     readonly tests: readonly ExcelEvidenceTest[];
 }
 
-const UNKNOWN = 'Not Known';
+const UNKNOWN = '';
 const SENSITIVE = /card.?number|card.?no|cvv|cvc|security.?code|password|secret|token|authorization|api.?key|access.?key|private.?key/i;
 
 const ordered = (fields: readonly SchemaField[]): SchemaField[] =>
