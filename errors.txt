@@ -1,2 +1,33 @@
 Scenario ID	Scenario Name	Status	Policy Number	Customer Number	Premium	Premium	Retry	Worker ID	Start Time	End Time	Duration	Error	Execution Mode	Device	Browser	Browser Channel	Browser Version	Headless
 Not Known	Not Known	Not Known	Not Known	Not Known	Not Known	Not Known	Not Known	Not Known	Not Known	Not Known	Not Known	Not Known	Not Known	Not Known	Not Known	Not Known	Not Known	Not Known
+
+
+PS C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\Athena_Automation\integration-tests> treee test-results
+test-results
+└── run-2026-11-12T12-49-07-769Z
+    ├── allure
+    │   └── results
+    │       ├── 41c00a45-1ab1-4e51-8a21-a45624dee311-result.json
+    │       ├── f90c976d-d185-4247-88eb-33791abf8533-attachment.md
+    │       └── ffe89e99-6828-45a2-ac90-7d8ee37cf007-attachment.png
+    ├── artifacts
+    │   ├── Regression-Britannia_Hexa--3877c-i-Premier-Annual-Bri-Annual-chromium
+    │   │   ├── error-context.md
+    │   │   └── test-failed-1.png
+    │   └── screenshots
+    ├── common-job
+    ├── excel-report
+    │   └── evidence-report.xlsx
+    ├── junit
+    │   └── results.xml
+    └── playwright
+        ├── data
+        │   ├── 00180ade80f2e2513c1341e64e54cc5978a8d993.dat
+        │   ├── 29b987cac892214a8588105d053cb9b357767689.dat
+        │   ├── 3d1f802d4996b398405622678960e3d5dba4957f.md
+        │   ├── 4aec2f7e7a30f79cfc64bd1809ee59640bb2caaf.png
+        │   ├── 7b2ab447c026c3332f4d6b81a097b350dc50216d.dat
+        │   ├── 85dc9589bd7c17d3168ec53392500c694e436517.dat
+        │   └── ac4626ad738a43093f331d8c17b783732955ca78.dat
+        └── index.html
+PS C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\Athena_Automation\integration-tests>
