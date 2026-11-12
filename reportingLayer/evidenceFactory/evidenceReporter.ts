@@ -11,6 +11,8 @@ interface SchemaField {
     readonly field: string;
     readonly label: string;
     readonly order: number;
+    readonly type?: 'text' | 'hyperlink';
+    readonly linkText?: string;
 }
 
 interface SummarySection {

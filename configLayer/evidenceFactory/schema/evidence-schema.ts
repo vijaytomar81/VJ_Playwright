@@ -31,7 +31,7 @@ export const evidenceFields = [
     { field: 'endTime', label: 'End Time', order: 15 },
     { field: 'duration', label: 'Duration', order: 16 },
     { field: 'error', label: 'Error', order: 17 },
-    { field: 'screenshot', label: 'Screenshot', order: 18 },
+    { field: 'screenshot', label: 'Screenshot', order: 18, type: 'hyperlink', linkText: 'View Screenshot' },
 
     // Execution environment
     { field: 'executionMode', label: 'Execution Mode', order: 19 },

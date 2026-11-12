@@ -19,6 +19,8 @@ interface SchemaField {
     readonly field: string;
     readonly label: string;
     readonly order: number;
+    readonly type?: 'text' | 'hyperlink';
+    readonly linkText?: string;
 }
 
 interface SummarySection {
@@ -227,12 +229,43 @@ function createDetail(
         const row = index + 2;
 
         fields.forEach((field, column) => {
-            sheet.getCell(row, column + 1).value = cellValue(
-                detailValue(test, field.field),
-            );
+            const cell = sheet.getCell(row, column + 1);
+            const value = detailValue(test, field.field);
+
+            if (
+                field.type === 'hyperlink' &&
+                typeof value === 'string' &&
+                value.trim()
+            ) {
+                cell.value = {
+                    text: field.linkText ?? value,
+                    hyperlink: value.replace(/\\/g, '/'),
+                };
+            } else {
+                cell.value = cellValue(value);
+            }
         });
 
         styleDataRow(sheet, row, fields.length);
+
+        // Addinf Hyperlink style
+        fields.forEach((field, column) => {
+            if (field.type !== 'hyperlink') return;
+
+            const cell = sheet.getCell(row, column + 1);
+
+            if (
+                cell.value &&
+                typeof cell.value === 'object' &&
+                'hyperlink' in cell.value
+            ) {
+                cell.font = {
+                    ...cell.font,
+                    color: { argb: 'FF0563C1' },
+                    underline: true,
+                };
+            }
+        });
 
         if (statusColumn > 0) {
             const cell = sheet.getCell(row, statusColumn);
