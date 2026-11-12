@@ -1,3 +1,4 @@
+
 {
   "compilerOptions": {
     "target": "ES2022",
@@ -13,7 +14,8 @@
       "@pages/*": ["automationLayer/ferry/pages/*"],
       "@shared/*": ["automationLayer/insurance/shared/*"],
       "@lv/*": ["automationLayer/insurance/lv/*"],
-      "@ferry/*": ["automationLayer/insurance/ferry/*"]
+      "@ferry/*": ["automationLayer/insurance/ferry/*"],
+      "@baseTest": ["automationLayer/common/baseTest.ts"]
     },
     "noEmit": true
   },
