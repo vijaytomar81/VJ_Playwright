@@ -2,7 +2,7 @@ import { test as base, expect, type Page } from '@playwright/test';
 
 import { createHash } from 'node:crypto';
 import { existsSync, statSync } from 'node:fs';
-import { basename, join } from 'node:path';
+import { basename, join, relative } from 'node:path';
 
 import { initializeEvidenceRun } from '../../configLayer/evidenceFactory/evidenceRunDirectory';
 import { captureBrowserMetadata } from './browserMetadata';
@@ -149,6 +149,18 @@ export const test = base.extend({
                 fullPage: true,
                 timeout: 10000,
                 animations: 'disabled',
+            });
+
+            /*
+             * Adding Fullpage screenshpt details into test result.
+             */
+
+            testInfo.annotations.push({
+                type: 'screenshot',
+                description: relative(
+                    initializeEvidenceRun().excelReportDirectory,
+                    screenshotPath,
+                ).replace(/\\/g, '/'),
             });
 
             /*
