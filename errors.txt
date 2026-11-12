@@ -1,1 +1,1 @@
-Get-ChildItem -Recurse -File | Where-Object { $_.FullName -notmatch 'node_modules|test-results|package-lock\.json|\.git' } | Select-String -Pattern 'custom-html-reporter|custom-test-reports|playwright-report|allure-results|allure-report|results\.xml|run-|mkdirSync|rm -rf test-results'
+Property 'eachCell' does not exist on type 'Partial<Column>'.
