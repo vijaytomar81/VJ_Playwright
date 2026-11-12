@@ -59,7 +59,7 @@ function createRunPaths(
         screenshotsDirectory: join(artifactsDirectory, 'screenshots'),
         allureResultsDirectory: join(allureDirectory, 'results'),
         allureReportDirectory: join(allureDirectory, 'report'),
-        evidenceReportFile: join(excelReportDirectory, 'evidence-report.xlsx'),
+        evidenceReportFile: join(excelReportDirectory, 'evidence-report-${runId}.xlsx'),
         junitFile: join(junitDirectory, 'results.xml'),
     };
 }
