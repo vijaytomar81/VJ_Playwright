@@ -1,13 +1,3 @@
-PS C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\Athena_Automation\VJ_Playwright> npm run pom:create -- `
->>   --connectCdp="$CDP" `
->>   --brand="AZO" `
->>   --channel="DJ" `
->>   --product="Motor" `
->>   --page-name="Login Page"
-
-> allianz-automation@1.0.0 pom:create
-> tsx tools/pom-generator/cli/pom-create.cli.ts --connectCdp=ws://localhost:9222/devtools/browser/*** --brand=AZO --channel=DJ --product=Motor --page-name=Login Page
-
-
-POM CREATE failed: Cannot read properties of undefined (reading 'tagName')
-PS C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\Athena_Automation\VJ_Playwright>
+> git stash push -u -m migrate to pom-automation
+warning: failed to remove apiIntegration/agentPortal/payment/invoices: Permission denied
+warning: failed to remove apiIntegration/backdating: Permission denied
