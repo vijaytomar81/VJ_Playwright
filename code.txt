@@ -3,3 +3,32 @@ import { test } from '@playwright/test';
 
 To:
 import { test } from '@baseTest';
+
+
+
+$old = "import { test } from '@playwright/test';"
+$new = "import { test } from '@baseTest';"
+
+$files = @(Get-ChildItem -Path . -Filter "*.spec.ts" -File -Recurse)
+
+$updated = 0
+
+foreach ($file in $files) {
+    $content = [System.IO.File]::ReadAllText($file.FullName)
+
+    if ($content.Contains($old)) {
+        $content = $content.Replace($old, $new)
+        [System.IO.File]::WriteAllText($file.FullName, $content)
+        $updated++
+    }
+}
+
+$total = $files.Count
+$remaining = $total - $updated
+
+Write-Host ""
+Write-Host "========== Import Replacement Summary =========="
+Write-Host "Total .spec.ts Files : $total"
+Write-Host "Total Updated Files  : $updated"
+Write-Host "Total Remaining      : $remaining"
+Write-Host "================================================"
