@@ -4,7 +4,7 @@ import { test } from '@playwright/test';
 To:
 import { test } from '@baseTest';
 
-
+function prompt { "$(Split-Path (Get-Location) -Leaf)> " }
 
 $old = "import { test } from '@playwright/test';"
 $new = "import { test } from '@baseTest';"
