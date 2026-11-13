@@ -1,7 +1,41 @@
-========== Spec Import Replacement Summary ==========
-Total .spec.ts Files : 874
-Matching Import Files: 764
-Files Updated        : 764
-Files Skipped        : 110
-Files With Errors    : 0
-=====================================================
+PS C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\Athena_Automation\VJ_Playwright> npx tsc --noEMit
+tsconfig.json:5:25 - error TS5108: Option 'moduleResolution=node10' has been removed. Please remove it from your configuration.
+
+5     "moduleResolution": "node",
+                          ~~~~~~
+
+tsconfig.json:13:5 - error TS5102: Option 'baseUrl' has been removed. Please remove it from your configuration.
+  Use '"paths": {"*": ["./*"]}' instead.
+
+13     "baseUrl": "./",
+       ~~~~~~~~~
+
+tsconfig.json:16:9 - error TS5090: Non-relative paths are not allowed. Did you forget a leading './'?
+
+16         "automationLayer/ferry/pages/*"
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+tsconfig.json:19:9 - error TS5090: Non-relative paths are not allowed. Did you forget a leading './'?
+
+19         "automationLayer/insurance/shared/*"
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+tsconfig.json:22:9 - error TS5090: Non-relative paths are not allowed. Did you forget a leading './'?
+
+22         "automationLayer/insurance/lv/*"
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+tsconfig.json:25:9 - error TS5090: Non-relative paths are not allowed. Did you forget a leading './'?
+
+25         "automationLayer/insurance/ferry/*"
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+tsconfig.json:28:9 - error TS5090: Non-relative paths are not allowed. Did you forget a leading './'?
+
+28         "automationLayer/common/baseTest.ts"
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+Found 7 errors in the same file, starting at: tsconfig.json:5
+
+PS C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\Athena_Automation\VJ_Playwright> 
