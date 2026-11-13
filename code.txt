@@ -7,28 +7,30 @@ import { test } from '@baseTest';
 function prompt { "$(Split-Path (Get-Location) -Leaf)> " }
 
 
-$old = "import { test } from '@playwright/test';"
-$new = "import { test } from '@baseTest';"
 
-$updated = 0
+$excluded = @(
+    'node_modules',
+    '.git',
+    'test-results',
+    'playwright-report',
+    'allure-results',
+    'allure-report'
+)
 
-foreach ($file in $files) {
-    $content = [System.IO.File]::ReadAllText($file.FullName)
+function Get-SpecCount {
+    param([string]$Path)
 
-    if ($content.Contains($old)) {
-        $content = $content.Replace($old, $new)
-        [System.IO.File]::WriteAllText($file.FullName, $content)
-        $updated++
+    $count = @([System.IO.Directory]::EnumerateFiles($Path, '*.spec.ts')).Count
+
+    foreach ($directory in [System.IO.Directory]::EnumerateDirectories($Path)) {
+        if ([System.IO.Path]::GetFileName($directory) -notin $excluded) {
+            $count += Get-SpecCount -Path $directory
+        }
     }
+
+    return $count
 }
 
-$total = $files.Count
-$remaining = $total - $updated
+$total = Get-SpecCount -Path (Get-Location).Path
 
-Write-Host ""
-Write-Host "========== Import Replacement Summary =========="
 Write-Host "Total .spec.ts Files : $total"
-Write-Host "Total Updated Files  : $updated"
-Write-Host "Total Not Updated    : $remaining"
-Write-Host "================================================"
-
