@@ -4,3 +4,23 @@ Matching Import Files: 601
 Other Spec Files     : 273
 Files Not Read       : 0
 =========================================
+
+
+
+$example = $files | Where-Object {
+    $longPath = '\\?\' + $_
+    $content = [System.IO.File]::ReadAllText($longPath)
+
+    -not $content.Contains($target)
+} | Select-Object -First 1
+
+Write-Host ""
+Write-Host "========== Other Spec File Example =========="
+
+if ($example) {
+    Write-Host "File: $example"
+} else {
+    Write-Host "No other spec files found."
+}
+
+Write-Host "============================================="
