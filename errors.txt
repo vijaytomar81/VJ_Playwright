@@ -1,45 +1,23 @@
-integration-tests> $files = @(Get-ChildItem -Path . -Filter "*.spec.ts" -File -Recurse)
->> $total = $files.Count
->> Write-Host "Total .spec.ts Files : $total"
-Get-ChildItem : Could not find a part of the path 'C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\Athena_Automation\integration-tests\node_modules\typescript-eslint\node_modules\@typescript-eslint\e
-slint-plugin\node_modules\@typescript-eslint\type-utils\node_modules\@typescript-eslint\typescript-estree'.
-At line:1 char:12
-+ $files = @(Get-ChildItem -Path . -Filter "*.spec.ts" -File -Recurse)
-+            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    + CategoryInfo          : ReadError: (C:\Users\tp7070...pescript-estree:String) [Get-ChildItem], DirectoryNotFoundException
-    + FullyQualifiedErrorId : DirIOError,Microsoft.PowerShell.Commands.GetChildItemCommand
+Exception calling "ReadAllText" with "1" argument(s): "Could not find a part of the path 'C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\Athena_Automation\integration-tests\automationLayer\ferry\tes
+ts\SmokeTests\DA+Annual_Policy\MonthlyPayment\Customer_Portal\Smoke_TC69_Audi_DA+AnnualPolicy_MonthlyPayment_Essentials_Customer-Portal.spec.ts'."
+At line:30 char:9
++         [System.IO.File]::ReadAllText($_).Contains($target)
++         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (:) [], MethodInvocationException
+    + FullyQualifiedErrorId : DirectoryNotFoundException
  
-Get-ChildItem : Could not find a part of the path 'C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\Athena_Automation\integration-tests\node_modules\typescript-eslint\node_modules\@typescript-eslint\p
-arser\node_modules\@typescript-eslint\typescript-estree\node_modules\@typescript-eslint\project-service'.
-At line:1 char:12
-+ $files = @(Get-ChildItem -Path . -Filter "*.spec.ts" -File -Recurse)
-+            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    + CategoryInfo          : ReadError: (C:\Users\tp7070...project-service:String) [Get-ChildItem], DirectoryNotFoundException
-    + FullyQualifiedErrorId : DirIOError,Microsoft.PowerShell.Commands.GetChildItemCommand
+Exception calling "ReadAllText" with "1" argument(s): "Could not find a part of the path 'C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\Athena_Automation\integration-tests\automationLayer\ferry\tes
+ts\SmokeTests\DA+Annual_Policy\MonthlyPayment\Customer_Portal\Smoke_TC70_Cupra_DA+AnnualPolicy_MonthlyPayment_Essentials_Customer-Portal.spec.ts'."
+At line:30 char:9
++         [System.IO.File]::ReadAllText($_).Contains($target)
++         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (:) [], MethodInvocationException
+    + FullyQualifiedErrorId : DirectoryNotFoundException
  
-Get-ChildItem : Could not find a part of the path 'C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\Athena_Automation\integration-tests\node_modules\typescript-eslint\node_modules\@typescript-eslint\p
-arser\node_modules\@typescript-eslint\typescript-estree\node_modules\@typescript-eslint\tsconfig-utils'.
-At line:1 char:12
-+ $files = @(Get-ChildItem -Path . -Filter "*.spec.ts" -File -Recurse)
-+            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    + CategoryInfo          : ReadError: (C:\Users\tp7070...\tsconfig-utils:String) [Get-ChildItem], DirectoryNotFoundException
-    + FullyQualifiedErrorId : DirIOError,Microsoft.PowerShell.Commands.GetChildItemCommand
- 
-Get-ChildItem : Could not find a part of the path 'C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\Athena_Automation\integration-tests\node_modules\typescript-eslint\node_modules\@typescript-eslint\u
-tils\node_modules\@typescript-eslint\typescript-estree\node_modules\@typescript-eslint\project-service'.
-At line:1 char:12
-+ $files = @(Get-ChildItem -Path . -Filter "*.spec.ts" -File -Recurse)
-+            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    + CategoryInfo          : ReadError: (C:\Users\tp7070...project-service:String) [Get-ChildItem], DirectoryNotFoundException
-    + FullyQualifiedErrorId : DirIOError,Microsoft.PowerShell.Commands.GetChildItemCommand
- 
-Get-ChildItem : Could not find a part of the path 'C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\Athena_Automation\integration-tests\node_modules\typescript-eslint\node_modules\@typescript-eslint\u
-tils\node_modules\@typescript-eslint\typescript-estree\node_modules\@typescript-eslint\tsconfig-utils'.
-At line:1 char:12
-+ $files = @(Get-ChildItem -Path . -Filter "*.spec.ts" -File -Recurse)
-+            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    + CategoryInfo          : ReadError: (C:\Users\tp7070...\tsconfig-utils:String) [Get-ChildItem], DirectoryNotFoundException
-    + FullyQualifiedErrorId : DirIOError,Microsoft.PowerShell.Commands.GetChildItemCommand
- 
+
+========== Spec Import Summary ==========
 Total .spec.ts Files : 874
+Matching Import Files: 391
+Other Spec Files     : 483
+=========================================
 integration-tests> 
