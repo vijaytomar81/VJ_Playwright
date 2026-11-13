@@ -3,105 +3,131 @@ import path from 'node:path';
 import ExcelJS from 'exceljs';
 
 interface TestCaseData {
-  [fieldName: string]: any;
+    [fieldName: string]: any;
 }
 
 interface SheetData {
-  [testCaseName: string]: TestCaseData;
+    [testCaseName: string]: TestCaseData;
 }
 
 function ensureOutputFolder(outputFolder: string): void {
-  if (!fs.existsSync(outputFolder)) {
-    fs.mkdirSync(outputFolder, { recursive: true });
-  }
+    if (!fs.existsSync(outputFolder)) {
+        fs.mkdirSync(outputFolder, { recursive: true });
+    }
 }
 
 const FIELD_CODE_LEGEND_NAMES = ['ScriptName', 'JSON object'];
 
 function normalizeHeader(value: any): string {
-  if (typeof value !== 'string') return '';
-  return value.replace(/\s+/g, ' ').trim().toLowerCase();
+    if (typeof value !== 'string') return '';
+    return value.replace(/\s+/g, ' ').trim().toLowerCase();
 }
 
-function transformToTestCaseStructure(sheet: WorkSheet): SheetData {
-  const rawData: any[][] = XLSX.utils.sheet_to_json(sheet, { header: 1 });
+function cellValue(cell: ExcelJS.Cell): any {
+    const value = cell.value;
 
-  const headerRow: any[] = rawData[0];
-  const testCases: SheetData = {};
-  const totalColumns = headerRow.length;
+    if (value === null || value === undefined) return undefined;
+    if (value instanceof Date) return value.toISOString();
+    if (typeof value === 'object') {
+        if ('result' in value) return value.result ?? undefined;
+        if ('text' in value) return value.text;
+        if ('richText' in value) return value.richText.map((part) => part.text).join('');
+        if ('error' in value) return value.error;
+    }
 
-  const normalizedLegendNames = FIELD_CODE_LEGEND_NAMES.map(normalizeHeader);
+    return value;
+}
 
-  const fieldNameColumnIndex = headerRow.findIndex((header) =>
-    normalizedLegendNames.includes(normalizeHeader(header))
-  );
+function transformToTestCaseStructure(sheet: ExcelJS.Worksheet): SheetData {
+    const rawData: any[][] = [];
 
-  if (fieldNameColumnIndex === -1) {
-    throw new Error(
-      `Could not find a field-code column (expected one of: ${FIELD_CODE_LEGEND_NAMES.join(', ')}) in header row: ${JSON.stringify(headerRow)}`
+    sheet.eachRow({ includeEmpty: false }, (row, rowNumber) => {
+        const values: any[] = [];
+
+        for (let columnIndex = 1; columnIndex <= row.cellCount; columnIndex += 1) {
+            values[columnIndex - 1] = cellValue(row.getCell(columnIndex));
+        }
+
+        rawData[rowNumber - 1] = values;
+    });
+
+    const headerRow: any[] = rawData[0] ?? [];
+    const testCases: SheetData = {};
+    const totalColumns = headerRow.length;
+
+    const normalizedLegendNames = FIELD_CODE_LEGEND_NAMES.map(normalizeHeader);
+
+    const fieldNameColumnIndex = headerRow.findIndex((header) =>
+        normalizedLegendNames.includes(normalizeHeader(header))
     );
-  }
 
-  // Any column(s) to the LEFT of the field-code column (e.g. "Test Case Name" / questions)
-  // are simply never read - real test case data always starts right after the field-code column.
-  const testCaseStartColumn = fieldNameColumnIndex + 1;
+    if (fieldNameColumnIndex === -1) {
+        throw new Error(
+            `Could not find a field-code column (expected one of: ${FIELD_CODE_LEGEND_NAMES.join(', ')}) in header row: ${JSON.stringify(headerRow)}`
+        );
+    }
 
-  for (let columnIndex = testCaseStartColumn; columnIndex < totalColumns; columnIndex += 1) {
-    const testCaseName = headerRow[columnIndex];
-    if (!testCaseName) continue;
-    testCases[testCaseName] = {};
-  }
-
-  for (let rowIndex = 1; rowIndex < rawData.length; rowIndex += 1) {
-    const row = rawData[rowIndex];
-    const fieldName = row[fieldNameColumnIndex]; // now correctly reads column B ("KnowRegNo", "VRN", etc.)
-    if (!fieldName) continue;
+    // Any column(s) to the LEFT of the field-code column (e.g. "Test Case Name" / questions)
+    // are simply never read - real test case data always starts right after the field-code column.
+    const testCaseStartColumn = fieldNameColumnIndex + 1;
 
     for (let columnIndex = testCaseStartColumn; columnIndex < totalColumns; columnIndex += 1) {
-      const testCaseName = headerRow[columnIndex];
-      if (!testCaseName) continue;
-      testCases[testCaseName][fieldName] = row[columnIndex];
+        const testCaseName = headerRow[columnIndex];
+        if (!testCaseName) continue;
+        testCases[testCaseName] = {};
     }
-  }
 
-  return testCases;
+    for (let rowIndex = 1; rowIndex < rawData.length; rowIndex += 1) {
+        const row = rawData[rowIndex];
+        if (!row) continue;
+        const fieldName = row[fieldNameColumnIndex]; // now correctly reads column B ("KnowRegNo", "VRN", etc.)
+        if (!fieldName) continue;
+
+        for (let columnIndex = testCaseStartColumn; columnIndex < totalColumns; columnIndex += 1) {
+            const testCaseName = headerRow[columnIndex];
+            if (!testCaseName) continue;
+            testCases[testCaseName][fieldName] = row[columnIndex];
+        }
+    }
+
+    return testCases;
 }
 
-export function getAllData(excelFile: string, outputFolder: string): Record<string, SheetData> {
-  ensureOutputFolder(outputFolder);
+export async function getAllData(excelFile: string, outputFolder: string): Promise<Record<string, SheetData>> {
+    ensureOutputFolder(outputFolder);
 
-  console.log('Reading Excel from:', excelFile);
+    console.log('Reading Excel from:', excelFile);
 
-  if (!fs.existsSync(excelFile)) {
-    throw new Error(`Excel file not found: ${excelFile}`);
-  }
-
-  const workbook = XLSX.readFile(excelFile);
-  const allSheets: Record<string, SheetData> = {};
-
-  workbook.SheetNames.forEach((sheetName) => {
-    const sheet = workbook.Sheets[sheetName];
-
-    const structuredData = transformToTestCaseStructure(sheet);
-    allSheets[sheetName] = structuredData;
-
-    const jsonFilePath = path.join(outputFolder, `${sheetName}.json`);
-
-    let existingData: SheetData = {};
-
-    if (fs.existsSync(jsonFilePath)) {
-      existingData = JSON.parse(fs.readFileSync(jsonFilePath, 'utf8'));
+    if (!fs.existsSync(excelFile)) {
+        throw new Error(`Excel file not found: ${excelFile}`);
     }
 
-    const dataChanged = JSON.stringify(existingData) !== JSON.stringify(structuredData);
+    const workbook = new ExcelJS.Workbook();
+    await workbook.xlsx.readFile(excelFile);
+    const allSheets: Record<string, SheetData> = {};
 
-    if (dataChanged) {
-      fs.writeFileSync(jsonFilePath, JSON.stringify(structuredData, null, 2));
-      console.log(`Updated JSON for sheet: ${sheetName}`);
-    } else {
-      console.log(`No changes for sheet: ${sheetName}`);
+    for (const sheet of workbook.worksheets) {
+        const sheetName = sheet.name;
+        const structuredData = transformToTestCaseStructure(sheet);
+        allSheets[sheetName] = structuredData;
+
+        const jsonFilePath = path.join(outputFolder, `${sheetName}.json`);
+
+        let existingData: SheetData = {};
+
+        if (fs.existsSync(jsonFilePath)) {
+            existingData = JSON.parse(fs.readFileSync(jsonFilePath, 'utf8'));
+        }
+
+        const dataChanged = JSON.stringify(existingData) !== JSON.stringify(structuredData);
+
+        if (dataChanged) {
+            fs.writeFileSync(jsonFilePath, JSON.stringify(structuredData, null, 2));
+            console.log(`Updated JSON for sheet: ${sheetName}`);
+        } else {
+            console.log(`No changes for sheet: ${sheetName}`);
+        }
     }
-  });
 
-  return allSheets;
+    return allSheets;
 }
