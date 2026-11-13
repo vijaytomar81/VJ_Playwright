@@ -8,4 +8,55 @@ function prompt { "$(Split-Path (Get-Location) -Leaf)> " }
 
 
 
-$target = "from '@playwright/test';"; $excluded = @('node_modules', '.git', 'test-results', 'playwright-report', 'allure-results', 'allure-report'); function Get-SpecFiles { param([string]$Path) foreach ($file in [System.IO.Directory]::EnumerateFiles($Path, '*.spec.ts')) { $file }; foreach ($dir in [System.IO.Directory]::EnumerateDirectories($Path)) { if ([System.IO.Path]::GetFileName($dir) -notin $excluded) { Get-SpecFiles -Path $dir } } }; Get-SpecFiles -Path (Get-Location).Path | Where-Object { $content = [System.IO.File]::ReadAllText(('\\?\' + $_)); -not $content.Contains($target) } | Select-Object -First 5
+
+$target = "from '@playwright/test';"
+
+$excluded = @(
+    'node_modules',
+    '.git',
+    'test-results',
+    'playwright-report',
+    'allure-results',
+    'allure-report'
+)
+
+function Get-SpecFiles {
+    param([string]$Path)
+
+    foreach ($file in [System.IO.Directory]::EnumerateFiles($Path, '*.spec.ts')) {
+        $file
+    }
+
+    foreach ($directory in [System.IO.Directory]::EnumerateDirectories($Path)) {
+        if ([System.IO.Path]::GetFileName($directory) -notin $excluded) {
+            Get-SpecFiles -Path $directory
+        }
+    }
+}
+
+$files = @(Get-SpecFiles -Path (Get-Location).Path)
+
+$matched = 0
+$errors = 0
+
+foreach ($file in $files) {
+    try {
+        $longPath = '\\?\' + $file
+        $content = [System.IO.File]::ReadAllText($longPath)
+
+        if ($content.Contains($target)) {
+            $matched++
+        }
+    }
+    catch {
+        $errors++
+        Write-Warning "Could not read: $file"
+    }
+}
+
+Write-Host ""
+Write-Host "========== Spec Import Summary =========="
+Write-Host "Total .spec.ts Files : $($files.Count)"
+Write-Host "Matching Import Files: $matched"
+Write-Host "Files Not Read       : $errors"
+Write-Host "========================================="
