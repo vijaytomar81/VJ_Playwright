@@ -1,22 +1,20 @@
-tp70707@AVD-HEX-73 MINGW64 ~/OneDrive - Allianz/My Documents/Automation/Athena_Automation/VJ_Playwright (master)
-$ git status
-On branch master
-Changes not staged for commit:
-  (use "git add/rm <file>..." to update what will be committed)
-  (use "git restore <file>..." to discard changes in working directory)
-        deleted:    automationLayer/tests/FerryTest.spec.ts
-        deleted:    automationLayer/tests/testOne.spec.ts
-        modified:   configLayer/brand.config.ts
-        modified:   package-lock.json
-        modified:   package.json
-        modified:   tools/pom-generator/scanner/element-metadata-reader.ts
+C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\Athena_Automation\VJ_Playwright> $profile = Join-Path $env:TEMP ("edge-cdp-" + (Get-Date -Format "yyyyMMdd-HHmmss")); `
+>> Start-Process "C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe" "--remote-debugging-port=9222 --user-data-dir=$profile"; `
+>> Start-Sleep -Seconds 2; `
+>> $CDP = (Invoke-RestMethod http://localhost:9222/json/version).webSocketDebuggerUrl;
+PS C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\Athena_Automation\VJ_Playwright> npm run pom:create -- `
+>>   --connectCdp="$CDP" `
+>>   --brand="AZO" `
+>>   --channel="CTM" `
+>>   --product="Motor" `
+>>   --page-name="Policyholder Details"
 
-no changes added to commit (use "git add" and/or "git commit -a")
+> allianz-automation@1.0.0 pom:create
+> tsx tools/pom-generator/cli/pom-create.cli.ts --connectCdp=ws://localhost:9222/devtools/browser/*** --brand=AZO --channel=CTM --product=Motor --page-name=Policyholder Details
 
-tp70707@AVD-HEX-73 MINGW64 ~/OneDrive - Allianz/My Documents/Automation/Athena_Automation/VJ_Playwright (master)
-$ git stash list
-stash@{0}: On master: mmm
-stash@{1}: On master: migrate to pom-automation
 
-tp70707@AVD-HEX-73 MINGW64 ~/OneDrive - Allianz/My Documents/Automation/Athena_Automation/VJ_Playwright (master)
-$ 
+POM CREATE failed: elementHandle.evaluate: ReferenceError: __name is not defined
+    at eval (eval at evaluate (:311:30), <anonymous>:1:120)
+    at UtilityScript.evaluate (<anonymous>:313:16)
+    at UtilityScript.<anonymous> (<anonymous>:1:44)
+PS C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\Athena_Automation\VJ_Playwright> 
