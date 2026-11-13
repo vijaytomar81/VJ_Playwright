@@ -1,5 +1,7 @@
-File: C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\Athena_Automation\integration-tests\automationLayer\insurance\ferry\automatedNavigation\agentPortal\motor\mta\annual\AddDriver.spec.ts
-
-import { indexServicingJourney } from '@ferry/automatedNavigation/servicingNavigation';
-
-indexServicingJourney('annual', 'addDriver', 'agentPortal');
+========== Spec Import Replacement Summary ==========
+Total .spec.ts Files : 874
+Matching Import Files: 764
+Files Updated        : 764
+Files Skipped        : 110
+Files With Errors    : 0
+=====================================================
