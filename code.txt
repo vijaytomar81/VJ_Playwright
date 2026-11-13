@@ -8,7 +8,7 @@ function prompt { "$(Split-Path (Get-Location) -Leaf)> " }
 
 
 
-$target = "import { test } from '@playwright/test';"
+$target = "from '@playwright/test';"
 
 $excluded = @(
     'node_modules',
