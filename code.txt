@@ -10,6 +10,7 @@ function prompt { "$(Split-Path (Get-Location) -Leaf)> " }
 
 
 $target = "from '@playwright/test';"
+$replacement = "from '@baseTest';"
 
 $excluded = @(
     'node_modules',
@@ -37,26 +38,52 @@ function Get-SpecFiles {
 $files = @(Get-SpecFiles -Path (Get-Location).Path)
 
 $matched = 0
+$replaced = 0
 $errors = 0
+$skipped = 0
 
 foreach ($file in $files) {
     try {
         $longPath = '\\?\' + $file
-        $content = [System.IO.File]::ReadAllText($longPath)
+        $bytes = [System.IO.File]::ReadAllBytes($longPath)
+
+        $hasBom = $bytes.Length -ge 3 -and
+            $bytes[0] -eq 0xEF -and
+            $bytes[1] -eq 0xBB -and
+            $bytes[2] -eq 0xBF
+
+        $utf8 = New-Object System.Text.UTF8Encoding($false, $true)
+        $content = $utf8.GetString($bytes)
 
         if ($content.Contains($target)) {
             $matched++
+
+            $updatedContent = $content.Replace($target, $replacement)
+
+            $encoding = New-Object System.Text.UTF8Encoding($hasBom)
+            [System.IO.File]::WriteAllText(
+                $longPath,
+                $updatedContent,
+                $encoding
+            )
+
+            $replaced++
+        }
+        else {
+            $skipped++
         }
     }
     catch {
         $errors++
-        Write-Warning "Could not read: $file"
+        Write-Warning "Could not process: $file - $($_.Exception.Message)"
     }
 }
 
 Write-Host ""
-Write-Host "========== Spec Import Summary =========="
+Write-Host "========== Spec Import Replacement Summary =========="
 Write-Host "Total .spec.ts Files : $($files.Count)"
 Write-Host "Matching Import Files: $matched"
-Write-Host "Files Not Read       : $errors"
-Write-Host "========================================="
+Write-Host "Files Updated        : $replaced"
+Write-Host "Files Skipped        : $skipped"
+Write-Host "Files With Errors    : $errors"
+Write-Host "====================================================="
