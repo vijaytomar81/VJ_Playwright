@@ -1,5 +1,7 @@
 
-import type { ElementHandle } from '@playwright/test';
+import type {
+    ElementHandle,
+} from '@playwright/test';
 
 export interface RawElementMetadata {
     tagName: string;
@@ -31,14 +33,13 @@ export class ElementMetadataReader {
             }
 
             /*
-             * Function expressions assigned to const variables
-             * avoid the named helper declarations that can
-             * trigger esbuild's __name transformation.
+             * Normalize DOM attribute values.
+             * Remove repeated whitespace and trim.
              */
-
-            const normalize = function (
+            const normalize = (
                 value: string | null | undefined,
-            ): string | undefined {
+            ): string | undefined => {
+
                 const normalized = value
                     ?.replace(/\s+/g, ' ')
                     .trim();
@@ -46,9 +47,12 @@ export class ElementMetadataReader {
                 return normalized || undefined;
             };
 
-            const getLabel = function (
+            /*
+             * Extract associated label text.
+             */
+            const getLabel = (
                 target: HTMLElement,
-            ): string | undefined {
+            ): string | undefined => {
 
                 if (
                     target instanceof HTMLInputElement ||
@@ -71,7 +75,11 @@ export class ElementMetadataReader {
                     }
                 }
 
-                const parentLabel = target.closest('label');
+                /*
+                 * Support elements wrapped in a label.
+                 */
+                const parentLabel =
+                    target.closest('label');
 
                 if (parentLabel) {
                     return normalize(
@@ -82,9 +90,12 @@ export class ElementMetadataReader {
                 return undefined;
             };
 
-            const getContext = function (
+            /*
+             * Extract semantic container context.
+             */
+            const getContext = (
                 target: HTMLElement,
-            ): string | undefined {
+            ): string | undefined => {
 
                 const container = target.closest(
                     'fieldset, section, form, article',
@@ -103,8 +114,14 @@ export class ElementMetadataReader {
                 );
             };
 
-            const style = window.getComputedStyle(node);
-            const rect = node.getBoundingClientRect();
+            /*
+             * Determine element visibility.
+             */
+            const style =
+                window.getComputedStyle(node);
+
+            const rect =
+                node.getBoundingClientRect();
 
             const visible =
                 style.display !== 'none' &&
@@ -113,43 +130,56 @@ export class ElementMetadataReader {
                 rect.width > 0 &&
                 rect.height > 0;
 
+            /*
+             * Return raw DOM metadata.
+             * Locator generation remains the
+             * responsibility of LocatorBuilder.
+             */
             return {
-                tagName: node.tagName.toLowerCase(),
+                tagName:
+                    node.tagName.toLowerCase(),
 
                 inputType:
                     node instanceof HTMLInputElement
                         ? normalize(node.type)
                         : undefined,
 
-                role: normalize(
-                    node.getAttribute('role'),
-                ),
+                role:
+                    normalize(
+                        node.getAttribute('role'),
+                    ),
 
-                label: getLabel(node),
+                label:
+                    getLabel(node),
 
-                text: normalize(
-                    node.textContent,
-                ),
+                text:
+                    normalize(node.textContent),
 
-                id: normalize(node.id),
+                id:
+                    normalize(node.id),
 
-                name: normalize(
-                    node.getAttribute('name'),
-                ),
+                name:
+                    normalize(
+                        node.getAttribute('name'),
+                    ),
 
-                testId: normalize(
-                    node.getAttribute('data-testid'),
-                ),
+                testId:
+                    normalize(
+                        node.getAttribute('data-testid'),
+                    ),
 
-                placeholder: normalize(
-                    node.getAttribute('placeholder'),
-                ),
+                placeholder:
+                    normalize(
+                        node.getAttribute('placeholder'),
+                    ),
 
-                ariaLabel: normalize(
-                    node.getAttribute('aria-label'),
-                ),
+                ariaLabel:
+                    normalize(
+                        node.getAttribute('aria-label'),
+                    ),
 
-                context: getContext(node),
+                context:
+                    getContext(node),
 
                 visible,
             };

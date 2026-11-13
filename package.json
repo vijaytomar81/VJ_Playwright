@@ -1,9 +1,10 @@
+
 {
   "name": "allianz-automation",
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-    "pom:create": "tsx tools/pom-generator/cli/pom-create.cli.ts"
+    "pom:create": "tsc -p tools/pom-generator/tsconfig.build.json && node dist/tools/pom-generator/cli/pom-create.cli.js"
   },
   "keywords": [],
   "author": "",

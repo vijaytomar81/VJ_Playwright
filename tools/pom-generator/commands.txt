@@ -5,6 +5,8 @@ $CDP = (Invoke-RestMethod http://localhost:9222/json/version).webSocketDebuggerU
 
 $CDP
 
+npx tsc -p tools/pom-generator/tsconfig.build.json
+
 npm run pom:create -- `
   --connectCdp="$CDP" `
   --brand="AZO" `
