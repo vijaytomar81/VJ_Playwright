@@ -8,6 +8,7 @@ function prompt { "$(Split-Path (Get-Location) -Leaf)> " }
 
 
 
+
 $excluded = @(
     'node_modules',
     '.git',
@@ -17,20 +18,33 @@ $excluded = @(
     'allure-report'
 )
 
-function Get-SpecCount {
+$target = "import { test } from '@playwright/test';"
+
+function Get-SpecFiles {
     param([string]$Path)
 
-    $count = @([System.IO.Directory]::EnumerateFiles($Path, '*.spec.ts')).Count
+    foreach ($file in [System.IO.Directory]::EnumerateFiles($Path, '*.spec.ts')) {
+        $file
+    }
 
     foreach ($directory in [System.IO.Directory]::EnumerateDirectories($Path)) {
         if ([System.IO.Path]::GetFileName($directory) -notin $excluded) {
-            $count += Get-SpecCount -Path $directory
+            Get-SpecFiles -Path $directory
         }
     }
-
-    return $count
 }
 
-$total = Get-SpecCount -Path (Get-Location).Path
+$files = @(Get-SpecFiles -Path (Get-Location).Path)
 
-Write-Host "Total .spec.ts Files : $total"
+$matched = @(
+    $files | Where-Object {
+        [System.IO.File]::ReadAllText($_).Contains($target)
+    }
+).Count
+
+Write-Host ""
+Write-Host "========== Spec Import Summary =========="
+Write-Host "Total .spec.ts Files : $($files.Count)"
+Write-Host "Matching Import Files: $matched"
+Write-Host "Other Spec Files     : $($files.Count - $matched)"
+Write-Host "========================================="
