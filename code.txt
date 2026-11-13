@@ -63,3 +63,37 @@ Write-Host "Matching Import Files: $matched"
 Write-Host "Other Spec Files     : $other"
 Write-Host "Files Not Read       : $errors"
 Write-Host "========================================="
+
+
+=======
+
+
+$target = "from '@playwright/test';"
+
+$example = $null
+
+foreach ($file in $files) {
+    try {
+        $longPath = '\\?\' + $file
+        $content = [System.IO.File]::ReadAllText($longPath)
+
+        if (-not $content.Contains($target)) {
+            $example = $file
+            break
+        }
+    }
+    catch {
+        Write-Warning "Could not read: $file"
+    }
+}
+
+Write-Host ""
+Write-Host "========== Other Spec File Example =========="
+
+if ($example) {
+    Write-Host "File: $example"
+} else {
+    Write-Host "No Other Spec Files found."
+}
+
+Write-Host "============================================="
