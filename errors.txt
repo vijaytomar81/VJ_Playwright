@@ -1,25 +1,29 @@
-PS C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\Athena_Automation\VJ_Playwright> npx tsc --version
-Version 7.0.2
-PS C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\Athena_Automation\VJ_Playwright> npm install install --save-dev typescript@5.9
+PS C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\Athena_Automation\VJ_Playwright> npx tsc --noEmit
+apiIntegration/gmail/gmailHelper.ts:1:42 - error TS2307: Cannot find module 'mailparser' or its corresponding type declarations.
 
-added 1 package, removed 1 package, changed 1 package, and audited 162 packages in 7s
+1 import { simpleParser, ParsedMail } from 'mailparser';
+                                           ~~~~~~~~~~~~
 
-17 packages are looking for funding
-  run `npm fund` for details
+apiIntegration/gmail/gmailHelper.ts:2:34 - error TS2307: Cannot find module 'googleapis' or its corresponding type declarations.
 
-5 moderate severity vulnerabilities
+2 import { google, gmail_v1 } from 'googleapis';
+                                   ~~~~~~~~~~~~
 
-To address issues that do not require attention, run:
-  npm audit fix
+automationLayer/insurance/unitTests/workerDependencies.test.ts:5:39 - error TS2307: Cannot find module 'googleapis' or its corresponding type declarations.
 
-To address all issues (including breaking changes), run:
-  npm audit fix --force
+5 import { google, type gmail_v1 } from 'googleapis';
+                                        ~~~~~~~~~~~~
 
-Run `npm audit` for details.
-npm warn install-scripts 1 package has install scripts not yet covered by allowScripts:
-npm warn install-scripts   esbuild@0.28.2 (postinstall: node install.js)
-npm warn install-scripts
-npm warn install-scripts Run `npm install-scripts ls` to review, or `npm install-scripts approve <pkg>` to allow.
-PS C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\Athena_Automation\VJ_Playwright> npx tsc --version                            
-Version 5.9.3
-PS C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\Athena_Automation\VJ_Playwright> 
+dataLayer/dataGenerator/excelToJson.ts:3:33 - error TS2307: Cannot find module 'xlsx' or its corresponding type declarations.
+
+3 import XLSX, { WorkSheet } from 'xlsx';
+                                  ~~~~~~
+
+
+Found 4 errors in 3 files.
+
+Errors  Files
+     2  apiIntegration/gmail/gmailHelper.ts:1
+     1  automationLayer/insurance/unitTests/workerDependencies.test.ts:5
+     1  dataLayer/dataGenerator/excelToJson.ts:3
+PS C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\Athena_Automation\VJ_Playwright>
