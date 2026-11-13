@@ -8,6 +8,7 @@ function prompt { "$(Split-Path (Get-Location) -Leaf)> " }
 
 
 
+$target = "import { test } from '@playwright/test';"
 
 $excluded = @(
     'node_modules',
@@ -17,8 +18,6 @@ $excluded = @(
     'allure-results',
     'allure-report'
 )
-
-$target = "import { test } from '@playwright/test';"
 
 function Get-SpecFiles {
     param([string]$Path)
@@ -36,15 +35,31 @@ function Get-SpecFiles {
 
 $files = @(Get-SpecFiles -Path (Get-Location).Path)
 
-$matched = @(
-    $files | Where-Object {
-        [System.IO.File]::ReadAllText($_).Contains($target)
+$matched = 0
+$errors = 0
+
+foreach ($file in $files) {
+    try {
+        $longPath = '\\?\' + $file
+        $content = [System.IO.File]::ReadAllText($longPath)
+
+        if ($content.Contains($target)) {
+            $matched++
+        }
     }
-).Count
+    catch {
+        $errors++
+        Write-Warning "Could not read: $file"
+    }
+}
+
+$total = $files.Count
+$other = $total - $matched - $errors
 
 Write-Host ""
 Write-Host "========== Spec Import Summary =========="
-Write-Host "Total .spec.ts Files : $($files.Count)"
+Write-Host "Total .spec.ts Files : $total"
 Write-Host "Matching Import Files: $matched"
-Write-Host "Other Spec Files     : $($files.Count - $matched)"
+Write-Host "Other Spec Files     : $other"
+Write-Host "Files Not Read       : $errors"
 Write-Host "========================================="
