@@ -1,41 +1,82 @@
-PS C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\Athena_Automation\VJ_Playwright> npx tsc --noEMit
-tsconfig.json:5:25 - error TS5108: Option 'moduleResolution=node10' has been removed. Please remove it from your configuration.
-
-5     "moduleResolution": "node",
-                          ~~~~~~
-
-tsconfig.json:13:5 - error TS5102: Option 'baseUrl' has been removed. Please remove it from your configuration.
-  Use '"paths": {"*": ["./*"]}' instead.
-
-13     "baseUrl": "./",
-       ~~~~~~~~~
-
-tsconfig.json:16:9 - error TS5090: Non-relative paths are not allowed. Did you forget a leading './'?
-
-16         "automationLayer/ferry/pages/*"
-           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-tsconfig.json:19:9 - error TS5090: Non-relative paths are not allowed. Did you forget a leading './'?
-
-19         "automationLayer/insurance/shared/*"
-           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-tsconfig.json:22:9 - error TS5090: Non-relative paths are not allowed. Did you forget a leading './'?
-
-22         "automationLayer/insurance/lv/*"
-           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-tsconfig.json:25:9 - error TS5090: Non-relative paths are not allowed. Did you forget a leading './'?
-
-25         "automationLayer/insurance/ferry/*"
-           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-tsconfig.json:28:9 - error TS5090: Non-relative paths are not allowed. Did you forget a leading './'?
-
-28         "automationLayer/common/baseTest.ts"
-           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-
-Found 7 errors in the same file, starting at: tsconfig.json:5
-
-PS C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\Athena_Automation\VJ_Playwright> 
+PS C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\Athena_Automation\VJ_Playwright> npx playwright install
+Removing unused browser at C:\Users\tp70707\AppData\Local\ms-playwright\chromium-1234
+Removing unused browser at C:\Users\tp70707\AppData\Local\ms-playwright\chromium-1248
+Removing unused browser at C:\Users\tp70707\AppData\Local\ms-playwright\chromium_headless_shell-1234
+Removing unused browser at C:\Users\tp70707\AppData\Local\ms-playwright\chromium_headless_shell-1248
+Removing unused browser at C:\Users\tp70707\AppData\Local\ms-playwright\ffmpeg-1013
+Downloading Chrome for Testing 153.0.8010.12 (playwright chromium v1243) from https://cdn.playwright.dev/builds/cft/153.0.8010.12/win64/chrome-win64.zip
+195.6 MiB [====================] 100% 0.0s
+Chrome for Testing 153.0.8010.12 (playwright chromium v1243) downloaded to C:\Users\tp70707\AppData\Local\ms-playwright\chromium-1243
+Downloading Chrome Headless Shell 153.0.8010.12 (playwright chromium-headless-shell v1243) from https://cdn.playwright.dev/builds/cft/153.0.8010.12/win64/chrome-headless-shell-win64.zip
+114.6 MiB [====================] 100% 0.0s
+Chrome Headless Shell 153.0.8010.12 (playwright chromium-headless-shell v1243) downloaded to C:\Users\tp70707\AppData\Local\ms-playwright\chromium_headless_shell-1243
+Downloading Firefox 155.0 (playwright firefox v1543) from https://cdn.playwright.dev/dbazure/download/playwright/builds/firefox/1543/firefox-win64.zip
+122 MiB [====================] 100% 0.0s
+Firefox 155.0 (playwright firefox v1543) downloaded to C:\Users\tp70707\AppData\Local\ms-playwright\firefox-1543
+Downloading WebKit 26.6 (playwright webkit v2359) from https://cdn.playwright.dev/dbazure/download/playwright/builds/webkit/2359/webkit-win64.zip
+Error: Request to https://playwright.download.prss.microsoft.com/dbazure/download/playwright/builds/webkit/2359/webkit-win64.zip timed out after 30000ms
+    at ClientRequest.<anonymous> (C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\Athena_Automation\VJ_Playwright\node_modules\playwright-core\lib\coreBundle.js:8793:15)
+    at ClientRequest.wrapper (node:events:639:12)
+    at ClientRequest.emit (node:events:514:28)
+    at TLSSocket.emitRequestTimeout (node:_http_client:1130:9)
+    at TLSSocket.wrapper (node:events:639:12)
+    at TLSSocket.emit (node:events:526:24)
+    at Socket._onTimeout (node:net:886:8)
+    at Timeout.onStreamTimeout (node:internal/stream_base_commons:242:10)
+    at listOnTimeout (node:internal/timers:687:11)
+    at process.processTimers (node:internal/timers:618:7)
+Downloading WebKit 26.6 (playwright webkit v2359) from https://playwright.download.prss.microsoft.com/dbazure/download/playwright/builds/webkit/2359/webkit-win64.zip
+Error: Request to https://playwright.download.prss.microsoft.com/dbazure/download/playwright/builds/webkit/2359/webkit-win64.zip timed out after 30000ms
+    at ClientRequest.<anonymous> (C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\Athena_Automation\VJ_Playwright\node_modules\playwright-core\lib\coreBundle.js:8793:15)
+    at ClientRequest.wrapper (node:events:639:12)
+    at ClientRequest.emit (node:events:514:28)
+    at TLSSocket.emitRequestTimeout (node:_http_client:1130:9)
+    at TLSSocket.wrapper (node:events:639:12)
+    at TLSSocket.emit (node:events:526:24)
+    at Socket._onTimeout (node:net:886:8)
+    at Timeout.onStreamTimeout (node:internal/stream_base_commons:242:10)
+    at listOnTimeout (node:internal/timers:687:11)
+    at process.processTimers (node:internal/timers:618:7)
+Downloading WebKit 26.6 (playwright webkit v2359) from https://cdn.playwright.dev/builds/webkit/2359/webkit-win64.zip
+Error: Request to https://cdn.playwright.dev/builds/webkit/2359/webkit-win64.zip timed out after 30000ms
+    at ClientRequest.<anonymous> (C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\Athena_Automation\VJ_Playwright\node_modules\playwright-core\lib\coreBundle.js:8793:15)
+    at ClientRequest.wrapper (node:events:639:12)
+    at ClientRequest.emit (node:events:514:28)
+    at TLSSocket.emitRequestTimeout (node:_http_client:1130:9)
+    at TLSSocket.wrapper (node:events:639:12)
+    at TLSSocket.emit (node:events:526:24)
+    at Socket._onTimeout (node:net:886:8)
+    at Timeout.onStreamTimeout (node:internal/stream_base_commons:242:10)
+    at listOnTimeout (node:internal/timers:687:11)
+    at process.processTimers (node:internal/timers:618:7)
+Downloading WebKit 26.6 (playwright webkit v2359) from https://cdn.playwright.dev/dbazure/download/playwright/builds/webkit/2359/webkit-win64.zip
+Error: Request to https://playwright.download.prss.microsoft.com/dbazure/download/playwright/builds/webkit/2359/webkit-win64.zip timed out after 30000ms
+    at ClientRequest.<anonymous> (C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\Athena_Automation\VJ_Playwright\node_modules\playwright-core\lib\coreBundle.js:8793:15)
+    at ClientRequest.wrapper (node:events:639:12)
+    at ClientRequest.emit (node:events:514:28)
+    at TLSSocket.emitRequestTimeout (node:_http_client:1130:9)
+    at TLSSocket.wrapper (node:events:639:12)
+    at TLSSocket.emit (node:events:526:24)
+    at Socket._onTimeout (node:net:886:8)
+    at Timeout.onStreamTimeout (node:internal/stream_base_commons:242:10)
+    at listOnTimeout (node:internal/timers:687:11)
+    at process.processTimers (node:internal/timers:618:7)
+Downloading WebKit 26.6 (playwright webkit v2359) from https://playwright.download.prss.microsoft.com/dbazure/download/playwright/builds/webkit/2359/webkit-win64.zip
+Error: Request to https://playwright.download.prss.microsoft.com/dbazure/download/playwright/builds/webkit/2359/webkit-win64.zip timed out after 30000ms
+    at ClientRequest.<anonymous> (C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\Athena_Automation\VJ_Playwright\node_modules\playwright-core\lib\coreBundle.js:8793:15)
+    at ClientRequest.wrapper (node:events:639:12)
+    at ClientRequest.emit (node:events:514:28)
+    at TLSSocket.emitRequestTimeout (node:_http_client:1130:9)
+    at TLSSocket.wrapper (node:events:639:12)
+    at TLSSocket.emit (node:events:526:24)
+    at Socket._onTimeout (node:net:886:8)
+    at Timeout.onStreamTimeout (node:internal/stream_base_commons:242:10)
+    at listOnTimeout (node:internal/timers:687:11)
+    at process.processTimers (node:internal/timers:618:7)
+Failed to install browsers
+Error: Failed to download WebKit 26.6 (playwright webkit v2359), caused by
+Error: Download failure, code=1
+    at ChildProcess.<anonymous> (C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\Athena_Automation\VJ_Playwright\node_modules\playwright-core\lib\coreBundle.js:32428:32)
+    at ChildProcess.emit (node:events:514:28)
+    at ChildProcess._handle.onexit (node:internal/child_process:324:12)
+PS C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\Athena_Automation\VJ_Playwright>
