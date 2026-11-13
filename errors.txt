@@ -9,8 +9,5 @@ PS C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\Athena_Automation
 > tsx tools/pom-generator/cli/pom-create.cli.ts --connectCdp=ws://localhost:9222/devtools/browser/*** --brand=AZO --channel=DJ --product=Motor --page-name=Login Page
 
 
-POM CREATE failed: elementHandle.evaluate: ReferenceError: __name is not defined
-    at eval (eval at evaluate (:311:30), <anonymous>:1:120)
-    at UtilityScript.evaluate (<anonymous>:313:16)
-    at UtilityScript.<anonymous> (<anonymous>:1:44)
+POM CREATE failed: Cannot read properties of undefined (reading 'tagName')
 PS C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\Athena_Automation\VJ_Playwright>
