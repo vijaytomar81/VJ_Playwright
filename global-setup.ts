@@ -1,8 +1,5 @@
 import path from 'node:path';
-import sapiensAgentPortalAuth from './automationLayer/agentPortalAuth/sapiensAgentPortalAuth';
-import allianzAgentPortalAuth from 'automationLayer/agentPortalAuth/allianzAgentPortalAuth';
 import { getAllData } from './dataLayer/dataGenerator/excelToJson';
-import sapiensAgentPortalAuthKeycloak from 'automationLayer/agentPortalAuth/sapiensAgentPortalAuthKeycloak';
 import { getProjectConfig } from './configLayer/execution/projectsRegistry';
 
 declare global {
@@ -25,21 +22,6 @@ async function globalSetup(): Promise<void> {
   switch (authMode) {
     case 'skip':
       console.log('Skipping agent portal authentication');
-      break;
-
-    case 'allianz':
-      console.log('Running Allianz Agent Portal authentication');
-      await allianzAgentPortalAuth();
-      break;
-
-    case 'sapiens':
-      console.log('Running Sapiens Agent Portal authentication');
-      await sapiensAgentPortalAuth();
-      break;
-
-    case 'sapiensKeycloak':
-      console.log('Running Sapiens Agent Portal authentication');
-      await sapiensAgentPortalAuthKeycloak();
       break;
 
     default:

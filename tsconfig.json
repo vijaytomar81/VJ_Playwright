@@ -1,8 +1,9 @@
+
 {
   "compilerOptions": {
     "target": "ES2022",
-    "module": "commonjs",
-    "moduleResolution": "node",
+    "module": "Node16",
+    "moduleResolution": "Node16",
     "types": [
       "node"
     ],
@@ -10,22 +11,21 @@
     "resolveJsonModule": true,
     "skipLibCheck": true,
     "strict": false,
-    "baseUrl": "./",
     "paths": {
       "@pages/*": [
-        "automationLayer/ferry/pages/*"
+        "./automationLayer/ferry/pages/*"
       ],
       "@shared/*": [
-        "automationLayer/insurance/shared/*"
+        "./automationLayer/insurance/shared/*"
       ],
       "@lv/*": [
-        "automationLayer/insurance/lv/*"
+        "./automationLayer/insurance/lv/*"
       ],
       "@ferry/*": [
-        "automationLayer/insurance/ferry/*"
+        "./automationLayer/insurance/ferry/*"
       ],
       "@baseTest": [
-        "automationLayer/common/baseTest.ts"
+        "./automationLayer/common/baseTest.ts"
       ]
     },
     "noEmit": true
@@ -33,5 +33,9 @@
   "include": [
     "**/*.ts",
     "**/*.js"
+  ],
+  "exclude": [
+    "node_modules",
+    "dist"
   ]
 }

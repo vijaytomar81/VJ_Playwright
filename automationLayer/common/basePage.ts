@@ -1,5 +1,5 @@
 import { errors, Page } from '@playwright/test';
-import { ACTION_TIMEOUT } from 'configLayer/execution/timeouts';
+import { ACTION_TIMEOUT } from '../../configLayer/execution/timeouts';
 
 export class BasePage {
   protected page: Page;
