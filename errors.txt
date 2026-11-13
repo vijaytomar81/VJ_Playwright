@@ -1,9 +1,4 @@
-========== Spec Import Summary ==========
-Total .spec.ts Files : 874
-Matching Import Files: 601
-Other Spec Files     : 273
-Files Not Read       : 0
-=========================================
+import { test, expect } from '@playwright/test';
 
 
 
