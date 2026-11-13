@@ -1,3 +1,16 @@
-> git stash push -u -m migrate to pom-automation
-warning: failed to remove apiIntegration/agentPortal/payment/invoices: Permission denied
-warning: failed to remove apiIntegration/backdating: Permission denied
+tp70707@AVD-HEX-73 MINGW64 /C/Users/tp70707/OneDrive - Allianz/My Documents/Automation/Athena_Automation/VJ_Playwright (master)
+$ git status
+On branch master
+Changes not staged for commit:
+  (use "git add/rm <file>..." to update what will be committed)
+  (use "git restore <file>..." to discard changes in working directory)
+        deleted:    automationLayer/tests/FerryTest.spec.ts
+        deleted:    automationLayer/tests/testOne.spec.ts
+        modified:   configLayer/brand.config.ts
+        modified:   package-lock.json
+        modified:   package.json
+        modified:   tools/pom-generator/scanner/element-metadata-reader.ts
+
+no changes added to commit (use "git add" and/or "git commit -a")
+
+tp70707@AVD-HEX-73 MINGW64 /C/Users/tp70707/OneDrive - Allianz/My Documents/Automation/Athena_Automation/VJ_Playwright (master)
