@@ -1,4 +1,4 @@
-tp70707@AVD-HEX-73 MINGW64 /C/Users/tp70707/OneDrive - Allianz/My Documents/Automation/Athena_Automation/VJ_Playwright (master)
+tp70707@AVD-HEX-73 MINGW64 ~/OneDrive - Allianz/My Documents/Automation/Athena_Automation/VJ_Playwright (master)
 $ git status
 On branch master
 Changes not staged for commit:
@@ -13,4 +13,10 @@ Changes not staged for commit:
 
 no changes added to commit (use "git add" and/or "git commit -a")
 
-tp70707@AVD-HEX-73 MINGW64 /C/Users/tp70707/OneDrive - Allianz/My Documents/Automation/Athena_Automation/VJ_Playwright (master)
+tp70707@AVD-HEX-73 MINGW64 ~/OneDrive - Allianz/My Documents/Automation/Athena_Automation/VJ_Playwright (master)
+$ git stash list
+stash@{0}: On master: mmm
+stash@{1}: On master: migrate to pom-automation
+
+tp70707@AVD-HEX-73 MINGW64 ~/OneDrive - Allianz/My Documents/Automation/Athena_Automation/VJ_Playwright (master)
+$ 
