@@ -1,12 +1,5 @@
+From: 
 import { test } from '@playwright/test';
 
+To:
 import { test } from '@baseTest';
-
-
-testInfo.annotations.push({
-    type: 'screenshot',
-    description: relative(
-        initializeEvidenceRun().excelReportDirectory,
-        screenshotPath,
-    ).replace(/\\/g, '/'),
-});
