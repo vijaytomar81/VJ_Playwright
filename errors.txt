@@ -1,41 +1,45 @@
-Scenario ID	Scenario Name	Status	VRN	Email	Interaction ID	Policy Number	Cover Start Date	NB Start Time	Bri Premium	Retry	Worker ID	Start Time	End Time	Duration	Error	Screenshot	Execution Mode	Device	Browser	Browser Channel	Browser Version	Headless
-BRI_DJ_PRE_NB001	TC1_BRI_DJ_PRE_NB001 @Britannia_Premier @Bri_Premier_Annual @Bri_Annual	failed	HJ64GZC	bri.test.team+1794500582486@gmail.com	6af5e7f0fad29c6d320aee84		21 Nov 2026	2026-11-12T16:23:02.487Z		0	0	2026-11-12T16:23:01.223Z	2026-11-12T16:24:00.479Z	00:59	"TimeoutError: locator.click: Timeout 30000ms exceeded."    Local		chromium	Not Specified	151.0.7922.34	
-
-Missing Field	Affected Tests	Occurrences
-viewport	TC1_BRI_DJ_PRE_NB001 @Britannia_Premier @Bri_Premier_Annual @Bri_Annual	1
-
-
-
-PS C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\Athena_Automation\integration-tests> treee test-results
-test-results
-└── Britannia-run-2026-11-12T16-22-50-171Z
-    ├── allure
-    │   └── results
-    │       ├── 58bbab65-e05f-4482-92dc-1a07e3d936dc-attachment.txt
-    │       ├── 5e7d272f-d868-457c-a5cb-9eaf607ae0fa-attachment.png
-    │       ├── 7e218cb6-6fae-4742-a68b-dfe92a63d71d-result.json
-    │       └── 8735ea8f-a56b-40ef-8e90-2a5545c37ae2-attachment.md
-    ├── artifacts
-    │   ├── Regression-Britannia_Hexa--3877c-i-Premier-Annual-Bri-Annual-chromium
-    │   │   ├── attachments
-    │   │   │   └── full-page-failure-failure-chromium-837c5718d03cf37a-retry-0-repeat-0-worker-0-png-7608f84c342197c7b0ca02f3373ec5e180799bb0.png
-    │   │   └── error-context.md
-    │   └── screenshots
-    │       └── failure-chromium-837c5718d03cf37a-retry-0-repeat-0-worker-0.png
-    ├── common-job
-    ├── excel-report
-    │   └── Britannia-report-run-2026-11-12T16-22-50-171Z.xlsx
-    ├── junit
-    │   └── results.xml
-    └── playwright
-        ├── data
-        │   ├── 20160739773c3ee2bf7999d41b817fdb47248a42.md
-        │   ├── 29b987cac892214a8588105d053cb9b357767689.dat
-        │   ├── 4e77c12262b3abdd2ac357a9bd78eafa7eafc9c5.dat
-        │   ├── 520ebaba6681f541dc9377665711cfc9e867af52.dat
-        │   ├── 52885f36eb01a9f4a1a1673e629592bb4025344c.dat
-        │   ├── 556292d74f65f70dd6c8ac31742415639a156dea.png
-        │   ├── 825d50ca90d27c9178803734252b6c24a15c2bf8.dat
-        │   └── 85dc9589bd7c17d3168ec53392500c694e436517.dat
-        └── index.html
-PS C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\Athena_Automation\integration-tests> 
+integration-tests> $files = @(Get-ChildItem -Path . -Filter "*.spec.ts" -File -Recurse)
+>> $total = $files.Count
+>> Write-Host "Total .spec.ts Files : $total"
+Get-ChildItem : Could not find a part of the path 'C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\Athena_Automation\integration-tests\node_modules\typescript-eslint\node_modules\@typescript-eslint\e
+slint-plugin\node_modules\@typescript-eslint\type-utils\node_modules\@typescript-eslint\typescript-estree'.
+At line:1 char:12
++ $files = @(Get-ChildItem -Path . -Filter "*.spec.ts" -File -Recurse)
++            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : ReadError: (C:\Users\tp7070...pescript-estree:String) [Get-ChildItem], DirectoryNotFoundException
+    + FullyQualifiedErrorId : DirIOError,Microsoft.PowerShell.Commands.GetChildItemCommand
+ 
+Get-ChildItem : Could not find a part of the path 'C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\Athena_Automation\integration-tests\node_modules\typescript-eslint\node_modules\@typescript-eslint\p
+arser\node_modules\@typescript-eslint\typescript-estree\node_modules\@typescript-eslint\project-service'.
+At line:1 char:12
++ $files = @(Get-ChildItem -Path . -Filter "*.spec.ts" -File -Recurse)
++            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : ReadError: (C:\Users\tp7070...project-service:String) [Get-ChildItem], DirectoryNotFoundException
+    + FullyQualifiedErrorId : DirIOError,Microsoft.PowerShell.Commands.GetChildItemCommand
+ 
+Get-ChildItem : Could not find a part of the path 'C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\Athena_Automation\integration-tests\node_modules\typescript-eslint\node_modules\@typescript-eslint\p
+arser\node_modules\@typescript-eslint\typescript-estree\node_modules\@typescript-eslint\tsconfig-utils'.
+At line:1 char:12
++ $files = @(Get-ChildItem -Path . -Filter "*.spec.ts" -File -Recurse)
++            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : ReadError: (C:\Users\tp7070...\tsconfig-utils:String) [Get-ChildItem], DirectoryNotFoundException
+    + FullyQualifiedErrorId : DirIOError,Microsoft.PowerShell.Commands.GetChildItemCommand
+ 
+Get-ChildItem : Could not find a part of the path 'C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\Athena_Automation\integration-tests\node_modules\typescript-eslint\node_modules\@typescript-eslint\u
+tils\node_modules\@typescript-eslint\typescript-estree\node_modules\@typescript-eslint\project-service'.
+At line:1 char:12
++ $files = @(Get-ChildItem -Path . -Filter "*.spec.ts" -File -Recurse)
++            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : ReadError: (C:\Users\tp7070...project-service:String) [Get-ChildItem], DirectoryNotFoundException
+    + FullyQualifiedErrorId : DirIOError,Microsoft.PowerShell.Commands.GetChildItemCommand
+ 
+Get-ChildItem : Could not find a part of the path 'C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\Athena_Automation\integration-tests\node_modules\typescript-eslint\node_modules\@typescript-eslint\u
+tils\node_modules\@typescript-eslint\typescript-estree\node_modules\@typescript-eslint\tsconfig-utils'.
+At line:1 char:12
++ $files = @(Get-ChildItem -Path . -Filter "*.spec.ts" -File -Recurse)
++            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : ReadError: (C:\Users\tp7070...\tsconfig-utils:String) [Get-ChildItem], DirectoryNotFoundException
+    + FullyQualifiedErrorId : DirIOError,Microsoft.PowerShell.Commands.GetChildItemCommand
+ 
+Total .spec.ts Files : 874
+integration-tests> 
