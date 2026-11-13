@@ -1,0 +1,378 @@
+// Build status:
+//   SUCCESS  - every test passed and all reports were generated
+//   UNSTABLE - one or more tests failed, or a report failed to generate
+//   FAILURE  - the run itself broke (bad parameters, npm ci, missing credentials,
+//              global setup, or no tests ran at all)
+
+def evidenceRunPrepared = false
+
+pipeline {
+    agent {
+        docker {
+            image 'mcr.microsoft.com/playwright:v1.62.1-noble'
+            args '--ipc=host'
+        }
+    }
+
+    // Jenkins only registers these on the first run after they're added - that run uses
+    // defaults and won't show the parameter form yet.
+    parameters {
+        choice(name: 'PROJECT_NAME', choices: ['ferry', 'britannia', 'allianzOnlineMotor', 'allianzOnlineHome'],
+            description: 'Brand to test (must match configLayer/execution/projectsRegistry.ts)')
+        choice(name: 'TEST_ENV', choices: ['dev', 'test', 'uat', 'nft'],
+            description: 'Not every brand has every env - the Validate parameters stage checks this')
+        choice(name: 'AGENT_PORTAL_AUTH', choices: ['skip', 'allianz', 'sapiens', 'sapiensKeycloak'],
+            description: 'Agent portal auth mode used by global-setup.ts')
+        string(name: 'TEST_FILTER', defaultValue: '',
+            description: 'Required. Passed to `playwright test -g`, e.g. a tag like @SmokeAnnualPolicyAndPayment')
+        choice(name: 'VIDEO_MODE', choices: ['off', 'on', 'retain-on-failure', 'on-first-retry'],
+            description: 'Video recording of each test, attached to the Playwright and Allure reports. Default off. on-first-retry needs RETRIES of 1 or more')
+        choice(name: 'RETRIES', choices: ['0', '1', '2'],
+            description: 'Retries of a failed test. Keep 0 unless needed: a retried purchase can pay twice')
+        string(name: 'TESTING_API_KEY_CREDENTIAL_ID', defaultValue: 'testing-api-key',
+            description: 'Optional shared Secret text credential for renewal testing API. Missing/blank does not block other tests.')
+        string(name: 'TESTING_API_AUTH_CREDENTIAL_ID', defaultValue: 'testing-api-auth',
+            description: 'Optional shared Username with password credential for testing API Basic auth. Missing/blank is allowed.')
+        booleanParam(name: 'GENERATE_ALLURE_REPORT', defaultValue: false,
+            description: 'Needs the Allure Jenkins plugin + "Allure Commandline" tool configured in Jenkins')
+        string(name: 'RECIPIENT_EMAILS', defaultValue: '',
+            description: 'Optional. Comma-separated emails that receive the results summary. Leave empty to skip the email.')
+    }
+
+    environment {
+        CI = 'true'
+        KEEP_BROWSER_OPEN = 'false'
+        PWDEBUG = ''
+        // The Playwright image's default npm cache dir (/.npm) is root-owned, but this container
+        // runs as a non-root user - point npm's cache inside the workspace instead.
+        npm_config_cache = "${WORKSPACE}/.npm-cache"
+    }
+
+    options {
+        buildDiscarder(logRotator(daysToKeepStr: '60', numToKeepStr: '20'))
+    }
+
+    stages {
+
+        stage('Validate parameters') {
+            steps {
+                sh '''
+                    if [ -z "$(echo "${TEST_FILTER}" | tr -d '[:space:]')" ]; then
+                        echo "TEST_FILTER is required - an empty filter would run the entire suite."
+                        exit 1
+                    fi
+
+                    # AllianzOnline Motor and Home share one env folder (see loadEnvironment.ts).
+                    case "${PROJECT_NAME}" in
+                        allianzOnlineMotor|allianzOnlineHome) ENV_DIR=allianzOnline ;;
+                        *) ENV_DIR="${PROJECT_NAME}" ;;
+                    esac
+
+                    ENV_FILE="configLayer/environments/${ENV_DIR}/.env.${TEST_ENV}"
+                    if [ ! -f "${ENV_FILE}" ]; then
+                        echo "No env file for ${PROJECT_NAME} + ${TEST_ENV} (expected ${ENV_FILE})."
+                        echo "Available for ${PROJECT_NAME}:"
+                        ls -a "configLayer/environments/${ENV_DIR}" | grep -E '^\\.env\\.[a-z]+$' | sed 's/^\\.env\\./  /'
+                        exit 1
+                    fi
+                '''
+            }
+        }
+
+        stage('Install dependencies') {
+            steps {
+                sh '''
+                    node --version
+                    npm --version
+                    npm ci
+
+                    # Allure 2 CLI needs Java and the Playwright image has none.
+                    if [ "${GENERATE_ALLURE_REPORT}" = "true" ] && [ ! -x .allure-jre/bin/java ]; then
+                        mkdir -p .allure-jre
+                        node -e "fetch('https://api.adoptium.net/v3/binary/latest/17/ga/linux/x64/jre/hotspot/normal/eclipse').then(r => { if (!r.ok) throw new Error('HTTP ' + r.status); return r.arrayBuffer(); }).then(b => require('fs').writeFileSync('.allure-jre.tar.gz', Buffer.from(b)))"
+                        tar -xzf .allure-jre.tar.gz -C .allure-jre --strip-components=1
+                        rm -f .allure-jre.tar.gz
+                    fi
+                '''
+            }
+        }
+
+        stage('Initialize EvidenceFactory') {
+            steps {
+                script {
+                    // Remove only the previous build's pointer, never its reports.
+                    sh 'rm -f .evidencefactory-direct-run.json'
+
+                    // Run the existing TypeScript CLI using the installed TypeScript dependency.
+                    // EvidenceFactory alone generates the run ID and all report paths.
+                    def runPathsJson = sh(returnStdout: true, script: '''
+                        env -u EVIDENCEFACTORY_RUN_ID node -e '
+                            const fs = require("node:fs");
+                            const ts = require("typescript");
+
+                            require.extensions[".ts"] = (module, filename) => {
+                                const source = fs.readFileSync(filename, "utf8");
+                                const compiled = ts.transpileModule(source, {
+                                    compilerOptions: {
+                                        module: ts.ModuleKind.CommonJS,
+                                        target: ts.ScriptTarget.ES2022,
+                                        esModuleInterop: true
+                                    },
+                                    fileName: filename
+                                });
+                                module._compile(compiled.outputText, filename);
+                            };
+
+                            require("./configLayer/evidenceFactory/evidenceRunCli.ts");
+                        ' initialize
+                    ''').trim()
+
+                    def paths = parseEvidenceRunPaths(runPathsJson)
+
+                    if (!paths.runId || !paths.runDirectory) {
+                        error('EvidenceFactory did not return a valid run ID and directory.')
+                    }
+
+                    writeFile file: '.evidencefactory-direct-run.json', text: runPathsJson
+                    env.EVIDENCEFACTORY_RUN_ID = paths.runId
+                    evidenceRunPrepared = true
+
+                    echo "[EvidenceFactory] Run ID: ${paths.runId}"
+                    echo "[EvidenceFactory] Directory: ${paths.runDirectory}"
+                }
+            }
+        }
+
+        stage('Run Playwright tests') {
+            steps {
+                script {
+                    // Binds Jenkins-stored secrets as real env vars for this step only.
+                    // Ferry's accounts are used for every brand for now - per-brand accounts TBD.
+                    def credentials = [
+                        string(credentialsId: 'ferry-gmail-client-id', variable: 'GMAIL_CLIENT_ID'),
+                        string(credentialsId: 'ferry-gmail-client-secret', variable: 'GMAIL_CLIENT_SECRET'),
+                        string(credentialsId: 'ferry-gmail-refresh-token', variable: 'GMAIL_REFRESH_TOKEN')
+                    ]
+
+                    // Only needed when global setup logs in.
+                    if (params.AGENT_PORTAL_AUTH != 'skip') {
+                        credentials << usernamePassword(credentialsId: 'ferry-agent-portal',
+                            usernameVariable: 'AGENT_PORTAL_EMAIL',
+                            passwordVariable: 'AGENT_PORTAL_PASSWORD')
+                    }
+
+                    withCredentials(credentials) {
+                        def testingApi = load('configLayer/execution/optionalTestingApiCredentials.groovy')
+                        testingApi.call([
+                            keyCredentialId: params.TESTING_API_KEY_CREDENTIAL_ID,
+                            authCredentialId: params.TESTING_API_AUTH_CREDENTIAL_ID
+                        ]) {
+                            // Playwright exits 1 both for failed tests and for run-level errors.
+                            // The next stage evaluates the JUnit results.
+                            env.PLAYWRIGHT_EXIT_CODE = sh(returnStatus: true, script: '''
+                                npx cross-env \
+                                    PROJECT=${PROJECT_NAME} \
+                                    ENV=${TEST_ENV} \
+                                    AGENT_PORTAL_AUTH=${AGENT_PORTAL_AUTH} \
+                                    VIDEO_MODE=${VIDEO_MODE} \
+                                    RETRIES=${RETRIES} \
+                                    playwright test -g "${TEST_FILTER}"
+                            ''').toString()
+                        }
+                    }
+                }
+            }
+        }
+
+        stage('Evaluate test results') {
+            steps {
+                script {
+                    def exitCode = env.PLAYWRIGHT_EXIT_CODE
+                    def paths = readEvidenceRunPaths()
+
+                    if (!paths) {
+                        error("Playwright exited with ${exitCode} without an initialized EvidenceFactory run.")
+                    }
+
+                    def junitFile = paths.junitFile
+                    if (!fileExists(junitFile)) {
+                        error("Playwright exited with ${exitCode} without writing ${junitFile} - tests did not run.")
+                    }
+
+                    // Marks the build UNSTABLE when tests fail and feeds Jenkins test trends.
+                    def summary = junit(testResults: junitFile)
+
+                    env.TESTS_TOTAL = summary.totalCount.toString()
+                    env.TESTS_PASSED = summary.passCount.toString()
+                    env.TESTS_FAILED = summary.failCount.toString()
+                    env.TESTS_SKIPPED = summary.skipCount.toString()
+
+                    if (summary.totalCount == 0) {
+                        error('No tests ran - TEST_FILTER matched nothing, or global setup failed (see log above).')
+                    }
+
+                    if (exitCode != '0' && summary.failCount == 0) {
+                        error("Playwright exited with ${exitCode} but reported no failed tests - run-level error (see log above).")
+                    }
+
+                    echo "Tests: ${summary.passCount} passed, ${summary.failCount} failed, ${summary.skipCount} skipped."
+                }
+            }
+        }
+    }
+
+    post {
+        always {
+            script {
+                def paths = evidenceRunPrepared ? readEvidenceRunPaths() : null
+
+                if (paths) {
+                    echo "[REPORTS] EvidenceFactory directory: ${paths.runDirectory}"
+
+                    // Archive only this build's run, not all historical workspace runs.
+                    archiveArtifacts artifacts: "${paths.runDirectory}/**",
+                        allowEmptyArchive: true
+
+                    // Report failures mark the build UNSTABLE without improving a FAILED build.
+                    if (fileExists("${paths.playwrightReportDirectory}/index.html")) {
+                        catchError(buildResult: 'UNSTABLE', stageResult: 'UNSTABLE',
+                            message: 'Playwright HTML report could not be published') {
+                            publishHTML(target: [
+                                allowMissing: false,
+                                alwaysLinkToLastBuild: true,
+                                keepAll: true,
+                                reportDir: paths.playwrightReportDirectory,
+                                reportFiles: 'index.html',
+                                reportName: 'Playwright Report'
+                            ])
+                        }
+                    } else {
+                        echo "[REPORTS] Playwright HTML report not found: ${paths.playwrightReportDirectory}/index.html"
+                        unstable('Playwright HTML report is missing.')
+                    }
+
+                    if (params.GENERATE_ALLURE_REPORT) {
+                        if (fileExists(paths.allureResultsDirectory)) {
+                            catchError(buildResult: 'UNSTABLE', stageResult: 'UNSTABLE',
+                                message: 'Allure report could not be generated') {
+                                withEnv(["JAVA_HOME=${env.WORKSPACE}/.allure-jre"]) {
+                                    allure(includeProperties: false,
+                                        results: [[path: paths.allureResultsDirectory]])
+                                }
+                            }
+                        } else {
+                            unstable("[REPORTS] Allure results not found: ${paths.allureResultsDirectory}")
+                        }
+                    }
+
+                    def evidenceFile = paths.evidenceReportFile
+                    if (fileExists(evidenceFile)) {
+                        echo "[REPORTS] EvidenceFactory Excel report available: ${evidenceFile}"
+                    } else {
+                        echo "[REPORTS] EvidenceFactory Excel report not found: ${evidenceFile}"
+                    }
+                } else {
+                    echo '[REPORTS] No current EvidenceFactory run available; report publication skipped.'
+                }
+
+                // Last, so the subject shows the final result including report problems.
+                sendResultsEmail()
+            }
+        }
+    }
+}
+
+/**
+ * Read the exact paths returned by EvidenceFactory for this build.
+ */
+def readEvidenceRunPaths() {
+    if (!fileExists('.evidencefactory-direct-run.json')) {
+        return null
+    }
+
+    return parseEvidenceRunPaths(readFile('.evidencefactory-direct-run.json'))
+}
+
+@com.cloudbees.groovy.cps.NonCPS
+def parseEvidenceRunPaths(String text) {
+    return new groovy.json.JsonSlurperClassic().parseText(text)
+}
+
+// Based on sendTestEmail() in testReporting.groovy from the Selenium repo.
+// Needs the "Email Extension" plugin, which that job already uses on this Jenkins.
+def sendResultsEmail() {
+    def recipients = params.RECIPIENT_EMAILS?.trim()
+    if (!recipients) {
+        echo '[EMAIL] Skipped: RECIPIENT_EMAILS is empty.'
+        return
+    }
+
+    def result = currentBuild.currentResult
+    def subject = "${params.PROJECT_NAME} ${params.TEST_ENV} Playwright Test Results - ${env.JOB_NAME} #${env.BUILD_NUMBER} (${result})"
+    def sender = env.TEST_EMAIL_FROM?.trim() ?: 'noreply@athenapaas.com'
+
+    try {
+        emailext subject: subject, mimeType: 'text/html', body: resultsEmailBody(result),
+            to: recipients, from: sender
+        // emailext returning only means Jenkins handed it to SMTP, not that it was delivered.
+        echo "[EMAIL] Sent to ${recipients} (result: ${result})."
+    } catch (org.jenkinsci.plugins.workflow.steps.FlowInterruptedException e) {
+        throw e
+    } catch (Exception e) {
+        // A notification problem must not change the test result.
+        echo "[EMAIL] FAILED: ${e.class.name}: ${e.message}"
+    }
+}
+
+def resultsEmailBody(String result) {
+    def total = (env.TESTS_TOTAL ?: '0') as Integer
+    def runDetails = """
+    <ul>
+      <li>Project: <b>${params.PROJECT_NAME}</b></li>
+      <li>Environment: <b>${params.TEST_ENV}</b></li>
+      <li>Test filter: <b>${escapeHtml(params.TEST_FILTER)}</b></li>
+    </ul>"""
+
+    if (total == 0) {
+        return """
+    <p>Playwright test run <b>${env.JOB_NAME}</b> (build <b>#${env.BUILD_NUMBER}</b>) finished with
+       <b>${result}</b>, but no test results are available.</p>
+    ${runDetails}
+    <p>Check <a href="${env.BUILD_URL}console">the build console</a> for the error.</p>
+    <p>Athena Automated Test System</p>"""
+    }
+
+    def passed = (env.TESTS_PASSED ?: '0') as Integer
+    def pct = String.format('%.1f', 100.0 * passed / total)
+    def allureLink = params.GENERATE_ALLURE_REPORT
+        ? "<li>Allure report: <a href=\"${env.BUILD_URL}allure/\">Allure Report</a></li>"
+        : ''
+
+    return """
+    <p>Playwright test run <b>${env.JOB_NAME}</b> (build <b>#${env.BUILD_NUMBER}</b>) finished with
+       <b>${result}</b> (${new Date().format('yyyy-MM-dd')}).</p>
+    ${runDetails}
+
+    <h2>Test summary</h2>
+    <ul>
+      <li>Total tests: <b>${total}</b></li>
+      <li>Passed: <b>${passed}</b> (${pct}%)</li>
+      <li>Failed: <b>${env.TESTS_FAILED}</b></li>
+      <li>Skipped: <b>${env.TESTS_SKIPPED}</b></li>
+    </ul>
+
+    <h2>Reports</h2>
+    <ul>
+      <li>Playwright report (screenshots, traces, videos): <a href="${env.BUILD_URL}Playwright_20Report/">Playwright Report</a></li>
+      ${allureLink}
+      <li>Test results and history: <a href="${env.BUILD_URL}testReport/">Test Results</a></li>
+      <li>Build console: <a href="${env.BUILD_URL}console">Console Output</a></li>
+    </ul>
+
+    <p>Athena Automated Test System</p>"""
+}
+
+// TEST_FILTER is free text typed into the job form, so escape it before putting it in HTML.
+def escapeHtml(String text) {
+    return (text ?: '').replace('&', '&amp;').replace('<', '&lt;').replace('>', '&gt;').replace('"', '&quot;')
+}

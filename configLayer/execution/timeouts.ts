@@ -17,3 +17,4 @@ export const NAVIGATION_TIMEOUT = 2 * ACTION_TIMEOUT;
 
 /** expect(...) assertions (Playwright's own default is 5 seconds). */
 export const EXPECT_TIMEOUT = 15_000;
+

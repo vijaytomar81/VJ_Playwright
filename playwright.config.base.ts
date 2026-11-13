@@ -1,137 +1,134 @@
-
-import './configLayer/execution/loadEnvironment';
-
-import { defineConfig } from '@playwright/test';
-import { mkdirSync } from 'node:fs';
-import { join } from 'node:path';
-
+import { defineConfig, devices } from '@playwright/test';
+import { loadEnvironment } from './configLayer/execution/loadEnvironment';
 import { getProjectConfig } from './configLayer/execution/projectsRegistry';
-import { getReporterConfig } from './configLayer/execution/reporterConfig';
-import { browserProjects } from './configLayer/execution/browserProjects';
+import { parseRetries, videoOption } from './configLayer/execution/playwrightArtifacts';
+import {
+  ACTION_TIMEOUT,
+  EXPECT_TIMEOUT,
+  NAVIGATION_TIMEOUT,
+} from './configLayer/execution/timeouts';
+
+import { initializeEvidenceRun } from './configLayer/evidenceFactory/evidenceRunDirectory';
+import { getEvidenceReporterConfig } from './configLayer/evidenceFactory/reporterConfig';
 
 /**
- * EvidenceFactory Playwright configuration.
- *
- * Directory creation is owned exclusively by this file.
- * All generated evidence belongs to one run directory.
+ * @see https://playwright.dev/docs/test-configuration
  */
 export function createConfig(project: string | undefined) {
+  const { testDir } = getProjectConfig(project);
+  loadEnvironment(project);
+
+  const env = process.env.ENV ?? 'dev';
   const authMode = process.env.AGENT_PORTAL_AUTH;
-  const projectConfig = getProjectConfig(project);
-  const product = process.env.PRODUCT ?? 'Not Known';
+  const retries = parseRetries();
 
   /*
-   * EVIDENCEFACTORY RUN DIRECTORY
+   * EvidenceFactory initializes the run for every invocation,
+   * including Common Job discovery.
    *
-   * Reserve a unique directory for each execution.
-   * Child processes can reuse an inherited run ID.
+   * The runner supplies EVIDENCEFACTORY_RUN_ID so discovery
+   * and execution use the same run directory.
    */
-  const timestamp = new Date()
-    .toISOString()
-    .replace(/[:.]/g, '-');
+  const paths = initializeEvidenceRun();
 
-  const resultsRoot = join(
-    process.cwd(),
-    'test-results',
-  );
+  /*
+   * Discovery collects test inventory only.
+   * Execution uses the configured EvidenceFactory reporters.
+   */
+  const discoveryOnly =
+    process.env.EVIDENCEFACTORY_DISCOVERY_ONLY === 'true';
 
-  mkdirSync(resultsRoot, { recursive: true });
-
-  let runId = process.env.EVIDENCEFACTORY_RUN_ID;
-  let runDirectory: string;
-
-  if (runId) {
-    runDirectory = join(
-      resultsRoot,
-      `run-${runId}`,
-    );
-  } else {
-    let counter = 0;
-
-    while (true) {
-      runId = counter === 0
-        ? timestamp
-        : `${timestamp}-${counter}`;
-
-      runDirectory = join(
-        resultsRoot,
-        `run-${runId}`,
-      );
-
-      try {
-        // Atomically reserve the run directory.
-        mkdirSync(runDirectory);
-        break;
-      } catch (error) {
-        if (
-          (error as NodeJS.ErrnoException).code !== 'EEXIST'
-        ) {
-          throw error;
-        }
-
-        counter++;
-      }
-    }
-
-    process.env.EVIDENCEFACTORY_RUN_ID = runId;
-  }
-
-  const screenshotsDirectory = join(
-    runDirectory,
-    'screenshots',
-  );
-
-  const artifactsDirectory = join(
-    runDirectory,
-    'test-artifacts',
-  );
-
-  const playwrightReportDirectory = join(
-    runDirectory,
-    'playwright-report',
-  );
-
-  // Only this configuration file creates directories.
-  mkdirSync(screenshotsDirectory, { recursive: true });
+  const reporter = discoveryOnly
+    ? [['list']]
+    : getEvidenceReporterConfig({
+      paths,
+      product: process.env.PRODUCT?.trim() || 'Not Known',
+    });
 
   return defineConfig({
-    testDir: projectConfig.testDir,
-
-    outputDir: artifactsDirectory,
-
+    testDir,
+    /* Run tests in files in parallel */
     fullyParallel: true,
+    /* Fail the build on CI if you accidentally left test.only in the source code. */
     forbidOnly: !!process.env.CI,
-
-    retries: 0,
+    /* 0 unless RETRIES is set: a retried purchase could pay twice. Needed for VIDEO_MODE=on-first-retry. */
+    retries,
+    /* Opt out of parallel tests on CI. */
     workers: 3,
-
-    reporter: getReporterConfig({
-      runId,
-      runDirectory,
-      playwrightReportDirectory,
-      product,
-    }),
-
-    globalSetup: require.resolve('./global-setup.js'),
-
-    timeout: 300000,
-
+    /* Reporter to use. See https://playwright.dev/docs/test-reporters */
+    reporter: reporter as ReturnType<typeof getEvidenceReporterConfig>,
+    /*
+     * Store Playwright test artifacts inside the current
+     * EvidenceFactory run directory.
+     */
+    outputDir: paths.artifactsDirectory,
+    globalSetup: require.resolve('./global-setup.ts'),
+    timeout: 300000, // 5 minutes for all tests
+    expect: { timeout: EXPECT_TIMEOUT },
+    /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
     use: {
-      actionTimeout: 30 * 1000,
-
-      // Full-page screenshots are handled by baseTest.ts.
-      screenshot: 'off',
+      /* Base URL to use in actions like `await page.goto('')`. */
+      // baseURL: 'http://localhost:3000',
 
       trace: 'on-first-retry',
-
+      /* Capture a screenshot right after a test fails, saved under test-results/ */
+      // screenshot: 'only-on-failure',
+      /* VIDEO_MODE: off (default), on, retain-on-failure, on-first-retry. See docs/Reporting.md. */
+      video: videoOption(retries),
+      /* Without these, a single stuck click/waitFor/goto waits out the whole 5-minute test
+         timeout (e.g. when an environment shows an error page). Calls that pass their own
+         `timeout` keep it. Raise per call for genuinely slow steps rather than here. */
+      actionTimeout: ACTION_TIMEOUT,
+      navigationTimeout: NAVIGATION_TIMEOUT,
       headless: process.env.CI === 'true',
 
       storageState:
-        authMode === 'skip'
-          ? undefined
-          : 'automationLayer/athena/agentPortalAuth/auth.json',
+        authMode === 'skip' ? undefined : `automationLayer/athena/agentPortalAuth/auth.json`,
     },
 
-    projects: browserProjects,
+    /* Configure projects for major browsers */
+    projects: [
+      {
+        name: 'chromium',
+        use: { ...devices['Desktop Chrome'] },
+      },
+
+      // {
+      //   name: 'firefox',
+      //   use: { ...devices['Desktop Firefox'] },
+      // },
+
+      // {
+      //   name: 'webkit',
+      //   use: { ...devices['Desktop Safari'] },
+      // },
+
+      /* Test against mobile viewports. */
+      // {
+      //   name: 'Mobile Chrome',
+      //   use: { ...devices['Pixel 5'] },
+      // },
+      // {
+      //   name: 'Mobile Safari',
+      //   use: { ...devices['iPhone 12'] },
+      // },
+
+      /* Test against branded browsers. */
+      // {
+      //   name: 'Microsoft Edge',
+      //   use: { ...devices['Desktop Edge'], channel: 'msedge' },
+      // },
+      // {
+      //   name: 'Google Chrome',
+      //   use: { ...devices['Desktop Chrome'], channel: 'chrome' },
+      // },
+    ],
+
+    /* Run your local dev server before starting the tests */
+    // webServer: {
+    //   command: 'npm run start',
+    //   url: 'http://localhost:3000',
+    //   reuseExistingServer: !process.env.CI,
+    // },
   });
 }

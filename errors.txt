@@ -1,44 +1,7 @@
-PS C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\Athena_Automation\integration-tests> npm install treee@latest
-npm error code ERESOLVE
-npm error ERESOLVE could not resolve
-npm error
-npm error While resolving: typescript-eslint@8.36.0
-npm error Found: typescript@5.9.3
-npm error node_modules/typescript
-npm error   peer typescript@">=4.8.4" from ts-api-utils@2.5.0
-npm error   node_modules/ts-api-utils
-npm error     ts-api-utils@"^2.1.0" from @typescript-eslint/eslint-plugin@8.36.0
-npm error     node_modules/typescript-eslint/node_modules/@typescript-eslint/eslint-plugin
-npm error       @typescript-eslint/eslint-plugin@"8.36.0" from typescript-eslint@8.36.0
-npm error       node_modules/typescript-eslint
-npm error         dev typescript-eslint@"^8.36.0" from the root project
-npm error     ts-api-utils@"^2.1.0" from @typescript-eslint/type-utils@8.36.0
-npm error     node_modules/typescript-eslint/node_modules/@typescript-eslint/eslint-plugin/node_modules/@typescript-eslint/type-utils
-npm error       @typescript-eslint/type-utils@"8.36.0" from @typescript-eslint/eslint-plugin@8.36.0
-npm error       node_modules/typescript-eslint/node_modules/@typescript-eslint/eslint-plugin
-npm error         @typescript-eslint/eslint-plugin@"8.36.0" from typescript-eslint@8.36.0
-npm error         node_modules/typescript-eslint
-npm error     3 more (@typescript-eslint/typescript-estree, ...)
-npm error   peer typescript@">=2.7" from ts-node@10.9.2
-npm error   node_modules/ts-node
-npm error     dev ts-node@"^10.9.2" from the root project
-npm error   1 more (the root project)
-npm error
-npm error Could not resolve dependency:
-npm error peer typescript@">=4.8.4 <5.9.0" from typescript-eslint@8.36.0
-npm error node_modules/typescript-eslint
-npm error   dev typescript-eslint@"^8.36.0" from the root project
-npm error
-npm error Conflicting peer dependency: typescript@5.8.3
-npm error node_modules/typescript
-npm error   peer typescript@">=4.8.4 <5.9.0" from typescript-eslint@8.36.0
-npm error   node_modules/typescript-eslint
-npm error     dev typescript-eslint@"^8.36.0" from the root project
-npm error
-npm error Fix the upstream dependency conflict, or retry this command with --force or --legacy-peer-deps to accept an incorrect (and potentially broken) dependency resolution.
-npm error
-npm error
-npm error For a full report see:
-npm error C:\Users\tp70707\AppData\Local\npm-cache\_logs\2026-11-11T10_27_03_033Z-eresolve-report.txt
-npm error A complete log of this run can be found in: C:\Users\tp70707\AppData\Local\npm-cache\_logs\2026-11-11T10_27_03_033Z-debug-0.log
-PS C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\Athena_Automation\integration-tests>
+========== Spec Import Replacement Summary ==========
+Total .spec.ts Files : 874
+Matching Import Files: 764
+Files Updated        : 764
+Files Skipped        : 110
+Files With Errors    : 0
+=====================================================

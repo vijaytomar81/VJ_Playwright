@@ -12,7 +12,8 @@ export const projects: Record<string, ProjectConfig> = {
   },
   allianzOnlineHome: {
     testDir: './automationLayer/athena/homeInsurance/az_home/tests',
-    excelFile: './automationLayer/athena/homeInsurance/az_home/data/AllianzOnlineHome_DirectJourney.xlsx',
+    excelFile:
+      './automationLayer/athena/homeInsurance/az_home/data/AllianzOnlineHome_DirectJourney.xlsx',
     outputFolder: './automationLayer/athena/homeInsurance/az_home/data',
   },
   britannia: {
