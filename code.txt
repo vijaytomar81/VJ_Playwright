@@ -6,10 +6,9 @@ import { test } from '@baseTest';
 
 function prompt { "$(Split-Path (Get-Location) -Leaf)> " }
 
+
 $old = "import { test } from '@playwright/test';"
 $new = "import { test } from '@baseTest';"
-
-$files = @(Get-ChildItem -Path . -Filter "*.spec.ts" -File -Recurse)
 
 $updated = 0
 
@@ -30,5 +29,6 @@ Write-Host ""
 Write-Host "========== Import Replacement Summary =========="
 Write-Host "Total .spec.ts Files : $total"
 Write-Host "Total Updated Files  : $updated"
-Write-Host "Total Remaining      : $remaining"
+Write-Host "Total Not Updated    : $remaining"
 Write-Host "================================================"
+
