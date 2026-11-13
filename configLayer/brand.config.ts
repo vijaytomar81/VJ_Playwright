@@ -32,7 +32,7 @@ export const BrandHierarchy = {
             Products.MOTOR,
         ],
 
-        [Channels.MSM]: [
+        [Channels.DJ]: [
             Products.HOME,
             Products.MOTOR,
         ],

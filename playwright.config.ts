@@ -49,14 +49,6 @@ export default defineConfig({
     },
   },
 
-  /*
-   * EvidenceFactory execution lifecycle.
-   */
-  globalSetup:
-    './evidenceFactory/fixtures/evidence.setup.ts',
-
-  globalTeardown:
-    './evidenceFactory/fixtures/evidence.finalize.ts',
 
   reporter: [
     [

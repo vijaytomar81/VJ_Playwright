@@ -15,6 +15,24 @@ export interface RawElementMetadata {
     placeholder?: string;
     ariaLabel?: string;
     context?: string;
+
+    /*
+     * Indicates whether an anchor has
+     * an href attribute.
+     *
+     * Used to determine the implicit
+     * link role of native HTML anchors.
+     */
+    hasHref?: boolean;
+
+    /*
+     * Diagnostic metadata.
+     * Used to investigate elements for which
+     * no unique locator can be generated.
+     */
+    title?: string;
+    outerHTML?: string;
+
     visible: boolean;
 }
 
@@ -116,6 +134,12 @@ export class ElementMetadataReader {
 
             /*
              * Determine element visibility.
+             *
+             * Exclude elements explicitly hidden
+             * from the accessibility tree.
+             *
+             * Also account for aria-hidden
+             * on ancestor elements.
              */
             const style =
                 window.getComputedStyle(node);
@@ -123,7 +147,11 @@ export class ElementMetadataReader {
             const rect =
                 node.getBoundingClientRect();
 
+            const accessibilityHidden =
+                node.closest('[aria-hidden="true"]') !== null;
+
             const visible =
+                !accessibilityHidden &&
                 style.display !== 'none' &&
                 style.visibility !== 'hidden' &&
                 Number(style.opacity) !== 0 &&
@@ -132,8 +160,12 @@ export class ElementMetadataReader {
 
             /*
              * Return raw DOM metadata.
+             *
              * Locator generation remains the
              * responsibility of LocatorBuilder.
+             *
+             * outerHTML is diagnostic only.
+             * It must not become a locator strategy.
              */
             return {
                 tagName:
@@ -180,6 +212,27 @@ export class ElementMetadataReader {
 
                 context:
                     getContext(node),
+
+                /*
+                 * Native anchors have an implicit
+                 * link role only when href is present.
+                 *
+                 * Use hasAttribute rather than
+                 * checking the href value so that
+                 * href="" is also recognized.
+                 */
+                hasHref:
+                    node instanceof HTMLAnchorElement
+                        ? node.hasAttribute('href')
+                        : undefined,
+
+                title:
+                    normalize(
+                        node.getAttribute('title'),
+                    ),
+
+                outerHTML:
+                    node.outerHTML.slice(0, 2000),
 
                 visible,
             };

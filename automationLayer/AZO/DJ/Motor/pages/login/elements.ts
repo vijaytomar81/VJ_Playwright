@@ -1,0 +1,68 @@
+// AUTO-GENERATED FILE.
+// Changes may be overwritten by the POM generator.
+// pageKey: login
+// scannedAt: 2026-11-13T17:56:36.346Z
+
+export const elements = {
+    linkToAllianzHomePageLink: {
+        type: "link",
+        preferred: "role=link[name=\"Link to Allianz home page\"]",
+        fallbacks: [
+            "css=#goToAllianzHomePage",
+        ],
+        stableKey: "d63e4f79-cc91-4639-87f8-5dd6f6b0dff6",
+    },
+
+    logInLink: {
+        type: "link",
+        preferred: "role=link[name=\"Log in\"]",
+        fallbacks: [
+            "css=#login",
+        ],
+        stableKey: "d8264c23-ad3d-4c7e-ab61-502d08e27ca8",
+    },
+
+    donTHaveAPolicyWithUsGetANewQuoteLink: {
+        type: "link",
+        preferred: "role=link[name=\"Don’t have a policy with us, get a new quote\"]",
+        fallbacks: [
+            "css=#skipRegistration",
+        ],
+        stableKey: "673e623f-2cb4-4b12-be68-a9b74edb1e9f",
+    },
+
+    openTrustSealButton: {
+        type: "button",
+        preferred: "role=button[name=\"Open Trust Seal\"]",
+        fallbacks: [],
+        stableKey: "a8b1ed8b-be3d-47b3-9da3-cdd10453223f",
+    },
+
+    complaintsLink: {
+        type: "link",
+        preferred: "role=link[name=\"Complaints\"]",
+        fallbacks: [],
+        stableKey: "ad4b5221-a8a0-4e2c-8d3e-044e51a26d01",
+    },
+
+    ourCookiePolicyLink: {
+        type: "link",
+        preferred: "role=link[name=\"Our cookie policy\"]",
+        fallbacks: [],
+        stableKey: "0d8fb44b-cd08-46e7-a048-c375c1cb7f7c",
+    },
+
+    personalDataRightsLink: {
+        type: "link",
+        preferred: "role=link[name=\"Personal data rights\"]",
+        fallbacks: [],
+        stableKey: "e778bf6e-02bb-4646-8303-1591e8cafa70",
+    },
+
+    manageCookiesButton: {
+        type: "button",
+        preferred: "role=button[name=\"Manage Cookies\"]",
+        fallbacks: [],
+        stableKey: "8fe87a6b-8d85-46e2-9007-a85173f0bd61",
+    },
+} as const;

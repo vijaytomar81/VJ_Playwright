@@ -1,3 +1,4 @@
+
 import type {
     Page,
 } from '@playwright/test';
@@ -73,41 +74,134 @@ export class GeneratedElementAssembler {
                 element,
             );
 
-
         const candidates =
             this.locatorBuilder.build(
                 element,
             );
-
 
         const validatedCandidates =
             await this.locatorValidator.validate(
                 candidates,
             );
 
+        let locator: GeneratedElement['locator'];
 
-        const locator =
-            this.locatorSelector.select(
-                validatedCandidates,
+        try {
+            locator =
+                this.locatorSelector.select(
+                    validatedCandidates,
+                );
+        } catch (error) {
+
+            /*
+             * Diagnostic information for elements
+             * without a unique locator.
+             *
+             * No fallback locator is invented.
+             * Existing uniqueness rules are preserved.
+             */
+            const details = {
+                generatedName:
+                    name,
+
+                tagName:
+                    element.tagName,
+
+                type:
+                    element.type,
+
+                role:
+                    element.role,
+
+                label:
+                    element.label,
+
+                text:
+                    element.text?.slice(0, 100),
+
+                id:
+                    element.id,
+
+                name:
+                    element.name,
+
+                testId:
+                    element.testId,
+
+                placeholder:
+                    element.placeholder,
+
+                ariaLabel:
+                    element.ariaLabel,
+
+                context:
+                    element.context,
+
+                /*
+                 * Additional diagnostic metadata.
+                 *
+                 * These values are captured by
+                 * ElementMetadataReader and forwarded
+                 * through DomScanner.
+                 *
+                 * They are used only for diagnostics,
+                 * not for locator generation.
+                 */
+                title:
+                    element.title,
+
+                outerHTML:
+                    element.outerHTML,
+
+                candidates:
+                    validatedCandidates.map(
+                        candidate => ({
+                            strategy:
+                                candidate.strategy,
+
+                            descriptor:
+                                candidate.descriptor,
+
+                            unique:
+                                candidate.unique,
+
+                            matchCount:
+                                candidate.matchCount,
+                        }),
+                    ),
+            };
+
+            throw new Error(
+                'Unable to generate a unique locator.\n' +
+                JSON.stringify(
+                    details,
+                    null,
+                    2,
+                ),
+                {
+                    cause: error,
+                },
             );
-
+        }
 
         const fingerprint =
             this.fingerprintBuilder.build(
                 element,
             );
 
-
         const stableKey =
             this.stableKeyGenerator.generate();
 
-
         return {
             name,
+
             type:
                 element.type,
+
             locator,
+
             stableKey,
+
             fingerprint,
         };
     }
@@ -122,6 +216,7 @@ export class GeneratedElementAssembler {
             GeneratedElement[] = [];
 
         for (const element of elements) {
+
             const generatedElement =
                 await this.assemble(
                     element,

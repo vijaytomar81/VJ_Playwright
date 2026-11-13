@@ -1,3 +1,4 @@
+
 import type {
     ElementHandle,
     Page,
@@ -153,11 +154,36 @@ export class DomScanner {
             ariaLabel:
                 metadata.ariaLabel,
 
+            /*
+             * Indicates whether a native anchor
+             * has an href attribute.
+             *
+             * LocatorBuilder uses this to infer
+             * the implicit link role.
+             */
+            hasHref:
+                metadata.hasHref,
+
             visible:
                 metadata.visible,
 
             context:
                 metadata.context,
+
+            /*
+             * Diagnostic metadata.
+             *
+             * These properties help identify
+             * elements that cannot produce
+             * a unique locator.
+             *
+             * They are not locator candidates.
+             */
+            title:
+                metadata.title,
+
+            outerHTML:
+                metadata.outerHTML,
 
             /*
              * Locator candidates are deliberately empty.

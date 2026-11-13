@@ -43,5 +43,20 @@ export interface CapturedElement {
      */
     context?: string;
 
+    /*
+    * Diagnostic metadata.
+    *
+    * Used for investigating elements
+    * without unique locator candidates.
+    */
+    title?: string;
+    outerHTML?: string;
+
+    /**
+     * True when a native anchor has an href attribute.
+     * Used to infer its implicit link role.
+     */
+    hasHref?: boolean;
+
     locatorCandidates: readonly LocatorCandidate[];
 }

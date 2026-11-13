@@ -1,3 +1,4 @@
+
 import type {
     CapturedElement,
 } from '../models/captured-element.model';
@@ -52,7 +53,31 @@ export class LocatorBuilder {
         candidates: LocatorCandidate[],
         element: CapturedElement,
     ): void {
-        if (!element.role) {
+
+        /*
+         * Preserve explicitly declared roles.
+         *
+         * Native HTML buttons have an implicit
+         * button role.
+         *
+         * Native HTML anchors have an implicit
+         * link role only when href is present.
+         *
+         * hasHref is captured by ElementMetadataReader
+         * and forwarded through DomScanner.
+         */
+        const role =
+            element.role ??
+            (
+                element.tagName === 'button'
+                    ? 'button'
+                    : element.tagName === 'a' &&
+                        element.hasHref === true
+                        ? 'link'
+                        : undefined
+            );
+
+        if (!role) {
             return;
         }
 
@@ -69,7 +94,7 @@ export class LocatorBuilder {
             strategy: 'role',
             value: accessibleName,
             descriptor:
-                `role=${element.role}[name="${accessibleName}"]`,
+                `role=${role}[name="${accessibleName}"]`,
             unique: false,
         });
     }

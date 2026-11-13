@@ -1,3 +1,4 @@
+
 import type {
     Locator,
     Page,
@@ -27,7 +28,22 @@ export class LocatorValidator {
 
             validated.push({
                 ...candidate,
+
+                /*
+                 * Preserve strict uniqueness validation.
+                 * A locator is unique only when exactly
+                 * one element matches.
+                 */
                 unique: count === 1,
+
+                /*
+                 * Diagnostic information.
+                 *
+                 * 0 = no matching elements
+                 * 1 = exactly one matching element
+                 * >1 = multiple matching elements
+                 */
+                matchCount: count,
             });
         }
 
