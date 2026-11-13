@@ -1,21 +1,5 @@
-import { test, expect } from '@playwright/test';
+File: C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\Athena_Automation\integration-tests\automationLayer\insurance\ferry\automatedNavigation\agentPortal\motor\mta\annual\AddDriver.spec.ts
 
+import { indexServicingJourney } from '@ferry/automatedNavigation/servicingNavigation';
 
-
-$example = $files | Where-Object {
-    $longPath = '\\?\' + $_
-    $content = [System.IO.File]::ReadAllText($longPath)
-
-    -not $content.Contains($target)
-} | Select-Object -First 1
-
-Write-Host ""
-Write-Host "========== Other Spec File Example =========="
-
-if ($example) {
-    Write-Host "File: $example"
-} else {
-    Write-Host "No other spec files found."
-}
-
-Write-Host "============================================="
+indexServicingJourney('annual', 'addDriver', 'agentPortal');
