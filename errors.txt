@@ -1,29 +1,107 @@
-PS C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\Athena_Automation\VJ_Playwright> npx tsc --noEmit
-apiIntegration/gmail/gmailHelper.ts:1:42 - error TS2307: Cannot find module 'mailparser' or its corresponding type declarations.
+import fs from 'node:fs';
+import path from 'node:path';
+import ExcelJS from 'exceljs';
 
-1 import { simpleParser, ParsedMail } from 'mailparser';
-                                           ~~~~~~~~~~~~
+interface TestCaseData {
+  [fieldName: string]: any;
+}
 
-apiIntegration/gmail/gmailHelper.ts:2:34 - error TS2307: Cannot find module 'googleapis' or its corresponding type declarations.
+interface SheetData {
+  [testCaseName: string]: TestCaseData;
+}
 
-2 import { google, gmail_v1 } from 'googleapis';
-                                   ~~~~~~~~~~~~
+function ensureOutputFolder(outputFolder: string): void {
+  if (!fs.existsSync(outputFolder)) {
+    fs.mkdirSync(outputFolder, { recursive: true });
+  }
+}
 
-automationLayer/insurance/unitTests/workerDependencies.test.ts:5:39 - error TS2307: Cannot find module 'googleapis' or its corresponding type declarations.
+const FIELD_CODE_LEGEND_NAMES = ['ScriptName', 'JSON object'];
 
-5 import { google, type gmail_v1 } from 'googleapis';
-                                        ~~~~~~~~~~~~
+function normalizeHeader(value: any): string {
+  if (typeof value !== 'string') return '';
+  return value.replace(/\s+/g, ' ').trim().toLowerCase();
+}
 
-dataLayer/dataGenerator/excelToJson.ts:3:33 - error TS2307: Cannot find module 'xlsx' or its corresponding type declarations.
+function transformToTestCaseStructure(sheet: WorkSheet): SheetData {
+  const rawData: any[][] = XLSX.utils.sheet_to_json(sheet, { header: 1 });
 
-3 import XLSX, { WorkSheet } from 'xlsx';
-                                  ~~~~~~
+  const headerRow: any[] = rawData[0];
+  const testCases: SheetData = {};
+  const totalColumns = headerRow.length;
 
+  const normalizedLegendNames = FIELD_CODE_LEGEND_NAMES.map(normalizeHeader);
 
-Found 4 errors in 3 files.
+  const fieldNameColumnIndex = headerRow.findIndex((header) =>
+    normalizedLegendNames.includes(normalizeHeader(header))
+  );
 
-Errors  Files
-     2  apiIntegration/gmail/gmailHelper.ts:1
-     1  automationLayer/insurance/unitTests/workerDependencies.test.ts:5
-     1  dataLayer/dataGenerator/excelToJson.ts:3
-PS C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\Athena_Automation\VJ_Playwright>
+  if (fieldNameColumnIndex === -1) {
+    throw new Error(
+      `Could not find a field-code column (expected one of: ${FIELD_CODE_LEGEND_NAMES.join(', ')}) in header row: ${JSON.stringify(headerRow)}`
+    );
+  }
+
+  // Any column(s) to the LEFT of the field-code column (e.g. "Test Case Name" / questions)
+  // are simply never read - real test case data always starts right after the field-code column.
+  const testCaseStartColumn = fieldNameColumnIndex + 1;
+
+  for (let columnIndex = testCaseStartColumn; columnIndex < totalColumns; columnIndex += 1) {
+    const testCaseName = headerRow[columnIndex];
+    if (!testCaseName) continue;
+    testCases[testCaseName] = {};
+  }
+
+  for (let rowIndex = 1; rowIndex < rawData.length; rowIndex += 1) {
+    const row = rawData[rowIndex];
+    const fieldName = row[fieldNameColumnIndex]; // now correctly reads column B ("KnowRegNo", "VRN", etc.)
+    if (!fieldName) continue;
+
+    for (let columnIndex = testCaseStartColumn; columnIndex < totalColumns; columnIndex += 1) {
+      const testCaseName = headerRow[columnIndex];
+      if (!testCaseName) continue;
+      testCases[testCaseName][fieldName] = row[columnIndex];
+    }
+  }
+
+  return testCases;
+}
+
+export function getAllData(excelFile: string, outputFolder: string): Record<string, SheetData> {
+  ensureOutputFolder(outputFolder);
+
+  console.log('Reading Excel from:', excelFile);
+
+  if (!fs.existsSync(excelFile)) {
+    throw new Error(`Excel file not found: ${excelFile}`);
+  }
+
+  const workbook = XLSX.readFile(excelFile);
+  const allSheets: Record<string, SheetData> = {};
+
+  workbook.SheetNames.forEach((sheetName) => {
+    const sheet = workbook.Sheets[sheetName];
+
+    const structuredData = transformToTestCaseStructure(sheet);
+    allSheets[sheetName] = structuredData;
+
+    const jsonFilePath = path.join(outputFolder, `${sheetName}.json`);
+
+    let existingData: SheetData = {};
+
+    if (fs.existsSync(jsonFilePath)) {
+      existingData = JSON.parse(fs.readFileSync(jsonFilePath, 'utf8'));
+    }
+
+    const dataChanged = JSON.stringify(existingData) !== JSON.stringify(structuredData);
+
+    if (dataChanged) {
+      fs.writeFileSync(jsonFilePath, JSON.stringify(structuredData, null, 2));
+      console.log(`Updated JSON for sheet: ${sheetName}`);
+    } else {
+      console.log(`No changes for sheet: ${sheetName}`);
+    }
+  });
+
+  return allSheets;
+}
