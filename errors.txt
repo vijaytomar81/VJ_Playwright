@@ -1,20 +1,37 @@
-C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\Athena_Automation\VJ_Playwright> $profile = Join-Path $env:TEMP ("edge-cdp-" + (Get-Date -Format "yyyyMMdd-HHmmss")); `
->> Start-Process "C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe" "--remote-debugging-port=9222 --user-data-dir=$profile"; `
->> Start-Sleep -Seconds 2; `
->> $CDP = (Invoke-RestMethod http://localhost:9222/json/version).webSocketDebuggerUrl;
-PS C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\Athena_Automation\VJ_Playwright> npm run pom:create -- `
->>   --connectCdp="$CDP" `
->>   --brand="AZO" `
->>   --channel="CTM" `
->>   --product="Motor" `
->>   --page-name="Policyholder Details"
-
-> allianz-automation@1.0.0 pom:create
-> tsx tools/pom-generator/cli/pom-create.cli.ts --connectCdp=ws://localhost:9222/devtools/browser/*** --brand=AZO --channel=CTM --product=Motor --page-name=Policyholder Details
-
-
-POM CREATE failed: elementHandle.evaluate: ReferenceError: __name is not defined
-    at eval (eval at evaluate (:311:30), <anonymous>:1:120)
-    at UtilityScript.evaluate (<anonymous>:313:16)
-    at UtilityScript.<anonymous> (<anonymous>:1:44)
-PS C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\Athena_Automation\VJ_Playwright> 
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "commonjs",
+    "moduleResolution": "node",
+    "types": [
+      "node"
+    ],
+    "esModuleInterop": true,
+    "resolveJsonModule": true,
+    "skipLibCheck": true,
+    "strict": false,
+    "baseUrl": "./",
+    "paths": {
+      "@pages/*": [
+        "automationLayer/ferry/pages/*"
+      ],
+      "@shared/*": [
+        "automationLayer/insurance/shared/*"
+      ],
+      "@lv/*": [
+        "automationLayer/insurance/lv/*"
+      ],
+      "@ferry/*": [
+        "automationLayer/insurance/ferry/*"
+      ],
+      "@baseTest": [
+        "automationLayer/common/baseTest.ts"
+      ]
+    },
+    "noEmit": true
+  },
+  "include": [
+    "**/*.ts",
+    "**/*.js"
+  ]
+}
