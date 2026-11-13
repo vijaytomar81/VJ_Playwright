@@ -1,41 +1,25 @@
-PS C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\Athena_Automation\VJ_Playwright> npx tsc --noEmit
-tsconfig.json:5:25 - error TS5108: Option 'moduleResolution=node10' has been removed. Please remove it from your configuration.
+PS C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\Athena_Automation\VJ_Playwright> npx tsc --version
+Version 7.0.2
+PS C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\Athena_Automation\VJ_Playwright> npm install install --save-dev typescript@5.9
 
-5     "moduleResolution": "node",
-                          ~~~~~~
+added 1 package, removed 1 package, changed 1 package, and audited 162 packages in 7s
 
-tsconfig.json:13:5 - error TS5102: Option 'baseUrl' has been removed. Please remove it from your configuration.
-  Use '"paths": {"*": ["./*"]}' instead.
+17 packages are looking for funding
+  run `npm fund` for details
 
-13     "baseUrl": "./",
-       ~~~~~~~~~
+5 moderate severity vulnerabilities
 
-tsconfig.json:16:9 - error TS5090: Non-relative paths are not allowed. Did you forget a leading './'?
+To address issues that do not require attention, run:
+  npm audit fix
 
-16         "automationLayer/ferry/pages/*"
-           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+To address all issues (including breaking changes), run:
+  npm audit fix --force
 
-tsconfig.json:19:9 - error TS5090: Non-relative paths are not allowed. Did you forget a leading './'?
-
-19         "automationLayer/insurance/shared/*"
-           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-tsconfig.json:22:9 - error TS5090: Non-relative paths are not allowed. Did you forget a leading './'?
-
-22         "automationLayer/insurance/lv/*"
-           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-tsconfig.json:25:9 - error TS5090: Non-relative paths are not allowed. Did you forget a leading './'?
-
-25         "automationLayer/insurance/ferry/*"
-           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-tsconfig.json:28:9 - error TS5090: Non-relative paths are not allowed. Did you forget a leading './'?
-
-28         "automationLayer/common/baseTest.ts"
-           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-
-Found 7 errors in the same file, starting at: tsconfig.json:5
-
+Run `npm audit` for details.
+npm warn install-scripts 1 package has install scripts not yet covered by allowScripts:
+npm warn install-scripts   esbuild@0.28.2 (postinstall: node install.js)
+npm warn install-scripts
+npm warn install-scripts Run `npm install-scripts ls` to review, or `npm install-scripts approve <pkg>` to allow.
+PS C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\Athena_Automation\VJ_Playwright> npx tsc --version                            
+Version 5.9.3
 PS C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\Athena_Automation\VJ_Playwright> 
