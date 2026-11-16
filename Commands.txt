@@ -1,3 +1,11 @@
+Git Clone:
+
+git clone --config core.longpaths=true "https://github.com/vijaytomar81/VJ_Playwright.git" &&
+cd VJ_Playwright &&
+git status &&
+code .
+
+
 Windows
 =========
 
