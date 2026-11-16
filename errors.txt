@@ -1,7 +1,6 @@
-tp70707@AVD-HEX-73 MINGW64 ~/OneDrive - Allianz/My Documents/Automation/Athena_Automation/VJ_Playwright (pom-automation)
-$ git status --short --branch
-## pom-automation...origin/pom-automation [behind 4]
- D API-Integration/microsoft/readMicrosoftEmail.ts
+git restore -- API-Integration/microsoft/readMicrosoftEmail.ts &&
+git pull --ff-only &&
+git status --short --branch
 
-tp70707@AVD-HEX-73 MINGW64 ~/OneDrive - Allianz/My Documents/Automation/Athena_Automation/VJ_Playwright (pom-automation)
-$ 
+
+ls -la API-Integration/microsoft
