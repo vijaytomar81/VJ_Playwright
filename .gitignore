@@ -10,5 +10,3 @@ node_modules/
 /results/
 /archive/
 dist/
-/package.json
-/package-lock.json
