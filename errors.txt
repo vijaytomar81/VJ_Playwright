@@ -1,7 +1,13 @@
-Tenant ID: 6e06e42d-6925-47c6-b9e7-9581c7ca302a
-Primary domain: allianzms.onmicrosoft.com
+PS C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\Athena_Automation\VJ_Playwright> npm run pom:create -- `
+>>   --connectCdp="$CDP" `
+>>   --brand="AZO" `
+>>   --channel="DJ" `
+>>   --product="Motor" `
+>>   --page-name="Login Options"
 
-04f42a63-e595-4266-8473-06fcb5f4b522
+> allianz-automation@1.0.0 pom:create
+> tsc -p tools/pom-generator/tsconfig.build.json && node dist/tools/pom-generator/cli/pom-create.cli.js --connectCdp=ws://localhost:9222/devtools/browser/*** --brand=AZO --channel=DJ --product=Motor --page-name=Login Options
 
 
-{"sessionId":"f6d39e38ec014fdc8004a346d63a697e","subscriptionId":"","resourceGroup":"","errorCode":"401","resourceName":"","details":"Error loading your content"}
+POM CREATE failed: Invalid CLI argument: ^--page-name=Login^ Options^
+PS C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\Athena_Automation\VJ_Playwright>
