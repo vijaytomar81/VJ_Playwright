@@ -1,6 +1,4 @@
-git restore -- API-Integration/microsoft/readMicrosoftEmail.ts &&
-git pull --ff-only &&
-git status --short --branch
+Tenant ID: 6e06e42d-6925-47c6-b9e7-9581c7ca302a
+Primary domain: allianzms.onmicrosoft.com
 
-
-ls -la API-Integration/microsoft
+04f42a63-e595-4266-8473-06fcb5f4b522
