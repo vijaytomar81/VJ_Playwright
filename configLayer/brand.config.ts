@@ -23,27 +23,50 @@ export const ALL_BRANDS: readonly Brand[] =
  */
 export const BrandHierarchy = {
     [Brands.AZO]: {
-        [Channels.CTM]: [
+        [Channels.DJ]: [
             Products.HOME,
             Products.MOTOR,
         ],
 
         [Channels.CNF]: [
+            Products.HOME,
             Products.MOTOR,
         ],
 
-        [Channels.DJ]: [
+        [Channels.CTM]: [
+            Products.HOME,
+            Products.MOTOR,
+        ],
+
+        [Channels.GOCO]: [
+            Products.HOME,
+            Products.MOTOR,
+        ],
+
+        [Channels.MSM]: [
             Products.HOME,
             Products.MOTOR,
         ],
     },
 
     [Brands.BRI]: {
-        [Channels.CTM]: [
+        [Channels.DJ]: [
             Products.MOTOR,
         ],
 
+        [Channels.CNF]: [
+            Products.HOME,
+        ],
+
+        [Channels.CTM]: [
+            Products.HOME,
+        ],
+
         [Channels.GOCO]: [
+            Products.HOME,
+        ],
+
+        [Channels.MSM]: [
             Products.HOME,
         ],
     },
