@@ -1,3 +1,8 @@
+
+import {
+    readFile,
+} from 'node:fs/promises';
+
 import type {
     GeneratedPage,
 } from '../models/page.model';
@@ -92,11 +97,10 @@ export class PomOutputWriter {
 
 
         const actionsCreated =
-            await this.fileWriter
-                .writeIfMissing(
-                    paths.actionsFile,
-                    actionsSource,
-                );
+            await this.writeActions(
+                paths.actionsFile,
+                actionsSource,
+            );
 
 
         return {
@@ -111,5 +115,43 @@ export class PomOutputWriter {
 
             actionsCreated,
         };
+    }
+
+
+    private async writeActions(
+        filePath: string,
+        content: string,
+    ): Promise<boolean> {
+
+        const created =
+            await this.fileWriter.writeIfMissing(
+                filePath,
+                content,
+            );
+
+        if (created) {
+            return true;
+        }
+
+        const existingContent =
+            await readFile(
+                filePath,
+                'utf8',
+            );
+
+        if (
+            !existingContent.startsWith(
+                '// AUTO-GENERATED ATOMIC ACTIONS',
+            )
+        ) {
+            return false;
+        }
+
+        await this.fileWriter.write(
+            filePath,
+            content,
+        );
+
+        return false;
     }
 }

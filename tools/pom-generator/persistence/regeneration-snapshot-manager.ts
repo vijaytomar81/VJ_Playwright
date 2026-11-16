@@ -1,3 +1,4 @@
+
 import type {
     GeneratedPage,
 } from '../models/page.model';
@@ -72,6 +73,7 @@ export class RegenerationSnapshotManager {
                 : [
                     outputPaths.elementsFile,
                     outputPaths.pageFile,
+                    outputPaths.actionsFile,
                     metadataFile,
                 ];
 
