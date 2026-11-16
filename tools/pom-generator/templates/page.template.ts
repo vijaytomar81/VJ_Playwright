@@ -7,24 +7,18 @@ import {
     PageNameGenerator,
 } from '../naming/page-name-generator';
 
-import {
-    LocatorCodeGenerator,
-} from '../locator/locator-code-generator';
-
 
 export class PageTemplate {
 
     constructor(
         private readonly pageNameGenerator =
             new PageNameGenerator(),
-
-        private readonly locatorCodeGenerator =
-            new LocatorCodeGenerator(),
     ) { }
 
 
     render(
         page: GeneratedPage,
+        resolverImportPath = './locator-resolver',
     ): string {
 
         const pageName =
@@ -48,7 +42,6 @@ export class PageTemplate {
                     ),
             );
 
-
         return [
             '// AUTO-GENERATED FILE.',
             '// Changes may be overwritten by the POM generator.',
@@ -59,6 +52,12 @@ export class PageTemplate {
             '    Locator,',
             '    Page,',
             "} from '@playwright/test';",
+            '',
+            "import { elements } from './elements';",
+            '',
+            'import {',
+            '    resolveLocator,',
+            `} from ${JSON.stringify(resolverImportPath)};`,
             '',
             `export class ${pageName.className}Page {`,
             '',
@@ -93,24 +92,18 @@ export class PageTemplate {
         element: GeneratedElement,
     ): string {
 
-        const locatorCode =
-            this.locatorCodeGenerator.generate(
-                element.locator.preferred,
+        const propertyAccess =
+            this.renderPropertyAccess(
+                element.name,
             );
-
-        const indentedLocatorCode =
-            this.indent(
-                locatorCode,
-                12,
-            );
-
 
         return [
             '',
-            `        this${this.renderPropertyAccess(
-                element.name,
-            )} =`,
-            indentedLocatorCode + ';',
+            `        this${propertyAccess} =`,
+            '            resolveLocator(',
+            '                page,',
+            `                elements${propertyAccess}.preferred,`,
+            '            );',
         ].join('\n');
     }
 
@@ -153,24 +146,6 @@ export class PageTemplate {
 
         return /^[A-Za-z_$][A-Za-z0-9_$]*$/
             .test(value);
-    }
-
-
-    private indent(
-        value: string,
-        spaces: number,
-    ): string {
-
-        const indentation =
-            ' '.repeat(spaces);
-
-        return value
-            .split('\n')
-            .map(
-                line =>
-                    `${indentation}${line}`,
-            )
-            .join('\n');
     }
 
 

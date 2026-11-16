@@ -424,5 +424,96 @@ test.describe(
             },
         );
 
+
+        test(
+            'should connect generated page to elements.ts',
+            async () => {
+
+                const result =
+                    await writer.write(
+                        generatedPage(),
+                    );
+
+                const source =
+                    await readFile(
+                        result.pageFile,
+                        'utf8',
+                    );
+
+                expect(source)
+                    .toContain(
+                        "import { elements } from './elements';",
+                    );
+
+                expect(source)
+                    .toContain(
+                        'elements.firstName.preferred',
+                    );
+
+                expect(source)
+                    .toContain(
+                        'resolveLocator(',
+                    );
+
+                expect(source)
+                    .not.toContain(
+                        'page.getByLabel(',
+                    );
+            },
+        );
+
+
+        test(
+            'should generate a valid relative resolver import',
+            async () => {
+
+                const result =
+                    await writer.write(
+                        generatedPage(),
+                    );
+
+                const source =
+                    await readFile(
+                        result.pageFile,
+                        'utf8',
+                    );
+
+                const resolverFile =
+                    path.resolve(
+                        process.cwd(),
+                        'tools/pom-generator/runtime/locator-resolver.ts',
+                    );
+
+                const relativeImport =
+                    path.relative(
+                        path.dirname(result.pageFile),
+                        resolverFile,
+                    )
+                        .replace(/\.ts$/, '')
+                        .split(path.sep)
+                        .join('/');
+
+                const importPath =
+                    relativeImport.startsWith('.')
+                        ? relativeImport
+                        : `./${relativeImport}`;
+
+                expect(source)
+                    .toContain(
+                        `from ${JSON.stringify(importPath)};`,
+                    );
+
+                const importedFile =
+                    path.resolve(
+                        path.dirname(result.pageFile),
+                        `${importPath}.ts`,
+                    );
+
+                expect(importedFile)
+                    .toBe(resolverFile);
+            },
+        );
+
+
     },
 );

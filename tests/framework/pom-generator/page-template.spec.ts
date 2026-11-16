@@ -1,3 +1,4 @@
+
 import {
     test,
     expect,
@@ -131,7 +132,6 @@ test.describe(
                         generatedPage(),
                     );
 
-
                 expect(source)
                     .toContain(
                         'export class PolicyholderDetailsPage {',
@@ -151,7 +151,7 @@ test.describe(
 
 
         test(
-            'should generate native Playwright label locator',
+            'should import generated elements definitions',
             () => {
 
                 const source =
@@ -159,22 +159,16 @@ test.describe(
                         generatedPage(),
                     );
 
-
                 expect(source)
                     .toContain(
-                        'page.getByLabel(',
-                    );
-
-                expect(source)
-                    .toContain(
-                        '"First name"',
+                        "import { elements } from './elements';",
                     );
             },
         );
 
 
         test(
-            'should generate native Playwright role locator',
+            'should reference the firstName element identifier',
             () => {
 
                 const source =
@@ -182,66 +176,101 @@ test.describe(
                         generatedPage(),
                     );
 
+                expect(source)
+                    .toContain(
+                        'elements.firstName.preferred',
+                    );
 
                 expect(source)
                     .toContain(
-                        'page.getByRole(',
+                        'this.firstName =',
                     );
 
                 expect(source)
                     .toContain(
-                        'name: "Continue"',
+                        'resolveLocator(',
                     );
-            },
-        );
-
-
-        test(
-            'should not create runtime dependency on pom generator',
-            () => {
-
-                const source =
-                    template.render(
-                        generatedPage(),
-                    );
-
 
                 expect(source)
                     .not.toContain(
-                        'tools/pom-generator',
+                        'page.getByLabel(',
+                    );
+            },
+        );
+
+
+        test(
+            'should reference the continueButton element identifier',
+            () => {
+
+                const source =
+                    template.render(
+                        generatedPage(),
+                    );
+
+                expect(source)
+                    .toContain(
+                        'elements.continueButton.preferred',
+                    );
+
+                expect(source)
+                    .toContain(
+                        'this.continueButton =',
+                    );
+
+                expect(source)
+                    .not.toContain(
+                        'page.getByRole(',
+                    );
+            },
+        );
+
+
+        test(
+            'should use the supplied shared resolver import path',
+            () => {
+
+                const source =
+                    template.render(
+                        generatedPage(),
+                        '../../../../tools/pom-generator/runtime/locator-resolver',
+                    );
+
+                expect(source)
+                    .toContain(
+                        'from "../../../../tools/pom-generator/runtime/locator-resolver";',
+                    );
+
+                expect(source)
+                    .toContain(
+                        'resolveLocator(',
+                    );
+            },
+        );
+
+
+        test(
+            'should not embed locator descriptors in the page class',
+            () => {
+
+                const source =
+                    template.render(
+                        generatedPage(),
+                    );
+
+                expect(source)
+                    .not.toContain(
+                        'label=First name',
+                    );
+
+                expect(source)
+                    .not.toContain(
+                        'role=button[name="Continue"]',
                     );
 
                 expect(source)
                     .not.toContain(
                         'LocatorCodeGenerator',
-                    );
-
-                expect(source)
-                    .not.toContain(
-                        'LocatorResolver',
-                    );
-            },
-        );
-
-
-        test(
-            'should not import generated elements descriptors at runtime',
-            () => {
-
-                const source =
-                    template.render(
-                        generatedPage(),
-                    );
-
-
-                expect(source)
-                    .not.toContain(
-                        "from './elements'",
-                    );
-
-                expect(source)
-                    .not.toContain(
-                        'elements.firstName',
                     );
             },
         );
@@ -258,7 +287,6 @@ test.describe(
                         }),
                     );
 
-
                 expect(source)
                     .toContain(
                         'export class PolicyholderDetailsPage {',
@@ -272,6 +300,11 @@ test.describe(
                 expect(source)
                     .not.toContain(
                         'readonly firstName',
+                    );
+
+                expect(source)
+                    .not.toContain(
+                        'elements.firstName.preferred',
                     );
             },
         );
@@ -309,10 +342,8 @@ test.describe(
                         ],
                     });
 
-
                 const source =
                     template.render(page);
-
 
                 expect(source)
                     .toContain(
@@ -322,6 +353,11 @@ test.describe(
                 expect(source)
                     .toContain(
                         'this["first-name"] =',
+                    );
+
+                expect(source)
+                    .toContain(
+                        'elements["first-name"].preferred',
                     );
             },
         );
@@ -335,7 +371,6 @@ test.describe(
                     template.render(
                         generatedPage(),
                     );
-
 
                 expect(source)
                     .toContain(

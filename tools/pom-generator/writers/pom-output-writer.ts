@@ -1,4 +1,6 @@
 
+import path from 'node:path';
+
 import {
     readFile,
 } from 'node:fs/promises';
@@ -68,6 +70,10 @@ export class PomOutputWriter {
                 page,
             );
 
+        const resolverImportPath =
+            this.buildResolverImportPath(
+                paths.pageFile,
+            );
 
         const elementsSource =
             this.elementsTemplate.render(
@@ -77,6 +83,7 @@ export class PomOutputWriter {
         const pageSource =
             this.pageTemplate.render(
                 page,
+                resolverImportPath,
             );
 
         const actionsSource =
@@ -115,6 +122,47 @@ export class PomOutputWriter {
 
             actionsCreated,
         };
+    }
+
+
+    private buildResolverImportPath(
+        pageFile: string,
+    ): string {
+
+        const resolverFile =
+            path.resolve(
+                process.cwd(),
+                'tools',
+                'pom-generator',
+                'runtime',
+                'locator-resolver.ts',
+            );
+
+        const pageDirectory =
+            path.dirname(
+                path.resolve(pageFile),
+            );
+
+        let relativePath =
+            path.relative(
+                pageDirectory,
+                resolverFile,
+            );
+
+        relativePath =
+            relativePath
+                .replace(/\.ts$/, '')
+                .split(path.sep)
+                .join('/');
+
+        if (
+            !relativePath.startsWith('.')
+        ) {
+            relativePath =
+                `./${relativePath}`;
+        }
+
+        return relativePath;
     }
 
 
