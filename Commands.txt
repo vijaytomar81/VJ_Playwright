@@ -16,10 +16,40 @@ git pull --ff-only
 Windows
 =========
 
-$profile = Join-Path $env:TEMP ("edge-cdp-" + (Get-Date -Format "yyyyMMdd-HHmmss")); `
-Start-Process "C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe" "--remote-debugging-port=9222 --user-data-dir=$profile"; `
-Start-Sleep -Seconds 2; `
-$CDP = (Invoke-RestMethod http://localhost:9222/json/version).webSocketDebuggerUrl;
+
+# Find Microsoft Edge
+$edge = "${env:ProgramFiles(x86)}\Microsoft\Edge\Application\msedge.exe"
+
+if (-not (Test-Path $edge)) {
+    $edge = "$env:ProgramFiles\Microsoft\Edge\Application\msedge.exe"
+}
+
+# Create a dedicated CDP browser profile
+$profile = Join-Path $env:TEMP (
+    "edge-cdp-" + (Get-Date -Format "yyyyMMdd-HHmmss")
+)
+
+# Launch Edge
+$edgeProcess = Start-Process `
+    -FilePath $edge `
+    -ArgumentList @(
+        "--remote-debugging-port=9222"
+        "--user-data-dir=`"$profile`""
+        "--no-first-run"
+        "--no-default-browser-check"
+    ) `
+    -PassThru
+
+# Wait for the CDP endpoint
+Start-Sleep -Seconds 2
+
+# Retrieve WebSocket URL
+$CDP = (
+    Invoke-RestMethod "http://localhost:9222/json/version"
+).webSocketDebuggerUrl
+
+Write-Host "CDP URL: $CDP"
+Write-Host "Edge PID: $($edgeProcess.Id)"
 
 
 =======
@@ -41,25 +71,36 @@ echo "$CDP"
 
 =============
 
-npm install exceljs
+Close the CDP browser
+---------------------
 
-npm install --save-dev typescript @types/node @playwright/test tsx
+Stop-Process -Id $edgeProcess.Id
 
-npm install archiver
-npm install --save-dev @types/archiver
+try {
+    Invoke-RestMethod "http://localhost:9222/json/version" `
+        -TimeoutSec 2 | Out-Null
 
+    Write-Host "CDP still running"
+}
+catch {
+    Write-Host "CDP stopped"
+}
+
+
+=============
+
+Scan Page:
+
+
+npm run pom:create -- `
+  --connectCdp="$CDP" `
+  --brand="AZO" `
+  --channel="DJ" `
+  --product="Motor" `
+  --page-name="Login Form Test"
+
+
+
+npx tsc -p tools/pom-generator/tsconfig.build.json
 npx tsc --noEmit
 
-npx tsx tests/framework/evidence-factory/initialize-run.ts
-
-npx playwright test tests/framework/evidence-factory/evidence-factory-excel.spec.ts --project=framework --workers=4
-
-npx playwright test tests/framework/evidence-factory/evidence-report.spec.ts --project=framework --workers=1
-
-=============
-
-EVIDENCE_RUN_ID="RUN-$(date +%Y%m%d-%H%M%S)" \
-npx playwright test automationLayer/tests/evidence-e2e.spec.ts \
-  --project=edge
-
-=============
