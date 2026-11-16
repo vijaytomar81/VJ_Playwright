@@ -1,37 +1,7 @@
-{
-  "compilerOptions": {
-    "target": "ES2022",
-    "module": "commonjs",
-    "moduleResolution": "node",
-    "types": [
-      "node"
-    ],
-    "esModuleInterop": true,
-    "resolveJsonModule": true,
-    "skipLibCheck": true,
-    "strict": false,
-    "baseUrl": "./",
-    "paths": {
-      "@pages/*": [
-        "automationLayer/ferry/pages/*"
-      ],
-      "@shared/*": [
-        "automationLayer/insurance/shared/*"
-      ],
-      "@lv/*": [
-        "automationLayer/insurance/lv/*"
-      ],
-      "@ferry/*": [
-        "automationLayer/insurance/ferry/*"
-      ],
-      "@baseTest": [
-        "automationLayer/common/baseTest.ts"
-      ]
-    },
-    "noEmit": true
-  },
-  "include": [
-    "**/*.ts",
-    "**/*.js"
-  ]
-}
+tp70707@AVD-HEX-73 MINGW64 ~/OneDrive - Allianz/My Documents/Automation/Athena_Automation/VJ_Playwright (pom-automation)
+$ git status --short --branch
+## pom-automation...origin/pom-automation [behind 4]
+ D API-Integration/microsoft/readMicrosoftEmail.ts
+
+tp70707@AVD-HEX-73 MINGW64 ~/OneDrive - Allianz/My Documents/Automation/Athena_Automation/VJ_Playwright (pom-automation)
+$ 
