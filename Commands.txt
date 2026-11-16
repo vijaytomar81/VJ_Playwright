@@ -1,3 +1,8 @@
+git restore --source=HEAD --staged --worktree -- package.json package-lock.json
+if ($LASTEXITCODE -eq 0) {
+    git pull --ff-only
+}
+
 Git Clone:
 
 git clone --config core.longpaths=true "https://github.com/vijaytomar81/VJ_Playwright.git" &&
