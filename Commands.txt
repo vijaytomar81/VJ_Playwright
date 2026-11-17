@@ -92,6 +92,9 @@ catch {
 
 =============
 
+npx tsc --noEmit
+npx tsc -p tools/pom-generator/tsconfig.build.json
+
 Scan Page:
 
 
