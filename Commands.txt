@@ -72,6 +72,10 @@ CDP=$(curl -s http://localhost:9222/json/version | \
 
 echo "$CDP"
 
+kill browser:
+
+pkill -f "Microsoft Edge.*remote-debugging-port=9222"
+
 =============
 
 Close the CDP browser
@@ -105,6 +109,6 @@ npm run pom:create -- `
   --product="Motor" `
   --page-name="Login-Options"
 
-npm run pom:create -- --connectCdp="$CDP" --brand="AZO" --channel="DJ" --product="Motor" --page-name="Login-Options"
+npm run pom:create -- --connectCdp="$CDP" --brand="AZO" --channel="DJ" --product="Motor" --page-name="Quote-Options"
 
 
