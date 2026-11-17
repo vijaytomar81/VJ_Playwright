@@ -100,7 +100,7 @@ npm run pom:create -- `
   --brand="AZO" `
   --channel="DJ" `
   --product="Motor" `
-  --page-name="Login Form Test"
+  --page-name="Login Options"
 
 
 
