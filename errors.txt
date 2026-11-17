@@ -1,20 +1,19 @@
-tp70707@AVD-HEX-73 MINGW64 ~/OneDrive - Allianz/My Documents/Automation/Athena_Automation/VJ_Playwright (pom-automation)
-$ git status
-On branch pom-automation
-Your branch is behind 'origin/pom-automation' by 3 commits, and can be fast-forwarded.
-  (use "git pull" to update your local branch)
+PS C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\Athena_Automation\VJ_Playwright> npm run pom:create -- --connectCdp="$CDP" --brand="AZO" --channel="DJ" --product="Motor" --page-name="Login Options"
 
-Changes not staged for commit:
-  (use "git add/rm <file>..." to update what will be committed)
-  (use "git restore <file>..." to discard changes in working directory)
-        deleted:    .pom-generator/metadata/AZO/DJ/Motor/login.json
-        deleted:    git-command.txt
-        deleted:    git-status-filtered.txt
-        deleted:    git-status.txt
+> allianz-automation@1.0.0 pom:create
+> tsc -p tools/pom-generator/tsconfig.build.json && node dist/tools/pom-generator/cli/pom-create.cli.js --connectCdp=ws://localhost:9222/devtools/browser/*** --brand=AZO --channel=DJ --product=Motor --page-name=Login Options
 
-no changes added to commit (use "git add" and/or "git commit -a")
+tools/pom-generator/writers/action-method-merger.ts:3:8 - error TS2307: Cannot find module '@babel/parser' or its corresponding type declarations.
 
-tp70707@AVD-HEX-73 MINGW64 ~/OneDrive - Allianz/My Documents/Automation/Athena_Automation/VJ_Playwright (pom-automation)
-$ git pull
-Updating 5a97e38..59377f3
-Deletion of directory '.pom-generator/metadata/AZO/DJ/Motor' failed. Should I try again? (y/n) 
+3 } from '@babel/parser';
+         ~~~~~~~~~~~~~~~
+
+tools/pom-generator/writers/action-method-merger.ts:7:8 - error TS2307: Cannot find module '@babel/types' or its corresponding type declarations.
+
+7 } from '@babel/types';
+         ~~~~~~~~~~~~~~
+
+
+Found 2 errors in the same file, starting at: tools/pom-generator/writers/action-method-merger.ts:3
+
+PS C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\Athena_Automation\VJ_Playwright> 
