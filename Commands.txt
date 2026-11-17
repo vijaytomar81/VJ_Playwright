@@ -1,7 +1,5 @@
-git restore --source=HEAD --staged --worktree -- package.json package-lock.json
-if ($LASTEXITCODE -eq 0) {
-    git pull --ff-only
-}
+git pull --ff-only < /dev/null
+git status --short --branch
 
 Git Clone:
 
