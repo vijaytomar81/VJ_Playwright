@@ -1,3 +1,4 @@
+
 import {
     test,
     expect,
@@ -25,31 +26,17 @@ import {
 
 
 function generatedPage(
-    overrides:
-        Partial<GeneratedPage> = {},
+    overrides: Partial<GeneratedPage> = {},
 ): GeneratedPage {
 
     return {
-        brand:
-            Brands.AZO,
-
-        channel:
-            Channels.CTM,
-
-        product:
-            Products.MOTOR,
-
-        pageName:
-            'Policyholder Details',
-
-        pageKey:
-            'policyholder-details',
-
-        scannedAt:
-            '2026-10-01T10:00:00.000Z',
-
+        brand: Brands.AZO,
+        channel: Channels.CTM,
+        product: Products.MOTOR,
+        pageName: 'Policyholder Details',
+        pageKey: 'policyholder-details',
+        scannedAt: '2026-10-01T10:00:00.000Z',
         elements: [],
-
         ...overrides,
     };
 }
@@ -72,11 +59,9 @@ test.describe(
                         generatedPage(),
                     );
 
-
-                expect(source)
-                    .toContain(
-                        'export class PolicyholderDetailsActions {',
-                    );
+                expect(source).toContain(
+                    'export class PolicyholderDetailsActions {',
+                );
             },
         );
 
@@ -90,16 +75,13 @@ test.describe(
                         generatedPage(),
                     );
 
+                expect(source).toContain(
+                    "from '../pages/policyholder-details/policyholder-details.page';",
+                );
 
-                expect(source)
-                    .toContain(
-                        "from '../pages/policyholder-details/policyholder-details.page';",
-                    );
-
-                expect(source)
-                    .toContain(
-                        'PolicyholderDetailsPage,',
-                    );
+                expect(source).toContain(
+                    'PolicyholderDetailsPage,',
+                );
             },
         );
 
@@ -113,17 +95,15 @@ test.describe(
                         generatedPage(),
                     );
 
-
-                expect(source)
-                    .toContain(
-                        'private readonly page: PolicyholderDetailsPage,',
-                    );
+                expect(source).toContain(
+                    'private readonly page: PolicyholderDetailsPage,',
+                );
             },
         );
 
 
         test(
-            'should not generate actions from page elements',
+            'should generate atomic actions from page elements',
             () => {
 
                 const source =
@@ -131,75 +111,70 @@ test.describe(
                         generatedPage({
                             elements: [
                                 {
-                                    name:
-                                        'firstName',
-
-                                    type:
-                                        'input',
+                                    name: 'firstName',
+                                    type: 'input',
 
                                     locator: {
-                                        preferred:
-                                            'label=First name',
-
+                                        preferred: 'label=First name',
                                         fallbacks: [],
                                     },
 
-                                    stableKey:
-                                        'stable-001',
+                                    stableKey: 'stable-001',
 
                                     fingerprint: {
-                                        type:
-                                            'input',
+                                        type: 'input',
                                     },
                                 },
 
                                 {
-                                    name:
-                                        'continueButton',
-
-                                    type:
-                                        'button',
+                                    name: 'continueButton',
+                                    type: 'button',
 
                                     locator: {
                                         preferred:
                                             'role=button[name="Continue"]',
-
                                         fallbacks: [],
                                     },
 
-                                    stableKey:
-                                        'stable-002',
+                                    stableKey: 'stable-002',
 
                                     fingerprint: {
-                                        type:
-                                            'button',
+                                        type: 'button',
                                     },
                                 },
                             ],
                         }),
                     );
 
+                expect(source).toContain(
+                    'async fillFirstName(value: string): Promise<void>',
+                );
 
-                expect(source)
-                    .not.toContain(
-                        'firstName',
-                    );
+                expect(source).toContain(
+                    'await this.page.resolveFirstName()',
+                );
 
-                expect(source)
-                    .not.toContain(
-                        'continueButton',
-                    );
+                expect(source).toContain(
+                    'await locator.fill(value)',
+                );
 
-                expect(source)
-                    .not.toContain(
-                        'async ',
-                    );
+                expect(source).toContain(
+                    'async clickContinueButton(): Promise<void>',
+                );
+
+                expect(source).toContain(
+                    'await this.page.resolveContinueButton()',
+                );
+
+                expect(source).toContain(
+                    'await locator.click()',
+                );
             },
         );
 
 
         test(
-            'should not contain auto-generated overwrite warning',
+            'should identify generator-owned atomic actions',
             () => {
 
                 const source =
@@ -207,16 +182,13 @@ test.describe(
                         generatedPage(),
                     );
 
+                expect(source).toContain(
+                    '// AUTO-GENERATED ATOMIC ACTIONS',
+                );
 
-                expect(source)
-                    .not.toContain(
-                        'AUTO-GENERATED FILE',
-                    );
-
-                expect(source)
-                    .not.toContain(
-                        'may be overwritten',
-                    );
+                expect(source).toContain(
+                    'Changes may be overwritten by the POM generator.',
+                );
             },
         );
 

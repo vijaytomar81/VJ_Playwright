@@ -1,3 +1,4 @@
+
 import type {
     GeneratedElement,
     GeneratedPage,
@@ -26,18 +27,10 @@ export class PageTemplate {
                 page.pageName,
             );
 
-        const declarations =
+        const methods =
             page.elements.map(
                 element =>
-                    this.renderDeclaration(
-                        element,
-                    ),
-            );
-
-        const assignments =
-            page.elements.map(
-                element =>
-                    this.renderAssignment(
+                    this.renderResolverMethod(
                         element,
                     ),
             );
@@ -56,71 +49,72 @@ export class PageTemplate {
             "import { elements } from './elements';",
             '',
             'import {',
-            '    resolveLocator,',
+            '    resolveElement,',
             `} from ${JSON.stringify(resolverImportPath)};`,
             '',
             `export class ${pageName.className}Page {`,
             '',
-            ...declarations,
-            '',
             '    constructor(',
-            '        page: Page,',
-            '    ) {',
-            ...assignments,
-            '    }',
+            '        private readonly page: Page,',
+            '    ) { }',
+            '',
+            ...methods.flatMap(
+                method => [method, ''],
+            ),
             '}',
             '',
         ].join('\n');
     }
 
 
-    private renderDeclaration(
+    private renderResolverMethod(
         element: GeneratedElement,
     ): string {
 
-        return [
-            '    readonly ',
-            this.renderPropertyName(
+        const methodName =
+            this.getResolverMethodName(
                 element.name,
-            ),
-            ': Locator;',
-        ].join('');
-    }
+            );
 
-
-    private renderAssignment(
-        element: GeneratedElement,
-    ): string {
-
-        const propertyAccess =
+        const elementAccess =
             this.renderPropertyAccess(
                 element.name,
             );
 
         return [
-            '',
-            `        this${propertyAccess} =`,
-            '            resolveLocator(',
-            '                page,',
-            `                elements${propertyAccess}.preferred,`,
-            '            );',
+            `    async ${methodName}(): Promise<Locator> {`,
+            '        return resolveElement(',
+            '            this.page,',
+            `            elements${elementAccess},`,
+            '        );',
+            '    }',
         ].join('\n');
     }
 
 
-    private renderPropertyName(
-        value: string,
+    private getResolverMethodName(
+        elementName: string,
     ): string {
 
-        if (
-            this.isValidIdentifier(
-                value,
-            )
-        ) {
-            return value;
+        const words =
+            elementName.match(
+                /[A-Za-z0-9]+/g,
+            ) ?? [];
+
+        const suffix =
+            words.map(
+                word =>
+                    word.charAt(0).toUpperCase() +
+                    word.slice(1),
+            ).join('');
+
+        if (!suffix) {
+            throw new Error(
+                `Cannot generate resolver method for element: ${elementName}`,
+            );
         }
 
-        return this.quote(value);
+        return `resolve${suffix}`;
     }
 
 

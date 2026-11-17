@@ -1,4 +1,3 @@
-
 import path from 'node:path';
 
 import {
@@ -29,14 +28,15 @@ import {
     FileWriter,
 } from './file-writer';
 
+import {
+    ActionMethodMerger,
+} from './action-method-merger';
+
 
 export interface PomWriteResult {
     elementsFile: string;
-
     pageFile: string;
-
     actionsFile: string;
-
     actionsCreated: boolean;
 }
 
@@ -58,6 +58,9 @@ export class PomOutputWriter {
 
         private readonly actionsTemplate =
             new ActionsTemplate(),
+
+        private readonly actionMerger =
+            new ActionMethodMerger(),
     ) { }
 
 
@@ -66,32 +69,41 @@ export class PomOutputWriter {
     ): Promise<PomWriteResult> {
 
         const paths =
-            this.pathBuilder.build(
-                page,
-            );
-
-        const resolverImportPath =
-            this.buildResolverImportPath(
-                paths.pageFile,
-            );
+            this.pathBuilder.build(page);
 
         const elementsSource =
-            this.elementsTemplate.render(
-                page,
-            );
+            this.elementsTemplate.render(page);
 
         const pageSource =
             this.pageTemplate.render(
                 page,
-                resolverImportPath,
+                this.buildResolverImportPath(
+                    paths.pageFile,
+                ),
             );
+
+        const generatedActions =
+            this.actionsTemplate.render(page);
+
+        const existingActions =
+            await this.readExistingActions(
+                paths.actionsFile,
+            );
+
+        const isGeneratorOwned =
+            existingActions?.startsWith(
+                '// AUTO-GENERATED ATOMIC ACTIONS',
+            ) ?? false;
 
         const actionsSource =
-            this.actionsTemplate.render(
-                page,
-            );
+            isGeneratorOwned
+                ? this.actionMerger.merge(
+                    existingActions!,
+                    generatedActions,
+                )
+                : generatedActions;
 
-
+        // Prepare the merged source before writing files.
         await this.fileWriter.write(
             paths.elementsFile,
             elementsSource,
@@ -102,26 +114,52 @@ export class PomOutputWriter {
             pageSource,
         );
 
+        let actionsCreated = false;
 
-        const actionsCreated =
-            await this.writeActions(
+        if (existingActions === undefined) {
+            actionsCreated =
+                await this.fileWriter.writeIfMissing(
+                    paths.actionsFile,
+                    actionsSource,
+                );
+        } else if (isGeneratorOwned) {
+            await this.fileWriter.write(
                 paths.actionsFile,
                 actionsSource,
             );
+        }
 
-
+        // Developer-owned actions files are not modified.
         return {
-            elementsFile:
-                paths.elementsFile,
-
-            pageFile:
-                paths.pageFile,
-
-            actionsFile:
-                paths.actionsFile,
-
+            elementsFile: paths.elementsFile,
+            pageFile: paths.pageFile,
+            actionsFile: paths.actionsFile,
             actionsCreated,
         };
+    }
+
+
+    private async readExistingActions(
+        filePath: string,
+    ): Promise<string | undefined> {
+
+        try {
+            return await readFile(
+                filePath,
+                'utf8',
+            );
+        } catch (error) {
+            if (
+                typeof error === 'object' &&
+                error !== null &&
+                'code' in error &&
+                error.code === 'ENOENT'
+            ) {
+                return undefined;
+            }
+
+            throw error;
+        }
     }
 
 
@@ -155,51 +193,11 @@ export class PomOutputWriter {
                 .split(path.sep)
                 .join('/');
 
-        if (
-            !relativePath.startsWith('.')
-        ) {
+        if (!relativePath.startsWith('.')) {
             relativePath =
                 `./${relativePath}`;
         }
 
         return relativePath;
-    }
-
-
-    private async writeActions(
-        filePath: string,
-        content: string,
-    ): Promise<boolean> {
-
-        const created =
-            await this.fileWriter.writeIfMissing(
-                filePath,
-                content,
-            );
-
-        if (created) {
-            return true;
-        }
-
-        const existingContent =
-            await readFile(
-                filePath,
-                'utf8',
-            );
-
-        if (
-            !existingContent.startsWith(
-                '// AUTO-GENERATED ATOMIC ACTIONS',
-            )
-        ) {
-            return false;
-        }
-
-        await this.fileWriter.write(
-            filePath,
-            content,
-        );
-
-        return false;
     }
 }

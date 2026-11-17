@@ -175,6 +175,7 @@ test.describe(
         );
 
 
+
         test(
             'should reject element when no unique locator can be generated',
             async ({
@@ -182,35 +183,31 @@ test.describe(
             }) => {
 
                 await page.setContent(`
-                    <input
-                        placeholder="Search"
-                    />
+            <input
+                placeholder="Search"
+            />
 
-                    <input
-                        placeholder="Search"
-                    />
-                `);
-
+            <input
+                placeholder="Search"
+            />
+        `);
 
                 const assembler =
                     new GeneratedElementAssembler(
                         page,
                     );
 
-
                 await expect(
                     assembler.assemble(
                         capturedElement({
-                            placeholder:
-                                'Search',
+                            placeholder: 'Search',
                         }),
                     ),
                 ).rejects.toThrow(
-                    'Unable to generate a unique locator for the element.',
+                    /Unable to generate a unique locator\./,
                 );
             },
         );
-
 
         test(
             'should assemble multiple elements',

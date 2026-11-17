@@ -12,6 +12,13 @@ import {
 } from '../naming/page-name-generator';
 
 
+interface GeneratedAction {
+    name: string;
+    parameter: string;
+    operation: string;
+}
+
+
 export class ActionsTemplate {
 
     constructor(
@@ -31,13 +38,19 @@ export class ActionsTemplate {
 
         const methods: string[] = [];
 
-        const methodNames = new Set<string>();
+        const methodNames =
+            new Set<string>();
 
         for (const element of page.elements) {
 
             const actions =
                 this.getActionNames(
                     element.type,
+                    element.name,
+                );
+
+            const resolverName =
+                this.getResolverMethodName(
                     element.name,
                 );
 
@@ -54,7 +67,10 @@ export class ActionsTemplate {
                 methods.push(
                     [
                         `    async ${action.name}(${action.parameter}): Promise<void> {`,
-                        `        await this.page.${element.name}.${action.operation};`,
+                        '        const locator =',
+                        `            await this.page.${resolverName}();`,
+                        '',
+                        `        await locator.${action.operation};`,
                         '    }',
                     ].join('\n'),
                 );
@@ -65,7 +81,7 @@ export class ActionsTemplate {
             '// AUTO-GENERATED ATOMIC ACTIONS',
             '// Changes may be overwritten by the POM generator.',
             '',
-            `import {`,
+            'import {',
             `    ${pageName.className}Page,`,
             `} from '../pages/${pageName.fileName}/${pageName.fileName}.page';`,
             '',
@@ -84,14 +100,22 @@ export class ActionsTemplate {
     }
 
 
+    private getResolverMethodName(
+        elementName: string,
+    ): string {
+
+        const suffix =
+            elementName.charAt(0).toUpperCase() +
+            elementName.slice(1);
+
+        return `resolve${suffix}`;
+    }
+
+
     private getActionNames(
         type: ElementType,
         elementName: string,
-    ): readonly {
-        name: string;
-        parameter: string;
-        operation: string;
-    }[] {
+    ): readonly GeneratedAction[] {
 
         const suffix =
             elementName.charAt(0).toUpperCase() +

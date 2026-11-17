@@ -26,64 +26,40 @@ import {
 
 
 function generatedPage(
-    overrides:
-        Partial<GeneratedPage> = {},
+    overrides: Partial<GeneratedPage> = {},
 ): GeneratedPage {
 
     return {
-        brand:
-            Brands.AZO,
-
-        channel:
-            Channels.CTM,
-
-        product:
-            Products.MOTOR,
-
-        pageName:
-            'Policyholder Details',
-
-        pageKey:
-            'policyholder-details',
-
-        scannedAt:
-            '2026-10-01T10:00:00.000Z',
+        brand: Brands.AZO,
+        channel: Channels.CTM,
+        product: Products.MOTOR,
+        pageName: 'Policyholder Details',
+        pageKey: 'policyholder-details',
+        scannedAt: '2026-10-01T10:00:00.000Z',
 
         elements: [
             {
-                name:
-                    'firstName',
-
-                type:
-                    'input',
+                name: 'firstName',
+                type: 'input',
 
                 locator: {
-                    preferred:
-                        'label=First name',
-
+                    preferred: 'label=First name',
                     fallbacks: [
                         'testid=first-name',
                     ],
                 },
 
-                stableKey:
-                    'stable-001',
+                stableKey: 'stable-001',
 
                 fingerprint: {
-                    type:
-                        'input',
-
-                    label:
-                        'first name',
+                    type: 'input',
+                    label: 'first name',
                 },
             },
 
             {
-                name:
-                    'continueButton',
-
-                type:
-                    'button',
+                name: 'continueButton',
+                type: 'button',
 
                 locator: {
                     preferred:
@@ -94,18 +70,12 @@ function generatedPage(
                     ],
                 },
 
-                stableKey:
-                    'stable-002',
+                stableKey: 'stable-002',
 
                 fingerprint: {
-                    type:
-                        'button',
-
-                    role:
-                        'button',
-
-                    text:
-                        'continue',
+                    type: 'button',
+                    role: 'button',
+                    text: 'continue',
                 },
             },
         ],
@@ -132,20 +102,17 @@ test.describe(
                         generatedPage(),
                     );
 
-                expect(source)
-                    .toContain(
-                        'export class PolicyholderDetailsPage {',
-                    );
+                expect(source).toContain(
+                    'export class PolicyholderDetailsPage {',
+                );
 
-                expect(source)
-                    .toContain(
-                        'readonly firstName: Locator;',
-                    );
+                expect(source).toContain(
+                    'async resolveFirstName(): Promise<Locator>',
+                );
 
-                expect(source)
-                    .toContain(
-                        'readonly continueButton: Locator;',
-                    );
+                expect(source).toContain(
+                    'async resolveContinueButton(): Promise<Locator>',
+                );
             },
         );
 
@@ -159,10 +126,9 @@ test.describe(
                         generatedPage(),
                     );
 
-                expect(source)
-                    .toContain(
-                        "import { elements } from './elements';",
-                    );
+                expect(source).toContain(
+                    "import { elements } from './elements';",
+                );
             },
         );
 
@@ -176,25 +142,21 @@ test.describe(
                         generatedPage(),
                     );
 
-                expect(source)
-                    .toContain(
-                        'elements.firstName.preferred',
-                    );
+                expect(source).toContain(
+                    'elements.firstName,',
+                );
 
-                expect(source)
-                    .toContain(
-                        'this.firstName =',
-                    );
+                expect(source).toContain(
+                    'async resolveFirstName(): Promise<Locator>',
+                );
 
-                expect(source)
-                    .toContain(
-                        'resolveLocator(',
-                    );
+                expect(source).toContain(
+                    'resolveElement(',
+                );
 
-                expect(source)
-                    .not.toContain(
-                        'page.getByLabel(',
-                    );
+                expect(source).not.toContain(
+                    'page.getByLabel(',
+                );
             },
         );
 
@@ -208,20 +170,17 @@ test.describe(
                         generatedPage(),
                     );
 
-                expect(source)
-                    .toContain(
-                        'elements.continueButton.preferred',
-                    );
+                expect(source).toContain(
+                    'elements.continueButton,',
+                );
 
-                expect(source)
-                    .toContain(
-                        'this.continueButton =',
-                    );
+                expect(source).toContain(
+                    'async resolveContinueButton(): Promise<Locator>',
+                );
 
-                expect(source)
-                    .not.toContain(
-                        'page.getByRole(',
-                    );
+                expect(source).not.toContain(
+                    'page.getByRole(',
+                );
             },
         );
 
@@ -236,15 +195,13 @@ test.describe(
                         '../../../../tools/pom-generator/runtime/locator-resolver',
                     );
 
-                expect(source)
-                    .toContain(
-                        'from "../../../../tools/pom-generator/runtime/locator-resolver";',
-                    );
+                expect(source).toContain(
+                    'from "../../../../tools/pom-generator/runtime/locator-resolver";',
+                );
 
-                expect(source)
-                    .toContain(
-                        'resolveLocator(',
-                    );
+                expect(source).toContain(
+                    'resolveElement(',
+                );
             },
         );
 
@@ -258,20 +215,17 @@ test.describe(
                         generatedPage(),
                     );
 
-                expect(source)
-                    .not.toContain(
-                        'label=First name',
-                    );
+                expect(source).not.toContain(
+                    'label=First name',
+                );
 
-                expect(source)
-                    .not.toContain(
-                        'role=button[name="Continue"]',
-                    );
+                expect(source).not.toContain(
+                    'role=button[name="Continue"]',
+                );
 
-                expect(source)
-                    .not.toContain(
-                        'LocatorCodeGenerator',
-                    );
+                expect(source).not.toContain(
+                    'LocatorCodeGenerator',
+                );
             },
         );
 
@@ -287,25 +241,21 @@ test.describe(
                         }),
                     );
 
-                expect(source)
-                    .toContain(
-                        'export class PolicyholderDetailsPage {',
-                    );
+                expect(source).toContain(
+                    'export class PolicyholderDetailsPage {',
+                );
 
-                expect(source)
-                    .toContain(
-                        'constructor(',
-                    );
+                expect(source).toContain(
+                    'constructor(',
+                );
 
-                expect(source)
-                    .not.toContain(
-                        'readonly firstName',
-                    );
+                expect(source).not.toContain(
+                    'async resolveFirstName(',
+                );
 
-                expect(source)
-                    .not.toContain(
-                        'elements.firstName.preferred',
-                    );
+                expect(source).not.toContain(
+                    'elements.firstName,',
+                );
             },
         );
 
@@ -318,25 +268,19 @@ test.describe(
                     generatedPage({
                         elements: [
                             {
-                                name:
-                                    'first-name',
-
-                                type:
-                                    'input',
+                                name: 'first-name',
+                                type: 'input',
 
                                 locator: {
                                     preferred:
                                         'testid=first-name',
-
                                     fallbacks: [],
                                 },
 
-                                stableKey:
-                                    'stable-003',
+                                stableKey: 'stable-003',
 
                                 fingerprint: {
-                                    type:
-                                        'input',
+                                    type: 'input',
                                 },
                             },
                         ],
@@ -345,20 +289,17 @@ test.describe(
                 const source =
                     template.render(page);
 
-                expect(source)
-                    .toContain(
-                        'readonly "first-name": Locator;',
-                    );
+                expect(source).toContain(
+                    'async resolveFirstName(): Promise<Locator>',
+                );
 
-                expect(source)
-                    .toContain(
-                        'this["first-name"] =',
-                    );
+                expect(source).toContain(
+                    'elements["first-name"],',
+                );
 
-                expect(source)
-                    .toContain(
-                        'elements["first-name"].preferred',
-                    );
+                expect(source).not.toContain(
+                    'resolveFirst-name',
+                );
             },
         );
 
@@ -372,17 +313,14 @@ test.describe(
                         generatedPage(),
                     );
 
-                expect(source)
-                    .toContain(
-                        '// pageKey: policyholder-details',
-                    );
+                expect(source).toContain(
+                    '// pageKey: policyholder-details',
+                );
 
-                expect(source)
-                    .toContain(
-                        '// scannedAt: 2026-10-01T10:00:00.000Z',
-                    );
+                expect(source).toContain(
+                    '// scannedAt: 2026-10-01T10:00:00.000Z',
+                );
             },
         );
-
     },
 );

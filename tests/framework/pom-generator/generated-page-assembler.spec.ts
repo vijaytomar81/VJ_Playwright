@@ -194,6 +194,7 @@ test.describe(
         );
 
 
+
         test(
             'should reject an invalid Brand Channel Product combination',
             async ({
@@ -205,14 +206,13 @@ test.describe(
                         page,
                     );
 
-
                 await expect(
                     assembler.assemble({
                         brand:
                             Brands.BRI,
 
                         channel:
-                            Channels.CNF,
+                            Channels.DJ,
 
                         product:
                             Products.HOME,
@@ -222,7 +222,7 @@ test.describe(
                     }),
                 ).rejects.toThrow(
                     'Invalid Brand → Channel → Product combination: ' +
-                    'BRI → CNF → Home',
+                    'BRI → DJ → Home',
                 );
             },
         );

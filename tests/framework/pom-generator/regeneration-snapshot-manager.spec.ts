@@ -1,5 +1,7 @@
+
 import {
     mkdtemp,
+    mkdir,
     readFile,
     rm,
     writeFile,
@@ -52,24 +54,12 @@ import {
 function generatedPage(): GeneratedPage {
 
     return {
-        brand:
-            Brands.AZO,
-
-        channel:
-            Channels.CTM,
-
-        product:
-            Products.MOTOR,
-
-        pageName:
-            'Policyholder Details',
-
-        pageKey:
-            'policyholder-details',
-
-        scannedAt:
-            '2026-10-01T10:00:00.000Z',
-
+        brand: Brands.AZO,
+        channel: Channels.CTM,
+        product: Products.MOTOR,
+        pageName: 'Policyholder Details',
+        pageKey: 'policyholder-details',
+        scannedAt: '2026-10-01T10:00:00.000Z',
         elements: [],
     };
 }
@@ -79,17 +69,13 @@ test.describe(
     'RegenerationSnapshotManager',
     () => {
 
-        let temporaryDirectory:
-            string;
+        let temporaryDirectory: string;
 
-        let outputPathBuilder:
-            OutputPathBuilder;
+        let outputPathBuilder: OutputPathBuilder;
 
-        let metadataPathBuilder:
-            MetadataPathBuilder;
+        let metadataPathBuilder: MetadataPathBuilder;
 
-        let manager:
-            RegenerationSnapshotManager;
+        let manager: RegenerationSnapshotManager;
 
 
         test.beforeEach(
@@ -103,7 +89,6 @@ test.describe(
                         ),
                     );
 
-
                 outputPathBuilder =
                     new OutputPathBuilder(
                         path.join(
@@ -111,7 +96,6 @@ test.describe(
                             'automationLayer',
                         ),
                     );
-
 
                 metadataPathBuilder =
                     new MetadataPathBuilder(
@@ -121,7 +105,6 @@ test.describe(
                             'metadata',
                         ),
                     );
-
 
                 manager =
                     new RegenerationSnapshotManager(
@@ -159,19 +142,16 @@ test.describe(
                         page,
                     );
 
-
                 const snapshot =
                     await manager.capture(
                         page,
                         'CREATE',
                     );
 
-
                 expect(
-                    snapshot.files
-                        .map(file =>
-                            file.filePath,
-                        ),
+                    snapshot.files.map(
+                        file => file.filePath,
+                    ),
                 ).toEqual([
                     paths.elementsFile,
                     paths.pageFile,
@@ -185,7 +165,7 @@ test.describe(
 
 
         test(
-            'should exclude actions from UPDATE snapshot',
+            'should include actions in UPDATE snapshot',
             async () => {
 
                 const page =
@@ -196,35 +176,24 @@ test.describe(
                         page,
                     );
 
-
                 const snapshot =
                     await manager.capture(
                         page,
                         'UPDATE',
                     );
 
-
                 expect(
-                    snapshot.files
-                        .map(file =>
-                            file.filePath,
-                        ),
+                    snapshot.files.map(
+                        file => file.filePath,
+                    ),
                 ).toEqual([
                     paths.elementsFile,
                     paths.pageFile,
+                    paths.actionsFile,
                     metadataPathBuilder.build(
                         page,
                     ),
                 ]);
-
-
-                expect(
-                    snapshot.files.some(
-                        file =>
-                            file.filePath ===
-                            paths.actionsFile,
-                    ),
-                ).toBe(false);
             },
         );
 
@@ -241,7 +210,6 @@ test.describe(
                         page,
                     );
 
-
                 await writeFileWithDirectories(
                     paths.elementsFile,
                     'old elements',
@@ -252,46 +220,33 @@ test.describe(
                     'old page',
                 );
 
-
                 const snapshot =
                     await manager.capture(
                         page,
                         'UPDATE',
                     );
 
-
                 expect(
                     snapshot.files[0],
                 ).toEqual({
-                    filePath:
-                        paths.elementsFile,
-
-                    existed:
-                        true,
-
-                    content:
-                        'old elements',
+                    filePath: paths.elementsFile,
+                    existed: true,
+                    content: 'old elements',
                 });
-
 
                 expect(
                     snapshot.files[1],
                 ).toEqual({
-                    filePath:
-                        paths.pageFile,
-
-                    existed:
-                        true,
-
-                    content:
-                        'old page',
+                    filePath: paths.pageFile,
+                    existed: true,
+                    content: 'old page',
                 });
             },
         );
 
 
         test(
-            'should restore UPDATE state without touching actions',
+            'should restore UPDATE state including actions',
             async () => {
 
                 const page =
@@ -306,7 +261,6 @@ test.describe(
                     metadataPathBuilder.build(
                         page,
                     );
-
 
                 await writeFileWithDirectories(
                     paths.elementsFile,
@@ -328,13 +282,11 @@ test.describe(
                     'old metadata',
                 );
 
-
                 const snapshot =
                     await manager.capture(
                         page,
                         'UPDATE',
                     );
-
 
                 await writeFile(
                     paths.elementsFile,
@@ -360,11 +312,9 @@ test.describe(
                     'utf8',
                 );
 
-
                 await manager.restore(
                     snapshot,
                 );
-
 
                 expect(
                     await readFile(
@@ -399,7 +349,7 @@ test.describe(
                         'utf8',
                     ),
                 ).toBe(
-                    'developer changed actions',
+                    'developer actions',
                 );
             },
         );
@@ -422,13 +372,11 @@ test.describe(
                         page,
                     );
 
-
                 const snapshot =
                     await manager.capture(
                         page,
                         'CREATE',
                     );
-
 
                 await writeFileWithDirectories(
                     paths.elementsFile,
@@ -450,15 +398,12 @@ test.describe(
                     'new metadata',
                 );
 
-
                 await manager.restore(
                     snapshot,
                 );
 
-
                 for (
-                    const filePath
-                    of [
+                    const filePath of [
                         paths.elementsFile,
                         paths.pageFile,
                         paths.actionsFile,
@@ -472,14 +417,12 @@ test.describe(
                                 filePath,
                             );
 
-
                     expect(
                         restored.existed,
                     ).toBe(false);
                 }
             },
         );
-
     },
 );
 
@@ -489,22 +432,12 @@ async function writeFileWithDirectories(
     content: string,
 ): Promise<void> {
 
-    const {
-        mkdir,
-    } = await import(
-        'node:fs/promises'
-    );
-
-
     await mkdir(
-        path.dirname(
-            filePath,
-        ),
+        path.dirname(filePath),
         {
             recursive: true,
         },
     );
-
 
     await writeFile(
         filePath,

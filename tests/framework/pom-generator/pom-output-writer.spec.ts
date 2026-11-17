@@ -1,7 +1,9 @@
+
 import {
     mkdtemp,
     readFile,
     rm,
+    writeFile,
 } from 'node:fs/promises';
 
 import {
@@ -45,55 +47,34 @@ import {
 
 
 function generatedPage(
-    overrides:
-        Partial<GeneratedPage> = {},
+    overrides: Partial<GeneratedPage> = {},
 ): GeneratedPage {
 
     return {
-        brand:
-            Brands.AZO,
-
-        channel:
-            Channels.CTM,
-
-        product:
-            Products.MOTOR,
-
-        pageName:
-            'Policyholder Details',
-
-        pageKey:
-            'policyholder-details',
-
-        scannedAt:
-            '2026-10-01T10:00:00.000Z',
+        brand: Brands.AZO,
+        channel: Channels.CTM,
+        product: Products.MOTOR,
+        pageName: 'Policyholder Details',
+        pageKey: 'policyholder-details',
+        scannedAt: '2026-10-01T10:00:00.000Z',
 
         elements: [
             {
-                name:
-                    'firstName',
-
-                type:
-                    'input',
+                name: 'firstName',
+                type: 'input',
 
                 locator: {
-                    preferred:
-                        'label=First name',
-
+                    preferred: 'label=First name',
                     fallbacks: [
                         'testid=first-name',
                     ],
                 },
 
-                stableKey:
-                    'stable-001',
+                stableKey: 'stable-001',
 
                 fingerprint: {
-                    type:
-                        'input',
-
-                    label:
-                        'first name',
+                    type: 'input',
+                    label: 'first name',
                 },
             },
         ],
@@ -107,14 +88,11 @@ test.describe(
     'PomOutputWriter',
     () => {
 
-        let temporaryDirectory:
-            string;
+        let temporaryDirectory: string;
 
-        let writer:
-            PomOutputWriter;
+        let writer: PomOutputWriter;
 
-        let pathBuilder:
-            OutputPathBuilder;
+        let pathBuilder: OutputPathBuilder;
 
 
         test.beforeEach(
@@ -128,12 +106,10 @@ test.describe(
                         ),
                     );
 
-
                 pathBuilder =
                     new OutputPathBuilder(
                         temporaryDirectory,
                     );
-
 
                 writer =
                     new PomOutputWriter(
@@ -164,12 +140,8 @@ test.describe(
                 const page =
                     generatedPage();
 
-
                 const result =
-                    await writer.write(
-                        page,
-                    );
-
+                    await writer.write(page);
 
                 const elements =
                     await readFile(
@@ -189,21 +161,17 @@ test.describe(
                         'utf8',
                     );
 
+                expect(elements).toContain(
+                    'firstName: {',
+                );
 
-                expect(elements)
-                    .toContain(
-                        'firstName: {',
-                    );
+                expect(pageSource).toContain(
+                    'export class PolicyholderDetailsPage {',
+                );
 
-                expect(pageSource)
-                    .toContain(
-                        'export class PolicyholderDetailsPage {',
-                    );
-
-                expect(actions)
-                    .toContain(
-                        'export class PolicyholderDetailsActions {',
-                    );
+                expect(actions).toContain(
+                    'export class PolicyholderDetailsActions {',
+                );
 
                 expect(
                     result.actionsCreated,
@@ -221,10 +189,7 @@ test.describe(
                         generatedPage(),
                     );
 
-
-                expect(
-                    result.pageFile,
-                ).toBe(
+                expect(result.pageFile).toBe(
                     path.join(
                         temporaryDirectory,
                         'AZO',
@@ -236,10 +201,7 @@ test.describe(
                     ),
                 );
 
-
-                expect(
-                    result.actionsFile,
-                ).toBe(
+                expect(result.actionsFile).toBe(
                     path.join(
                         temporaryDirectory,
                         'AZO',
@@ -260,27 +222,21 @@ test.describe(
                 const firstPage =
                     generatedPage();
 
-
                 const result =
                     await writer.write(
                         firstPage,
                     );
 
-
                 const changedPage =
                     generatedPage({
                         elements: [
                             {
-                                name:
-                                    'surname',
-
-                                type:
-                                    'input',
+                                name: 'surname',
+                                type: 'input',
 
                                 locator: {
                                     preferred:
                                         'label=Surname',
-
                                     fallbacks: [],
                                 },
 
@@ -288,21 +244,16 @@ test.describe(
                                     'stable-002',
 
                                 fingerprint: {
-                                    type:
-                                        'input',
-
-                                    label:
-                                        'surname',
+                                    type: 'input',
+                                    label: 'surname',
                                 },
                             },
                         ],
                     });
 
-
                 await writer.write(
                     changedPage,
                 );
-
 
                 const elements =
                     await readFile(
@@ -316,21 +267,17 @@ test.describe(
                         'utf8',
                     );
 
+                expect(elements).toContain(
+                    'surname: {',
+                );
 
-                expect(elements)
-                    .toContain(
-                        'surname: {',
-                    );
+                expect(elements).not.toContain(
+                    'firstName: {',
+                );
 
-                expect(elements)
-                    .not.toContain(
-                        'firstName: {',
-                    );
-
-                expect(pageSource)
-                    .toContain(
-                        'readonly surname: Locator;',
-                    );
+                expect(pageSource).toContain(
+                    'async resolveSurname(): Promise<Locator>',
+                );
             },
         );
 
@@ -342,39 +289,28 @@ test.describe(
                 const page =
                     generatedPage();
 
-
                 const firstResult =
-                    await writer.write(
-                        page,
-                    );
+                    await writer.write(page);
 
-
-                const developerContent =
-                    [
-                        '// Developer-owned code',
-                        '',
-                        'export class CustomActions {',
-                        '    async doSomething(): Promise<void> { }',
-                        '}',
-                        '',
-                    ].join('\n');
-
+                const developerContent = [
+                    '// Developer-owned code',
+                    '',
+                    'export class CustomActions {',
+                    '    async doSomething(): Promise<void> { }',
+                    '}',
+                    '',
+                ].join('\n');
 
                 const fileWriter =
                     new FileWriter();
-
 
                 await fileWriter.write(
                     firstResult.actionsFile,
                     developerContent,
                 );
 
-
                 const secondResult =
-                    await writer.write(
-                        page,
-                    );
-
+                    await writer.write(page);
 
                 const actions =
                     await readFile(
@@ -382,15 +318,13 @@ test.describe(
                         'utf8',
                     );
 
-
                 expect(
                     secondResult.actionsCreated,
                 ).toBe(false);
 
-                expect(actions)
-                    .toBe(
-                        developerContent,
-                    );
+                expect(actions).toBe(
+                    developerContent,
+                );
             },
         );
 
@@ -402,17 +336,11 @@ test.describe(
                 const page =
                     generatedPage();
 
-
                 const firstResult =
-                    await writer.write(
-                        page,
-                    );
+                    await writer.write(page);
 
                 const secondResult =
-                    await writer.write(
-                        page,
-                    );
-
+                    await writer.write(page);
 
                 expect(
                     firstResult.actionsCreated,
@@ -440,25 +368,21 @@ test.describe(
                         'utf8',
                     );
 
-                expect(source)
-                    .toContain(
-                        "import { elements } from './elements';",
-                    );
+                expect(source).toContain(
+                    "import { elements } from './elements';",
+                );
 
-                expect(source)
-                    .toContain(
-                        'elements.firstName.preferred',
-                    );
+                expect(source).toContain(
+                    'elements.firstName,',
+                );
 
-                expect(source)
-                    .toContain(
-                        'resolveLocator(',
-                    );
+                expect(source).toContain(
+                    'resolveElement(',
+                );
 
-                expect(source)
-                    .not.toContain(
-                        'page.getByLabel(',
-                    );
+                expect(source).not.toContain(
+                    'page.getByLabel(',
+                );
             },
         );
 
@@ -486,7 +410,9 @@ test.describe(
 
                 const relativeImport =
                     path.relative(
-                        path.dirname(result.pageFile),
+                        path.dirname(
+                            result.pageFile,
+                        ),
                         resolverFile,
                     )
                         .replace(/\.ts$/, '')
@@ -498,22 +424,326 @@ test.describe(
                         ? relativeImport
                         : `./${relativeImport}`;
 
-                expect(source)
-                    .toContain(
-                        `from ${JSON.stringify(importPath)};`,
-                    );
+                expect(source).toContain(
+                    `from ${JSON.stringify(importPath)};`,
+                );
 
                 const importedFile =
                     path.resolve(
-                        path.dirname(result.pageFile),
+                        path.dirname(
+                            result.pageFile,
+                        ),
                         `${importPath}.ts`,
                     );
 
-                expect(importedFile)
-                    .toBe(resolverFile);
+                expect(importedFile).toBe(
+                    resolverFile,
+                );
             },
         );
 
 
+        test(
+            'should preserve engineer-renamed action methods',
+            async () => {
+
+                const page =
+                    generatedPage();
+
+                const result =
+                    await writer.write(page);
+
+                const original =
+                    await readFile(
+                        result.actionsFile,
+                        'utf8',
+                    );
+
+                expect(original).toContain(
+                    'async fillFirstName(',
+                );
+
+                const renamed =
+                    original.replace(
+                        'async fillFirstName(',
+                        'async enterCustomerFirstName(',
+                    );
+
+                await writeFile(
+                    result.actionsFile,
+                    renamed,
+                    'utf8',
+                );
+
+                await writer.write(page);
+
+                const regenerated =
+                    await readFile(
+                        result.actionsFile,
+                        'utf8',
+                    );
+
+                expect(regenerated).toContain(
+                    'async enterCustomerFirstName(',
+                );
+
+                expect(regenerated).not.toContain(
+                    'async fillFirstName(',
+                );
+
+                expect(regenerated).toContain(
+                    'this.page.resolveFirstName()',
+                );
+            },
+        );
+
+
+        test(
+            'should not duplicate renamed actions on repeated rescans',
+            async () => {
+
+                const page =
+                    generatedPage();
+
+                const result =
+                    await writer.write(page);
+
+                const original =
+                    await readFile(
+                        result.actionsFile,
+                        'utf8',
+                    );
+
+                await writeFile(
+                    result.actionsFile,
+                    original.replace(
+                        'async fillFirstName(',
+                        'async enterCustomerFirstName(',
+                    ),
+                    'utf8',
+                );
+
+                await writer.write(page);
+                await writer.write(page);
+                await writer.write(page);
+
+                const actions =
+                    await readFile(
+                        result.actionsFile,
+                        'utf8',
+                    );
+
+                expect(
+                    actions.match(
+                        /async enterCustomerFirstName\(/g,
+                    )?.length ?? 0,
+                ).toBe(1);
+
+                expect(actions).not.toContain(
+                    'async fillFirstName(',
+                );
+            },
+        );
+
+
+        test(
+            'should preserve renamed actions when locator changes',
+            async () => {
+
+                const page =
+                    generatedPage();
+
+                const result =
+                    await writer.write(page);
+
+                const original =
+                    await readFile(
+                        result.actionsFile,
+                        'utf8',
+                    );
+
+                await writeFile(
+                    result.actionsFile,
+                    original.replace(
+                        'async fillFirstName(',
+                        'async enterCustomerFirstName(',
+                    ),
+                    'utf8',
+                );
+
+                const changedPage =
+                    generatedPage({
+                        elements:
+                            page.elements.map(
+                                element => ({
+                                    ...element,
+
+                                    locator: {
+                                        preferred:
+                                            'testid=customer-first-name',
+
+                                        fallbacks: [
+                                            'label=First name',
+                                        ],
+                                    },
+                                }),
+                            ),
+                    });
+
+                await writer.write(
+                    changedPage,
+                );
+
+                const actions =
+                    await readFile(
+                        result.actionsFile,
+                        'utf8',
+                    );
+
+                const elements =
+                    await readFile(
+                        result.elementsFile,
+                        'utf8',
+                    );
+
+                expect(actions).toContain(
+                    'async enterCustomerFirstName(',
+                );
+
+                expect(actions).not.toContain(
+                    'async fillFirstName(',
+                );
+
+                expect(elements).toContain(
+                    'testid=customer-first-name',
+                );
+            },
+        );
+
+
+        test(
+            'should add new actions without duplicating renamed methods',
+            async () => {
+
+                const page =
+                    generatedPage();
+
+                const result =
+                    await writer.write(page);
+
+                const original =
+                    await readFile(
+                        result.actionsFile,
+                        'utf8',
+                    );
+
+                await writeFile(
+                    result.actionsFile,
+                    original.replace(
+                        'async fillFirstName(',
+                        'async enterCustomerFirstName(',
+                    ),
+                    'utf8',
+                );
+
+                const updatedPage =
+                    generatedPage({
+                        elements: [
+                            ...page.elements,
+
+                            {
+                                name:
+                                    'continueButton',
+
+                                type:
+                                    'button',
+
+                                locator: {
+                                    preferred:
+                                        'role=button[name="Continue"]',
+
+                                    fallbacks: [],
+                                },
+
+                                stableKey:
+                                    'stable-continue',
+
+                                fingerprint: {
+                                    type: 'button',
+                                    label: 'continue',
+                                },
+                            },
+                        ],
+                    });
+
+                await writer.write(
+                    updatedPage,
+                );
+
+                const actions =
+                    await readFile(
+                        result.actionsFile,
+                        'utf8',
+                    );
+
+                expect(actions).toContain(
+                    'async enterCustomerFirstName(',
+                );
+
+                expect(actions).toContain(
+                    'async clickContinueButton(',
+                );
+
+                expect(actions).not.toContain(
+                    'async fillFirstName(',
+                );
+            },
+        );
+
+
+        test(
+            'should reject ambiguous action identities',
+            async () => {
+
+                const page =
+                    generatedPage();
+
+                const result =
+                    await writer.write(page);
+
+                const original =
+                    await readFile(
+                        result.actionsFile,
+                        'utf8',
+                    );
+
+                const duplicate = [
+                    '',
+                    '    async anotherFirstNameAction(value: string): Promise<void> {',
+                    '        const locator = await this.page.resolveFirstName();',
+                    '        await locator.fill(value);',
+                    '    }',
+                    '',
+                ].join('\n');
+
+                const modified =
+                    original.replace(
+                        /\n}\s*$/,
+                        `${duplicate}\n}`,
+                    );
+
+                await writeFile(
+                    result.actionsFile,
+                    modified,
+                    'utf8',
+                );
+
+                await expect(
+                    writer.write(page),
+                ).rejects.toThrow(
+                    /Ambiguous existing action/,
+                );
+            },
+        );
     },
 );
