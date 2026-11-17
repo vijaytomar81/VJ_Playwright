@@ -3,17 +3,6 @@ PS C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\Athena_Automation
 > allianz-automation@1.0.0 pom:create
 > tsc -p tools/pom-generator/tsconfig.build.json && node dist/tools/pom-generator/cli/pom-create.cli.js --connectCdp=ws://localhost:9222/devtools/browser/*** --brand=AZO --channel=DJ --product=Motor --page-name=Login Options
 
-tools/pom-generator/writers/action-method-merger.ts:3:8 - error TS2307: Cannot find module '@babel/parser' or its corresponding type declarations.
 
-3 } from '@babel/parser';
-         ~~~~~~~~~~~~~~~
-
-tools/pom-generator/writers/action-method-merger.ts:7:8 - error TS2307: Cannot find module '@babel/types' or its corresponding type declarations.
-
-7 } from '@babel/types';
-         ~~~~~~~~~~~~~~
-
-
-Found 2 errors in the same file, starting at: tools/pom-generator/writers/action-method-merger.ts:3
-
+POM CREATE failed: Invalid CLI argument: ^--page-name=Login^ Options^
 PS C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\Athena_Automation\VJ_Playwright> 
