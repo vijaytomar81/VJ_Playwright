@@ -1,5 +1,6 @@
 
 import type {
+    ElementHandle,
     Page,
 } from '@playwright/test';
 
@@ -10,6 +11,10 @@ import type {
 import type {
     GeneratedElement,
 } from '../models/page.model';
+
+import type {
+    ScannedElementWithHandle,
+} from '../scanner/dom-scanner';
 
 import {
     ElementNameGenerator,
@@ -67,6 +72,9 @@ export class GeneratedElementAssembler {
 
     async assemble(
         element: CapturedElement,
+        originalElement?: ElementHandle<
+            HTMLElement | SVGElement
+        >,
     ): Promise<GeneratedElement> {
 
         const name =
@@ -79,9 +87,18 @@ export class GeneratedElementAssembler {
                 element,
             );
 
+        /*
+         * Validate candidate uniqueness.
+         *
+         * When the original DOM handle is
+         * available, also verify that each
+         * unique locator points to the exact
+         * element captured by DomScanner.
+         */
         const validatedCandidates =
             await this.locatorValidator.validate(
                 candidates,
+                originalElement,
             );
 
         let locator: GeneratedElement['locator'];
@@ -95,7 +112,7 @@ export class GeneratedElementAssembler {
 
             /*
              * Diagnostic information for elements
-             * without a unique locator.
+             * without a valid unique locator.
              *
              * No fallback locator is invented.
              * Existing uniqueness rules are preserved.
@@ -134,18 +151,18 @@ export class GeneratedElementAssembler {
                 ariaLabel:
                     element.ariaLabel,
 
+                classNames:
+                    element.classNames,
+
                 context:
                     element.context,
 
                 /*
                  * Additional diagnostic metadata.
                  *
-                 * These values are captured by
-                 * ElementMetadataReader and forwarded
-                 * through DomScanner.
-                 *
-                 * They are used only for diagnostics,
-                 * not for locator generation.
+                 * These values are used only for
+                 * troubleshooting failed locator
+                 * generation.
                  */
                 title:
                     element.title,
@@ -207,6 +224,12 @@ export class GeneratedElementAssembler {
     }
 
 
+    /**
+     * Backward-compatible assembly method.
+     *
+     * Existing callers can continue supplying
+     * CapturedElement objects without handles.
+     */
     async assembleAll(
         elements:
             readonly CapturedElement[],
@@ -220,6 +243,38 @@ export class GeneratedElementAssembler {
             const generatedElement =
                 await this.assemble(
                     element,
+                );
+
+            generatedElements.push(
+                generatedElement,
+            );
+        }
+
+        return generatedElements;
+    }
+
+
+    /**
+     * Assemble elements while validating
+     * against their original DOM references.
+     *
+     * Handle disposal remains the
+     * responsibility of the caller.
+     */
+    async assembleAllWithHandles(
+        scanned:
+            readonly ScannedElementWithHandle[],
+    ): Promise<GeneratedElement[]> {
+
+        const generatedElements:
+            GeneratedElement[] = [];
+
+        for (const item of scanned) {
+
+            const generatedElement =
+                await this.assemble(
+                    item.element,
+                    item.handle,
                 );
 
             generatedElements.push(

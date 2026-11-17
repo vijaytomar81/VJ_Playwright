@@ -44,6 +44,20 @@ export class LocatorBuilder {
             element,
         );
 
+        /*
+         * CSS class locators are fallback candidates.
+         *
+         * They are generated after semantic and
+         * attribute-based candidates.
+         *
+         * LocatorValidator remains responsible
+         * for checking uniqueness.
+         */
+        this.addCssClassCandidates(
+            candidates,
+            element,
+        );
+
         return this.removeDuplicates(
             candidates,
         );
@@ -62,9 +76,6 @@ export class LocatorBuilder {
          *
          * Native HTML anchors have an implicit
          * link role only when href is present.
-         *
-         * hasHref is captured by ElementMetadataReader
-         * and forwarded through DomScanner.
          */
         const role =
             element.role ??
@@ -184,6 +195,91 @@ export class LocatorBuilder {
                 )}"]`,
             unique: false,
         });
+    }
+
+    private addCssClassCandidates(
+        candidates: LocatorCandidate[],
+        element: CapturedElement,
+    ): void {
+
+        const tagName =
+            element.tagName.toLowerCase();
+
+        /*
+         * Only use valid HTML tag names.
+         *
+         * Class names are escaped separately
+         * using CSS identifier escaping.
+         */
+        if (
+            !/^[a-z][a-z0-9-]*$/.test(tagName)
+        ) {
+            return;
+        }
+
+        const classNames = Array.from(
+            new Set(
+                element.classNames ?? [],
+            ),
+        ).filter(className =>
+            className.trim().length > 0,
+        );
+
+        if (classNames.length === 0) {
+            return;
+        }
+
+        /*
+         * Generate a tag-qualified candidate
+         * for each individual class.
+         *
+         * For example:
+         * button.btn-back-link
+         *
+         * The validator will reject candidates
+         * matching zero or multiple elements.
+         */
+        for (const className of classNames) {
+            const selector =
+                `${tagName}.${this.escapeCssIdentifier(
+                    className,
+                )}`;
+
+            candidates.push({
+                strategy: 'css',
+                value: selector,
+                descriptor: `css=${selector}`,
+                unique: false,
+            });
+        }
+
+        /*
+         * Generate a combined class candidate.
+         *
+         * For example:
+         * button.btn.btn-back-link
+         *
+         * This provides a more specific fallback
+         * when individual classes are not unique.
+         */
+        if (classNames.length > 1) {
+            const selector =
+                tagName +
+                classNames
+                    .map(className =>
+                        `.${this.escapeCssIdentifier(
+                            className,
+                        )}`,
+                    )
+                    .join('');
+
+            candidates.push({
+                strategy: 'css',
+                value: selector,
+                descriptor: `css=${selector}`,
+                unique: false,
+            });
+        }
     }
 
     private removeDuplicates(

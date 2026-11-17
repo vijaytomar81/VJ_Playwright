@@ -1,3 +1,4 @@
+
 import path from 'node:path';
 
 import {
@@ -68,13 +69,14 @@ test.describe(
                 const builder =
                     new MetadataPathBuilder();
 
-
                 expect(
                     builder.build(
                         generatedPage(),
                     ),
                 ).toBe(
                     path.join(
+                        'automationLayer',
+                        'pomObjects',
                         '.pom-generator',
                         'metadata',
                         'AZO',
@@ -95,7 +97,6 @@ test.describe(
                     new MetadataPathBuilder(
                         'temporary-metadata',
                     );
-
 
                 expect(
                     builder.build(
@@ -121,7 +122,6 @@ test.describe(
                 const builder =
                     new MetadataPathBuilder();
 
-
                 expect(
                     builder.build(
                         generatedPage({
@@ -137,6 +137,8 @@ test.describe(
                     ),
                 ).toBe(
                     path.join(
+                        'automationLayer',
+                        'pomObjects',
                         '.pom-generator',
                         'metadata',
                         'BRI',

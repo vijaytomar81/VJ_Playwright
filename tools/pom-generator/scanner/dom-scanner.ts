@@ -20,6 +20,20 @@ import {
     ElementTypeResolver,
 } from './element-type-resolver';
 
+export interface ScannedElementWithHandle {
+    element: CapturedElement;
+
+    /**
+     * Original DOM element reference.
+     *
+     * Used only during locator validation.
+     * Must not be persisted in generated metadata.
+     */
+    handle: ElementHandle<
+        HTMLElement | SVGElement
+    >;
+}
+
 export class DomScanner {
 
     constructor(
@@ -33,8 +47,39 @@ export class DomScanner {
     ) { }
 
 
+    /**
+     * Backward-compatible scanning method.
+     *
+     * Returns captured metadata and disposes
+     * all temporary DOM element handles.
+     */
     async scan():
         Promise<CapturedElement[]> {
+
+        const scanned =
+            await this.scanWithHandles();
+
+        try {
+            return scanned.map(
+                item => item.element,
+            );
+        } finally {
+            await this.disposeHandles(
+                scanned,
+            );
+        }
+    }
+
+
+    /**
+     * Scan elements while retaining their
+     * original DOM references.
+     *
+     * The caller MUST dispose these handles
+     * after locator validation completes.
+     */
+    async scanWithHandles():
+        Promise<ScannedElementWithHandle[]> {
 
         const handles =
             await this.page.$$(
@@ -52,8 +97,15 @@ export class DomScanner {
                 ].join(','),
             );
 
-        const capturedElements:
-            CapturedElement[] = [];
+        const scanned:
+            ScannedElementWithHandle[] = [];
+
+        const retainedHandles =
+            new Set<
+                ElementHandle<
+                    HTMLElement | SVGElement
+                >
+            >();
 
         try {
             for (const handle of handles) {
@@ -63,25 +115,74 @@ export class DomScanner {
                     );
 
                 if (captured) {
-                    capturedElements.push(
-                        captured,
+                    scanned.push({
+                        element: captured,
+                        handle,
+                    });
+
+                    retainedHandles.add(
+                        handle,
                     );
                 }
             }
-        } finally {
+
+            return scanned;
+        } catch (error) {
+
+            /*
+             * If scanning fails, release every
+             * handle before propagating the error.
+             */
             await Promise.all(
                 handles.map(handle =>
                     handle.dispose(),
                 ),
             );
-        }
 
-        return capturedElements;
+            throw error;
+        } finally {
+
+            /*
+             * Dispose unsupported or filtered
+             * elements immediately.
+             *
+             * Supported element handles remain
+             * alive for locator validation.
+             */
+            await Promise.all(
+                handles
+                    .filter(handle =>
+                        !retainedHandles.has(handle),
+                    )
+                    .map(handle =>
+                        handle.dispose(),
+                    ),
+            );
+        }
+    }
+
+
+    /**
+     * Release retained DOM references after
+     * locator validation completes.
+     */
+    async disposeHandles(
+        scanned:
+            readonly ScannedElementWithHandle[],
+    ): Promise<void> {
+
+        await Promise.all(
+            scanned.map(item =>
+                item.handle.dispose(),
+            ),
+        );
     }
 
 
     private async captureElement(
-        handle: ElementHandle<HTMLElement | SVGElement>,
+        handle: ElementHandle<
+            HTMLElement | SVGElement
+        >,
     ): Promise<CapturedElement | undefined> {
 
         const metadata =
@@ -155,11 +256,13 @@ export class DomScanner {
                 metadata.ariaLabel,
 
             /*
-             * Indicates whether a native anchor
-             * has an href attribute.
-             *
-             * LocatorBuilder uses this to infer
-             * the implicit link role.
+             * CSS classes captured from the DOM.
+             */
+            classNames:
+                metadata.classNames,
+
+            /*
+             * Native anchor href information.
              */
             hasHref:
                 metadata.hasHref,
@@ -171,13 +274,7 @@ export class DomScanner {
                 metadata.context,
 
             /*
-             * Diagnostic metadata.
-             *
-             * These properties help identify
-             * elements that cannot produce
-             * a unique locator.
-             *
-             * They are not locator candidates.
+             * Diagnostic metadata only.
              */
             title:
                 metadata.title,
@@ -186,10 +283,8 @@ export class DomScanner {
                 metadata.outerHTML,
 
             /*
-             * Locator candidates are deliberately empty.
-             *
-             * Scanner discovers DOM information.
-             * LocatorBuilder owns locator generation.
+             * Locator generation belongs
+             * exclusively to LocatorBuilder.
              */
             locatorCandidates: [],
         };

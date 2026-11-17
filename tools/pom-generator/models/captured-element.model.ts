@@ -33,6 +33,8 @@ export interface CapturedElement {
 
     ariaLabel?: string;
 
+    classNames?: readonly string[];
+
     visible: boolean;
 
     /**

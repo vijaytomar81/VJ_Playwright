@@ -1,3 +1,4 @@
+
 import path from 'node:path';
 
 import {
@@ -74,12 +75,12 @@ test.describe(
                         generatedPage(),
                     );
 
-
                 expect(
                     paths.pageDirectory,
                 ).toBe(
                     path.join(
                         'automationLayer',
+                        'pomObjects',
                         'AZO',
                         'CTM',
                         'Motor',
@@ -100,12 +101,12 @@ test.describe(
                         generatedPage(),
                     );
 
-
                 expect(
                     paths.actionsDirectory,
                 ).toBe(
                     path.join(
                         'automationLayer',
+                        'pomObjects',
                         'AZO',
                         'CTM',
                         'Motor',
@@ -125,12 +126,12 @@ test.describe(
                         generatedPage(),
                     );
 
-
                 expect(
                     paths.elementsFile,
                 ).toBe(
                     path.join(
                         'automationLayer',
+                        'pomObjects',
                         'AZO',
                         'CTM',
                         'Motor',
@@ -152,12 +153,12 @@ test.describe(
                         generatedPage(),
                     );
 
-
                 expect(
                     paths.pageFile,
                 ).toBe(
                     path.join(
                         'automationLayer',
+                        'pomObjects',
                         'AZO',
                         'CTM',
                         'Motor',
@@ -179,12 +180,12 @@ test.describe(
                         generatedPage(),
                     );
 
-
                 expect(
                     paths.actionsFile,
                 ).toBe(
                     path.join(
                         'automationLayer',
+                        'pomObjects',
                         'AZO',
                         'CTM',
                         'Motor',
@@ -214,12 +215,12 @@ test.describe(
                         }),
                     );
 
-
                 expect(
                     paths.pageDirectory,
                 ).toBe(
                     path.join(
                         'automationLayer',
+                        'pomObjects',
                         'BRI',
                         'GoCo',
                         'Home',
@@ -255,12 +256,12 @@ test.describe(
                         }),
                     );
 
-
                 expect(
                     paths.pageFile,
                 ).toBe(
                     path.join(
                         'automationLayer',
+                        'pomObjects',
                         'FERRY',
                         'DJ',
                         'Home',
@@ -270,12 +271,12 @@ test.describe(
                     ),
                 );
 
-
                 expect(
                     paths.actionsFile,
                 ).toBe(
                     path.join(
                         'automationLayer',
+                        'pomObjects',
                         'FERRY',
                         'DJ',
                         'Home',

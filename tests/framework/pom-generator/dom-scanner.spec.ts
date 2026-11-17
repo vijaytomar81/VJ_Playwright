@@ -274,5 +274,36 @@ test.describe(
                 .toBe('button');
         });
 
+        test('should capture CSS class names', async ({
+            page,
+        }) => {
+            await page.setContent(`
+        <button
+            type="button"
+            class="btn btn-back-link"
+        >
+            Back
+        </button>
+    `);
+
+            const scanner =
+                new DomScanner(page);
+
+            const elements =
+                await scanner.scan();
+
+            expect(elements)
+                .toHaveLength(1);
+
+            expect(elements[0].classNames)
+                .toEqual([
+                    'btn',
+                    'btn-back-link',
+                ]);
+
+            expect(elements[0].locatorCandidates)
+                .toEqual([]);
+        });
+
     },
 );

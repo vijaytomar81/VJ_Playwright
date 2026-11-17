@@ -1,5 +1,6 @@
 
 import type {
+    ElementHandle,
     Locator,
     Page,
 } from '@playwright/test';
@@ -16,6 +17,9 @@ export class LocatorValidator {
 
     async validate(
         candidates: readonly LocatorCandidate[],
+        originalElement?: ElementHandle<
+            HTMLElement | SVGElement
+        >,
     ): Promise<LocatorCandidate[]> {
         const validated: LocatorCandidate[] = [];
 
@@ -26,18 +30,53 @@ export class LocatorValidator {
             const count =
                 await locator.count();
 
+            /*
+             * Strict uniqueness:
+             * exactly one element must match.
+             */
+            let unique =
+                count === 1;
+
+            /*
+             * When the original scanned element
+             * is available, verify DOM identity.
+             *
+             * A locator matching exactly one
+             * different element is not valid.
+             */
+            if (
+                unique &&
+                originalElement
+            ) {
+                const matchedElement =
+                    await locator.elementHandle();
+
+                try {
+                    unique =
+                        matchedElement !== null &&
+                        await matchedElement.evaluate(
+                            (matched, original) =>
+                                matched === original,
+                            originalElement,
+                        );
+                } finally {
+                    await matchedElement?.dispose();
+                }
+            }
+
             validated.push({
                 ...candidate,
 
                 /*
-                 * Preserve strict uniqueness validation.
-                 * A locator is unique only when exactly
-                 * one element matches.
+                 * A candidate is accepted only if
+                 * it matches exactly one element
+                 * and, when provided, matches the
+                 * original scanned element.
                  */
-                unique: count === 1,
+                unique,
 
                 /*
-                 * Diagnostic information.
+                 * Diagnostic match count.
                  *
                  * 0 = no matching elements
                  * 1 = exactly one matching element

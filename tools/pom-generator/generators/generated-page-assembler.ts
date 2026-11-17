@@ -1,3 +1,4 @@
+
 import type {
     Page,
 } from '@playwright/test';
@@ -88,15 +89,50 @@ export class GeneratedPageAssembler {
             );
 
 
-        const capturedElements =
-            await this.scanner.scan();
+        /*
+         * Capture element metadata together with
+         * original DOM element references.
+         *
+         * The handles remain alive until locator
+         * validation has completed.
+         */
+        const scannedElements =
+            await this.scanner.scanWithHandles();
 
 
-        const elements =
-            await this.elementAssembler
-                .assembleAll(
-                    capturedElements,
-                );
+        let elements:
+            GeneratedPage['elements'];
+
+        try {
+
+            /*
+             * Validate locator candidates against
+             * their original DOM elements.
+             *
+             * A locator is accepted only when:
+             *
+             * 1. Exactly one element matches.
+             * 2. The matched element is the
+             *    original scanned element.
+             */
+            elements =
+                await this.elementAssembler
+                    .assembleAllWithHandles(
+                        scannedElements,
+                    );
+
+        } finally {
+
+            /*
+             * Always release original DOM handles.
+             *
+             * Cleanup occurs whether locator
+             * generation succeeds or fails.
+             */
+            await this.scanner.disposeHandles(
+                scannedElements,
+            );
+        }
 
 
         return {

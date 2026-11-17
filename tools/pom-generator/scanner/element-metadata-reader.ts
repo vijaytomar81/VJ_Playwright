@@ -1,4 +1,3 @@
-
 import type {
     ElementHandle,
 } from '@playwright/test';
@@ -14,6 +13,14 @@ export interface RawElementMetadata {
     testId?: string;
     placeholder?: string;
     ariaLabel?: string;
+
+    /**
+     * CSS classes captured from the DOM.
+     *
+     * Used to build CSS fallback locator candidates.
+     */
+    classNames?: readonly string[];
+
     context?: string;
 
     /*
@@ -208,6 +215,18 @@ export class ElementMetadataReader {
                 ariaLabel:
                     normalize(
                         node.getAttribute('aria-label'),
+                    ),
+
+                /*
+                 * Capture individual CSS class names.
+                 *
+                 * LocatorBuilder will decide which
+                 * classes are suitable for fallback
+                 * locator generation.
+                 */
+                classNames:
+                    Array.from(
+                        node.classList,
                     ),
 
                 context:
