@@ -10,3 +10,5 @@ node_modules/
 /results/
 /archive/
 dist/
+# Ignore generated POM objects and metadata
+/automationLayer/pomObjects/
