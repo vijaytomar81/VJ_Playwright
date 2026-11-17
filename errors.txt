@@ -1,13 +1,20 @@
-PS C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\Athena_Automation\VJ_Playwright> npm run pom:create -- `
->>   --connectCdp="$CDP" `
->>   --brand="AZO" `
->>   --channel="DJ" `
->>   --product="Motor" `
->>   --page-name="Login Options"
+tp70707@AVD-HEX-73 MINGW64 ~/OneDrive - Allianz/My Documents/Automation/Athena_Automation/VJ_Playwright (pom-automation)
+$ git status
+On branch pom-automation
+Your branch is behind 'origin/pom-automation' by 3 commits, and can be fast-forwarded.
+  (use "git pull" to update your local branch)
 
-> allianz-automation@1.0.0 pom:create
-> tsc -p tools/pom-generator/tsconfig.build.json && node dist/tools/pom-generator/cli/pom-create.cli.js --connectCdp=ws://localhost:9222/devtools/browser/*** --brand=AZO --channel=DJ --product=Motor --page-name=Login Options
+Changes not staged for commit:
+  (use "git add/rm <file>..." to update what will be committed)
+  (use "git restore <file>..." to discard changes in working directory)
+        deleted:    .pom-generator/metadata/AZO/DJ/Motor/login.json
+        deleted:    git-command.txt
+        deleted:    git-status-filtered.txt
+        deleted:    git-status.txt
 
+no changes added to commit (use "git add" and/or "git commit -a")
 
-POM CREATE failed: Invalid CLI argument: ^--page-name=Login^ Options^
-PS C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\Athena_Automation\VJ_Playwright>
+tp70707@AVD-HEX-73 MINGW64 ~/OneDrive - Allianz/My Documents/Automation/Athena_Automation/VJ_Playwright (pom-automation)
+$ git pull
+Updating 5a97e38..59377f3
+Deletion of directory '.pom-generator/metadata/AZO/DJ/Motor' failed. Should I try again? (y/n) 
