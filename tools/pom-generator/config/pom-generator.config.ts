@@ -56,8 +56,8 @@ export const PomGeneratorConfig = {
     },
 
     output: {
-        automationRoot: 'automationLayer',
-        metadataRoot: '.pom-generator/metadata',
+        automationRoot: 'automationLayer/pomObjects',
+        metadataRoot: 'automationLayer/pomObjects/.pom-generator/metadata',
     },
 
 } as const;
