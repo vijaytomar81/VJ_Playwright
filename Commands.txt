@@ -103,11 +103,8 @@ npm run pom:create -- `
   --brand="AZO" `
   --channel="DJ" `
   --product="Motor" `
-  --page-name="Login Options"
+  --page-name="Login-Options"
 
 npm run pom:create -- --connectCdp="$CDP" --brand="AZO" --channel="DJ" --product="Motor" --page-name="Login-Options"
 
-
-npx tsc -p tools/pom-generator/tsconfig.build.json
-npx tsc --noEmit
 
