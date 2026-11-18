@@ -1,3 +1,4 @@
+
 import type {
     ElementFingerprint,
 } from './element-fingerprint';
@@ -22,6 +23,24 @@ export class FingerprintMatcher {
 
     private readonly threshold = 0.65;
 
+    /*
+     * Role and context are supporting evidence,
+     * not sufficient identity evidence.
+     *
+     * At least one of these fields must match
+     * before two fingerprints can be considered
+     * the same logical element.
+     */
+    private readonly identityFields:
+        readonly WeightedField[] = [
+            'label',
+            'ariaLabel',
+            'name',
+            'testId',
+            'placeholder',
+            'text',
+        ];
+
     private readonly weights:
         Record<WeightedField, number> = {
             role: 10,
@@ -40,8 +59,8 @@ export class FingerprintMatcher {
     ): FingerprintMatchResult {
 
         /*
-         * Different logical element types are not considered
-         * the same element.
+         * Different logical element types are not
+         * considered the same element.
          */
         if (existing.type !== current.type) {
             return {
@@ -64,6 +83,7 @@ export class FingerprintMatcher {
             ) as WeightedField[];
 
         for (const field of fields) {
+
             const oldValue =
                 existing[field];
 
@@ -71,8 +91,8 @@ export class FingerprintMatcher {
                 current[field];
 
             /*
-             * Only compare a characteristic when both
-             * fingerprints contain it.
+             * Only compare a characteristic when
+             * both fingerprints contain it.
              */
             if (!oldValue || !newValue) {
                 continue;
@@ -84,11 +104,18 @@ export class FingerprintMatcher {
             availableWeight += weight;
 
             if (oldValue === newValue) {
+
                 matchedWeight += weight;
 
-                matchedFields.push(field);
+                matchedFields.push(
+                    field,
+                );
+
             } else {
-                conflictingFields.push(field);
+
+                conflictingFields.push(
+                    field,
+                );
             }
         }
 
@@ -105,8 +132,26 @@ export class FingerprintMatcher {
             matchedWeight /
             availableWeight;
 
+        /*
+         * A shared role or page context alone
+         * cannot establish element identity.
+         *
+         * This prevents unrelated controls
+         * from receiving a 100% fingerprint
+         * match solely because they belong
+         * to the same form or section.
+         */
+        const hasIdentityEvidence =
+            this.identityFields.some(
+                field =>
+                    matchedFields.includes(
+                        field,
+                    ),
+            );
+
         return {
             matched:
+                hasIdentityEvidence &&
                 score >= this.threshold,
 
             score,

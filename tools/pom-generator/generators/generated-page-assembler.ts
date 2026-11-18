@@ -103,31 +103,47 @@ export class GeneratedPageAssembler {
         let elements:
             GeneratedPage['elements'];
 
+        let unresolvedElements:
+            NonNullable<
+                GeneratedPage['unresolvedElements']
+            >;
+
+
         try {
 
             /*
-             * Validate locator candidates against
-             * their original DOM elements.
+             * Assemble all captured elements.
              *
-             * A locator is accepted only when:
+             * Successfully resolved elements and
+             * expected locator failures are returned
+             * in separate collections.
              *
-             * 1. Exactly one element matches.
-             * 2. The matched element is the
-             *    original scanned element.
+             * Every successful locator must:
+             *
+             * 1. Match exactly one DOM element.
+             * 2. Match the original scanned element.
+             *
+             * Unexpected errors still propagate.
              */
-            elements =
+            const result =
                 await this.elementAssembler
-                    .assembleAllWithHandles(
+                    .assembleAllWithHandlesAndDiagnostics(
                         scannedElements,
                     );
+
+            elements =
+                result.elements;
+
+            unresolvedElements =
+                result.unresolvedElements;
 
         } finally {
 
             /*
              * Always release original DOM handles.
              *
-             * Cleanup occurs whether locator
-             * generation succeeds or fails.
+             * Cleanup occurs whether element
+             * assembly succeeds or fails.
              */
             await this.scanner.disposeHandles(
                 scannedElements,
@@ -154,7 +170,20 @@ export class GeneratedPageAssembler {
             scannedAt:
                 new Date().toISOString(),
 
+            /*
+             * Only successfully resolved elements
+             * may be used for POM generation.
+             */
             elements,
+
+            /*
+             * Captured elements that could not be
+             * assigned a safe unique locator.
+             *
+             * These must be retained for review,
+             * not emitted as executable actions.
+             */
+            unresolvedElements,
         };
     }
 

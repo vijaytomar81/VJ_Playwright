@@ -1,3 +1,4 @@
+
 import type {
     ElementHandle,
 } from '@playwright/test';
@@ -140,13 +141,50 @@ export class ElementMetadataReader {
             };
 
             /*
-             * Determine element visibility.
+             * Check whether an element and its
+             * ancestor containers are rendered.
              *
-             * Exclude elements explicitly hidden
-             * from the accessibility tree.
-             *
-             * Also account for aria-hidden
-             * on ancestor elements.
+             * This intentionally does not reject
+             * zero opacity or zero dimensions.
+             * Those checks are applied separately
+             * to the actual interaction surface.
+             */
+            const hasRenderedHierarchy = (
+                target: HTMLElement,
+            ): boolean => {
+
+                let current: HTMLElement | null = target;
+
+                while (current) {
+
+                    if (
+                        current.hidden ||
+                        current.hasAttribute('inert') ||
+                        current.getAttribute('aria-hidden') === 'true'
+                    ) {
+                        return false;
+                    }
+
+                    const currentStyle =
+                        window.getComputedStyle(current);
+
+                    if (
+                        currentStyle.display === 'none' ||
+                        currentStyle.visibility === 'hidden' ||
+                        currentStyle.visibility === 'collapse'
+                    ) {
+                        return false;
+                    }
+
+                    current = current.parentElement;
+                }
+
+                return true;
+            };
+
+            /*
+             * Preserve the existing visibility
+             * requirements for ordinary elements.
              */
             const style =
                 window.getComputedStyle(node);
@@ -154,16 +192,59 @@ export class ElementMetadataReader {
             const rect =
                 node.getBoundingClientRect();
 
-            const accessibilityHidden =
-                node.closest('[aria-hidden="true"]') !== null;
-
-            const visible =
-                !accessibilityHidden &&
-                style.display !== 'none' &&
-                style.visibility !== 'hidden' &&
+            const visuallyRendered =
+                hasRenderedHierarchy(node) &&
                 Number(style.opacity) !== 0 &&
                 rect.width > 0 &&
                 rect.height > 0;
+
+            /*
+             * Native radio buttons and checkboxes
+             * are frequently visually hidden by
+             * CSS while their associated labels
+             * provide the visible interaction
+             * surface.
+             *
+             * Only allow this exception when a
+             * corresponding label is rendered.
+             */
+            const isChoiceInput =
+                node instanceof HTMLInputElement &&
+                (
+                    node.type === 'radio' ||
+                    node.type === 'checkbox'
+                );
+
+            const hasVisibleChoiceLabel =
+                isChoiceInput &&
+                Array.from(node.labels ?? [])
+                    .some(label => {
+
+                        if (!hasRenderedHierarchy(label)) {
+                            return false;
+                        }
+
+                        const labelStyle =
+                            window.getComputedStyle(label);
+
+                        const labelRect =
+                            label.getBoundingClientRect();
+
+                        return (
+                            Number(labelStyle.opacity) !== 0 &&
+                            labelRect.width > 0 &&
+                            labelRect.height > 0 &&
+                            label.getClientRects().length > 0
+                        );
+                    });
+
+            const visible =
+                visuallyRendered ||
+                (
+                    isChoiceInput &&
+                    hasRenderedHierarchy(node) &&
+                    hasVisibleChoiceLabel
+                );
 
             /*
              * Return raw DOM metadata.

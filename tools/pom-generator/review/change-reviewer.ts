@@ -1,3 +1,4 @@
+
 import type {
     ElementChange,
 } from '../models/change.model';
@@ -27,6 +28,7 @@ export class ChangeReviewer {
 
     ) { }
 
+
     apply(
         changes:
             readonly ElementChange[],
@@ -44,6 +46,9 @@ export class ChangeReviewer {
         const unresolvedStableKeys:
             string[] = [];
 
+        const approvedStableKeys =
+            new Set<string>();
+
 
         const decisionMap =
             this.buildDecisionMap(
@@ -53,23 +58,40 @@ export class ChangeReviewer {
 
         for (const change of changes) {
 
-            if (
-                change.type ===
-                'UNCHANGED'
-            ) {
-                if (change.existing) {
-                    elements.push(
-                        change.existing,
-                    );
-                }
-
-                continue;
+            /*
+             * Every change must have a stable identity.
+             *
+             * Silently skipping an unidentified change
+             * could cause an existing element to
+             * disappear from generated metadata.
+             */
+            if (!change.stableKey) {
+                throw new Error(
+                    `Cannot review element without a stableKey: ` +
+                    `${change.elementName} (${change.type}).`,
+                );
             }
 
 
             if (
-                !change.stableKey
+                change.type ===
+                'UNCHANGED'
             ) {
+
+                if (!change.existing) {
+                    throw new Error(
+                        `UNCHANGED element is missing its existing definition: ` +
+                        `${change.elementName}.`,
+                    );
+                }
+
+
+                this.addApprovedElement(
+                    change.existing,
+                    elements,
+                    approvedStableKeys,
+                );
+
                 continue;
             }
 
@@ -107,6 +129,7 @@ export class ChangeReviewer {
                 change,
                 decision.action,
                 elements,
+                approvedStableKeys,
             );
 
 
@@ -141,6 +164,15 @@ export class ChangeReviewer {
         for (const decision of decisions) {
 
             if (
+                !decision.stableKey
+            ) {
+                throw new Error(
+                    'Review decision is missing a stableKey.',
+                );
+            }
+
+
+            if (
                 decisionMap.has(
                     decision.stableKey,
                 )
@@ -172,59 +204,116 @@ export class ChangeReviewer {
 
         elements:
             GeneratedElement[],
+
+        approvedStableKeys:
+            Set<string>,
     ): void {
 
         switch (action) {
 
-            case 'ADD':
+            case 'ADD': {
 
-                if (change.current) {
-                    elements.push(
-                        change.current,
+                if (!change.current) {
+                    throw new Error(
+                        `ADD requires a current element: ` +
+                        `${change.elementName}.`,
                     );
                 }
 
+
+                this.assertStableKey(
+                    change.current,
+                    change.stableKey,
+                    'ADD',
+                );
+
+
+                this.addApprovedElement(
+                    change.current,
+                    elements,
+                    approvedStableKeys,
+                );
+
                 return;
+            }
 
 
-            case 'UPDATE':
+            case 'UPDATE': {
 
-                if (change.current) {
-                    elements.push(
-                        change.current,
+                if (!change.existing) {
+                    throw new Error(
+                        `UPDATE requires an existing element: ` +
+                        `${change.elementName}.`,
                     );
                 }
 
+
+                if (!change.current) {
+                    throw new Error(
+                        `UPDATE requires a current element: ` +
+                        `${change.elementName}.`,
+                    );
+                }
+
+
+                this.assertStableKey(
+                    change.existing,
+                    change.stableKey,
+                    'UPDATE existing',
+                );
+
+
+                /*
+                 * The comparator must preserve the
+                 * existing stable identity when it
+                 * creates a matched current element.
+                 */
+                this.assertStableKey(
+                    change.current,
+                    change.stableKey,
+                    'UPDATE current',
+                );
+
+
+                this.addApprovedElement(
+                    change.current,
+                    elements,
+                    approvedStableKeys,
+                );
+
                 return;
+            }
 
 
             case 'KEEP':
-
-                if (change.existing) {
-                    elements.push(
-                        change.existing,
-                    );
-                }
-
-                return;
-
-
-            case 'IGNORE':
+            case 'IGNORE': {
 
                 /*
-                 * IGNORE means:
+                 * Preserve the existing element,
+                 * including its approved locator,
+                 * name, and stableKey.
                  *
-                 * preserve an existing element
-                 * when one exists, but do not
-                 * accept a NEW element.
+                 * IGNORE on NEW intentionally adds
+                 * nothing to the output.
                  */
                 if (change.existing) {
-                    elements.push(
+
+                    this.assertStableKey(
                         change.existing,
+                        change.stableKey,
+                        action,
+                    );
+
+
+                    this.addApprovedElement(
+                        change.existing,
+                        elements,
+                        approvedStableKeys,
                     );
                 }
 
                 return;
+            }
 
 
             case 'REMOVE':
@@ -232,10 +321,78 @@ export class ChangeReviewer {
                 /*
                  * Explicitly approved removal.
                  *
-                 * Do not add the existing element
-                 * to the resulting collection.
+                 * The action policy determines
+                 * which change types can be removed.
                  */
                 return;
         }
+    }
+
+
+    private assertStableKey(
+        element:
+            GeneratedElement,
+
+        expectedStableKey:
+            string,
+
+        operation:
+            string,
+    ): void {
+
+        if (
+            !element.stableKey ||
+            element.stableKey !==
+            expectedStableKey
+        ) {
+            throw new Error(
+                `${operation} stableKey mismatch for ` +
+                `${element.name}: expected ` +
+                `${expectedStableKey}, received ` +
+                `${element.stableKey}.`,
+            );
+        }
+    }
+
+
+    private addApprovedElement(
+        element:
+            GeneratedElement,
+
+        elements:
+            GeneratedElement[],
+
+        approvedStableKeys:
+            Set<string>,
+    ): void {
+
+        if (!element.stableKey) {
+            throw new Error(
+                `Approved element is missing a stableKey: ` +
+                `${element.name}.`,
+            );
+        }
+
+
+        if (
+            approvedStableKeys.has(
+                element.stableKey,
+            )
+        ) {
+            throw new Error(
+                `Duplicate approved element stableKey: ` +
+                `${element.stableKey}.`,
+            );
+        }
+
+
+        approvedStableKeys.add(
+            element.stableKey,
+        );
+
+
+        elements.push(
+            element,
+        );
     }
 }

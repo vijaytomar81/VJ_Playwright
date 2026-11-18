@@ -1,3 +1,4 @@
+
 import type {
     Brand,
 } from '../../../configLayer/brand.config';
@@ -22,6 +23,11 @@ import type {
     ElementFingerprint,
 } from '../fingerprint/element-fingerprint';
 
+import type {
+    UnresolvedElement,
+} from './unresolved-element.model';
+
+
 export interface GeneratedElement {
     name: string;
 
@@ -33,6 +39,7 @@ export interface GeneratedElement {
 
     fingerprint: ElementFingerprint;
 }
+
 
 export interface GeneratedPage {
     brand: Brand;
@@ -47,5 +54,20 @@ export interface GeneratedPage {
 
     scannedAt: string;
 
+    /**
+     * Successfully resolved elements.
+     *
+     * Each element must have a validated
+     * unique locator.
+     */
     elements: readonly GeneratedElement[];
+
+    /**
+     * Captured elements for which no safe,
+     * unique locator could be generated.
+     *
+     * Optional for backward compatibility
+     * with existing generated page metadata.
+     */
+    unresolvedElements?: readonly UnresolvedElement[];
 }

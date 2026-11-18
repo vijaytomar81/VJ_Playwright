@@ -1,3 +1,4 @@
+
 import {
     StringUtils,
 } from '../../../utils/string/string.utils';
@@ -27,6 +28,31 @@ export class ElementNameGenerator {
     private getBestNameSource(
         element: CapturedElement,
     ): string {
+
+        /*
+         * Select elements can expose all their
+         * option labels through element.text.
+         *
+         * Those options may change between
+         * vehicle configurations, so they
+         * must not determine the element name.
+         */
+        if (element.type === 'select') {
+            return (
+                element.label ||
+                element.ariaLabel ||
+                element.placeholder ||
+                element.name ||
+                element.testId ||
+                element.id ||
+                element.tagName
+            );
+        }
+
+        /*
+         * Preserve existing naming behavior
+         * for all other element types.
+         */
         return (
             element.label ||
             element.ariaLabel ||

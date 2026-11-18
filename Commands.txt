@@ -109,6 +109,7 @@ npm run pom:create -- `
   --product="Motor" `
   --page-name="Login-Options"
 
-npm run pom:create -- --connectCdp="$CDP" --brand="AZO" --channel="DJ" --product="Motor" --page-name="Quote-Options"
+npm run pom:create -- --connectCdp="http://localhost:9222" --brand="AZO" --channel="DJ" --product="Motor" --page-name="Car-Details"
+npm run pom:update -- --connectCdp="http://localhost:9222" --brand="AZO" --channel="DJ" --product="Motor" --page-name="Car-Details"
 
 

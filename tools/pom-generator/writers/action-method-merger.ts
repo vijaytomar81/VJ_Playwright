@@ -1,3 +1,4 @@
+
 import {
     parse,
 } from '@babel/parser';
@@ -27,6 +28,7 @@ interface Replacement {
     text: string;
 }
 
+
 export class ActionMethodMerger {
 
     merge(
@@ -41,6 +43,7 @@ export class ActionMethodMerger {
         const generated = this.parseActions(
             generatedSource,
         );
+
 
         const existingByIdentity =
             new Map<string, ActionMethod>();
@@ -66,6 +69,7 @@ export class ActionMethodMerger {
             );
         }
 
+
         const matched =
             new Set<ActionMethod>();
 
@@ -73,6 +77,7 @@ export class ActionMethodMerger {
             new Set<string>();
 
         const edits: Replacement[] = [];
+
 
         for (const method of generated.methods) {
             if (!method.identity) {
@@ -99,19 +104,31 @@ export class ActionMethodMerger {
 
             if (previous) {
                 matched.add(previous);
-            }
 
-            if (name !== method.name) {
+                /*
+                 * Preserve the complete existing
+                 * action method, including its
+                 * engineer-owned name and body.
+                 *
+                 * Do not replace it with the newly
+                 * generated implementation.
+                 */
                 edits.push({
-                    start: method.nameStart,
-                    end: method.nameEnd,
-                    text: name,
+                    start: method.start,
+                    end: method.end,
+                    text: existingSource.slice(
+                        previous.start,
+                        previous.end,
+                    ),
                 });
             }
         }
 
-        // Retain custom methods and actions from
-        // elements absent in the latest scan.
+
+        /*
+         * Retain custom methods and actions from
+         * elements absent in the latest scan.
+         */
         const retained =
             existing.methods.filter(
                 method => !matched.has(method),
@@ -126,6 +143,7 @@ export class ActionMethodMerger {
 
             names.add(method.name);
         }
+
 
         if (retained.length > 0) {
             const bodies =
@@ -147,6 +165,7 @@ export class ActionMethodMerger {
             });
         }
 
+
         let result = generatedSource;
 
         for (
@@ -159,6 +178,12 @@ export class ActionMethodMerger {
                 edit.text +
                 result.slice(edit.end);
         }
+
+        /*
+         * Validate that the merged source remains
+         * syntactically valid TypeScript.
+         */
+        this.parseActions(result);
 
         return result;
     }

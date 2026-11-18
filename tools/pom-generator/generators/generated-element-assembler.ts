@@ -13,24 +13,16 @@ import type {
 } from '../models/page.model';
 
 import type {
+    UnresolvedElement,
+} from '../models/unresolved-element.model';
+
+import type {
     ScannedElementWithHandle,
 } from '../scanner/dom-scanner';
 
 import {
     ElementNameGenerator,
 } from '../naming/element-name-generator';
-
-import {
-    LocatorBuilder,
-} from '../locator/locator-builder';
-
-import {
-    LocatorValidator,
-} from '../locator/locator-validator';
-
-import {
-    LocatorSelector,
-} from '../locator/locator-selector';
 
 import {
     ElementFingerprintBuilder,
@@ -40,12 +32,54 @@ import {
     StableKeyGenerator,
 } from '../fingerprint/stable-key-generator';
 
+import {
+    GeneratedElementNameResolver,
+} from './generated-element-name-resolver';
+
+import type {
+    NamedGeneratedElement,
+} from './generated-element-name-resolver';
+
+import {
+    GeneratedElementLocatorResolver,
+} from './generated-element-locator-resolver';
+
+import {
+    UnresolvedElementFactory,
+} from './unresolved-element-factory';
+
+
+export interface ElementAssemblyResult {
+    elements: readonly GeneratedElement[];
+    unresolvedElements: readonly UnresolvedElement[];
+}
+
+
+export class UnresolvedLocatorError extends Error {
+
+    readonly unresolvedElement: UnresolvedElement;
+
+    constructor(
+        unresolvedElement: UnresolvedElement,
+        cause?: unknown,
+    ) {
+        super(
+            unresolvedElement.message,
+            { cause },
+        );
+
+        this.name = 'UnresolvedLocatorError';
+
+        this.unresolvedElement =
+            unresolvedElement;
+    }
+}
+
 
 export class GeneratedElementAssembler {
 
-    private readonly locatorValidator:
-        LocatorValidator;
-
+    private readonly locatorResolver:
+        GeneratedElementLocatorResolver;
 
     constructor(
         page: Page,
@@ -53,23 +87,29 @@ export class GeneratedElementAssembler {
         private readonly nameGenerator =
             new ElementNameGenerator(),
 
-        private readonly locatorBuilder =
-            new LocatorBuilder(),
-
-        private readonly locatorSelector =
-            new LocatorSelector(),
-
         private readonly fingerprintBuilder =
             new ElementFingerprintBuilder(),
 
         private readonly stableKeyGenerator =
             new StableKeyGenerator(),
+
+        private readonly nameResolver =
+            new GeneratedElementNameResolver(),
+
+        private readonly unresolvedElementFactory =
+            new UnresolvedElementFactory(),
     ) {
-        this.locatorValidator =
-            new LocatorValidator(page);
+        this.locatorResolver =
+            new GeneratedElementLocatorResolver(page);
     }
 
 
+    /**
+     * Assemble one captured element.
+     *
+     * Each responsibility is delegated to
+     * the corresponding specialized class.
+     */
     async assemble(
         element: CapturedElement,
         originalElement?: ElementHandle<
@@ -78,196 +118,91 @@ export class GeneratedElementAssembler {
     ): Promise<GeneratedElement> {
 
         const name =
-            this.nameGenerator.generate(
-                element,
-            );
+            this.nameGenerator.generate(element);
 
-        const candidates =
-            this.locatorBuilder.build(
+        const resolution =
+            await this.locatorResolver.resolve(
                 element,
-            );
-
-        /*
-         * Validate candidate uniqueness.
-         *
-         * When the original DOM handle is
-         * available, also verify that each
-         * unique locator points to the exact
-         * element captured by DomScanner.
-         */
-        const validatedCandidates =
-            await this.locatorValidator.validate(
-                candidates,
                 originalElement,
             );
 
-        let locator: GeneratedElement['locator'];
+        /*
+         * Explicit discriminant comparison
+         * ensures correct TypeScript narrowing.
+         */
+        if (resolution.success === false) {
 
-        try {
-            locator =
-                this.locatorSelector.select(
-                    validatedCandidates,
-                );
-        } catch (error) {
-
-            /*
-             * Diagnostic information for elements
-             * without a valid unique locator.
-             *
-             * No fallback locator is invented.
-             * Existing uniqueness rules are preserved.
-             */
-            const details = {
-                generatedName:
+            const unresolvedElement =
+                this.unresolvedElementFactory.create(
                     name,
+                    element,
+                    resolution.candidates,
+                    originalElement !== undefined,
+                );
 
-                tagName:
-                    element.tagName,
-
-                type:
-                    element.type,
-
-                role:
-                    element.role,
-
-                label:
-                    element.label,
-
-                text:
-                    element.text?.slice(0, 100),
-
-                id:
-                    element.id,
-
-                name:
-                    element.name,
-
-                testId:
-                    element.testId,
-
-                placeholder:
-                    element.placeholder,
-
-                ariaLabel:
-                    element.ariaLabel,
-
-                classNames:
-                    element.classNames,
-
-                context:
-                    element.context,
-
-                /*
-                 * Additional diagnostic metadata.
-                 *
-                 * These values are used only for
-                 * troubleshooting failed locator
-                 * generation.
-                 */
-                title:
-                    element.title,
-
-                outerHTML:
-                    element.outerHTML,
-
-                candidates:
-                    validatedCandidates.map(
-                        candidate => ({
-                            strategy:
-                                candidate.strategy,
-
-                            descriptor:
-                                candidate.descriptor,
-
-                            unique:
-                                candidate.unique,
-
-                            matchCount:
-                                candidate.matchCount,
-                        }),
-                    ),
-            };
-
-            throw new Error(
-                'Unable to generate a unique locator.\n' +
-                JSON.stringify(
-                    details,
-                    null,
-                    2,
-                ),
-                {
-                    cause: error,
-                },
+            throw new UnresolvedLocatorError(
+                unresolvedElement,
             );
         }
 
         const fingerprint =
-            this.fingerprintBuilder.build(
-                element,
-            );
+            this.fingerprintBuilder.build(element);
 
         const stableKey =
             this.stableKeyGenerator.generate();
 
         return {
             name,
-
-            type:
-                element.type,
-
-            locator,
-
+            type: element.type,
+            locator: resolution.locator,
             stableKey,
-
             fingerprint,
         };
     }
 
 
     /**
-     * Backward-compatible assembly method.
+     * Assemble elements without DOM handles.
      *
-     * Existing callers can continue supplying
-     * CapturedElement objects without handles.
+     * Locator failures propagate to the caller.
      */
     async assembleAll(
-        elements:
-            readonly CapturedElement[],
+        elements: readonly CapturedElement[],
     ): Promise<GeneratedElement[]> {
 
-        const generatedElements:
-            GeneratedElement[] = [];
+        const namedElements:
+            NamedGeneratedElement[] = [];
 
         for (const element of elements) {
 
             const generatedElement =
-                await this.assemble(
-                    element,
-                );
+                await this.assemble(element);
 
-            generatedElements.push(
-                generatedElement,
-            );
+            namedElements.push({
+                generated: generatedElement,
+                captured: element,
+            });
         }
 
-        return generatedElements;
+        return this.nameResolver.resolve(
+            namedElements,
+        );
     }
 
 
     /**
-     * Assemble elements while validating
-     * against their original DOM references.
+     * Assemble elements using their DOM handles.
      *
-     * Handle disposal remains the
-     * responsibility of the caller.
+     * The caller remains responsible for
+     * disposing the handles.
      */
     async assembleAllWithHandles(
         scanned:
             readonly ScannedElementWithHandle[],
     ): Promise<GeneratedElement[]> {
 
-        const generatedElements:
-            GeneratedElement[] = [];
+        const namedElements:
+            NamedGeneratedElement[] = [];
 
         for (const item of scanned) {
 
@@ -277,11 +212,75 @@ export class GeneratedElementAssembler {
                     item.handle,
                 );
 
-            generatedElements.push(
-                generatedElement,
-            );
+            namedElements.push({
+                generated: generatedElement,
+                captured: item.element,
+            });
         }
 
-        return generatedElements;
+        return this.nameResolver.resolve(
+            namedElements,
+        );
+    }
+
+
+    /**
+     * Assemble elements while collecting expected
+     * locator-resolution failures as diagnostics.
+     *
+     * Unexpected errors propagate unchanged.
+     * The caller owns handle disposal.
+     */
+    async assembleAllWithHandlesAndDiagnostics(
+        scanned:
+            readonly ScannedElementWithHandle[],
+    ): Promise<ElementAssemblyResult> {
+
+        const namedElements:
+            NamedGeneratedElement[] = [];
+
+        const unresolvedElements:
+            UnresolvedElement[] = [];
+
+        for (const item of scanned) {
+
+            try {
+
+                const generatedElement =
+                    await this.assemble(
+                        item.element,
+                        item.handle,
+                    );
+
+                namedElements.push({
+                    generated: generatedElement,
+                    captured: item.element,
+                });
+
+            } catch (error) {
+
+                if (
+                    error instanceof
+                    UnresolvedLocatorError
+                ) {
+                    unresolvedElements.push(
+                        error.unresolvedElement,
+                    );
+
+                    continue;
+                }
+
+                throw error;
+            }
+        }
+
+        return {
+            elements:
+                this.nameResolver.resolve(
+                    namedElements,
+                ),
+
+            unresolvedElements,
+        };
     }
 }

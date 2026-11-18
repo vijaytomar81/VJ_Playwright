@@ -1,3 +1,4 @@
+
 import {
     test,
     expect,
@@ -56,7 +57,6 @@ test.describe(
             });
         });
 
-
         test('should normalize whitespace and casing', () => {
             const element =
                 createElement({
@@ -68,7 +68,6 @@ test.describe(
                 builder.build(element).label,
             ).toBe('first name');
         });
-
 
         test('should not use locator or html id as fingerprint identity', () => {
             const element =

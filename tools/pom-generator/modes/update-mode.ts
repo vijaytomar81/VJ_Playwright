@@ -1,3 +1,4 @@
+
 import type {
     GeneratedPage,
 } from '../models/page.model';
@@ -164,6 +165,19 @@ export class UpdateMode {
         };
 
 
+        /*
+         * Validate the final merged collection before
+         * capturing a snapshot or writing any files.
+         *
+         * This protects existing metadata and generated
+         * TypeScript files from duplicate names or
+         * stable-key collisions introduced by merging.
+         */
+        this.validateMergedPage(
+            updatedPage,
+        );
+
+
         const snapshot =
             await this.snapshotManager.capture(
                 currentPage,
@@ -201,6 +215,70 @@ export class UpdateMode {
             return this.rollback(
                 snapshot,
                 error,
+            );
+        }
+    }
+
+
+    private validateMergedPage(
+        page: GeneratedPage,
+    ): void {
+
+        const names =
+            new Set<string>();
+
+        const stableKeys =
+            new Set<string>();
+
+
+        for (const element of page.elements) {
+
+            const name =
+                element.name.trim();
+
+            const stableKey =
+                element.stableKey.trim();
+
+
+            if (!name) {
+                throw new Error(
+                    'Cannot UPDATE POM: merged element ' +
+                    'has an empty name.',
+                );
+            }
+
+
+            if (!stableKey) {
+                throw new Error(
+                    `Cannot UPDATE POM: merged element ` +
+                    `"${name}" has an empty stableKey.`,
+                );
+            }
+
+
+            if (names.has(name)) {
+                throw new Error(
+                    `Cannot UPDATE POM: duplicate merged ` +
+                    `element name "${name}".`,
+                );
+            }
+
+
+            if (stableKeys.has(stableKey)) {
+                throw new Error(
+                    `Cannot UPDATE POM: duplicate merged ` +
+                    `stableKey "${stableKey}".`,
+                );
+            }
+
+
+            names.add(
+                name,
+            );
+
+
+            stableKeys.add(
+                stableKey,
             );
         }
     }

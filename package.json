@@ -3,7 +3,9 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-    "pom:create": "tsc -p tools/pom-generator/tsconfig.build.json && node dist/tools/pom-generator/cli/pom-create.cli.js"
+    "pom-generate": "tsc -p tools/pom-generator/tsconfig.build.json && node dist/tools/pom-generator/cli/pom-generate.cli.js",
+    "edge:cdp:start": "node tools/pom-generator/scripts/launch-edge-cdp.cjs",
+    "edge:cdp:stop": "node tools/pom-generator/scripts/stop-edge-cdp.cjs"
   },
   "keywords": [],
   "author": "",
