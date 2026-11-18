@@ -1,0 +1,39 @@
+
+===== tools/pom-generator/scanner/dom-scanner.ts =====
+19:export interface DomScanOptions {
+25:export interface DomScanResult {
+264:export function scanDom(
+
+===== tools/pom-generator/comparison/element-matcher.ts =====
+14:export interface ElementComparison {
+125:export function comparePageElements(
+
+===== tools/pom-generator/comparison/change-planner.ts =====
+18:export interface ChangePlannerOptions {
+239:export function planChanges(
+
+===== tools/pom-generator/core/element-identity.ts =====
+10:export interface IdentityCandidate {
+16:export interface IdentityDecision {
+25:export interface IdentityResolution {
+305:export function resolveElementIdentities(
+
+===== tools/pom-generator/generation/page-writer.ts =====
+7:export interface PageWriterOptions {
+12:export interface PageWriterResult {
+196:export function generatePageFile(
+
+===== tools/pom-generator/generation/elements-writer.ts =====
+12:export interface ElementsWriterOptions {
+17:export interface ElementsWriterResult {
+299:export function generateElementsFile(
+
+===== tools/pom-generator/generation/actions-writer.ts =====
+9:export interface ActionsWriterOptions {
+13:export interface ActionsWriterResult {
+288:export function generateActionsFile(
+
+===== tools/pom-generator/generation/action-merger.ts =====
+10:export interface ActionMergeOptions {
+14:export interface ActionMergeResult {
+225:export function mergeActionFiles(

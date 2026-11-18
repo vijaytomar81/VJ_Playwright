@@ -12,3 +12,4 @@ node_modules/
 dist/
 # Ignore generated POM objects and metadata
 /automationLayer/pomObjects/
+/tmp/

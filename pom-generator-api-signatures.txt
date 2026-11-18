@@ -1,0 +1,479 @@
+
+===== tools/pom-generator/scanner/dom-scanner.ts =====
+264:export function scanDom(
+265-    root: ParentNode,
+266-    options: DomScanOptions,
+267-): DomScanResult {
+268-    const warnings: string[] = [];
+269-
+270-    const groupResult = detectGroups(root);
+271-    const repeatableResult = detectRepeatableGroups(root);
+272-
+273-    warnings.push(...repeatableResult.warnings);
+274-
+275-    const validatedRepeatables = filterValidatedRepeatables(
+276-        repeatableResult.groups,
+277-        root,
+278-        warnings,
+279-    );
+280-
+281-    const repeatableGroups = collectRepeatableGroups(
+282-        validatedRepeatables,
+283-        warnings,
+284-    );
+285-
+286-    const activeRepeatables = getActiveRepeatableGroups(
+287-        validatedRepeatables,
+288-        repeatableGroups,
+289-    );
+290-
+291-    const controls = collectInteractiveElements(root);
+292-
+293-    const elements: ScannedElement[] = controls.map(
+294-        (control, index) => {
+295-            const membership = findRepeatableMembership(
+296-                control,
+297-                activeRepeatables,
+298-            );
+299-
+
+19:export interface DomScanOptions {
+20-    pageName: string;
+21-    url?: string;
+22-    includeHidden?: boolean;
+23-}
+24-
+25:export interface DomScanResult {
+26-    scan: PageScan;
+27-    warnings: string[];
+28-}
+29-
+30-interface RepeatableMembership {
+31-    group: DetectedRepeatableGroup;
+32-    instance: number;
+33-}
+34-
+35-const INTERACTIVE_SELECTOR = [
+36-    'input:not([type="hidden"])',
+37-    'textarea',
+38-    'select',
+39-    'button',
+40-    'a[href]',
+
+===== tools/pom-generator/comparison/element-matcher.ts =====
+125:export function comparePageElements(
+126-    scan: PageScan,
+127-    existing: readonly StoredElement[],
+128-): ElementComparison {
+129-    const warnings: string[] = [];
+130-    const matches: ElementMatch[] = [];
+131-
+132-    const logicalGroups = groupLogicalScans(scan.elements);
+133-
+134-    const identities = resolveElementIdentities(
+135-        logicalGroups.map((group) => group.representative),
+136-        existing,
+137-    );
+138-
+139-    warnings.push(...identities.warnings);
+140-
+141-    const decisions = new Map(
+142-        identities.decisions.map((decision) => [
+143-            decision.scannedId,
+144-            decision,
+145-        ]),
+146-    );
+147-
+148-    const claimedKeys = new Set<ElementKey>();
+149-
+150-    for (const group of logicalGroups) {
+151-        const decision = decisions.get(
+152-            group.representative.temporaryId,
+153-        );
+154-
+155-        if (!decision) {
+156-            matches.push(
+157-                ...markAmbiguous(
+158-                    group,
+159-                    'Identity resolver returned no decision.',
+160-                ),
+
+14:export interface ElementComparison {
+15-    matches: ElementMatch[];
+16-    matched: number;
+17-    added: number;
+18-    notFound: number;
+19-    ambiguous: number;
+20-    warnings: string[];
+21-}
+22-
+23-interface LogicalScanGroup {
+24-    representative: ScannedElement;
+25-    members: ScannedElement[];
+26-}
+27-
+28-function normalize(value: string | undefined): string {
+29-    return (value ?? '')
+
+===== tools/pom-generator/comparison/change-planner.ts =====
+239:export function planChanges(
+240-    scan: PageScan,
+241-    comparison: ElementComparison,
+242-    metadata: PageMetadata | undefined,
+243-    options: ChangePlannerOptions,
+244-): ChangePlan {
+245-    const changes: GeneratorChange[] = [];
+246-    const lookup = createLookup(scan);
+247-
+248-    const blockNewWhenUnresolved =
+249-        options.blockNewWhenUnresolved ?? true;
+250-
+251-    const unresolvedExisting =
+252-        comparison.notFound > 0 ||
+253-        comparison.ambiguous > 0;
+254-
+255-    const safeNewElements =
+256-        options.mode === 'create' ||
+257-        !blockNewWhenUnresolved ||
+258-        !unresolvedExisting;
+259-
+260-    for (const match of comparison.matches) {
+261-        switch (match.status) {
+262-            case 'matched':
+263-                planMatchedElement(
+264-                    match,
+265-                    lookup,
+266-                    metadata,
+267-                    changes,
+268-                );
+269-                break;
+270-
+271-            case 'new':
+272-                planNewElement(
+273-                    match,
+274-                    lookup,
+
+18:export interface ChangePlannerOptions {
+19-    mode: GeneratorMode;
+20-    blockNewWhenUnresolved?: boolean;
+21-}
+22-
+23-interface ScanLookup {
+24-    byTemporaryId: Map<string, ScannedElement>;
+25-}
+26-
+27-function createLookup(scan: PageScan): ScanLookup {
+28-    return {
+29-        byTemporaryId: new Map(
+30-            scan.elements.map((element) => [
+31-                element.temporaryId,
+32-                element,
+33-            ]),
+
+===== tools/pom-generator/core/element-identity.ts =====
+305:export function resolveElementIdentities(
+306-    scanned: readonly ScannedElement[],
+307-    existing: readonly StoredElement[],
+308-): IdentityResolution {
+309-    const logicalScans = collectLogicalScans(scanned);
+310-
+311-    const usedKeys = new Set(
+312-        existing.map((element) => element.stableKey),
+313-    );
+314-
+315-    const claimedExisting = new Set<string>();
+316-    const decisions: IdentityDecision[] = [];
+317-    const warnings: string[] = [];
+318-
+319-    for (const logical of logicalScans) {
+320-        const decision = decideMatch(
+321-            logical.representative,
+322-            existing,
+323-        );
+324-
+325-        if (
+326-            decision.status === 'matched' &&
+327-            decision.stableKey &&
+328-            claimedExisting.has(decision.stableKey)
+329-        ) {
+330-            decision.status = 'ambiguous';
+331-            decision.reason =
+332-                'Multiple scanned elements claim the same stable key.';
+333-            delete decision.stableKey;
+334-        }
+335-
+336-        if (
+337-            decision.status === 'matched' &&
+338-            decision.stableKey
+339-        ) {
+340-            claimedExisting.add(decision.stableKey);
+
+10:export interface IdentityCandidate {
+11-    existingKey: ElementKey;
+12-    score: number;
+13-    reasons: string[];
+14-}
+15-
+16:export interface IdentityDecision {
+17-    scannedId: string;
+18-    status: 'matched' | 'new' | 'ambiguous';
+19-    stableKey?: ElementKey;
+20-    confidence: number;
+21-    candidates: IdentityCandidate[];
+22-    reason: string;
+23-}
+24-
+25:export interface IdentityResolution {
+26-    decisions: IdentityDecision[];
+27-    unmatchedExistingKeys: ElementKey[];
+28-    warnings: string[];
+29-}
+30-
+31-interface LogicalScan {
+32-    representative: ScannedElement;
+33-    members: ScannedElement[];
+34-}
+35-
+36-const MATCH_THRESHOLD = 65;
+37-const AMBIGUITY_MARGIN = 12;
+38-
+39-function normalize(value: string | undefined): string {
+40-    return (value ?? '')
+
+===== tools/pom-generator/generation/page-writer.ts =====
+196:export function generatePageFile(
+197-    metadata: PageMetadata,
+198-    options: PageWriterOptions = {},
+199-): PageWriterResult {
+200-    const className = `${toPascalCase(metadata.pageName)}Page`;
+201-
+202-    const runtimePath = validateImportPath(
+203-        options.runtimeImportPath ??
+204-        '../../tools/pom-generator/runtime/locator-resolver',
+205-        'runtimeImportPath',
+206-    );
+207-
+208-    const elementsPath = validateImportPath(
+209-        options.elementsImportPath ??
+210-        `./${metadata.pageName}.elements`,
+211-        'elementsImportPath',
+212-    );
+213-
+214-    const warnings: string[] = [];
+215-    const accessors = collectAccessors(metadata, warnings);
+216-
+217-    const accessorCode = accessors
+218-        .map(renderAccessor)
+219-        .join('\n\n');
+220-
+221-    const content = [
+222-        '// AUTO-GENERATED BY POM GENERATOR V2.',
+223-        '// Regenerate this file through the generator.',
+224-        '// Put engineer-owned workflows in group-actions.',
+225-        '',
+226-        "import type { Locator, Page } from '@playwright/test';",
+227-        `import { LocatorResolver } from '${runtimePath}';`,
+228-        `import {`,
+229-        `  elementDefinitions,`,
+230-        `  groupDefinitions,`,
+231-        `  repeatableGroupDefinitions,`,
+
+7:export interface PageWriterOptions {
+8-    runtimeImportPath?: string;
+9-    elementsImportPath?: string;
+10-}
+11-
+12:export interface PageWriterResult {
+13-    fileName: string;
+14-    content: string;
+15-    accessorCount: number;
+16-    warnings: string[];
+17-}
+18-
+19-interface AccessorDefinition {
+20-    name: string;
+21-    elementKey: string;
+22-    indexed: boolean;
+23-    groupKey?: string;
+24-    repeatableGroupKey?: string;
+25-}
+26-
+27-const IDENTIFIER_PATTERN = /^[A-Za-z_$][A-Za-z0-9_$]*$/;
+
+===== tools/pom-generator/generation/elements-writer.ts =====
+299:export function generateElementsFile(
+300-    metadata: PageMetadata,
+301-    options: ElementsWriterOptions = {},
+302-): ElementsWriterResult {
+303-    const typesPath = validateImportPath(
+304-        options.typesImportPath ??
+305-        '../../tools/pom-generator/models/generator.types',
+306-    );
+307-
+308-    const warnings: string[] = [];
+309-
+310-    const elements = collectElements(
+311-        metadata,
+312-        options.includeInactive ?? false,
+313-        warnings,
+314-    );
+315-
+316-    const groups = collectGroups(
+317-        metadata.groups,
+318-        warnings,
+319-    );
+320-
+321-    const repeatables = collectRepeatables(
+322-        metadata.repeatableGroups,
+323-        warnings,
+324-    );
+325-
+326-    const elementRecord = [
+327-        '{',
+328-        ...elements.map((entry) => {
+329-            const definition = renderDefinition(
+330-                entry.definition,
+331-                '    ',
+332-            );
+333-
+334-            return (
+
+12:export interface ElementsWriterOptions {
+13-    typesImportPath?: string;
+14-    includeInactive?: boolean;
+15-}
+16-
+17:export interface ElementsWriterResult {
+18-    fileName: string;
+19-    content: string;
+20-    elementCount: number;
+21-    groupCount: number;
+22-    repeatableGroupCount: number;
+23-    warnings: string[];
+24-}
+25-
+26-interface ElementEntry {
+27-    key: string;
+28-    definition: LocatorDefinition;
+29-}
+30-
+31-interface GroupEntry {
+32-    key: GroupKey;
+
+===== tools/pom-generator/generation/actions-writer.ts =====
+288:export function generateActionsFile(
+289-    metadata: PageMetadata,
+290-    options: ActionsWriterOptions = {},
+291-): ActionsWriterResult {
+292-    const classBase = toPascalCase(metadata.pageName);
+293-
+294-    const importPath = validateImportPath(
+295-        options.pageImportPath ??
+296-        `./${metadata.pageName}.page`,
+297-    );
+298-
+299-    const warnings: string[] = [];
+300-    const actions = collectActions(metadata, warnings);
+301-
+302-    const methods = actions
+303-        .map(renderAction)
+304-        .join('\n\n');
+305-
+306-    const content = [
+307-        '// GENERATED BY POM GENERATOR V2.',
+308-        '// Individual actions may be customized by engineers.',
+309-        '// Stable @pom-action-id markers support safe UPDATE.',
+310-        '// Keep business workflows in engineer-owned group-actions.',
+311-        '',
+312-        `import { ${classBase}Page } from '${importPath}';`,
+313-        '',
+314-        `export class ${classBase}Actions {`,
+315-        `  constructor(private readonly page: ${classBase}Page) {}`,
+316-        '',
+317-        methods,
+318-        '}',
+319-        '',
+320-    ].join('\n');
+321-
+322-    return {
+323-        fileName: `${metadata.pageName}.actions.ts`,
+
+9:export interface ActionsWriterOptions {
+10-    pageImportPath?: string;
+11-}
+12-
+13:export interface ActionsWriterResult {
+14-    fileName: string;
+15-    content: string;
+16-    actionCount: number;
+17-    warnings: string[];
+18-}
+19-
+20-interface ActionDefinition {
+21-    action: StoredAction;
+22-    element: StoredElement;
+23-    methodName: string;
+24-    indexed: boolean;
+25-}
+26-
+27-const IDENTIFIER_PATTERN = /^[A-Za-z_$][A-Za-z0-9_$]*$/;
+28-
+
+===== tools/pom-generator/generation/action-merger.ts =====
+225:export function mergeActionFiles(
+226-    existingSource: string,
+227-    generatedSource: string,
+228-    options: ActionMergeOptions = {},
+229-): ActionMergeResult {
+230-    const existingAst = parseSource(
+231-        existingSource,
+232-        'existing actions',
+233-    );
+234-    const generatedAst = parseSource(
+235-        generatedSource,
+236-        'generated actions',
+237-    );
+238-
+239-    const existing = findActionClass(
+240-        existingAst,
+241-        existingSource,
+242-        'Existing source',
+243-        options.className,
+244-    );
+245-    const generated = findActionClass(
+246-        generatedAst,
+247-        generatedSource,
+248-        'Generated source',
+249-        options.className,
+250-    );
+251-
+252-    if (getClassName(existing.node) !== getClassName(generated.node)) {
+253-        throw new Error(
+254-            'Existing and generated action class names differ.',
+255-        );
+256-    }
+257-
+258-    assertUniqueMethods(existing.methods, 'existing source');
+259-    assertUniqueMethods(generated.methods, 'generated source');
+260-
+
+10:export interface ActionMergeOptions {
+11-    className?: string;
+12-}
+13-
+14:export interface ActionMergeResult {
+15-    content: string;
+16-    preservedActionIds: string[];
+17-    addedActionIds: string[];
+18-    warnings: string[];
+19-    changed: boolean;
+20-}
+21-
+22-interface ParsedMethod {
+23-    actionId?: string;
+24-    elementId?: string;
+25-    name: string;
+26-    source: string;
+27-}
+28-
+29-interface ParsedClass {
