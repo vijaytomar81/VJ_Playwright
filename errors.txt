@@ -5,12 +5,12 @@ PS C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\Athena_Automation
 
 Starting dedicated Microsoft Edge...
 Platform: win32
-Process ID: 2808
+Process ID: 18316
 Profile: C:\Users\tp70707\.pom-generator-v2\edge-cdp-profile
 
 Edge CDP is ready.
 CDP: http://127.0.0.1:9222
-WebSocket: ws://127.0.0.1:9222/devtools/browser/0680925c-016b-44ea-bdcb-f11ffb62fd94
+WebSocket: ws://127.0.0.1:9222/devtools/browser/2433f495-6a94-4fda-8843-51ae86186a72
 Open your application in the dedicated Edge window.
 PS C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\Athena_Automation\VJ_Playwright> npm run pom-generate -- `
 >>   --brand AZO `
@@ -45,13 +45,12 @@ This does not look like a DevTools server, try connecting via ws://.
 Call log:
   - <ws preparing> retrieving websocket url from http://127.0.0.1:9222
 
-PS C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\Athena_Automation\VJ_Playwright> npm run edge:cdp:stop
-
+PS C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\Athena_Automation\VJ_Playwright> npm run edge:cdp:stop    
+                  
 > allianz-automation@1.0.0 edge:cdp:stop
 > node tools/pom-generator/scripts/stop-edge-cdp.cjs
-
-Command failed: taskkill /PID 2808 /T /F
-ERROR: The process with PID 12300 (child process of PID 20512) could not be terminated.
-Reason: Access is denied.
-
-PS C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\Athena_Automation\VJ_Playwright> 
+                           
+Closing dedicated Edge CDP (PID 18316)...
+Dedicated Edge CDP browser closed successfully.
+Your regular Edge windows were not targeted.
+PS C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\Athena_Automation\VJ_Playwright>
