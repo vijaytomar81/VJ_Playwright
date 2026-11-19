@@ -102,13 +102,13 @@ npx tsc -p tools/pom-generator/tsconfig.build.json
 Scan Page:
 
 
-npm run pom-generate -- \
-  --brand AZO \
-  --channel DJ \
-  --product Motor \
-  --page car-details \
-  --mode create \
-  --dry-run \
+npm run pom-generate -- `
+  --brand AZO `
+  --channel DJ `
+  --product Motor `
+  --page login-options `
+  --mode create `
+  --dry-run `
   --verbose
 
 npm run pom:create -- --connectCdp="http://localhost:9222" --brand="AZO" --channel="DJ" --product="Motor" --page-name="Car-Details"
