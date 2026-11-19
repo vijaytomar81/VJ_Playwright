@@ -86,10 +86,17 @@ function sortChanges(
 
         if (kind !== 0) return kind;
 
-        const leftKey = left.elementKey ?? left.actionKey ?? '';
-        const rightKey = right.elementKey ?? right.actionKey ?? '';
+        const leftName = left.elementName ??
+            left.elementKey ??
+            left.actionKey ??
+            '';
 
-        return leftKey.localeCompare(rightKey) ||
+        const rightName = right.elementName ??
+            right.elementKey ??
+            right.actionKey ??
+            '';
+
+        return leftName.localeCompare(rightName) ||
             left.description.localeCompare(right.description);
     });
 }
@@ -107,22 +114,26 @@ function cleanDescription(
     return normalized.slice(0, maxLength - 3) + '...';
 }
 
+function displayName(change: GeneratorChange): string {
+    if (change.elementName) {
+        return change.elementName;
+    }
+
+    if (change.actionKey) {
+        return 'Unnamed action';
+    }
+
+    return 'Unknown element';
+}
+
 function formatChange(
     change: GeneratorChange,
-    maxDescriptionLength: number,
+    _maxDescriptionLength: number,
 ): string {
     const status = change.safeToApply ? 'SAFE' : 'REVIEW';
     const label = CHANGE_LABELS[change.kind];
-    const identifier = change.elementKey ?? change.actionKey;
-    const reference = identifier ? ` [${identifier}]` : '';
 
-    return (
-        `  [${status}] ${label}${reference}\n` +
-        `    ${cleanDescription(
-            change.description,
-            maxDescriptionLength,
-        )}`
-    );
+    return `  [${status}] ${label}: ${displayName(change)}`;
 }
 
 function plural(count: number, noun: string): string {
@@ -156,10 +167,6 @@ function reportStatus(summary: ChangeSummary): string {
 
 /**
  * Summarize a change plan without mutating it.
- *
- * A change is unsafe when safeToApply is false.
- * An explicit plan conflict is also respected even
- * when individual change flags appear safe.
  */
 export function summarizeChanges(
     plan: ChangePlan,
@@ -181,10 +188,11 @@ export function summarizeChanges(
 }
 
 /**
- * Produce a structured report for CLI output or tests.
+ * Produce a structured report for CLI output and JSON.
  *
- * writtenFiles must come from the completed write result,
- * never from a change plan alone.
+ * Stable keys remain in the structured data for internal
+ * identity tracking. Human-readable names are included
+ * through GeneratorChange.elementName.
  */
 export function createChangeReport(
     result: GeneratorResult,
@@ -199,13 +207,15 @@ export function createChangeReport(
 
 /**
  * Render a plan before filesystem writes.
- * No file is described as written in this mode.
+ *
+ * Each change is displayed on a single line.
  */
 export function formatChangePlan(
     plan: ChangePlan,
     options: ChangeReportOptions = {},
 ): string {
     const summary = summarizeChanges(plan);
+
     const lines: string[] = [
         `POM Generator V2 — ${modeLabel(plan.mode)}`,
         `Page: ${plan.pageName}`,
@@ -232,6 +242,7 @@ export function formatChangePlan(
     }
 
     const includeSafe = options.includeSafeChanges !== false;
+
     const changes = sortChanges(plan.changes).filter(
         (change) => includeSafe || !change.safeToApply,
     );
@@ -243,7 +254,10 @@ export function formatChangePlan(
             lines.push(
                 formatChange(
                     change,
-                    Math.max(20, options.maxDescriptionLength ?? 160),
+                    Math.max(
+                        20,
+                        options.maxDescriptionLength ?? 160,
+                    ),
                 ),
             );
         }
@@ -264,14 +278,14 @@ export function formatChangePlan(
 }
 
 /**
- * Render the result after orchestration has completed.
- * The writtenFiles list is factual, not inferred.
+ * Render the result after generation has completed.
  */
 export function formatGeneratorResult(
     result: GeneratorResult,
     options: ChangeReportOptions = {},
 ): string {
     const report = createChangeReport(result);
+
     const lines = [
         formatChangePlan(result.plan, options).trimEnd(),
         '',
@@ -285,8 +299,10 @@ export function formatGeneratorResult(
         }
     }
 
-    if (result.mode === 'dry-run' ||
-        result.plan.mode === 'dry-run') {
+    if (
+        result.mode === 'dry-run' ||
+        result.plan.mode === 'dry-run'
+    ) {
         lines.push('  Dry-run: no files should have been written.');
     }
 
@@ -303,17 +319,23 @@ export function formatGeneratorResult(
 
 /**
  * Machine-readable output for CI and external tooling.
+ *
+ * JSON retains both elementKey and elementName.
  */
 export function formatChangeReportJson(
     result: GeneratorResult,
 ): string {
-    return JSON.stringify(createChangeReport(result), null, 2) + '\n';
+    return JSON.stringify(
+        createChangeReport(result),
+        null,
+        2,
+    ) + '\n';
 }
 
 /**
  * Fail-fast guard for the orchestrator.
  *
- * This is a planning gate, not a runtime locator check.
+ * Detailed descriptions are retained for diagnostics.
  */
 export function assertSafeChangePlan(
     plan: ChangePlan,
@@ -324,9 +346,16 @@ export function assertSafeChangePlan(
 
     const unsafe = sortChanges(plan.changes)
         .filter((change) => !change.safeToApply)
-        .map((change) =>
-            `${change.kind}: ${change.description}`,
-        );
+        .map((change) => {
+            const label = CHANGE_LABELS[change.kind];
+            const name = displayName(change);
+            const description = cleanDescription(
+                change.description,
+                500,
+            );
+
+            return `${label}: ${name} — ${description}`;
+        });
 
     const details = unsafe.length > 0
         ? unsafe.join('\n')

@@ -199,6 +199,7 @@ export interface GeneratorChange {
     kind: ChangeKind;
     elementKey?: ElementKey;
     actionKey?: ActionKey;
+    elementName?: string;
     description: string;
     safeToApply: boolean;
 }
