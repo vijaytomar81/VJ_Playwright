@@ -1,34 +1,24 @@
-PS C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\Athena_Automation\VJ_Playwright> npm run pom-generate -- `
->>   --brand AZO `
->>   --channel DJ `
->>   --product Motor `
->>   --page login-options `
->>   --mode create `
->>   --dry-run `
->>   --verbose
+PS C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\Athena_Automation\VJ_Playwright> npm run edge:cdp:start
 
-> allianz-automation@1.0.0 pom-generate
-> npm run pom-generate:build && node dist/tools/pom-generator/cli/pom-generate.cli.js --brand AZO --channel DJ --product Motor --page login-options --mode create --dry-run --verbose
+> allianz-automation@1.0.0 edge:cdp:start
+> node tools/pom-generator/scripts/launch-edge-cdp.cjs
 
+Starting dedicated Microsoft Edge...
+Platform: win32
+Process ID: 16140
+Profile: C:\Users\tp70707\.pom-generator-v2\edge-cdp-profile
 
-> allianz-automation@1.0.0 pom-generate:build
-> tsc -p tools/pom-generator/tsconfig.build.json && tsc-alias -p tools/pom-generator/tsconfig.build.json
+Edge CDP is ready.
+CDP: http://127.0.0.1:9222
+WebSocket: ws://127.0.0.1:9222/devtools/browser/bd96ef2c-9900-46dc-b200-50f16f256571
+Open your application in the dedicated Edge window.
+PS C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\Athena_Automation\VJ_Playwright> npm run edge:cdp:stop 
 
-POM Generator V2
-Brand:   AZO
-Channel: DJ
-Product: Motor
-Page:    login-options
-Mode:    create
-Output:  C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\Athena_Automation\VJ_Playwright\automationLayer\pomObjects\AZO\DJ\Motor
-Preview only: no generated file writes.
-POM Generator V2 — FAILED
+> allianz-automation@1.0.0 edge:cdp:stop
+> node tools/pom-generator/scripts/stop-edge-cdp.cjs
 
-Could not connect to Edge CDP at "http://127.0.0.1:9222".
-Start Edge with remote debugging enabled and verify the endpoint.
-browserType.connectOverCDP: Unexpected status 403 when connecting to http://127.0.0.1:9222/json/version/.
-This does not look like a DevTools server, try connecting via ws://.
-Call log:
-  - <ws preparing> retrieving websocket url from http://127.0.0.1:9222
+Command failed: taskkill /PID 16140 /T /F
+ERROR: The process with PID 20860 (child process of PID 22224) could not be terminated.
+Reason: Access is denied.
 
 PS C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\Athena_Automation\VJ_Playwright> 
