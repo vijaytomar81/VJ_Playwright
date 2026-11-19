@@ -1,3 +1,17 @@
+PS C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\Athena_Automation\VJ_Playwright> npm run edge:cdp:start
+
+> allianz-automation@1.0.0 edge:cdp:start
+> node tools/pom-generator/scripts/launch-edge-cdp.cjs
+
+Starting dedicated Microsoft Edge...
+Platform: win32
+Process ID: 12264
+Profile: C:\Users\tp70707\.pom-generator-v2\edge-cdp-profile
+
+Edge CDP is ready.
+CDP: http://127.0.0.1:9222
+WebSocket: ws://127.0.0.1:9222/devtools/browser/f3d14f3b-b679-4f0f-9182-a196a34c11c7
+Open your application in the dedicated Edge window.
 PS C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\Athena_Automation\VJ_Playwright> npm run pom-generate -- `
 >>   --brand AZO `
 >>   --channel DJ `
@@ -35,20 +49,13 @@ Changes by type:
   Element added: 7
 
 Change details:
-  [SAFE] Element added [el_001]
-    New element "Link to Allianz home page" can be generated.
-  [SAFE] Element added [el_002]
-    New element "login" can be generated.
-  [SAFE] Element added [el_003]
-    New element "skipRegistration" can be generated.
-  [SAFE] Element added [el_004]
-    New element "Open Trust Seal" can be generated.
-  [SAFE] Element added [el_005]
-    New element "Manage Cookies, Opens the preference center dialog" can be generated.
-  [SAFE] Element added [el_006]
-    New element "Privacy" can be generated.
-  [SAFE] Element added [el_007]
-    New element "Privacy" can be generated.
+  [SAFE] Element added: linkToAllianzHomePageLink
+  [SAFE] Element added: loginLink
+  [SAFE] Element added: openTrustSealButton
+  [SAFE] Element added: privacyButton
+  [SAFE] Element added: privacyButton2
+  [SAFE] Element added: privacyManageCookiesOpensThePreferenceCenterDialogButton
+  [SAFE] Element added: skipRegistrationLink
 
 Write result:
   0 files written
@@ -59,7 +66,7 @@ PS C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\Athena_Automation
 > allianz-automation@1.0.0 edge:cdp:stop
 > node tools/pom-generator/scripts/stop-edge-cdp.cjs
                            
-Closing dedicated Edge CDP (PID 21072)...
+Closing dedicated Edge CDP (PID 12264)...
 Dedicated Edge CDP browser closed successfully.
 Your regular Edge windows were not targeted.
 PS C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\Athena_Automation\VJ_Playwright> 
