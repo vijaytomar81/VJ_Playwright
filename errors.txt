@@ -1,17 +1,3 @@
-PS C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\Athena_Automation\VJ_Playwright> npm run edge:cdp:start
-
-> allianz-automation@1.0.0 edge:cdp:start
-> node tools/pom-generator/scripts/launch-edge-cdp.cjs
-
-Starting dedicated Microsoft Edge...
-Platform: win32
-Process ID: 16620
-Profile: C:\Users\tp70707\.pom-generator-v2\edge-cdp-profile
-
-Edge CDP is ready.
-CDP: http://127.0.0.1:9222
-WebSocket: ws://127.0.0.1:9222/devtools/browser/0cd23fc1-ef77-4f53-bf34-6218654f8cf8
-Open your application in the dedicated Edge window.
 PS C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\Athena_Automation\VJ_Playwright> npm run pom-generate -- `
 >>   --brand AZO `
 >>   --channel DJ `
@@ -36,15 +22,44 @@ Page:    login-options
 Mode:    create
 Output:  C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\Athena_Automation\VJ_Playwright\automationLayer\pomObjects\AZO\DJ\Motor
 Preview only: no generated file writes.
-POM Generator V2 — FAILED
+POM Generator V2 — DRY-RUN
+Page: login-options
+Status: CHANGES PROPOSED
 
-Generated action name collision: "clickPrivacyButton".
+Change summary:
+  Total: 7
+  Safe: 7
+  Review required: 0
+
+Changes by type:
+  Element added: 7
+
+Change details:
+  [SAFE] Element added [el_001]
+    New element "Link to Allianz home page" can be generated.
+  [SAFE] Element added [el_002]
+    New element "login" can be generated.
+  [SAFE] Element added [el_003]
+    New element "skipRegistration" can be generated.
+  [SAFE] Element added [el_004]
+    New element "Open Trust Seal" can be generated.
+  [SAFE] Element added [el_005]
+    New element "Manage Cookies, Opens the preference center dialog" can be generated.
+  [SAFE] Element added [el_006]
+    New element "Privacy" can be generated.
+  [SAFE] Element added [el_007]
+    New element "Privacy" can be generated.
+
+Write result:
+  0 files written
+  Dry-run: no files should have been written.
+
 PS C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\Athena_Automation\VJ_Playwright> npm run edge:cdp:stop    
                   
 > allianz-automation@1.0.0 edge:cdp:stop
 > node tools/pom-generator/scripts/stop-edge-cdp.cjs
                            
-Closing dedicated Edge CDP (PID 16620)...
+Closing dedicated Edge CDP (PID 21072)...
 Dedicated Edge CDP browser closed successfully.
 Your regular Edge windows were not targeted.
 PS C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\Athena_Automation\VJ_Playwright> 
