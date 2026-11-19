@@ -1,4 +1,5 @@
 
+import { get as httpGet } from 'node:http';
 import {
     chromium,
     type Browser,
@@ -37,21 +38,115 @@ function validateOptions(options: EdgeCdpOptions): void {
     if (!normalize(options.endpoint)) {
         throw new Error('Edge CDP endpoint must not be empty.');
     }
-
     if (
         options.tabIndex !== undefined &&
         (!Number.isInteger(options.tabIndex) || options.tabIndex < 0)
     ) {
         throw new Error('tabIndex must be a non-negative integer.');
     }
-
     if (
         options.timeoutMs !== undefined &&
-        (!Number.isFinite(options.timeoutMs) ||
-            options.timeoutMs <= 0)
+        (!Number.isFinite(options.timeoutMs) || options.timeoutMs <= 0)
     ) {
         throw new Error('timeoutMs must be a positive number.');
     }
+}
+
+function resolveWebSocketEndpoint(
+    endpoint: string,
+    timeoutMs: number,
+): Promise<string> {
+    const value = endpoint.trim();
+
+    if (/^wss?:\/\//i.test(value)) {
+        return Promise.resolve(value);
+    }
+
+    let url: URL;
+
+    try {
+        url = new URL(value);
+    } catch {
+        return Promise.reject(
+            new Error(`Invalid CDP endpoint: "${value}".`),
+        );
+    }
+
+    if (url.protocol !== 'http:') {
+        return Promise.reject(
+            new Error(
+                'CDP endpoint must use http://, ws://, or wss://.',
+            ),
+        );
+    }
+
+    // Use direct Node.js HTTP rather than Playwright's
+    // HTTP discovery request, which may encounter proxy issues.
+    const versionUrl = new URL('/json/version', url);
+
+    return new Promise<string>((resolve, reject) => {
+        const request = httpGet(
+            versionUrl,
+            { timeout: timeoutMs },
+            (response) => {
+                let body = '';
+
+                response.setEncoding('utf8');
+
+                response.on('data', (chunk: string) => {
+                    body += chunk;
+                });
+
+                response.on('end', () => {
+                    if (response.statusCode !== 200) {
+                        reject(
+                            new Error(
+                                'CDP discovery returned HTTP ' +
+                                `${response.statusCode}.`,
+                            ),
+                        );
+                        return;
+                    }
+
+                    try {
+                        const data: unknown = JSON.parse(body);
+
+                        if (
+                            typeof data !== 'object' ||
+                            data === null ||
+                            !('webSocketDebuggerUrl' in data) ||
+                            typeof data.webSocketDebuggerUrl !== 'string'
+                        ) {
+                            throw new Error(
+                                'CDP discovery response has no ' +
+                                'webSocketDebuggerUrl.',
+                            );
+                        }
+
+                        const socketUrl = data.webSocketDebuggerUrl;
+
+                        if (!/^wss?:\/\//i.test(socketUrl)) {
+                            throw new Error(
+                                'CDP returned an invalid WebSocket URL.',
+                            );
+                        }
+
+                        resolve(socketUrl);
+                    } catch (error) {
+                        reject(error);
+                    }
+                });
+            },
+        );
+
+        request.on('timeout', () => {
+            request.destroy(
+                new Error('CDP discovery request timed out.'),
+            );
+        });
+
+        request.on('error', reject);
+    });
 }
 
 async function getOpenPages(
@@ -109,7 +204,6 @@ async function describePages(
 
     for (let index = 0; index < pages.length; index++) {
         const page = pages[index];
-
         let title = '';
 
         try {
@@ -230,8 +324,13 @@ export async function connectToEdge(
     let browser: Browser;
 
     try {
-        browser = await chromium.connectOverCDP(
+        const websocketEndpoint = await resolveWebSocketEndpoint(
             options.endpoint,
+            options.timeoutMs ?? DEFAULT_TIMEOUT_MS,
+        );
+
+        browser = await chromium.connectOverCDP(
+            websocketEndpoint,
             {
                 timeout: options.timeoutMs ?? DEFAULT_TIMEOUT_MS,
             },
@@ -243,8 +342,8 @@ export async function connectToEdge(
         throw new Error(
             `Could not connect to Edge CDP at ` +
             `"${options.endpoint}".\n` +
-            'Start Edge with remote debugging enabled and ' +
-            `verify the endpoint.\n${message}`,
+            'Verify the dedicated Edge CDP instance is running.\n' +
+            message,
         );
     }
 
@@ -256,8 +355,8 @@ export async function connectToEdge(
             context: selected.context,
             page: selected.page,
             async disconnect(): Promise<void> {
-                // This disconnects Playwright's CDP transport.
-                // It must not close individual tabs or contexts.
+                // Disconnect Playwright from the CDP browser.
+                // Do not explicitly close tabs or contexts.
                 await browser.close();
             },
         };
