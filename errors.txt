@@ -1,72 +1,80 @@
-PS C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\Athena_Automation\VJ_Playwright> npm run edge:cdp:start
-
-> allianz-automation@1.0.0 edge:cdp:start
-> node tools/pom-generator/scripts/launch-edge-cdp.cjs
-
-Starting dedicated Microsoft Edge...
-Platform: win32
-Process ID: 12264
-Profile: C:\Users\tp70707\.pom-generator-v2\edge-cdp-profile
-
-Edge CDP is ready.
-CDP: http://127.0.0.1:9222
-WebSocket: ws://127.0.0.1:9222/devtools/browser/f3d14f3b-b679-4f0f-9182-a196a34c11c7
-Open your application in the dedicated Edge window.
-PS C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\Athena_Automation\VJ_Playwright> npm run pom-generate -- `
->>   --brand AZO `
->>   --channel DJ `
->>   --product Motor `
->>   --page login-options `
->>   --mode create `
->>   --dry-run `
->>   --verbose
-
-> allianz-automation@1.0.0 pom-generate
-> npm run pom-generate:build && node dist/tools/pom-generator/cli/pom-generate.cli.js --brand AZO --channel DJ --product Motor --page login-options --mode create --dry-run --verbose
-
-
-> allianz-automation@1.0.0 pom-generate:build
-> tsc -p tools/pom-generator/tsconfig.build.json && tsc-alias -p tools/pom-generator/tsconfig.build.json
-
-POM Generator V2
-Brand:   AZO
-Channel: DJ
-Product: Motor
-Page:    login-options
-Mode:    create
-Output:  C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\Athena_Automation\VJ_Playwright\automationLayer\pomObjects\AZO\DJ\Motor
-Preview only: no generated file writes.
-POM Generator V2 — DRY-RUN
-Page: login-options
-Status: CHANGES PROPOSED
-
-Change summary:
-  Total: 7
-  Safe: 7
-  Review required: 0
-
-Changes by type:
-  Element added: 7
-
-Change details:
-  [SAFE] Element added: linkToAllianzHomePageLink
-  [SAFE] Element added: loginLink
-  [SAFE] Element added: openTrustSealButton
-  [SAFE] Element added: privacyButton
-  [SAFE] Element added: privacyButton2
-  [SAFE] Element added: privacyManageCookiesOpensThePreferenceCenterDialogButton
-  [SAFE] Element added: skipRegistrationLink
-
-Write result:
-  0 files written
-  Dry-run: no files should have been written.
-
-PS C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\Athena_Automation\VJ_Playwright> npm run edge:cdp:stop    
-                  
-> allianz-automation@1.0.0 edge:cdp:stop
-> node tools/pom-generator/scripts/stop-edge-cdp.cjs
-                           
-Closing dedicated Edge CDP (PID 12264)...
-Dedicated Edge CDP browser closed successfully.
-Your regular Edge windows were not targeted.
-PS C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\Athena_Automation\VJ_Playwright> 
+<div id="root">
+	<div>
+		<div>
+			<div class="container-fluid">
+				<div class="container pt-3 pb-3">
+					<div id="root">
+						<div class="journey-bg">
+							<div>
+								<img class="waves" alt="Journey background waves" src="/img/Flow-waves.svg">
+									<img class="clouds" alt="Journey background clouds" src="/img/Flow-clouds.svg"/>
+								</div>
+								<div class="journey-header">
+									<div class="journey-header-background">
+										<a class="header-logo-link" id="goToAllianzHomePage" href="https://www.allianz.co.uk" target="_blank" aria-label="Link to Allianz home page">
+											<img class="flow-logo" alt="Allianz logo icon" tabindex="0" src="/Allianz/img/brand-logo.png"/>
+										</div>
+									</div>
+									<div class="main-plugin panel mb-3">
+										<div class="text-group title plugin pt-md-0">
+											<h1 class="text-blue-1 font-weight-medium margin-bottom-8">Log in with us</h1>
+										</div>
+										<div class="new-quote-container hello">
+											<a href="/dashboard" class="btn btn-primary btn-next plugin" id="login">Log in</a>
+										</div>
+										<div class="plugin hello w-100">
+											<a id="skipRegistration" class="mb-md-0" href="/products" data-discover="true">Don’t have a policy with us, get a new quote</a>
+										</div>
+									</div>
+									<footer class="falcon-footer">
+										<div class="falcon-footer-divider"/>
+										<div class="entrust-section">
+											<div id="trust-logo" class="security-logo position-relative">
+												<div>
+													<button type="button" class="trust-logo-btn" aria-label="Open Trust Seal">
+														<img alt="Trust Seal" src="/Allianz/img/sectigo_trust_seal.png"/>
+													</div>
+												</div>
+												<div class="entrust-section-wording">
+													<div class="entrust-section-title">We'll keep your details safe</div>
+													<div class="entrust-section-description">Our website is constantly monitored to <br>check for harmful viruses or malware.</div>
+													</div>
+													<div class="d-flex justify-content-end flex-grow-1">
+														<img alt="Allianz olympics logo icon" src="/Allianz/img/allianz-olympic-logo.svg"/>
+													</div>
+													<div class="falcon-footer-divider-bottom"/>
+													<hr aria-hidden="true">
+														<div class="trademark-section">
+															<div class="links-container d-mobile-none">
+																<a href="/complaints" id="complaints">Complaints</a>
+																<a href="https://www.allianz.co.uk/cookie-policy.html" target="_blank" id="cookie-policy">Our cookie policy</a>
+																<a href="https://www.allianz.co.uk/privacy-notice.html" id="data-rights" target="_blank">Personal data rights</a>
+																<br>
+																	<br/>
+																	<div class="links-container d-desktop-none">
+																		<a href="/complaints" id="complaints">Complaints</a>
+																		<a href="https://www.allianz.co.uk/cookie-policy.html" target="_blank" id="cookie-policy">Our cookie policy</a>
+																		<a href="https://www.allianz.co.uk/privacy-notice.html" id="data-rights" target="_blank">Personal data rights</a>
+																		<br>
+																			<br/>
+																			<hr aria-hidden="true">
+																				<div class="trademark-container">
+																					<div>This insurance is arranged, underwritten and administered by Liverpool Victoria Insurance Company Limited, which is an Allianz Group company, registered in England and Wales number 3232514. Authorised by the Prudential Regulation Authority and regulated by the Financial Conduct Authority and the Prudential Regulation Authority, register number 202965. Registered address: 57 Ladymead, Guildford, Surrey, GU1 1DB. Allianz Online is a trading name of Liverpool Victoria Insurance Company Limited.</div>
+																				</div>
+																			</div>
+																		</footer>
+																	</div>
+																</div>
+															</div>
+														</div>
+													</div>
+													<footer class="footer-position">
+														<div class=" collapsed">
+															<div class="section-wrap"/>
+														</div>
+													</footer>
+													<div id="versionDisplayContainer">
+														<div>customer-portal : <b>7.8.124-RC</b>
+														</div>
+													</div>
+												</div>
