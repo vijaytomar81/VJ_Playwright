@@ -202,15 +202,10 @@ function withControlSuffix(
     const suffix = CONTROL_SUFFIX[kind];
     if (!suffix) return baseName;
 
-    const suffixWords = words(suffix);
-    const nameWords = words(baseName);
-
-    if (endsWith(nameWords, suffixWords)) {
+    if (endsWith(words(baseName), words(suffix))) {
         return baseName;
     }
 
-    // "Date" already describes a date input sufficiently
-    // when the full suffix is "DateInput".
     return `${baseName}${suffix}`;
 }
 
@@ -219,20 +214,25 @@ function getLogicalIdentity(
     semantic: string,
 ): string {
     if (element.repeatableGroupKey) {
+        const fingerprint = element.fingerprint;
+
         return [
             'repeatable',
             element.repeatableGroupKey,
             semantic,
             element.kind,
+            normalized(fingerprint.labels.parentField),
+            normalized(fingerprint.labels.direct),
+            normalized(fingerprint.labels.accessible),
+            normalized(fingerprint.inputType),
+            normalized(fingerprint.id).replace(/\b\d+\b/g, '#'),
+            normalized(fingerprint.name).replace(/\b\d+\b/g, '#'),
         ].join('|');
     }
 
-    return [
-        'single',
-        element.groupKey ?? '',
-        semantic,
-        element.kind,
-    ].join('|');
+    // Distinct ordinary elements must never reuse a name
+    // solely because their labels and groups are identical.
+    return `single|${element.temporaryId}`;
 }
 
 function getExistingName(
@@ -252,7 +252,6 @@ function getExistingName(
 
     const name = matches[0].name;
 
-    // Don't perpetuate legacy generic names.
     if (isGeneric(name) || /^unnamedElement\d*$/i.test(name)) {
         return undefined;
     }
@@ -287,16 +286,13 @@ function allocateName(
     used: Map<string, string>,
     warnings: string[],
 ): string {
-    if (!used.has(preferred) || used.get(preferred) === identity) {
+    if (!used.has(preferred)) {
         return preferred;
     }
 
     const contextual = getContextualName(element, preferred);
 
-    if (
-        contextual &&
-        (!used.has(contextual) || used.get(contextual) === identity)
-    ) {
+    if (contextual && !used.has(contextual)) {
         warnings.push(
             `Resolved name collision for "${preferred}" ` +
             `using parent context: "${contextual}".`,
@@ -305,6 +301,7 @@ function allocateName(
     }
 
     let suffix = 2;
+
     while (used.has(`${preferred}${suffix}`)) {
         suffix++;
     }
@@ -337,7 +334,10 @@ export function nameElements(
 
         const identity = getLogicalIdentity(element, semantic);
 
-        let name = identities.get(identity);
+        // Only genuine repeatable members may share a name.
+        let name = element.repeatableGroupKey
+            ? identities.get(identity)
+            : undefined;
 
         if (!name) {
             const previous = getExistingName(element, existing);
