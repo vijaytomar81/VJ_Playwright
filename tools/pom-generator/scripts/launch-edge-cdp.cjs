@@ -7,30 +7,19 @@ const {
     mkdirSync,
     writeFileSync,
     readFileSync,
-    rmSync,
 } = require('node:fs');
-const { homedir, platform, tmpdir } = require('node:os');
+const { homedir, platform } = require('node:os');
 const { join } = require('node:path');
 const net = require('node:net');
+const http = require('node:http');
 
 const PORT = 9222;
 const HOST = '127.0.0.1';
 const OS = platform();
-
-const BASE_DIRECTORY = join(
-    homedir(),
-    '.pom-generator-v2',
-);
-
-const PROFILE_DIRECTORY = join(
-    BASE_DIRECTORY,
-    'edge-cdp-profile',
-);
-
-const STATE_FILE = join(
-    BASE_DIRECTORY,
-    'edge-cdp-state.json',
-);
+const ENDPOINT = `http://${HOST}:${PORT}`;
+const BASE_DIRECTORY = join(homedir(), '.pom-generator-v2');
+const PROFILE_DIRECTORY = join(BASE_DIRECTORY, 'edge-cdp-profile');
+const STATE_FILE = join(BASE_DIRECTORY, 'edge-cdp-state.json');
 
 function findEdge() {
     const candidates = [];
@@ -56,9 +45,7 @@ function findEdge() {
             }
         }
     } else {
-        throw new Error(
-            `Unsupported platform: ${OS}. Use macOS or Windows.`,
-        );
+        throw new Error(`Unsupported platform: ${OS}`);
     }
 
     const executable = candidates.find(existsSync);
@@ -114,14 +101,17 @@ function isDedicatedProcess(pid) {
     if (!isAlive(pid)) return false;
 
     const command = getCommandLine(pid);
+    const normalized = command.replace(/"/g, '').toLowerCase();
+    const profile = PROFILE_DIRECTORY.toLowerCase();
 
-    return command.includes(
-        `--user-data-dir=${PROFILE_DIRECTORY}`,
-    ) && (
+    return (
+        normalized.includes(`--user-data-dir=${profile}`) &&
+        (
             OS === 'win32'
                 ? /msedge\.exe/i.test(command)
                 : command.includes('Microsoft Edge')
-        );
+        )
+    );
 }
 
 function readState() {
@@ -150,6 +140,79 @@ function portIsBusy() {
     });
 }
 
+function getCDPInfo() {
+    return new Promise((resolvePromise, reject) => {
+        const request = http.get(
+            `${ENDPOINT}/json/version`,
+            { timeout: 2000 },
+            (response) => {
+                let body = '';
+
+                response.setEncoding('utf8');
+                response.on('data', (chunk) => {
+                    body += chunk;
+                });
+
+                response.on('end', () => {
+                    if (response.statusCode !== 200) {
+                        reject(new Error(
+                            `CDP returned HTTP ${response.statusCode}`,
+                        ));
+                        return;
+                    }
+
+                    try {
+                        const info = JSON.parse(body);
+
+                        if (!info.webSocketDebuggerUrl) {
+                            throw new Error(
+                                'Missing webSocketDebuggerUrl',
+                            );
+                        }
+
+                        resolvePromise(info);
+                    } catch (error) {
+                        reject(error);
+                    }
+                });
+            },
+        );
+
+        request.on('timeout', () => {
+            request.destroy(new Error('CDP request timed out'));
+        });
+
+        request.on('error', reject);
+    });
+}
+
+function sleep(milliseconds) {
+    return new Promise((resolvePromise) => {
+        setTimeout(resolvePromise, milliseconds);
+    });
+}
+
+async function waitForCDP(attempts = 15) {
+    let lastError;
+
+    for (let attempt = 1; attempt <= attempts; attempt++) {
+        try {
+            return await getCDPInfo();
+        } catch (error) {
+            lastError = error;
+
+            if (attempt < attempts) {
+                await sleep(1000);
+            }
+        }
+    }
+
+    throw new Error(
+        `Edge CDP did not become ready at ${ENDPOINT}.\n` +
+        `Last error: ${lastError?.message || 'Unknown error'}`,
+    );
+}
+
 function saveState(pid, executable) {
     writeFileSync(
         STATE_FILE,
@@ -175,17 +238,29 @@ async function launch() {
     const previous = readState();
 
     if (previous && isDedicatedProcess(previous.pid)) {
-        console.log(
-            `Dedicated Edge is already running (PID ${previous.pid}).`,
-        );
-        console.log(`CDP: http://${HOST}:${PORT}`);
-        return;
+        try {
+            const info = await getCDPInfo();
+
+            console.log(
+                `Dedicated Edge already running (PID ${previous.pid}).`,
+            );
+            console.log(`CDP: ${ENDPOINT}`);
+            console.log(`WebSocket: ${info.webSocketDebuggerUrl}`);
+            return;
+        } catch {
+            throw new Error(
+                'Dedicated Edge is running, but its CDP endpoint ' +
+                'is not responding correctly.\n' +
+                'Existing Edge windows were not modified.',
+            );
+        }
     }
 
     if (await portIsBusy()) {
         throw new Error(
             `Port ${PORT} is already in use.\n` +
-            'Stop the existing CDP browser or choose a free port.',
+            'Cannot launch another CDP instance on the same port.\n' +
+            'Existing Edge windows were not modified.',
         );
     }
 
@@ -217,14 +292,21 @@ async function launch() {
         throw new Error('Edge launched without a process ID.');
     }
 
-    saveState(child.pid, executable);
     child.unref();
 
-    console.log('Microsoft Edge launched.');
+    console.log('Starting dedicated Microsoft Edge...');
     console.log(`Platform: ${OS}`);
     console.log(`Process ID: ${child.pid}`);
-    console.log(`CDP: http://${HOST}:${PORT}`);
     console.log(`Profile: ${PROFILE_DIRECTORY}`);
+
+    const info = await waitForCDP();
+
+    saveState(child.pid, executable);
+
+    console.log('');
+    console.log('Edge CDP is ready.');
+    console.log(`CDP: ${ENDPOINT}`);
+    console.log(`WebSocket: ${info.webSocketDebuggerUrl}`);
     console.log('Open your application in the dedicated Edge window.');
 }
 
