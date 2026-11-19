@@ -1,3 +1,5 @@
+(Get-Content tools/pom-generator/scripts/stop-edge-cdp.cjs).Count
+
 git pull --ff-only < /dev/null
 git status --short --branch
 
