@@ -3,7 +3,8 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-    "pom-generate": "tsc -p tools/pom-generator/tsconfig.build.json && node dist/tools/pom-generator/cli/pom-generate.cli.js",
+    "pom-generate:build": "tsc -p tools/pom-generator/tsconfig.build.json && tsc-alias -p tools/pom-generator/tsconfig.build.json",
+    "pom-generate": "npm run pom-generate:build && node dist/tools/pom-generator/cli/pom-generate.cli.js",
     "edge:cdp:start": "node tools/pom-generator/scripts/launch-edge-cdp.cjs",
     "edge:cdp:stop": "node tools/pom-generator/scripts/stop-edge-cdp.cjs"
   },
@@ -18,6 +19,7 @@
     "@types/archiver": "^8.0.0",
     "@types/node": "^26.6.3",
     "esbuild": "^0.28.2",
+    "tsc-alias": "^1.9.10",
     "tsx": "^4.23.15",
     "typescript": "^7.0.2"
   },

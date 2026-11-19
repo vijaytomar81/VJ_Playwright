@@ -1,6 +1,6 @@
 import {
     StringUtils,
-} from '../../../utils/string/string.utils';
+} from '../../../../utils/string/string.utils';
 
 export interface GeneratedPageName {
     displayName: string;

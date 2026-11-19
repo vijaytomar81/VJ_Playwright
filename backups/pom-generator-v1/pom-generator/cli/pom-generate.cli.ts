@@ -43,11 +43,11 @@ import {
     isValidBrand,
     isValidChannel,
     isValidProduct,
-} from '../../../configLayer/config';
+} from '@framework-config';
 
 import type {
     BusinessConfiguration,
-} from '../../../configLayer/config.types';
+} from '@framework-config';
 
 
 async function main(): Promise<void> {

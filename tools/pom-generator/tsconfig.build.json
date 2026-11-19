@@ -19,15 +19,18 @@
         "forceConsistentCasingInFileNames": true,
         "noEmitOnError": true,
         "declaration": false,
-        "sourceMap": true
+        "sourceMap": true,
+        "paths": {
+            "@framework-config": [
+                "../../configLayer/framework-config/index.ts"
+            ],
+            "@utils": [
+                "../../utils/index.ts"
+            ]
+        }
     },
     "include": [
-        "**/*.ts",
-        "../../configLayer/brand.config.ts",
-        "../../configLayer/channel.config.ts",
-        "../../configLayer/product.config.ts",
-        "../../configLayer/config.types.ts",
-        "../../configLayer/config.ts"
+        "**/*.ts"
     ],
     "exclude": [
         "node_modules",

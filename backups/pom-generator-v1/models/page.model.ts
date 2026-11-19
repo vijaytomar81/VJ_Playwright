@@ -1,15 +1,15 @@
 
 import type {
     Brand,
-} from '../../../configLayer/brand.config';
+} from '@framework-config';
 
 import type {
     Channel,
-} from '../../../configLayer/channel.config';
+} from '@framework-config';
 
 import type {
     Product,
-} from '../../../configLayer/product.config';
+} from '@framework-config';
 
 import type {
     ElementType,

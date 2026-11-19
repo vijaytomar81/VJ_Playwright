@@ -11,9 +11,9 @@ import {
     isValidBrand,
     isValidChannel,
     isValidProduct,
-} from '../../../configLayer/config';
-import type { Brand } from '../../../configLayer/brand.config';
-import type { Channel } from '../../../configLayer/channel.config';
+} from '@framework-config';
+import type { Brand, Channel } from '@framework-config';
+import { StringUtils } from '@utils';
 interface CliArguments {
     help: boolean;
     brand?: string;
@@ -128,15 +128,6 @@ function parseMode(value: string): GeneratorMode {
     }
     return normalized;
 }
-function matchConfiguredValue<T extends string>(
-    input: string,
-    allowed: readonly T[],
-): T | undefined {
-    const normalized = input.toLowerCase();
-    return allowed.find(
-        value => value.toLowerCase() === normalized,
-    );
-}
 export function parseCliArguments(
     args: readonly string[],
 ): CliArguments {
@@ -239,7 +230,7 @@ function validateArguments(
     const productInput = parsed.product!;
     const pageName = parsed.pageName!;
     const mode = parsed.mode!;
-    const brand = matchConfiguredValue(
+    const brand = StringUtils.matchIgnoreCase(
         brandInput,
         getBrands(),
     );
@@ -249,7 +240,7 @@ function validateArguments(
             `Valid brands: ${getBrands().join(', ')}`,
         );
     }
-    const channel = matchConfiguredValue(
+    const channel = StringUtils.matchIgnoreCase(
         channelInput,
         getChannels(brand),
     );
@@ -261,7 +252,7 @@ function validateArguments(
             getChannels(brand).join(', '),
         );
     }
-    const product = matchConfiguredValue(
+    const product = StringUtils.matchIgnoreCase(
         productInput,
         getProducts(brand, channel),
     );

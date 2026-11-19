@@ -9,7 +9,7 @@ import type {
 
 import {
     StringUtils,
-} from '../../../utils/string/string.utils';
+} from '../../../../utils/string/string.utils';
 
 
 export interface NamedGeneratedElement {

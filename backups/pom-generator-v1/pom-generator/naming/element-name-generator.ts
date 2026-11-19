@@ -1,7 +1,7 @@
 
 import {
     StringUtils,
-} from '../../../utils/string/string.utils';
+} from '../../../../utils/string/string.utils';
 
 import type {
     CapturedElement,
