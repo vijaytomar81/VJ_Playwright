@@ -18,21 +18,23 @@ export interface ElementNamingResult {
 }
 
 const GENERIC_LABELS = new Set([
-    'input',
-    'field',
-    'text',
-    'text field',
-    'select',
-    'dropdown',
-    'button',
-    'checkbox',
-    'radio',
-    'yes',
-    'no',
-    'month',
-    'year',
-    'day',
+    'input', 'field', 'text', 'text field',
+    'select', 'dropdown', 'button', 'checkbox',
+    'radio', 'yes', 'no', 'month', 'year', 'day',
+    'submit', 'element', 'unknown', 'div',
 ]);
+
+const CONTROL_SUFFIX: Partial<Record<ElementKind, string>> = {
+    input: 'Input',
+    textarea: 'Textarea',
+    date: 'DateInput',
+    select: 'Select',
+    combobox: 'Combobox',
+    checkbox: 'Checkbox',
+    radio: 'Radio',
+    button: 'Button',
+    link: 'Link',
+};
 
 function words(value: string): string[] {
     return value
@@ -44,17 +46,18 @@ function words(value: string): string[] {
         .trim()
         .split(/\s+/)
         .filter(Boolean)
-        .map((word) => word.toLowerCase());
+        .map((part) => part.toLowerCase());
 }
 
 function camelCase(value: string): string {
     const parts = words(value);
-
-    if (parts.length === 0) return 'unnamedElement';
+    if (!parts.length) return 'unnamedElement';
 
     const result = parts[0] + parts
         .slice(1)
-        .map((part) => part[0].toUpperCase() + part.slice(1))
+        .map((part) =>
+            part[0].toUpperCase() + part.slice(1),
+        )
         .join('');
 
     return /^[a-zA-Z_$]/.test(result)
@@ -62,76 +65,17 @@ function camelCase(value: string): string {
         : `element${result[0].toUpperCase()}${result.slice(1)}`;
 }
 
-function normalizePhrase(value: string | undefined): string {
+function normalized(value?: string): string {
     return words(value ?? '').join(' ');
 }
 
-function isGeneric(value: string | undefined): boolean {
-    const normalized = normalizePhrase(value);
-    return !normalized || GENERIC_LABELS.has(normalized);
+function isGeneric(value?: string): boolean {
+    const phrase = normalized(value);
+    return !phrase || GENERIC_LABELS.has(phrase);
 }
 
-function endsWithWords(
-    phrase: string[],
-    suffix: string[],
-): boolean {
-    if (suffix.length > phrase.length) return false;
-
-    return suffix.every(
-        (word, index) =>
-            phrase[phrase.length - suffix.length + index] === word,
-    );
-}
-
-function combineContext(
-    parent: string | undefined,
-    child: string | undefined,
-): string {
-    const parentWords = words(parent ?? '');
-    const childWords = words(child ?? '');
-
-    if (parentWords.length === 0) {
-        return childWords.join(' ');
-    }
-
-    if (childWords.length === 0) {
-        return parentWords.join(' ');
-    }
-
-    if (endsWithWords(parentWords, childWords)) {
-        return parentWords.join(' ');
-    }
-
-    if (endsWithWords(childWords, parentWords)) {
-        return childWords.join(' ');
-    }
-
-    // Remove the largest repeated boundary.
-    let overlap = 0;
-
-    for (
-        let size = 1;
-        size <= Math.min(parentWords.length, childWords.length);
-        size++
-    ) {
-        if (
-            endsWithWords(
-                parentWords,
-                childWords.slice(0, size),
-            )
-        ) {
-            overlap = size;
-        }
-    }
-
-    return [
-        ...parentWords,
-        ...childWords.slice(overlap),
-    ].join(' ');
-}
-
-function simplifyLabel(value: string): string {
-    return value
+function simplify(value?: string): string {
+    return (value ?? '')
         .replace(/\binput field\b/gi, '')
         .replace(/\bplease (enter|select|choose)\b/gi, '')
         .replace(/\bdid the\b/gi, '')
@@ -141,101 +85,144 @@ function simplifyLabel(value: string): string {
         .trim();
 }
 
-function deriveSemanticName(
-    element: ScannedElement,
+function endsWith(
+    parts: string[],
+    suffix: string[],
+): boolean {
+    return suffix.length <= parts.length &&
+        suffix.every(
+            (part, index) =>
+                parts[parts.length - suffix.length + index] === part,
+        );
+}
+
+function combine(
+    parent?: string,
+    child?: string,
 ): string {
-    const labels = element.fingerprint.labels;
+    const a = words(parent ?? '');
+    const b = words(child ?? '');
 
-    const direct = simplifyLabel(labels.direct ?? '');
-    const accessible = simplifyLabel(labels.accessible ?? '');
-    const parentField = simplifyLabel(labels.parentField ?? '');
-    const parentGroup = simplifyLabel(labels.parentGroup ?? '');
+    if (!a.length) return b.join(' ');
+    if (!b.length) return a.join(' ');
 
-    let name = '';
+    if (endsWith(a, b)) return a.join(' ');
+    if (endsWith(b, a)) return b.join(' ');
 
-    if (direct && !isGeneric(direct)) {
-        name = direct;
-    } else if (direct && parentField) {
-        name = combineContext(parentField, direct);
-    } else if (accessible && !isGeneric(accessible)) {
-        name = accessible;
-    } else if (parentField) {
-        name = parentField;
-    } else if (parentGroup) {
-        name = parentGroup;
-    } else {
-        name =
-            element.fingerprint.placeholder ??
-            element.fingerprint.name ??
-            element.fingerprint.id ??
-            element.suggestedName;
-    }
+    let overlap = 0;
 
-    // Parent field context is valuable for short labels.
-    if (
-        direct &&
-        words(direct).length <= 2 &&
-        parentField &&
-        normalizePhrase(parentField) !== normalizePhrase(direct)
-    ) {
-        name = combineContext(parentField, direct);
-    }
-
-    // Add group context when it provides new information.
-    if (
-        parentGroup &&
-        !normalizePhrase(name).includes(normalizePhrase(parentGroup))
-    ) {
-        const context = words(parentGroup);
-
-        if (context.length <= 5 && !isGeneric(parentGroup)) {
-            name = combineContext(parentGroup, name);
+    for (let size = 1; size <= Math.min(a.length, b.length); size++) {
+        if (endsWith(a, b.slice(0, size))) {
+            overlap = size;
         }
     }
 
-    return camelCase(name);
+    return [...a, ...b.slice(overlap)].join(' ');
 }
 
-function appendControlMeaning(
+function meaningful(
+    ...values: Array<string | undefined>
+): string | undefined {
+    return values
+        .map(simplify)
+        .find((value) => !isGeneric(value));
+}
+
+function getChoice(element: ScannedElement): string | undefined {
+    if (element.kind !== 'radio') return undefined;
+
+    const labels = element.fingerprint.labels;
+    const direct = normalized(labels.direct);
+    const value = normalized(element.fingerprint.value);
+
+    if (direct === 'yes' || direct === 'no') return direct;
+    if (value === 'true' || value === 'yes') return 'yes';
+    if (value === 'false' || value === 'no') return 'no';
+
+    return meaningful(labels.direct, element.fingerprint.value);
+}
+
+function deriveSemanticName(element: ScannedElement): string {
+    const labels = element.fingerprint.labels;
+
+    const direct = simplify(labels.direct);
+    const accessible = simplify(labels.accessible);
+    const parentField = simplify(labels.parentField);
+    const parentGroup = simplify(labels.parentGroup);
+
+    let phrase = meaningful(
+        direct,
+        accessible,
+        parentField,
+        element.fingerprint.placeholder,
+        element.fingerprint.name,
+        element.fingerprint.id,
+        element.suggestedName,
+    ) ?? '';
+
+    if (
+        direct &&
+        words(direct).length <= 2 &&
+        !isGeneric(parentField) &&
+        normalized(parentField) !== normalized(direct)
+    ) {
+        phrase = combine(parentField, phrase);
+    }
+
+    if (
+        !isGeneric(parentGroup) &&
+        !normalized(phrase).includes(normalized(parentGroup)) &&
+        words(parentGroup).length <= 5
+    ) {
+        phrase = combine(parentGroup, phrase);
+    }
+
+    if (!phrase || isGeneric(phrase)) {
+        phrase = meaningful(
+            parentGroup,
+            parentField,
+            element.fingerprint.id,
+            element.fingerprint.name,
+        ) ?? 'unnamed';
+    }
+
+    const choice = getChoice(element);
+
+    if (choice && !endsWith(words(phrase), words(choice))) {
+        phrase = combine(phrase, choice);
+    }
+
+    return camelCase(phrase);
+}
+
+function withControlSuffix(
     baseName: string,
-    element: ScannedElement,
+    kind: ElementKind,
 ): string {
-    if (element.kind !== 'radio') {
+    const suffix = CONTROL_SUFFIX[kind];
+    if (!suffix) return baseName;
+
+    const suffixWords = words(suffix);
+    const nameWords = words(baseName);
+
+    if (endsWith(nameWords, suffixWords)) {
         return baseName;
     }
 
-    const value = element.fingerprint.value?.toLowerCase();
-    const direct = element.fingerprint.labels.direct?.toLowerCase();
-
-    const choice =
-        direct === 'yes' || direct === 'no'
-            ? direct
-            : value === 'true'
-                ? 'yes'
-                : value === 'false'
-                    ? 'no'
-                    : undefined;
-
-    if (!choice) return baseName;
-
-    const suffix = choice[0].toUpperCase() + choice.slice(1);
-
-    return baseName.endsWith(suffix)
-        ? baseName
-        : `${baseName}${suffix}`;
+    // "Date" already describes a date input sufficiently
+    // when the full suffix is "DateInput".
+    return `${baseName}${suffix}`;
 }
 
 function getLogicalIdentity(
     element: ScannedElement,
-    baseName: string,
+    semantic: string,
 ): string {
-    const repeatable = element.repeatableGroupKey;
-
-    if (repeatable) {
+    if (element.repeatableGroupKey) {
         return [
             'repeatable',
-            repeatable,
-            baseName,
+            element.repeatableGroupKey,
+            semantic,
             element.kind,
         ].join('|');
     }
@@ -243,7 +230,7 @@ function getLogicalIdentity(
     return [
         'single',
         element.groupKey ?? '',
-        baseName,
+        semantic,
         element.kind,
     ].join('|');
 }
@@ -253,7 +240,6 @@ function getExistingName(
     existing: readonly StoredElement[],
 ): string | undefined {
     const id = element.fingerprint.id;
-
     if (!id) return undefined;
 
     const matches = existing.filter(
@@ -262,9 +248,75 @@ function getExistingName(
             stored.kind === element.kind,
     );
 
-    return matches.length === 1
-        ? matches[0].name
+    if (matches.length !== 1) return undefined;
+
+    const name = matches[0].name;
+
+    // Don't perpetuate legacy generic names.
+    if (isGeneric(name) || /^unnamedElement\d*$/i.test(name)) {
+        return undefined;
+    }
+
+    return name;
+}
+
+function getContextualName(
+    element: ScannedElement,
+    semantic: string,
+): string | undefined {
+    const labels = element.fingerprint.labels;
+
+    const context = meaningful(
+        labels.parentField,
+        labels.parentGroup,
+    );
+
+    if (!context) return undefined;
+
+    const contextual = camelCase(combine(context, semantic));
+
+    return contextual !== semantic
+        ? contextual
         : undefined;
+}
+
+function allocateName(
+    preferred: string,
+    identity: string,
+    element: ScannedElement,
+    used: Map<string, string>,
+    warnings: string[],
+): string {
+    if (!used.has(preferred) || used.get(preferred) === identity) {
+        return preferred;
+    }
+
+    const contextual = getContextualName(element, preferred);
+
+    if (
+        contextual &&
+        (!used.has(contextual) || used.get(contextual) === identity)
+    ) {
+        warnings.push(
+            `Resolved name collision for "${preferred}" ` +
+            `using parent context: "${contextual}".`,
+        );
+        return contextual;
+    }
+
+    let suffix = 2;
+    while (used.has(`${preferred}${suffix}`)) {
+        suffix++;
+    }
+
+    const result = `${preferred}${suffix}`;
+
+    warnings.push(
+        `Name collision for "${preferred}"; ` +
+        `assigned "${result}".`,
+    );
+
+    return result;
 }
 
 export function nameElements(
@@ -276,12 +328,11 @@ export function nameElements(
 
     const identities = new Map<string, string>();
     const usedNames = new Map<string, string>();
-    const counters = new Map<string, number>();
 
     for (const element of elements) {
-        const semantic = appendControlMeaning(
+        const semantic = withControlSuffix(
             deriveSemanticName(element),
-            element,
+            element.kind,
         );
 
         const identity = getLogicalIdentity(element, semantic);
@@ -289,21 +340,15 @@ export function nameElements(
         let name = identities.get(identity);
 
         if (!name) {
-            name = getExistingName(element, existing) ?? semantic;
+            const previous = getExistingName(element, existing);
 
-            const claimedBy = usedNames.get(name);
-
-            if (claimedBy && claimedBy !== identity) {
-                const next = (counters.get(name) ?? 1) + 1;
-                counters.set(name, next);
-
-                warnings.push(
-                    `Name collision for "${name}"; ` +
-                    `assigned suffix ${next}.`,
-                );
-
-                name = `${name}${next}`;
-            }
+            name = allocateName(
+                previous ?? semantic,
+                identity,
+                element,
+                usedNames,
+                warnings,
+            );
 
             identities.set(identity, name);
             usedNames.set(name, identity);
@@ -334,19 +379,15 @@ export function actionStem(
         case 'textarea':
         case 'date':
             return `enter${capitalized}`;
-
         case 'select':
         case 'combobox':
             return `select${capitalized}`;
-
         case 'checkbox':
         case 'radio':
             return `choose${capitalized}`;
-
         case 'button':
         case 'link':
             return `click${capitalized}`;
-
         default:
             return `interactWith${capitalized}`;
     }

@@ -10,8 +10,8 @@
         "types": [
             "node"
         ],
-        "rootDir": ".",
-        "outDir": "../../dist/tools/pom-generator",
+        "rootDir": "../..",
+        "outDir": "../../dist",
         "strict": true,
         "skipLibCheck": true,
         "esModuleInterop": true,
@@ -22,7 +22,12 @@
         "sourceMap": true
     },
     "include": [
-        "**/*.ts"
+        "**/*.ts",
+        "../../configLayer/brand.config.ts",
+        "../../configLayer/channel.config.ts",
+        "../../configLayer/product.config.ts",
+        "../../configLayer/config.types.ts",
+        "../../configLayer/config.ts"
     ],
     "exclude": [
         "node_modules",

@@ -19,11 +19,21 @@ export interface GroupDetectionResult {
 
 const GROUP_SELECTOR = [
     'fieldset',
+    'form',
+    'section',
     '[role="group"]',
     '[role="radiogroup"]',
-    'section',
+    '[role="region"]',
     '.form-group',
     '.input-group',
+    'div[aria-label]',
+    'div[aria-labelledby]',
+    'div:has(> h1)',
+    'div:has(> h2)',
+    'div:has(> h3)',
+    'div:has(> h4)',
+    'div:has(> h5)',
+    'div:has(> h6)',
 ].join(', ');
 
 const HEADING_SELECTOR = 'h1, h2, h3, h4, h5, h6';
@@ -37,51 +47,64 @@ function getReferencedText(
     attribute: string,
 ): string {
     const ids = normalizeText(element.getAttribute(attribute))
-        .split(' ')
+        .split(/\s+/)
         .filter(Boolean);
 
-    const parts: string[] = [];
-
-    for (const id of ids) {
-        const referenced = element.ownerDocument.getElementById(id);
-
-        if (referenced) {
-            const text = normalizeText(referenced.textContent);
-
-            if (text) {
-                parts.push(text);
-            }
-        }
-    }
-
-    return parts.join(' ');
+    return ids
+        .map((id) => element.ownerDocument.getElementById(id))
+        .filter((node): node is HTMLElement =>
+            node instanceof HTMLElement,
+        )
+        .map((node) => normalizeText(node.textContent))
+        .filter(Boolean)
+        .join(' ');
 }
 
-function getDirectLegend(element: Element): string {
+function getDirectChildText(
+    element: Element,
+    selector: string,
+): string {
     for (const child of Array.from(element.children)) {
-        if (child.tagName.toLowerCase() === 'legend') {
-            return normalizeText(child.textContent);
-        }
-    }
+        if (child.matches(selector)) {
+            const text = normalizeText(child.textContent);
 
-    return '';
-}
-
-function getDirectHeading(element: Element): string {
-    for (const child of Array.from(element.children)) {
-        if (child.matches(HEADING_SELECTOR)) {
-            return normalizeText(child.textContent);
+            if (text) return text;
         }
     }
 
     return '';
 }
 
-function getDirectLabel(element: Element): string {
+function getNestedHeading(element: Element): string {
+    const direct = getDirectChildText(
+        element,
+        HEADING_SELECTOR,
+    );
+
+    if (direct) return direct;
+
+    // Inspect only shallow wrappers to avoid borrowing
+    // a heading from an unrelated nested form or section.
     for (const child of Array.from(element.children)) {
-        if (child.tagName.toLowerCase() === 'label') {
-            return normalizeText(child.textContent);
+        if (
+            child.matches(
+                'form, section, fieldset, [role="group"], ' +
+                '[role="region"], [role="radiogroup"]',
+            )
+        ) {
+            continue;
         }
+
+        if (!child.matches('div, header')) {
+            continue;
+        }
+
+        const heading = getDirectChildText(
+            child,
+            HEADING_SELECTOR,
+        );
+
+        if (heading) return heading;
     }
 
     return '';
@@ -91,7 +114,10 @@ function detectGroupName(
     element: Element,
 ): { name: string; source: GroupSource } | null {
     if (element.matches('fieldset')) {
-        const legend = getDirectLegend(element);
+        const legend = getDirectChildText(
+            element,
+            'legend',
+        );
 
         if (legend) {
             return {
@@ -124,7 +150,7 @@ function detectGroupName(
         };
     }
 
-    const heading = getDirectHeading(element);
+    const heading = getNestedHeading(element);
 
     if (heading) {
         return {
@@ -134,7 +160,10 @@ function detectGroupName(
     }
 
     if (element.matches('.form-group, .input-group')) {
-        const label = getDirectLabel(element);
+        const label = getDirectChildText(
+            element,
+            'label',
+        );
 
         if (label) {
             return {
@@ -158,9 +187,13 @@ function createGroupKey(
         .replace(/^-|-$/g, '')
         .slice(0, 60) || 'group';
 
-    const path = parentKey ? `${parentKey}.${slug}` : slug;
+    const path = parentKey
+        ? `${parentKey}.${slug}`
+        : slug;
 
-    return occurrence > 1 ? `${path}-${occurrence}` : path;
+    return occurrence > 1
+        ? `${path}-${occurrence}`
+        : path;
 }
 
 function getParentGroup(
@@ -172,14 +205,38 @@ function getParentGroup(
     while (ancestor) {
         const group = groupMap.get(ancestor);
 
-        if (group) {
-            return group;
-        }
+        if (group) return group;
 
         ancestor = ancestor.parentElement;
     }
 
     return undefined;
+}
+
+function isMeaningfulGroup(
+    element: Element,
+): boolean {
+    if (
+        element.matches(
+            'fieldset, form, section, [role="group"], ' +
+            '[role="radiogroup"], [role="region"], ' +
+            '.form-group, .input-group',
+        )
+    ) {
+        return true;
+    }
+
+    if (!element.matches('div')) {
+        return false;
+    }
+
+    // Generic divs qualify only when they carry their
+    // own label or a heading directly within them.
+    return Boolean(
+        normalizeText(element.getAttribute('aria-label')) ||
+        normalizeText(element.getAttribute('aria-labelledby')) ||
+        getDirectChildText(element, HEADING_SELECTOR),
+    );
 }
 
 export function detectGroups(
@@ -194,20 +251,29 @@ export function detectGroups(
     const occurrences = new Map<string, number>();
 
     for (const element of elements) {
+        if (!isMeaningfulGroup(element)) {
+            continue;
+        }
+
         const identity = detectGroupName(element);
 
         if (!identity) {
             continue;
         }
 
-        const parent = getParentGroup(element, groupMap);
+        const parent = getParentGroup(
+            element,
+            groupMap,
+        );
 
         const occurrenceKey = [
             parent?.key ?? '',
             identity.name.toLowerCase(),
         ].join('|');
 
-        const occurrence = (occurrences.get(occurrenceKey) ?? 0) + 1;
+        const occurrence =
+            (occurrences.get(occurrenceKey) ?? 0) + 1;
+
         occurrences.set(occurrenceKey, occurrence);
 
         const group: DetectedGroup = {
@@ -226,14 +292,16 @@ export function detectGroups(
         groupMap.set(element, group);
     }
 
-    const groups: ElementGroup[] = detected.map((group) => ({
-        key: group.key,
-        name: group.name,
-        source: group.source,
-        ...(group.parentKey
-            ? { parentKey: group.parentKey }
-            : {}),
-    }));
+    const groups: ElementGroup[] = detected.map(
+        (group) => ({
+            key: group.key,
+            name: group.name,
+            source: group.source,
+            ...(group.parentKey
+                ? { parentKey: group.parentKey }
+                : {}),
+        }),
+    );
 
     return { groups, detected };
 }
@@ -243,7 +311,10 @@ export function findNearestGroup(
     detected: readonly DetectedGroup[],
 ): DetectedGroup | undefined {
     const groupMap = new Map(
-        detected.map((group) => [group.element, group]),
+        detected.map((group) => [
+            group.element,
+            group,
+        ]),
     );
 
     let current: Element | null = element;
@@ -251,9 +322,7 @@ export function findNearestGroup(
     while (current) {
         const match = groupMap.get(current);
 
-        if (match) {
-            return match;
-        }
+        if (match) return match;
 
         current = current.parentElement;
     }
@@ -265,12 +334,13 @@ export function getGroupPath(
     group: DetectedGroup | undefined,
     detected: readonly DetectedGroup[],
 ): string[] {
-    if (!group) {
-        return [];
-    }
+    if (!group) return [];
 
     const byKey = new Map(
-        detected.map((item) => [item.key, item]),
+        detected.map((item) => [
+            item.key,
+            item,
+        ]),
     );
 
     const path: string[] = [];

@@ -1,13 +1,13 @@
 
 import type {
     ElementGroup,
-    LocatorCandidate,
     LocatorDefinition,
     PageScan,
     RepeatableGroup,
     ScannedElement,
 } from '../models/generator.types';
 
+import { rankLocators } from '../core/locator-strategy';
 import { detectGroups } from './group-detector';
 import { normalizeElement } from './element-normalizer';
 
@@ -30,6 +30,7 @@ export interface DomScanResult {
 interface RepeatableMembership {
     group: DetectedRepeatableGroup;
     instance: number;
+    section: Element;
 }
 
 const INTERACTIVE_SELECTOR = [
@@ -67,6 +68,7 @@ function findRepeatableMembership(
                 return {
                     group,
                     instance: section.index,
+                    section: section.element,
                 };
             }
         }
@@ -76,17 +78,14 @@ function findRepeatableMembership(
 }
 
 function isStableAttribute(value: string): boolean {
-    if (!value) return false;
-
-    return !/^(react-select-|css-|sc-|jsx-)/i.test(value);
+    return Boolean(value) &&
+        !/^(react-select-|css-|sc-|jsx-)/i.test(value);
 }
 
 function getSectionLocator(
     group: DetectedRepeatableGroup,
 ): LocatorDefinition | undefined {
-    if (!group.locator) {
-        return undefined;
-    }
+    if (!group.locator) return undefined;
 
     return {
         primary: group.locator,
@@ -98,10 +97,7 @@ function toStoredRepeatableGroup(
     group: DetectedRepeatableGroup,
 ): RepeatableGroup | undefined {
     const locator = getSectionLocator(group);
-
-    if (!locator) {
-        return undefined;
-    }
+    if (!locator) return undefined;
 
     return {
         key: group.key,
@@ -151,7 +147,6 @@ function collectElementWarnings(
     elements: readonly ScannedElement[],
 ): string[] {
     const warnings: string[] = [];
-
     const byId = new Map<string, number>();
 
     for (const element of elements) {
@@ -159,17 +154,6 @@ function collectElementWarnings(
 
         if (id) {
             byId.set(id, (byId.get(id) ?? 0) + 1);
-        }
-
-        if (
-            element.locators.primary.strategy === 'css' &&
-            element.locators.primary.value ===
-            element.fingerprint.tagName.toLowerCase()
-        ) {
-            warnings.push(
-                `Element ${element.temporaryId} has only a generic ` +
-                `tag locator (${element.locators.primary.value}).`,
-            );
         }
     }
 
@@ -201,9 +185,13 @@ function getActiveRepeatableGroups(
     detected: readonly DetectedRepeatableGroup[],
     persisted: readonly RepeatableGroup[],
 ): DetectedRepeatableGroup[] {
-    const keys = new Set(persisted.map((group) => group.key));
+    const keys = new Set(
+        persisted.map((group) => group.key),
+    );
 
-    return detected.filter((group) => keys.has(group.key));
+    return detected.filter(
+        (group) => keys.has(group.key),
+    );
 }
 
 function validateRepeatableLocator(
@@ -261,6 +249,38 @@ function filterValidatedRepeatables(
     });
 }
 
+function rankScannedElement(
+    control: Element,
+    element: ScannedElement,
+    membership: RepeatableMembership | undefined,
+    warnings: string[],
+): ScannedElement | undefined {
+    const scope = membership
+        ? membership.section
+        : control.ownerDocument;
+
+    const ranking = rankLocators(
+        control,
+        element,
+        { scope },
+    );
+
+    warnings.push(...ranking.warnings);
+
+    if (!ranking.locators) {
+        warnings.push(
+            `Skipped ${element.temporaryId}: no unique, stable ` +
+            `locator${membership ? ' within its repeatable section' : ''}.`,
+        );
+        return undefined;
+    }
+
+    return {
+        ...element,
+        locators: ranking.locators,
+    };
+}
+
 export function scanDom(
     root: ParentNode,
     options: DomScanOptions,
@@ -289,26 +309,43 @@ export function scanDom(
     );
 
     const controls = collectInteractiveElements(root);
+    const elements: ScannedElement[] = [];
 
-    const elements: ScannedElement[] = controls.map(
-        (control, index) => {
-            const membership = findRepeatableMembership(
-                control,
-                activeRepeatables,
-            );
+    for (const [index, control] of controls.entries()) {
+        const membership = findRepeatableMembership(
+            control,
+            activeRepeatables,
+        );
 
-            return normalizeElement(control, {
-                temporaryId: `scan_${String(index + 1).padStart(4, '0')}`,
-                groups: groupResult.detected,
-                ...(membership
-                    ? {
-                        repeatableGroupKey: membership.group.key,
-                        repeatableInstance: membership.instance,
-                    }
-                    : {}),
-            });
-        },
-    );
+        const normalized = normalizeElement(control, {
+            temporaryId: `scan_${String(index + 1).padStart(4, '0')}`,
+            groups: groupResult.detected,
+            ...(membership
+                ? {
+                    repeatableGroupKey: membership.group.key,
+                    repeatableInstance: membership.instance,
+                }
+                : {}),
+        });
+
+        if (
+            !options.includeHidden &&
+            normalized.visibility !== 'visible'
+        ) {
+            continue;
+        }
+
+        const ranked = rankScannedElement(
+            control,
+            normalized,
+            membership,
+            warnings,
+        );
+
+        if (ranked) {
+            elements.push(ranked);
+        }
+    }
 
     warnings.push(...collectElementWarnings(elements));
 
@@ -318,11 +355,7 @@ export function scanDom(
         pageName: clean(options.pageName),
         url: getPageUrl(root, options.url),
         scannedAt: new Date().toISOString(),
-        elements: options.includeHidden
-            ? elements
-            : elements.filter(
-                (element) => element.visibility === 'visible',
-            ),
+        elements,
         groups,
         repeatableGroups,
     };

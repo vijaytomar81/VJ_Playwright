@@ -39,35 +39,32 @@ const STRATEGY_SCORES: Record<
     xpath: 20,
 };
 
+const CONTROL_SELECTOR = [
+    'input', 'textarea', 'select', 'button',
+    'a[href]', '[role="button"]', '[role="link"]',
+    '[role="checkbox"]', '[role="radio"]',
+    '[role="combobox"]', '[role="textbox"]',
+].join(', ');
+
 function clean(value: string | null | undefined): string {
     return (value ?? '').replace(/\s+/g, ' ').trim();
 }
 
-function escapeCss(value: string): string {
-    return Array.from(value)
-        .map((character) => {
-            if (/^[a-zA-Z0-9_-]$/.test(character)) {
-                return character;
-            }
+function normalizeText(value: string | null | undefined): string {
+    return clean(value).toLowerCase();
+}
 
-            return `\\${character.codePointAt(0)!.toString(16)} `;
-        })
-        .join('');
+function escapeAttribute(value: string): string {
+    return value
+        .replace(/\\/g, '\\\\')
+        .replace(/"/g, '\\"')
+        .replace(/\n/g, '\\a ')
+        .replace(/\r/g, '\\d ')
+        .replace(/\f/g, '\\c ');
 }
 
 function getControls(root: ParentNode): Element[] {
-    return Array.from(
-        root.querySelectorAll(
-            'input, textarea, select, button, a[href], ' +
-            '[role="button"], [role="link"], ' +
-            '[role="checkbox"], [role="radio"], ' +
-            '[role="combobox"]',
-        ),
-    );
-}
-
-function normalizeText(value: string | null): string {
-    return clean(value).toLowerCase();
+    return Array.from(root.querySelectorAll(CONTROL_SELECTOR));
 }
 
 function getAccessibleName(element: Element): string {
@@ -77,68 +74,80 @@ function getAccessibleName(element: Element): string {
         const referenced = labelledBy
             .split(/\s+/)
             .map((id) => element.ownerDocument.getElementById(id))
-            .filter(Boolean)
-            .map((node) => clean(node!.textContent))
+            .filter((node): node is HTMLElement => Boolean(node))
+            .map((node) => clean(node.textContent))
             .filter(Boolean);
 
-        if (referenced.length > 0) {
-            return referenced.join(' ');
-        }
+        if (referenced.length) return referenced.join(' ');
     }
 
-    const ariaLabel = element.getAttribute('aria-label');
-
-    if (ariaLabel) {
-        return clean(ariaLabel);
-    }
+    const ariaLabel = clean(element.getAttribute('aria-label'));
+    if (ariaLabel) return ariaLabel;
 
     if (
         element instanceof HTMLInputElement ||
         element instanceof HTMLSelectElement ||
         element instanceof HTMLTextAreaElement
     ) {
-        const labelText = Array.from(element.labels ?? [])
+        const labels = Array.from(element.labels ?? [])
             .map((label) => clean(label.textContent))
-            .filter(Boolean)
-            .join(' ');
+            .filter(Boolean);
 
-        if (labelText) {
-            return labelText;
+        if (labels.length) return labels.join(' ');
+    }
+
+    const tag = element.tagName.toLowerCase();
+
+    if (tag === 'input') {
+        const type = normalizeText(element.getAttribute('type'));
+
+        if (['button', 'submit', 'reset'].includes(type)) {
+            return clean(element.getAttribute('value'));
         }
+
+        return '';
+    }
+
+    if (tag === 'img') {
+        return clean(element.getAttribute('alt'));
     }
 
     return clean(element.textContent);
 }
 
-function matchesRole(
-    element: Element,
-    role: string,
-): boolean {
-    const explicit = element.getAttribute('role');
-
-    if (explicit) {
-        return explicit === role;
-    }
+function inferRole(element: Element): string | undefined {
+    const explicit = clean(element.getAttribute('role'));
+    if (explicit) return explicit;
 
     const tag = element.tagName.toLowerCase();
-    const type = element.getAttribute('type')?.toLowerCase();
+    const type = normalizeText(element.getAttribute('type'));
 
-    if (tag === 'button') return role === 'button';
-    if (tag === 'a') return role === 'link';
-    if (tag === 'select') return role === 'combobox';
+    if (tag === 'button') return 'button';
+    if (tag === 'a' && element.hasAttribute('href')) return 'link';
+    if (tag === 'select') return 'combobox';
+    if (tag === 'textarea') return 'textbox';
 
     if (tag === 'input') {
-        if (type === 'checkbox') return role === 'checkbox';
-        if (type === 'radio') return role === 'radio';
-        if (type === 'button' || type === 'submit') {
-            return role === 'button';
+        if (type === 'checkbox') return 'checkbox';
+        if (type === 'radio') return 'radio';
+
+        if (['button', 'submit', 'reset', 'image'].includes(type)) {
+            return 'button';
         }
-        return role === 'textbox';
+
+        if (type === 'hidden') return undefined;
+        return 'textbox';
     }
 
-    if (tag === 'textarea') return role === 'textbox';
+    return undefined;
+}
 
-    return false;
+function queryCss(root: ParentNode, selector: string): Element[] {
+    try {
+        return Array.from(root.querySelectorAll(selector));
+    } catch {
+        return [];
+    }
 }
 
 function queryByRole(
@@ -148,20 +157,15 @@ function queryByRole(
     const role = candidate.role ?? candidate.value;
 
     return getControls(root).filter((element) => {
-        if (!matchesRole(element, role)) {
-            return false;
-        }
+        if (inferRole(element) !== role) return false;
+        if (!candidate.name) return true;
 
-        if (!candidate.name) {
-            return true;
-        }
-
-        const actual = getAccessibleName(element);
-        const expected = candidate.name;
+        const actual = normalizeText(getAccessibleName(element));
+        const expected = normalizeText(candidate.name);
 
         return candidate.exact === false
-            ? normalizeText(actual).includes(normalizeText(expected))
-            : normalizeText(actual) === normalizeText(expected);
+            ? actual.includes(expected)
+            : actual === expected;
     });
 }
 
@@ -180,59 +184,29 @@ function queryByLabel(
     });
 }
 
-function queryCss(
-    root: ParentNode,
-    selector: string,
-): Element[] {
-    try {
-        return Array.from(root.querySelectorAll(selector));
-    } catch {
-        return [];
-    }
-}
-
 function queryCandidate(
     root: ParentNode,
     candidate: LocatorCandidate,
 ): Element[] {
+    const value = escapeAttribute(candidate.value);
+
     switch (candidate.strategy) {
         case 'testId':
-            return queryCss(
-                root,
-                `[data-testid="${escapeCss(candidate.value)}"]`,
-            );
-
+            return queryCss(root, `[data-testid="${value}"]`);
         case 'id':
-            return queryCss(
-                root,
-                `[id="${escapeCss(candidate.value)}"]`,
-            );
-
+            return queryCss(root, `[id="${value}"]`);
         case 'name':
-            return queryCss(
-                root,
-                `[name="${escapeCss(candidate.value)}"]`,
-            );
-
+            return queryCss(root, `[name="${value}"]`);
         case 'placeholder':
-            return queryCss(
-                root,
-                `[placeholder="${escapeCss(candidate.value)}"]`,
-            );
-
+            return queryCss(root, `[placeholder="${value}"]`);
         case 'css':
             return queryCss(root, candidate.value);
-
         case 'role':
             return queryByRole(root, candidate);
-
         case 'label':
             return queryByLabel(root, candidate);
-
         case 'xpath':
-            // XPath validation belongs to the runtime resolver.
             return [];
-
         default:
             return [];
     }
@@ -255,18 +229,11 @@ function isUnstable(candidate: LocatorCandidate): boolean {
     return false;
 }
 
-function scoreCandidate(
-    candidate: LocatorCandidate,
-): number {
+function scoreCandidate(candidate: LocatorCandidate): number {
     let score = STRATEGY_SCORES[candidate.strategy];
 
-    if (candidate.exact === false) {
-        score -= 15;
-    }
-
-    if (candidate.scopeGroupKey) {
-        score += 5;
-    }
+    if (candidate.exact === false) score -= 15;
+    if (candidate.scopeGroupKey) score += 5;
 
     return score;
 }
@@ -280,11 +247,7 @@ function evaluateCandidate(
     const matchesTarget = matches.includes(target);
     const unstable = isUnstable(candidate);
     const unique = matches.length === 1;
-
-    const accepted =
-        unique &&
-        matchesTarget &&
-        !unstable;
+    const accepted = unique && matchesTarget && !unstable;
 
     let reason = 'Unique locator for the target.';
 
@@ -314,13 +277,9 @@ function deduplicate(
     const seen = new Set<string>();
 
     return candidates.filter((candidate) => {
-        const identity = JSON.stringify(candidate);
-
-        if (seen.has(identity)) {
-            return false;
-        }
-
-        seen.add(identity);
+        const key = JSON.stringify(candidate);
+        if (seen.has(key)) return false;
+        seen.add(key);
         return true;
     });
 }
@@ -328,23 +287,39 @@ function deduplicate(
 function collectCandidates(
     element: ScannedElement,
 ): LocatorCandidate[] {
-    const candidates = [
+    const candidates: LocatorCandidate[] = [
         element.locators.primary,
         ...element.locators.fallbacks,
     ];
 
-    const role = element.fingerprint.role;
+    const fingerprint = element.fingerprint;
+    const labels = fingerprint.labels;
+
+    const role = fingerprint.role ||
+        ({
+            button: 'button',
+            link: 'link',
+            checkbox: 'checkbox',
+            radio: 'radio',
+            select: 'combobox',
+            combobox: 'combobox',
+            input: 'textbox',
+            textarea: 'textbox',
+        } as Record<string, string>)[element.kind];
 
     if (role) {
-        candidates.push({
-            strategy: 'role',
-            value: role,
-            role,
-            ...(element.fingerprint.labels.accessible
-                ? { name: element.fingerprint.labels.accessible }
-                : {}),
-            exact: true,
-        });
+        const accessibleName =
+            labels.accessible || labels.direct;
+
+        if (accessibleName) {
+            candidates.push({
+                strategy: 'role',
+                value: role,
+                role,
+                name: accessibleName,
+                exact: true,
+            });
+        }
     }
 
     return deduplicate(candidates);
@@ -362,13 +337,13 @@ export function rankLocators(
         .map((candidate) =>
             evaluateCandidate(root, target, candidate),
         )
-        .sort((left, right) => right.score - left.score);
+        .sort((a, b) => b.score - a.score);
 
     const accepted = evaluations.filter(
         (evaluation) => evaluation.accepted,
     );
 
-    if (accepted.length === 0) {
+    if (!accepted.length) {
         warnings.push(
             `No unique, stable locator for ${element.temporaryId}.`,
         );

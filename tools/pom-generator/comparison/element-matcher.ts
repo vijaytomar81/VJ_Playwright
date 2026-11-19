@@ -23,6 +23,7 @@ export interface ElementComparison {
 interface LogicalScanGroup {
     representative: ScannedElement;
     members: ScannedElement[];
+    ambiguous?: string;
 }
 
 function normalize(value: string | undefined): string {
@@ -32,25 +33,53 @@ function normalize(value: string | undefined): string {
         .trim();
 }
 
+function normalizedAttribute(
+    value: string | undefined,
+): string {
+    return normalize(value).replace(/\b\d+\b/g, '#');
+}
+
+function semanticLabel(
+    element: ScannedElement,
+): string {
+    const fingerprint = element.fingerprint;
+    const labels = fingerprint.labels;
+
+    return normalize(
+        labels.parentField ||
+        labels.direct ||
+        labels.accessible ||
+        fingerprint.placeholder ||
+        fingerprint.ariaLabel ||
+        fingerprint.text,
+    );
+}
+
 function logicalFieldSignature(
     element: ScannedElement,
 ): string {
     const fingerprint = element.fingerprint;
 
-    const label =
-        fingerprint.labels.parentField ||
-        fingerprint.labels.direct ||
-        fingerprint.labels.accessible ||
-        fingerprint.placeholder ||
-        element.suggestedName;
-
     return [
-        element.repeatableGroupKey ?? '',
         element.kind,
-        normalize(label),
+        element.repeatableGroupKey ?? element.groupKey ?? '',
+        semanticLabel(element),
         normalize(fingerprint.inputType),
-        normalize(fingerprint.value),
+        normalizedAttribute(fingerprint.id),
+        normalizedAttribute(fingerprint.name),
     ].join('|');
+}
+
+function hasIdentityEvidence(
+    element: ScannedElement,
+): boolean {
+    const fingerprint = element.fingerprint;
+
+    return Boolean(
+        semanticLabel(element) ||
+        fingerprint.id ||
+        fingerprint.name,
+    );
 }
 
 function groupLogicalScans(
@@ -71,12 +100,20 @@ function groupLogicalScans(
             continue;
         }
 
+        if (!hasIdentityEvidence(element)) {
+            groups.push({
+                representative: element,
+                members: [element],
+                ambiguous:
+                    'Repeatable field has no distinguishing identity.',
+            });
+            continue;
+        }
+
         const signature = logicalFieldSignature(element);
         const existing = repeatableBySignature.get(signature);
 
-        if (existing) {
-            existing.members.push(element);
-        } else {
+        if (!existing) {
             const group: LogicalScanGroup = {
                 representative: element,
                 members: [element],
@@ -84,7 +121,25 @@ function groupLogicalScans(
 
             repeatableBySignature.set(signature, group);
             groups.push(group);
+            continue;
         }
+
+        const instance = element.repeatableInstance;
+
+        if (
+            instance === undefined ||
+            existing.members.some(
+                (member) =>
+                    member.repeatableInstance === undefined ||
+                    member.repeatableInstance === instance,
+            )
+        ) {
+            existing.ambiguous =
+                'Indistinguishable repeatable fields occur ' +
+                'within the same instance.';
+        }
+
+        existing.members.push(element);
     }
 
     return groups;
@@ -128,7 +183,6 @@ export function comparePageElements(
 ): ElementComparison {
     const warnings: string[] = [];
     const matches: ElementMatch[] = [];
-
     const logicalGroups = groupLogicalScans(scan.elements);
 
     const identities = resolveElementIdentities(
@@ -148,6 +202,13 @@ export function comparePageElements(
     const claimedKeys = new Set<ElementKey>();
 
     for (const group of logicalGroups) {
+        if (group.ambiguous) {
+            matches.push(
+                ...markAmbiguous(group, group.ambiguous),
+            );
+            continue;
+        }
+
         const decision = decisions.get(
             group.representative.temporaryId,
         );
@@ -197,7 +258,6 @@ export function comparePageElements(
                     ),
                 );
             }
-
             continue;
         }
 
@@ -205,6 +265,19 @@ export function comparePageElements(
             decision.status === 'new' &&
             decision.stableKey
         ) {
+            if (claimedKeys.has(decision.stableKey)) {
+                matches.push(
+                    ...markAmbiguous(
+                        group,
+                        `New stable key "${decision.stableKey}" ` +
+                        'was claimed by another logical field.',
+                    ),
+                );
+                continue;
+            }
+
+            claimedKeys.add(decision.stableKey);
+
             for (const member of group.members) {
                 matches.push(
                     matchForScanned(
@@ -216,7 +289,6 @@ export function comparePageElements(
                     ),
                 );
             }
-
             continue;
         }
 
