@@ -1,67 +1,14 @@
-{html: '<div class="d-flex w-100 justify-content-center my…ype="button" tabindex="0">All done</button></div>', tag: 'DIV', role: null, text: 'All done', value: null, …}
-disabled
-: 
-false
-html
-: 
-"<div class=\"d-flex w-100 justify-content-center my-2 btn-container\"><button class=\"btn btn-white btn-center-edit-car-details\" type=\"button\" tabindex=\"0\">All done</button></div>"
-role
-: 
-null
-tag
-: 
-"DIV"
-text
-: 
-"All done"
-value
-: 
-null
-visible
-: 
-true
-[[Prototype]]
-: 
-Object
-constructor
-: 
-ƒ Object()
-hasOwnProperty
-: 
-ƒ hasOwnProperty()
-isPrototypeOf
-: 
-ƒ isPrototypeOf()
-propertyIsEnumerable
-: 
-ƒ propertyIsEnumerable()
-toLocaleString
-: 
-ƒ toLocaleString()
-toString
-: 
-ƒ toString()
-valueOf
-: 
-ƒ valueOf()
-__defineGetter__
-: 
-ƒ __defineGetter__()
-__defineSetter__
-: 
-ƒ __defineSetter__()
-__lookupGetter__
-: 
-ƒ __lookupGetter__()
-__lookupSetter__
-: 
-ƒ __lookupSetter__()
-__proto__
-: 
-(...)
-get __proto__
-: 
-ƒ __proto__()
-set __proto__
-: 
-ƒ __proto__()
+document.querySelectorAll('button.btn-center-edit-car-details').length
+
+(() => {
+    const el = document.querySelector('button.btn-center-edit-car-details');
+
+    return {
+        html: el?.outerHTML,
+        text: el?.textContent?.trim(),
+        visible: !!el?.getClientRects().length,
+        disabled: el?.disabled,
+        ariaHidden: el?.getAttribute('aria-hidden'),
+        parentAriaHidden: el?.closest('[aria-hidden="true"]') !== null,
+    };
+})()
