@@ -1,45 +1,9 @@
-git fetch origin
+git branch --show-current
+git status
+git add .
+git diff --cached --stat
+git commit -m "Update evidence factory and resolve dependency issues"
 
-git log --oneline evidence_factory..origin/develop
 
-git rev-list --count evidence_factory..origin/develop
+git push -u origin HEAD
 
-git diff --stat evidence_factory...origin/develop
-
-==========
-
-tp70707@AVD-HEX-73 MINGW64 ~/OneDrive - Allianz/My Documents/Automation/Athena_Automation/integration-tests (evidence_factory)
-$ git fetch origin
-
-tp70707@AVD-HEX-73 MINGW64 ~/OneDrive - Allianz/My Documents/Automation/Athena_Automation/integration-tests (evidence_factory)
-$ git log --oneline evidence_factory..origin/develop
-bbd6592 (origin/develop) Merge branch 'CTM_code' into 'develop'
-66dd042 minor change in quotepage
-469627e (origin/CTM_code) Updated CTM data sheet json
-f9635fc Merge branch develop into CTM_code
-6534d70 CTM New business code
-
-tp70707@AVD-HEX-73 MINGW64 ~/OneDrive - Allianz/My Documents/Automation/Athena_Automation/integration-tests (evidence_factory)
-$ git rev-list --count evidence_factory..origin/develop
-5
-
-tp70707@AVD-HEX-73 MINGW64 ~/OneDrive - Allianz/My Documents/Automation/Athena_Automation/integration-tests (evidence_factory)
-$ git diff --stat evidence_factory...origin/develop
- .../PCW/CTM/data/Britannia_CTM_Data_Sheet.json     | 3124 ++++++++++++++++++++
- automationLayer/PCW/CTM/data/CTM_NB.xlsx           |  Bin 0 -> 56985 bytes
- .../PCW/CTM/pages/CTM_CarDetailsPage.ts            |  455 +++
- .../PCW/CTM/pages/CTM_CheckAnswersPage.ts          |   18 +
- automationLayer/PCW/CTM/pages/CTM_Pages.ts         |   32 +
- .../PCW/CTM/pages/CTM_YourDetailsPage.ts           | 1017 +++++++
- .../PCW/CTM/pages/CTM_YourPolicyPage.ts            |  859 ++++++
- automationLayer/PCW/CTM/pages/CTM_YourQuotePage.ts |  114 +
- automationLayer/PCW/CTM/pages/index.ts             |    5 +
- .../PCW/CTM/tests/Britannia_CTMNBUi.spec.ts        |   85 +
- .../athena/carInsurance/commonPages/QuotePage.ts   |   50 +-
- configLayer/environments/PCW/CTM/.env.test         |    2 +
- configLayer/execution/loadEnvironment.ts           |    1 +
- configLayer/execution/projectsRegistry.ts          |    5 +
- playwright.PCW_CTM.config.ts                       |    5 +
- 15 files changed, 5771 insertions(+), 1 deletion(-)
-
-tp70707@AVD-HEX-73 MINGW64 ~/OneDrive - Allianz/My Documents/Automation/Athena_Automation/integration-tests (evidence_factory)
