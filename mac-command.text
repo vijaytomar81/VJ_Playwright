@@ -1,0 +1,7 @@
+This prints total lines first, followed by the full relative file path
+
+find tools/pom-generator -type f -name "*.ts" \
+  -not -path "*/node_modules/*" \
+  -not -path "*/dist/*" \
+  -exec wc -l {} + | awk '$2 != "total" { print $1 " lines | " $2 }' | sort -nr
+

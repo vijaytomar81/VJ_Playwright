@@ -94,6 +94,7 @@ function getContainerLabel(
         getDirectChildText(container, HEADING_SELECTOR)
     );
 }
+
 function getParentFieldLabel(
     element: Element,
 ): string | undefined {
@@ -118,10 +119,22 @@ function getParentFieldLabel(
                 if (label) return label;
             }
         }
+
+        // Recognize a visual label immediately before a single-control wrapper.
+        const previous = parent.previousElementSibling;
+        if (
+            previous?.matches('label:not([for])') &&
+            parent.querySelectorAll('input, select, textarea').length === 1
+        ) {
+            const label = clean(previous.textContent);
+            if (label) return label;
+        }
+
         parent = parent.parentElement;
     }
     return undefined;
 }
+
 function getParentContext(
     element: Element,
 ): string | undefined {

@@ -1,30 +1,36 @@
+
 import type {
     ElementKind,
     ScannedElement,
     StoredElement,
 } from '../models/generator.types';
+
 export interface NamedElement {
     temporaryId: string;
     name: string;
     baseName: string;
     repeatableGroupKey?: string;
 }
+
 export interface NamingConflict {
     temporaryId: string;
     name: string;
     reason: string;
 }
+
 export interface ElementNamingResult {
     elements: NamedElement[];
     warnings: string[];
     conflicts: NamingConflict[];
 }
+
 const GENERIC_LABELS = new Set([
     'input', 'field', 'text', 'text field',
     'select', 'dropdown', 'button', 'checkbox',
     'radio', 'yes', 'no', 'month', 'year', 'day',
     'submit', 'element', 'unknown', 'div',
 ]);
+
 const CONTROL_SUFFIX: Partial<Record<ElementKind, string>> = {
     input: 'Input',
     textarea: 'Textarea',
@@ -36,16 +42,17 @@ const CONTROL_SUFFIX: Partial<Record<ElementKind, string>> = {
     button: 'Button',
     link: 'Link',
 };
+
 function words(value: string): string[] {
     return value
         .replace(/([a-z])([A-Z])/g, '$1 $2')
         .replace(/([A-Z])([A-Z][a-z])/g, '$1 $2')
-        .replace(/([a-zA-Z])(\d)/g, '$1 $2')
         .replace(/(\d)([a-zA-Z])/g, '$1 $2')
         .replace(/[^a-zA-Z0-9]+/g, ' ')
         .trim().split(/\s+/).filter(Boolean)
         .map((part) => part.toLowerCase());
 }
+
 function camelCase(value: string): string {
     const parts = words(value);
     if (!parts.length) return 'unnamedElement';
@@ -56,13 +63,16 @@ function camelCase(value: string): string {
         ? result
         : `element${result[0].toUpperCase()}${result.slice(1)}`;
 }
+
 function normalized(value?: string): string {
     return words(value ?? '').join(' ');
 }
+
 function isGeneric(value?: string): boolean {
     const phrase = normalized(value);
     return !phrase || GENERIC_LABELS.has(phrase);
 }
+
 function simplify(value?: string): string {
     return (value ?? '')
         .replace(/\binput field\b/gi, '')
@@ -72,12 +82,14 @@ function simplify(value?: string): string {
         .replace(/[?*:]+/g, ' ')
         .replace(/\s+/g, ' ').trim();
 }
+
 function endsWith(parts: string[], suffix: string[]): boolean {
     return suffix.length <= parts.length &&
         suffix.every((part, index) =>
             parts[parts.length - suffix.length + index] === part,
         );
 }
+
 function combine(parent?: string, child?: string): string {
     const a = words(parent ?? '');
     const b = words(child ?? '');
@@ -85,18 +97,21 @@ function combine(parent?: string, child?: string): string {
     if (!b.length) return a.join(' ');
     if (endsWith(a, b)) return a.join(' ');
     if (endsWith(b, a)) return b.join(' ');
+
     let overlap = 0;
     for (let size = 1; size <= Math.min(a.length, b.length); size++) {
         if (endsWith(a, b.slice(0, size))) overlap = size;
     }
     return [...a, ...b.slice(overlap)].join(' ');
 }
+
 function meaningful(
     ...values: Array<string | undefined>
 ): string | undefined {
     return values.map(simplify)
         .find((value) => !isGeneric(value));
 }
+
 function getChoice(element: ScannedElement): string | undefined {
     if (element.kind !== 'radio') return undefined;
     const labels = element.fingerprint.labels;
@@ -107,9 +122,11 @@ function getChoice(element: ScannedElement): string | undefined {
     if (value === 'false' || value === 'no') return 'no';
     return meaningful(labels.direct, element.fingerprint.value);
 }
+
 function deriveSemanticName(element: ScannedElement): string {
     const labels = element.fingerprint.labels;
     const fp = element.fingerprint;
+
     // Do not prefix parent context unless a collision occurs.
     let phrase = meaningful(
         labels.direct,
@@ -120,6 +137,7 @@ function deriveSemanticName(element: ScannedElement): string {
         fp.id,
         element.suggestedName,
     ) ?? '';
+
     if (!phrase || isGeneric(phrase)) {
         phrase = meaningful(
             labels.parentField,
@@ -128,12 +146,14 @@ function deriveSemanticName(element: ScannedElement): string {
             fp.name,
         ) ?? 'unnamed';
     }
+
     const choice = getChoice(element);
     if (choice && !endsWith(words(phrase), words(choice))) {
         phrase = combine(phrase, choice);
     }
     return camelCase(phrase);
 }
+
 function withControlSuffix(
     baseName: string,
     kind: ElementKind,
@@ -144,6 +164,7 @@ function withControlSuffix(
     }
     return `${baseName}${suffix}`;
 }
+
 function getLogicalIdentity(
     element: ScannedElement,
     semantic: string,
@@ -151,6 +172,7 @@ function getLogicalIdentity(
     if (!element.repeatableGroupKey) {
         return `single|${element.temporaryId}`;
     }
+
     const fp = element.fingerprint;
     return [
         'repeatable',
@@ -165,34 +187,58 @@ function getLogicalIdentity(
         normalized(fp.name).replace(/\b\d+\b/g, '#'),
     ].join('|');
 }
+
 function getExistingName(
     element: ScannedElement,
     existing: readonly StoredElement[],
 ): string | undefined {
     const id = element.fingerprint.id;
     if (!id) return undefined;
+
     const matches = existing.filter((stored) =>
         stored.fingerprint.id === id &&
         stored.kind === element.kind,
     );
     if (matches.length !== 1) return undefined;
+
     const name = matches[0].name;
     if (isGeneric(name) || /^unnamedElement\d*$/i.test(name)) {
         return undefined;
     }
     return name;
 }
+
+function isStableMeaningfulId(id?: string): boolean {
+    if (!id || isGeneric(id)) return false;
+
+    // Reject common generated identifiers and opaque values.
+    if (/^(react-select-\d+|css-|sc-|jsx-|ember\d+|:r[\da-z]+:)/i.test(id)) {
+        return false;
+    }
+    if (/^(input|field|control|element)[-_]?\d+$/i.test(id)) {
+        return false;
+    }
+    if (/^[0-9a-f]{8}-[0-9a-f-]{27,}$/i.test(id)) {
+        return false;
+    }
+    if (/^\d+$/.test(id)) return false;
+
+    return true;
+}
+
 function getContextualNames(
     element: ScannedElement,
     semantic: string,
 ): string[] {
     const labels = element.fingerprint.labels;
     const result: string[] = [];
+
     for (const context of [
         labels.parentField,
         labels.parentGroup,
     ]) {
         if (isGeneric(context)) continue;
+
         const candidate = withControlSuffix(
             camelCase(combine(context, semantic)),
             element.kind,
@@ -201,8 +247,22 @@ function getContextualNames(
             result.push(candidate);
         }
     }
+
+    // Resolve remaining naming collisions using a meaningful HTML ID.
+    const id = element.fingerprint.id;
+    if (isStableMeaningfulId(id)) {
+        const candidate = withControlSuffix(
+            camelCase(id!),
+            element.kind,
+        );
+        if (candidate !== semantic && !result.includes(candidate)) {
+            result.push(candidate);
+        }
+    }
+
     return result;
 }
+
 interface LogicalEntry {
     identity: string;
     element: ScannedElement;
@@ -210,6 +270,7 @@ interface LogicalEntry {
     name: string;
     members: ScannedElement[];
 }
+
 function groupByName(
     entries: readonly LogicalEntry[],
 ): Map<string, LogicalEntry[]> {
@@ -221,6 +282,7 @@ function groupByName(
     }
     return groups;
 }
+
 function resolveCollisions(
     entries: LogicalEntry[],
     warnings: string[],
@@ -230,12 +292,15 @@ function resolveCollisions(
     for (let round = 0; round < entries.length; round++) {
         const groups = groupByName(entries);
         let changed = false;
+
         for (const [name, group] of groups) {
             if (group.length < 2) continue;
+
             const occupied = new Set(
                 entries.filter((entry) => !group.includes(entry))
                     .map((entry) => entry.name),
             );
+
             // A context candidate must distinguish one logical
             // element from all other elements in this collision.
             const proposals = group.map((entry) => ({
@@ -244,6 +309,7 @@ function resolveCollisions(
                     entry.element, entry.baseName,
                 ),
             }));
+
             for (const proposal of proposals) {
                 const candidate = proposal.candidates.find((value) =>
                     !occupied.has(value) &&
@@ -251,18 +317,22 @@ function resolveCollisions(
                         other.candidates.includes(value),
                     ).length === 1,
                 );
+
                 if (!candidate) continue;
+
                 proposal.entry.name = candidate;
                 changed = true;
                 warnings.push(
                     `Resolved name collision for "${name}" ` +
-                    `using parent context: "${candidate}".`,
+                    `using distinguishing context: "${candidate}".`,
                 );
             }
         }
+
         if (!changed) break;
     }
 }
+
 export function nameElements(
     elements: readonly ScannedElement[],
     existing: readonly StoredElement[] = [],
@@ -271,19 +341,23 @@ export function nameElements(
     const conflicts: NamingConflict[] = [];
     const entries: LogicalEntry[] = [];
     const byIdentity = new Map<string, LogicalEntry>();
+
     for (const element of elements) {
         const semantic = withControlSuffix(
             deriveSemanticName(element), element.kind,
         );
         const identity = getLogicalIdentity(element, semantic);
+
         // Only genuine repeatable members share an identity.
         const repeatable = element.repeatableGroupKey
             ? byIdentity.get(identity)
             : undefined;
+
         if (repeatable) {
             repeatable.members.push(element);
             continue;
         }
+
         const entry: LogicalEntry = {
             identity,
             element,
@@ -294,15 +368,20 @@ export function nameElements(
         entries.push(entry);
         byIdentity.set(identity, entry);
     }
+
     resolveCollisions(entries, warnings);
+
     for (const [name, group] of groupByName(entries)) {
         if (group.length < 2) continue;
+
         const reason =
             `Naming collision for "${name}": ` +
             `${group.length} distinct logical elements remain ` +
-            `indistinguishable after parent-context resolution. ` +
+            `indistinguishable after contextual resolution. ` +
             `Manual review required; no numeric suffix assigned.`;
+
         warnings.push(reason);
+
         for (const entry of group) {
             for (const member of entry.members) {
                 conflicts.push({
@@ -313,7 +392,9 @@ export function nameElements(
             }
         }
     }
+
     const namedById = new Map<string, NamedElement>();
+
     for (const entry of entries) {
         for (const member of entry.members) {
             namedById.set(member.temporaryId, {
@@ -326,6 +407,7 @@ export function nameElements(
             });
         }
     }
+
     return {
         elements: elements.map((element) => {
             const named = namedById.get(element.temporaryId);
@@ -340,12 +422,14 @@ export function nameElements(
         conflicts,
     };
 }
+
 export function actionStem(
     kind: ElementKind,
     elementName: string,
 ): string {
     const capitalized =
         elementName[0].toUpperCase() + elementName.slice(1);
+
     switch (kind) {
         case 'input':
         case 'textarea':
