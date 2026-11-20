@@ -1,89 +1,50 @@
-From: 
-import { test } from '@playwright/test';
+PS C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\Athena_Automation\VJ_Playwright> npm run pom-generate -- `
+>>   --brand AZO `
+>>   --channel DJ `
+>>   --product Motor `
+>>   --page car-details `
+>>   --mode create `
+>>   --dry-run `
+>>   --verbose
 
-To:
-import { test } from '@baseTest';
-
-function prompt { "$(Split-Path (Get-Location) -Leaf)> " }
+> allianz-automation@1.0.0 pom-generate
+> npm run pom-generate:build && node dist/tools/pom-generator/cli/pom-generate.cli.js --brand AZO --channel DJ --product Motor --page car-details --mode create --dry-run --verbose
 
 
+> allianz-automation@1.0.0 pom-generate:build
+> tsc -p tools/pom-generator/tsconfig.build.json && tsc-alias -p tools/pom-generator/tsconfig.build.json
 
+POM Generator V2
+Brand:   AZO
+Channel: DJ
+Product: Motor
+Page:    car-details
+Mode:    create
+Output:  C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\Athena_Automation\VJ_Playwright\automationLayer\pomObjects\AZO\DJ\Motor
+Preview only: no generated file writes.
+POM Generator V2 — DRY-RUN
+Page: car-details
+Status: CHANGES PROPOSED
 
-$target = "from '@playwright/test';"
-$replacement = "from '@baseTest';"
+Change summary:
+  Total: 7
+  Safe: 7
+  Review required: 0
 
-$excluded = @(
-    'node_modules',
-    '.git',
-    'test-results',
-    'playwright-report',
-    'allure-results',
-    'allure-report'
-)
+Changes by type:
+  Element added: 7
 
-function Get-SpecFiles {
-    param([string]$Path)
+Change details:
+  [SAFE] Element added: linkToAllianzHomePageLink
+  [SAFE] Element added: manageCookiesButton
+  [SAFE] Element added: openChatWidgetButton
+  [SAFE] Element added: openTrustSealButton
+  [SAFE] Element added: registrationNumberPolarQuestionNoRadio
+  [SAFE] Element added: registrationNumberPolarQuestionYesRadio
+  [SAFE] Element added: viewHowWeLlUseYourInfoLink
 
-    foreach ($file in [System.IO.Directory]::EnumerateFiles($Path, '*.spec.ts')) {
-        $file
-    }
+Write result:
+  0 files written
+  Dry-run: no files should have been written.
 
-    foreach ($directory in [System.IO.Directory]::EnumerateDirectories($Path)) {
-        if ([System.IO.Path]::GetFileName($directory) -notin $excluded) {
-            Get-SpecFiles -Path $directory
-        }
-    }
-}
-
-$files = @(Get-SpecFiles -Path (Get-Location).Path)
-
-$matched = 0
-$replaced = 0
-$errors = 0
-$skipped = 0
-
-foreach ($file in $files) {
-    try {
-        $longPath = '\\?\' + $file
-        $bytes = [System.IO.File]::ReadAllBytes($longPath)
-
-        $hasBom = $bytes.Length -ge 3 -and
-            $bytes[0] -eq 0xEF -and
-            $bytes[1] -eq 0xBB -and
-            $bytes[2] -eq 0xBF
-
-        $utf8 = New-Object System.Text.UTF8Encoding($false, $true)
-        $content = $utf8.GetString($bytes)
-
-        if ($content.Contains($target)) {
-            $matched++
-
-            $updatedContent = $content.Replace($target, $replacement)
-
-            $encoding = New-Object System.Text.UTF8Encoding($hasBom)
-            [System.IO.File]::WriteAllText(
-                $longPath,
-                $updatedContent,
-                $encoding
-            )
-
-            $replaced++
-        }
-        else {
-            $skipped++
-        }
-    }
-    catch {
-        $errors++
-        Write-Warning "Could not process: $file - $($_.Exception.Message)"
-    }
-}
-
-Write-Host ""
-Write-Host "========== Spec Import Replacement Summary =========="
-Write-Host "Total .spec.ts Files : $($files.Count)"
-Write-Host "Matching Import Files: $matched"
-Write-Host "Files Updated        : $replaced"
-Write-Host "Files Skipped        : $skipped"
-Write-Host "Files With Errors    : $errors"
-Write-Host "====================================================="
+PS C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\Athena_Automation\VJ_Playwright>
