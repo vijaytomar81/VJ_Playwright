@@ -1,23 +1,52 @@
-PS C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\Athena_Automation\integration-tests> npx playwright install
-Downloading Chrome for Testing 159.0.8154.6 (playwright chromium v1255) from https://cdn.playwright.dev/builds/cft/159.0.8154.6/win64/chrome-win64.zip
-207.3 MiB [====================] 100% 0.0s
-Chrome for Testing 159.0.8154.6 (playwright chromium v1255) downloaded to C:\Users\tp70707\AppData\Local\ms-playwright\chromium-1255
-Downloading Chrome Headless Shell 159.0.8154.6 (playwright chromium-headless-shell v1255) from https://cdn.playwright.dev/builds/cft/159.0.8154.6/win64/chrome-headless-shell-win64.zip
-123.8 MiB [====================] 100% 0.0s
-Chrome Headless Shell 159.0.8154.6 (playwright chromium-headless-shell v1255) downloaded to C:\Users\tp70707\AppData\Local\ms-playwright\chromium_headless_shell-1255
-Downloading Firefox 159.0 (playwright firefox v1572) from https://cdn.playwright.dev/dbazure/download/playwright/builds/firefox/1572/firefox-win64.zip
-126.1 MiB [====================] 100% 0.0s
-Firefox 159.0 (playwright firefox v1572) downloaded to C:\Users\tp70707\AppData\Local\ms-playwright\firefox-1572
-Downloading WebKit 27.2 (playwright webkit v2388) from https://cdn.playwright.dev/dbazure/download/playwright/builds/webkit/2388/webkit-win64.zip
-Error: Request to https://playwright.download.prss.microsoft.com/dbazure/download/playwright/builds/webkit/2388/webkit-win64.zip timed out after 30000ms
-    at ClientRequest.<anonymous> (C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\Athena_Automation\integration-tests\node_modules\playwright-core\lib\coreBundle.js:9758:15)
-    at ClientRequest.wrapper (node:events:639:12)
-    at ClientRequest.emit (node:events:514:28)
-    at TLSSocket.emitRequestTimeout (node:_http_client:1130:9)
-    at TLSSocket.wrapper (node:events:639:12)
-    at TLSSocket.emit (node:events:526:24)
-    at Socket._onTimeout (node:net:886:8)
-    at Timeout.onStreamTimeout (node:internal/stream_base_commons:242:10)
-    at listOnTimeout (node:internal/timers:687:11)
-    at process.processTimers (node:internal/timers:618:7)
-Downloading WebKit 27.2 (playwright webkit v2388) from https://playwright.download.prss.microsoft.com/dbazure/download/playwright/builds/webkit/2388/webkit-win64.zip
+PS C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\Athena_Automation\VJ_Playwright> npm run edge:cdp:start
+
+> allianz-automation@1.0.0 edge:cdp:start
+> node tools/pom-generator/scripts/launch-edge-cdp.cjs
+
+Starting dedicated Microsoft Edge...
+Platform: win32
+Process ID: 25048
+Profile: C:\Users\tp70707\.pom-generator-v2\edge-cdp-profile
+
+Edge CDP is ready.
+CDP: http://127.0.0.1:9222
+WebSocket: ws://127.0.0.1:9222/devtools/browser/17764b0b-9cc0-4e87-92de-bb149445e94a
+Open your application in the dedicated Edge window.
+PS C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\Athena_Automation\VJ_Playwright> npm run pom-generate -- `
+>>   --brand AZO `
+>>   --channel DJ `
+>>   --product Motor `
+>>   --page car-details `
+>>   --mode create `
+>>   --dry-run `
+>>   --verbose
+
+> allianz-automation@1.0.0 pom-generate
+> npm run pom-generate:build && node dist/tools/pom-generator/cli/pom-generate.cli.js --brand AZO --channel DJ --product Motor --page car-details --mode create --dry-run --verbose
+
+
+> allianz-automation@1.0.0 pom-generate:build
+> tsc -p tools/pom-generator/tsconfig.build.json && tsc-alias -p tools/pom-generator/tsconfig.build.json
+
+POM Generator V2
+Brand:   AZO
+Channel: DJ
+Product: Motor
+Page:    car-details
+Mode:    create
+Output:  C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\Athena_Automation\VJ_Playwright\automationLayer\pomObjects\AZO\DJ\Motor
+Preview only: no generated file writes.
+POM Generator V2 — FAILED
+
+Unsafe POM change plan for "car-details":
+Ambiguous element: startTypingTheModelNameOfYourVehicleInput — REVIEW REQUIRED: Naming conflict for "startTypingTheModelNameOfYourVehicleInput". Naming collision for "startTypingTheModelNameOfYourVehicleInput": 2 distinct logical elements remain indistinguishable after parent-context resolution. Manual review required; no numeric suffix assigned.
+Ambiguous element: startTypingTheModelNameOfYourVehicleInput — REVIEW REQUIRED: Naming conflict for "startTypingTheModelNameOfYourVehicleInput". Naming collision for "startTypingTheModelNameOfYourVehicleInput": 2 distinct logical elements remain indistinguishable after parent-context resolution. Manual review required; no numeric suffix assigned.
+PS C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\Athena_Automation\VJ_Playwright> npm run edge:cdp:stop    
+                  
+> allianz-automation@1.0.0 edge:cdp:stop
+> node tools/pom-generator/scripts/stop-edge-cdp.cjs
+                         
+Closing dedicated Edge CDP (PID 25048)...
+Dedicated Edge CDP browser closed successfully.
+Your regular Edge windows were not targeted.
+PS C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\Athena_Automation\VJ_Playwright> 
