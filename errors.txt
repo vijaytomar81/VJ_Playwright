@@ -1,589 +1,72 @@
-<body><a href="#" tabindex="-1" aria-hidden="true" rel="nofollow" style="opacity: 0.01; position: absolute; z-index: -999; width: 54px; height: 22px;">___</a><div style="opacity: 0.01; position: absolute; z-index: -1000; width: 54px; height: 22px;"></div><noscript>You need to enable JavaScript to run this app.</noscript><div id="loading-screen-container" class="d-none"></div><script type="text/javascript" src="/loading-screens/main.js"></script><div id="root"><div><div><div class="container-fluid"><div class="container pt-3 pb-3"><div id="root"><div class="journey-bg"><div><img class="waves" alt="Journey background waves" src="/img/Flow-waves.svg"><img class="clouds" alt="Journey background clouds" src="/img/Flow-clouds.svg"></div></div><div class="journey-header"><div class="journey-header-background"><a class="header-logo-link" id="goToAllianzHomePage" href="https://www.allianz.co.uk" target="_blank" aria-label="Link to Allianz home page"><img class="flow-logo" alt="Allianz logo icon" tabindex="0" src="/Allianz/img/brand-logo.png"></a></div></div><div class="main-plugin panel mb-3"><div class="text-group title plugin pt-md-0"><h1 class="text-blue-1 font-weight-medium margin-bottom-8">Log in with us</h1></div><div class="new-quote-container hello"><a href="/dashboard" class="btn btn-primary btn-next plugin" id="login">Log in</a></div><div class="plugin hello w-100"><a id="skipRegistration" class="mb-md-0" href="/products" data-discover="true">Don’t have a policy with us, get a new quote</a></div></div><footer class="falcon-footer"><div class="falcon-footer-divider"></div><div class="entrust-section"><div id="trust-logo" class="security-logo position-relative"><div><button type="button" class="trust-logo-btn" aria-label="Open Trust Seal"><img alt="Trust Seal" src="/Allianz/img/sectigo_trust_seal.png"></button></div></div><div class="entrust-section-wording"><div class="entrust-section-title">We'll keep your details safe</div><div class="entrust-section-description">Our website is constantly monitored to <br>check for harmful viruses or malware.</div></div><div class="d-flex justify-content-end flex-grow-1"><img alt="Allianz olympics logo icon" src="/Allianz/img/allianz-olympic-logo.svg"></div></div><div class="falcon-footer-divider-bottom"></div><hr aria-hidden="true"><div class="trademark-section"><div class="links-container d-mobile-none"><a href="/complaints" id="complaints">Complaints</a><a href="https://www.allianz.co.uk/cookie-policy.html" target="_blank" id="cookie-policy">Our cookie policy</a><a href="https://www.allianz.co.uk/privacy-notice.html" id="data-rights" target="_blank">Personal data rights</a><br><br></div><div class="links-container d-desktop-none"><a href="/complaints" id="complaints">Complaints</a><a href="https://www.allianz.co.uk/cookie-policy.html" target="_blank" id="cookie-policy">Our cookie policy</a><a href="https://www.allianz.co.uk/privacy-notice.html" id="data-rights" target="_blank">Personal data rights</a><br><br></div><hr aria-hidden="true"><div class="trademark-container"><div>This insurance is arranged, underwritten and administered by Liverpool Victoria Insurance Company Limited, which is an Allianz Group company, registered in England and Wales number 3232514. Authorised by the Prudential Regulation Authority and regulated by the Financial Conduct Authority and the Prudential Regulation Authority, register number 202965. Registered address: 57 Ladymead, Guildford, Surrey, GU1 1DB. Allianz Online is a trading name of Liverpool Victoria Insurance Company Limited.</div></div></div></footer></div></div></div></div></div><footer class="footer-position"><div class=" collapsed"><div class="section-wrap"></div></div></footer><div id="versionDisplayContainer"><div>customer-portal : <b>7.8.124-RC</b></div></div></div><script src="/static/js/main.4c7166c7.js"></script><script>_satellite["_runScript1"](function(event, target, Promise) {
-// Declare the adobeDataLayer array if it doesn't already exist
-window.adobeDataLayer = window.adobeDataLayer || [];
-
-/**
- * Custom logging function to log Adobe Data Layer events to the console.
- * @param {object} event - The event object pushed to the data layer.
- */
-var myLoggingHandler = function (event) {
-    if (localStorage.getItem("com.adobe.reactor.debug") === "true") {
-        console.log(
-            "%c[Adobe Data Layer Logging] " + event.event + " event pushed.", "background: palegreen", "Event contents:", event
-        );
-    }
-};
-
-// add event listener
-window.adobeDataLayer.push(function (dl) {
-    dl.addEventListener("adobeDataLayer:event", myLoggingHandler);
-});
-
-/**
- * Main data layer object which takes data from the event listeners
- * and handles pushing it to the data layer.
- */
-const eventDataLayer = {
-    recordedInteractions: {}, // Keeps track of which form fields have been interacted with
-
-    /**
-     * Pushes data to the data layer and logs it to the console.
-     * @param {Object} data - The data to be pushed to the data layer.
-     */
-    pushToDataLayer(data) {
-        window.adobeDataLayer = window.adobeDataLayer || [];
-        window.adobeDataLayer.push(data);
-    },
-
-    /**
-     * Handles page view events and application errors (which occur on page load).
-     */
-    handlePageView() {
-
-        /**
-         * Triggers an immediate page view event without waiting for LvDataLayer.
-         * This can be used for triggering rules where we don't need the full LvDataLayer object.
-         */
-        const triggerImmediatePageView = () => {
-            const pageHostname = window.location.hostname;
-            const pageTitle = document.title;
-            const pagePath = window.location.pathname;
-            const pageUrl = window.location.href;
-            const pageQueryString = window.location.search;
-
-            const immediatePageViewData = {
-                event: 'pageViewWithoutDelay',
-                pageInfo: {
-                    pageHostname: pageHostname,
-                    pageTitle: pageTitle,
-                    pagePath: pagePath,
-                    pageUrl: pageUrl,
-                    pageQueryString: pageQueryString,
-                },
-                // LvDataLayer may not be ready, so we use an empty object or fallback
-                quoteInfo: this.removeNullValues(window.LvDataLayer || {}),
-            };
-
-            this.pushToDataLayer(immediatePageViewData);
-        };
-
-        // Trigger the immediate page view event without waiting for LvDataLayer
-        triggerImmediatePageView();
-
-
-        /**
-         * Waits for the LvDataLayer object to be available before tracking the full page view.
-         * Some pages may not have this object, and some paths are excluded.
-         */
-        const waitForLvDataLayer = () => {
-            // List of URL paths where LvDataLayer is not expected to be present.
-            const excludedPaths = [
-                '/dashboard/advantages',
-            ];
-
-            const currentPath = window.location.pathname;
-
-            // If the current path is in the excluded list, skip waiting for LvDataLayer.
-            if (excludedPaths.some(path => currentPath.includes(path))) {
-                _satellite.logger.log(`Data Layer Script: Current path ${currentPath} is excluded from LvDataLayer wait. Proceeding directly.`);
-                checkAndTrackPageView();
-                return;
-            }
-
-            const maxLvDataLayerAttempts = 10; // Example: 10 attempts * 500ms = 5 second total wait time
-            let lvDataLayerAttempts = 0;
-
-            const checkForLvDataLayer = () => {
-                _satellite.logger.log(`Data Layer Script: Checking for LvDataLayer... Attempt ${lvDataLayerAttempts + 1}`);
-
-                if (typeof window.LvDataLayer !== 'undefined') {
-                    _satellite.logger.log("Data Layer Script: LvDataLayer found, proceeding with page view tracking...");
-                    checkAndTrackPageView();
-                } else if (lvDataLayerAttempts < maxLvDataLayerAttempts) {
-                    setTimeout(() => {
-                        _satellite.logger.log(`Data Layer Script: LvDataLayer not found on attempt ${lvDataLayerAttempts + 1}. Retrying...`);
-                        lvDataLayerAttempts++;
-                        checkForLvDataLayer();
-                    }, 500); // Check again in 500ms
-                } else {
-                    _satellite.logger.log("Data Layer Script: Max attempts reached without finding LvDataLayer, proceeding with page view tracking...");
-                    checkAndTrackPageView();
-                }
-            };
-
-            checkForLvDataLayer(); // Start the LvDataLayer polling process
-        };
-
-
-        /**
-         * Checks for on-page application errors and tracks the main page view event.
-         * This function is called after waiting for LvDataLayer (if applicable).
-         */
-        const checkAndTrackPageView = () => {
-
-            // Tracking for on page application errors
-            const applicationErrorMessageElement = document.querySelector('p.text-center.text-uppercase');
-            const applicationErrorMessage = document.querySelector('h2.text-center');
-            if (applicationErrorMessageElement && applicationErrorMessageElement.textContent === "Application error") {
-                const errorMessage = applicationErrorMessage.textContent || "Unknown Error";
-                const errorType = "application-error";
-
-                const errorDataToPush = {
-                    event: "errorMessage",
-                    errorInfo: {
-                        errorMessage: errorMessage,
-                        errorType: errorType,
-                    },
-                    quoteInfo: this.removeNullValues(window.LvDataLayer || {}),
-                };
-
-                this.pushToDataLayer(errorDataToPush);
-            }
-
-            // Tracking for page views
-            const pageHostname = window.location.hostname;
-            const pageTitle = document.title;
-            const pagePath = window.location.pathname;
-            const pageUrl = window.location.href;
-            const pageQueryString = window.location.search;
-            const pageViewDataToPush = {
-                event: 'pageView',
-                pageInfo: {
-                    pageHostname: pageHostname,
-                    pageTitle: pageTitle,
-                    pagePath: pagePath,
-                    pageUrl: pageUrl,
-                    pageQueryString: pageQueryString,
-                },
-                quoteInfo: this.removeNullValues(window.LvDataLayer || {}),
-            };
-
-            this.pushToDataLayer(pageViewDataToPush);
-        };
-
-        /**
-         * Waits for the main application container to be present in the DOM.
-         * This is necessary for single-page applications where the content is loaded dynamically,
-         * especially when users arrive from aggregator sites.
-         */
-        const waitForRootContainer = () => {
-            const loadingScreenContainer = document.getElementById('loading-screen-container');
-            const rootContainer = document.getElementById('root');
-            if (!loadingScreenContainer && !rootContainer) {
-                _satellite.logger.log("Data Layer Script: No loading screen or root container found, proceeding to wait for LvDataLayer...");
-                waitForLvDataLayer();
-                return; // Exit the function to prevent further execution
-            }
-
-            if (loadingScreenContainer) {
-                _satellite.logger.log("Data Layer Script: Loading screen found, waiting for root container to track page view...");
-                const maxAttempts = 10; // Total wait time of 5 seconds (10 attempts * 500ms)
-                let attempts = 0;
-                const intervalId = setInterval(() => {
-                    attempts++;
-                    const rootContainerNowVisible = document.getElementById('root');
-                    if (rootContainerNowVisible || attempts >= maxAttempts) {
-                        clearInterval(intervalId);
-                        _satellite.logger.log("Data Layer Script: Root container found after waiting, proceeding to wait for LvDataLayer...");
-                        waitForLvDataLayer();
-                    }
-                }, 500);
-            } else {
-                // If only the root div is present (and no loading screen), track the page view immediately
-                _satellite.logger.log("Data Layer Script: Root container found, proceeding to wait for LvDataLayer...");
-                waitForLvDataLayer();
-            }
-        };
-
-        waitForRootContainer(); // Start the root container (or loading screen) polling process
-    },
-
-    /**
-     * Handles form field interactions
-     * @param {Event} event - The DOM event associated with the interaction.
-     * @param {String} eventSource - The source of the event.
-     */
-    handleFormFieldInteraction(event, eventSource) {
-        let fieldName = "";
-        let fieldValue = "";
-
-        // Get field name and value from event
-        if (eventSource === "genericFormField") {
-            fieldName = event.target.name || event.target.id || "unknownField";
-            fieldValue = event.target.value || "unknownValue";
-        }
-        if (eventSource === "addressLookup") {
-            fieldName = event.target
-                .closest(".addressLookup")
-                .querySelector("input").id || "unknownField";
-            fieldValue = event.target.innerText || "unknownValue";
-        }
-        if (eventSource === "autocomplete") {
-            fieldName = event.id || "unknownField";
-            fieldValue = event.innerText || "unknownValue";
-        }
-
-        if (!this.recordedInteractions[fieldName]) { // Only record the first interaction with a field
-
-            const dataToPush = {
-                event: "formFieldInteraction",
-                formInfo: {
-                    formFieldName: fieldName,
-                    formFieldValue: fieldValue,
-                },
-                quoteInfo: this.removeNullValues(window.LvDataLayer || {}),
-            };
-
-            this.pushToDataLayer(dataToPush);
-
-            this.recordedInteractions[fieldName] = true; // Mark field as recorded
-
-        } else {
-            _satellite.logger.log("Data Layer Script: Field name", fieldName, "has already already recorded an interaction, skipping...");
-        }
-    },
-
-    /**
-     * Handles button interactions
-     * @param {Event} event - The DOM event associated with the button click.
-     */
-    handleButtonInteraction(event) {
-        const button = event.target;
-        const buttonId = button.getAttribute('data-di-id') || button.id || "unknownButtonId";
-        const buttonText = button.textContent || "unknownButtonText";
-
-        const dataToPush = {
-            event: "componentClick",
-            componentInfo: {
-                componentType: "Button",
-                componentId: buttonId,
-                componentName: buttonText,
-            },
-            quoteInfo: this.removeNullValues(window.LvDataLayer || {}),
-        };
-
-        this.pushToDataLayer(dataToPush);
-    },
-
-    /**
-      * Handles tracking of page error messages.
-      * @param {Element} errorMessageElement - The element that contains the error message.
-      */
-    handleErrorMessageTracking(errorMessageElement) {
-        let errorMessage = "";
-        let errorType = "";
-        if (errorMessageElement.classList.contains('page-validation')) {
-            errorMessage = errorMessageElement.querySelector('.page-validation-message-bottom').textContent || "Unknown Error";
-            errorType = "page-validation-alert"
-        } else if (errorMessageElement.classList.contains('invalid-feedback')) {
-            errorMessage = errorMessageElement.textContent || "Unknown Error";
-            errorType = "form-validation-alert"
-        }
-
-        const dataToPush = {
-            event: "errorMessage",
-            errorInfo: {
-                errorMessage: errorMessage,
-                errorType: errorType
-            },
-            quoteInfo: this.removeNullValues(window.LvDataLayer || {}),
-        };
-
-        this.pushToDataLayer(dataToPush);
-    },
-
-    /**
-     * Handles the display of the purchase success modal and logs the purchase event.
-     */
-    // handlePurchaseSuccessModal() {
-    //     const isPurchaseRecorded = window.adobeDataLayer.some(item => item.event === 'purchase');
-
-    //     // if we haven't already tracked a purchase event
-    //     if (!isPurchaseRecorded) {
-    //         // Only track this for home insurance purchases, not car insurance
-    //         if (window.location.href.includes("/annualHome/")) {
-    //             _satellite.logger.log("Data Layer Script: Purchase success modal displayed on home insurance and not already tracked, tracking purchase event...");
-    //             const purchaseEventData = {
-    //                 event: "purchase",
-    //                 quoteInfo: this.removeNullValues(window.LvDataLayer || {}),
-    //             };
-
-    //             this.pushToDataLayer(purchaseEventData);
-    //         } else {
-    //             _satellite.logger.log("Data Layer Script: Purchase success modal displayed, but URL does not include /annualHome/, event not tracked.");
-    //         }
-    //     } else {
-    //         _satellite.logger.log("Data Layer Script: Purchase event already tracked, skipping...");
-    //     }
-    // },
-
-    /**
-     * Removes null or undefined values from an object. 
-     * For cleaning up the LvDataLayer object.
-     * @param {Object} obj - The object to clean.
-     * @return {Object} - Cleaned object.
-     */
-    removeNullValues(obj) {
-        return Object.entries(obj).reduce((acc, [key, value]) => {
-            if (value === null || value === undefined) return acc;
-            if (Array.isArray(value)) {
-                acc[key] = value.map(item =>
-                    item instanceof Object ? this.removeNullValues(item) : item
-                ).filter(item => item !== null && item !== undefined);
-            } else {
-                acc[key] = value instanceof Object ? this.removeNullValues(value) : value;
-            }
-            return acc;
-        }, Array.isArray(obj) ? [] : {});
-    },
-
-    /**
-     * Attaches event listeners to address lookup fields.
-     * This method is called by the mutation observer when the address lookup fields are added to the DOM.
-     */
-    attachAddressEventListeners() {
-        const addressesFound = document.querySelectorAll(".addressesFound li");
-        addressesFound.forEach(address => {
-            if (!address.hasEventListener) {
-                address.addEventListener("click", event => {
-                    this.handleFormFieldInteraction(event, "addressLookup");
-                    _satellite.logger.log("Data Layer Script: Dropdown option selected, tracking form field interaction...");
-                });
-                address.hasEventListener = true;
-            }
-        });
-    },
-
-};
-
-// Initialize event listeners, observers, overrides and track initial page load
-(function initialize() {
-    _satellite.logger.log("Data Layer Script: Initializing custom event listeners and observer...");
-
-    /**
-     * Handles page view tracking when the browser history changes (e.g., in a single-page application).
-     */
-    function trackHistoryChange() {
-        _satellite.logger.log("Data Layer Script: History changed, initiating page view handler...");
-        eventDataLayer.handlePageView();
-    }
-
-    // Wrap history.pushState method and call trackHistoryChange function
-    const originalPushState = history.pushState;
-    history.pushState = function (...args) {
-        originalPushState.apply(this, args);
-        trackHistoryChange();
-    };
-
-    // Wrap history.replaceState method and call trackHistoryChange function
-    const originalReplaceState = history.replaceState;
-    history.replaceState = function (...args) {
-        originalReplaceState.apply(this, args);
-        trackHistoryChange();
-    };
-
-    // Track page views on popstate event
-    window.addEventListener('popstate', trackHistoryChange);
-
-    // Add event listeners to all form fields, except address lookup fields
-    document.body.addEventListener("change", event => {
-        if (!event.target.closest('.addressLookup')) {
-            _satellite.logger.log("Data Layer Script: Form field changed, tracking form field interaction...");
-            eventDataLayer.handleFormFieldInteraction(event, "genericFormField");
-        }
-    });
-
-    // Add event listener for button clicks
-    document.body.addEventListener("click", event => {
-        if (event.target.matches('.btn') ||
-            event.target.matches('.optional-extra-toggle-button') ||
-            event.target.matches('.breakdown-cover-level-select-modal__btn-add')) {
-            _satellite.logger.log("Data Layer Script: Button clicked, tracking button click...");
-            eventDataLayer.handleButtonInteraction(event);
-        }
-    });
-
-    // Configuration for observing mutations
-    const mutationConfig = { attributes: true, childList: true, subtree: true };
-
-
-    // Unified MutationObserver to handle various mutations
-    const unifiedObserver = new MutationObserver((mutations, observer) => {
-        // Disconnect the observer to prevent infinite loops
-        observer.disconnect();
-
-        mutations.forEach((mutation) => {
-
-            // Handle form error messages and modals
-            if (mutation.type === 'childList' && mutation.addedNodes.length) {
-                mutation.addedNodes.forEach((node) => {
-                    if (node.matches && (node.matches('.page-validation') || node.matches('.invalid-feedback'))) {
-                        _satellite.logger.log("Data Layer Script: Form error message added, tracking error message...");
-                        eventDataLayer.handleErrorMessageTracking(node);
-                    }
-
-                    // // Check for purchase success modal
-                    // if (node instanceof HTMLElement) {
-                    //     const successTitle = node.querySelector('#success-modal-title');
-                    //     if (successTitle && successTitle.textContent === "Payment complete") {
-                    //         _satellite.logger.log("Data Layer Script: Purchase success modal added, tracking purchase event...");
-                    //         eventDataLayer.handlePurchaseSuccessModal();
-                    //     }
-                    // }
-                });
-            }
-
-            // Handle address lookup fields
-            if (mutation.type === "childList" && mutation.target.className.includes('addressLookup')) {
-                _satellite.logger.log("Data Layer Script: Address lookup field added, attaching event listeners...");
-                eventDataLayer.attachAddressEventListeners();
-            }
-
-            // Handle autocomplete fields
-            if (mutation.type === 'childList' && mutation.target.className.includes('is-valid')) {
-                const targetElement = mutation.target;
-                // Check for specific classes or attributes that indicate an interaction
-                if (targetElement.querySelector('.autocomplete__value-container--has-value')) {
-                    _satellite.logger.log("Data Layer Script: Autocomplete field", targetElement.id, "now has value", targetElement.innerText);
-                    eventDataLayer.handleFormFieldInteraction(targetElement, "autocomplete");
-                }
-            }
-        });
-
-        // Reconnect the observer
-        observer.observe(document.body, mutationConfig);
-    });
-
-    // Start the unified observer
-    unifiedObserver.observe(document.body, mutationConfig);
-
-
-    _satellite.logger.log("Data Layer Script: Custom event listeners and observer initialized.");
-
-    // Trigger page load hander when this script is executed by Adobe Launch on library load
-    eventDataLayer.handlePageView();
-    _satellite.logger.log("Data Layer Script: Page view handler triggered on script load.");
-
-})();
-
-});</script><!-- OneTrust Cookies Consent Notice start -->
-<script src="https://cdn.cookielaw.org/scripttemplates/otSDKStub.js" type="text/javascript" charset="UTF-8" data-domain-script="36714b41-4e2b-4cf4-8bab-1b6016757604-test"></script>
-<script type="text/javascript">
-    function OptanonWrapper() {
-        window.adobeDataLayer = window.adobeDataLayer || [];
-    
-        // Find the last Onetrust event in the data layer to get the previous state.
-        const lastOnetrustEvent = [...window.adobeDataLayer]
-            .reverse()
-            .find(e => e && e.event === 'OnetrustActiveGroupsUpdated');
-    
-        // Get the previous groups string from the last onetrust event, 
-        // defaulting to an empty string if not found.
-        const previousGroupsString = lastOnetrustEvent ? lastOnetrustEvent.OnetrustActiveGroups : '';
-    
-        // Helper function to parse the group string into a clean array of IDs.
-        const parseGroups = (groupString) => {
-            if (!groupString || typeof groupString !== 'string') {
-                return [];
-            }
-            // Trim leading/trailing commas, then split by comma, and filter out any empty strings.
-            return groupString.replace(/^,|,$/g, '').split(',').filter(Boolean);
-        };
-    
-        // Parse current and previous groups into arrays for comparison.
-        const currentGroups = parseGroups(window.OnetrustActiveGroups);
-        const previousGroups = parseGroups(previousGroupsString);
-    
-        // Determine newly consented groups. If this is the first event on the page (lastOnetrustEvent is null),
-        // then there are no "newly" consented groups.
-        const newlyConsentedGroups = lastOnetrustEvent ? currentGroups.filter(
-            (group) => !previousGroups.includes(group)
-        ) : [];
-    
-        // Determine newly removed groups.
-        const newlyRemovedGroups = lastOnetrustEvent ? previousGroups.filter(
-            (group) => !currentGroups.includes(group)
-        ) : [];
-    
-        // Push the main OnetrustGroupsUpdated event with details to the data layer.
-        window.adobeDataLayer.push({
-            event: 'OnetrustActiveGroupsUpdated',
-            OnetrustActiveGroups: currentGroups.join(','),
-            newlyConsentedGroups: newlyConsentedGroups.join(','),
-            newlyRemovedGroups: newlyRemovedGroups.join(','),
-            previouslyConsentedGroups: previousGroups.join(','),
-        });
-    
-        // For each newly consented group, push a specific event to the data layer.
-        newlyConsentedGroups.forEach(group => {
-            window.adobeDataLayer.push({
-                event: `OnetrustConsentGiven-${group}`,
-            });
-        });
-    
-        // For each newly removed group, push a specific event to the data layer.
-        newlyRemovedGroups.forEach(group => {
-            window.adobeDataLayer.push({
-                event: `OnetrustConsentRemoved-${group}`,
-            });
-        });
-    }
-</script>
-<!-- OneTrust Cookies Consent Notice end --><script>_satellite["_runScript2"](function(event, target, Promise) {
-targetPageParamsAll = function () {
-    return {
-        "at_property": "837333d3-bf65-a8c4-bc34-b4efd0b53cf6",
-        "licenceType": _satellite.getVar("[ACDL] quoteInfo.licenceType"),
-        "aggregatorName": _satellite.getVar("[ACDL] quoteInfo.aggregatorName"),
-        "homeCoverLevel": _satellite.getVar("[ACDL] quoteInfo.homeCoverLevel"),
-        "homeCoverTier": _satellite.getVar("[ACDL] quoteInfo.homeCoverTier"),
-    };
-};
-
-});</script><script>
-/*
- *Name: Adobe Target CS Integration
- *Version: 1.1.1
- *https://support.contentsquare.com/hc/en-gb/articles/4408047638674-Adobe-Target#section5
- */
-document.addEventListener("at-request-succeeded", function (e) {
-    window.ttMETA = typeof window.ttMETA != "undefined" ? window.ttMETA : [];
-    if (e && e.detail) {
-        const tokens = e.detail.responseTokens;
-
-        if (tokens) {
-            tokens.forEach(function (token) {
-                window.ttMETA.push({
-                    CampaignName: token["activity.name"],
-                    CampaignId: token["activity.id"],
-                    RecipeName: token["experience.name"],
-                    RecipeId: token["experience.id"],
-                    OfferId: token["offer.id"],
-                    OfferName: token["offer.name"],
-                });
-            });
-        }
-    }
-});
-//Adobe Target CS Integration End
-</script><div id="onetrust-consent-sdk" data-nosnippet="true"><div class="onetrust-pc-dark-filter ot-fade-in" style="z-index:2147483645;"></div><div id="onetrust-banner-sdk" class="otCenterRounded default ot-wo-title vertical-align-content" tabindex="0"><div class="ot-sdk-container" role="dialog" aria-modal="true" aria-label="Privacy"><div class="ot-sdk-row"><div id="onetrust-group-container" class="ot-sdk-twelve ot-sdk-columns"><div id="onetrust-policy"><div class="banner-header"><div class="banner_logo"></div></div><div id="onetrust-policy-text">We use cookies on our website to provide you with a better experience and make it secure. We would also like to use additional cookies to provide personalised marketing on other websites and apps you use. This involves sharing your data with our social media, analytics and advertising partners.
-<br><br>
-Select ‘Accept all’ to agree or ‘Manage cookies’ to choose the cookies we use.<a class="ot-cookie-policy-link" href="https://www.allianz.co.uk/cookie-policy.html" aria-label="More information about your privacy, opens in a new tab" rel="noopener noreferrer" target="_blank">Refer to our Cookie Policy</a></div></div></div><div id="onetrust-button-group-parent" class="ot-sdk-twelve ot-sdk-columns has-reject-all-button"><div id="onetrust-button-group"><button id="onetrust-pc-btn-handler" aria-label="Manage Cookies, Opens the preference center dialog">Manage Cookies</button><div class="banner-actions-container"><button id="onetrust-reject-all-handler">Reject All</button> <button id="onetrust-accept-btn-handler">Accept All</button></div></div></div><!-- Close Button --><div id="onetrust-close-btn-container"></div><!-- Close Button END--></div></div></div><div id="onetrust-pc-sdk" class="otPcCenter ot-hide ot-fade-in ot-addtl-vendors" lang="en"><div role="dialog" aria-modal="true" style="height: 100%;" aria-label="Privacy Preference Center"><!-- Close Button --><div class="ot-pc-header"><!-- Logo Tag --><div class="ot-pc-logo"><img alt="Company Logo" src="https://cdn.cookielaw.org/logos/7f818be0-01b4-4c5d-ade5-c077fc0dc6f4/5a13d187-7a9c-44d7-b51f-93a45e30b690/cd77bd81-35ad-4682-9294-c0677a2c6cbd/Allianz_logo_new_noexif.jpg"></div><button id="close-pc-btn-handler" class="ot-close-icon" aria-label="Close preference center" style="background-image: url(&quot;https://cdn.cookielaw.org/logos/static/ot_close.svg&quot;);"></button></div><!-- Close Button --><div id="ot-pc-content" class="ot-pc-scrollbar"><div class="ot-optout-signal ot-hide"><div class="ot-optout-icon"><svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path class="ot-floating-button__svg-fill" d="M14.588 0l.445.328c1.807 1.303 3.961 2.533 6.461 3.688 2.015.93 4.576 1.746 7.682 2.446 0 14.178-4.73 24.133-14.19 29.864l-.398.236C4.863 30.87 0 20.837 0 6.462c3.107-.7 5.668-1.516 7.682-2.446 2.709-1.251 5.01-2.59 6.906-4.016zm5.87 13.88a.75.75 0 00-.974.159l-5.475 6.625-3.005-2.997-.077-.067a.75.75 0 00-.983 1.13l4.172 4.16 6.525-7.895.06-.083a.75.75 0 00-.16-.973z" fill="#FFF" fill-rule="evenodd"></path></svg></div><span></span></div><h2 id="ot-pc-title">Privacy Preference Center</h2><div id="ot-pc-desc">When you visit any website, it may store or retrieve information on your browser, mostly in the form of cookies. This information might be about you, your preferences, or your device, and is mostly used to make the site work as you expect. The information does not usually identify you directly, but it can give you a more personalized web experience. Because we respect your right to privacy, you can choose not to allow some types of cookies. Click on the different category headings to learn more and change our default settings. Blocking some types of cookies may impact your experience of the site and the services we are able to offer.
-            <br><a href="https://cookiepedia.co.uk/giving-consent-to-cookies" class="privacy-notice-link" rel="noopener noreferrer" target="_blank" aria-label="More information about your privacy, opens in a new tab">More information</a></div><button id="accept-recommended-btn-handler" ot-button-order="0">Allow All</button><section class="ot-sdk-row ot-cat-grp"><h3 id="ot-category-title"> Manage Consent Preferences</h3><div class="ot-accordion-layout ot-cat-item ot-vs-config" data-optanongroupid="1"><button aria-expanded="false" ot-accordion="true" aria-controls="ot-desc-id-1" aria-labelledby="ot-header-id-1 ot-status-id-1"></button><!-- Accordion header --><div class="ot-acc-hdr ot-always-active-group"><div class="ot-plus-minus"><span></span><span></span></div><h4 class="ot-cat-header" id="ot-header-id-1">Strictly Necessary cookies</h4><div id="ot-status-id-1" class="ot-always-active">Always Active</div></div><!-- accordion detail --><div class="ot-acc-grpcntr ot-acc-txt"><p class="ot-acc-grpdesc ot-category-desc" id="ot-desc-id-1">These cookies are required for the website to function and cannot be disabled on our systems. They are usually set to respond to actions you take to receive services, such as setting your privacy preferences, logging into the site or filling out forms. You can set your browser to block or alert you to the presence of these cookies, although some parts of the website won't work. These cookies do not store any personally identifiable information.</p><div class="ot-hlst-cntr"><button class="ot-link-btn category-host-list-handler" dir="ltr" aria-label="Strictly Necessary cookies - Vendor Details button opens Vendor List menu" data-parent-id="1">View Vendor Details</button></div></div></div><div class="ot-accordion-layout ot-cat-item ot-vs-config" data-optanongroupid="2"><button aria-expanded="false" ot-accordion="true" aria-controls="ot-desc-id-2" aria-labelledby="ot-header-id-2"></button><!-- Accordion header --><div class="ot-acc-hdr"><div class="ot-plus-minus"><span></span><span></span></div><h4 class="ot-cat-header" id="ot-header-id-2">Performance cookies</h4><div class="ot-tgl"><input type="checkbox" name="ot-group-id-2" id="ot-group-id-2" class="category-switch-handler" data-optanongroupid="2" aria-labelledby="ot-header-id-2"> <label class="ot-switch" for="ot-group-id-2"><span class="ot-switch-nob"></span> <span class="ot-label-txt">Performance cookies</span></label> </div></div><!-- accordion detail --><div class="ot-acc-grpcntr ot-acc-txt"><p class="ot-acc-grpdesc ot-category-desc" id="ot-desc-id-2">These cookies allow us to count visits and traffic sources in order to measure and improve website performance. They help to determine which pages are the most or least popular and see how many people visit the site. All the information that these cookies collect is aggregated and therefore anonymous. If these cookies are not allowed, there will be no record of when you visited the site.</p><div class="ot-hlst-cntr"><button class="ot-link-btn category-host-list-handler" dir="ltr" aria-label="Performance cookies - Vendor Details button opens Vendor List menu" data-parent-id="2">View Vendor Details</button></div></div></div><div class="ot-accordion-layout ot-cat-item ot-vs-config" data-optanongroupid="3"><button aria-expanded="false" ot-accordion="true" aria-controls="ot-desc-id-3" aria-labelledby="ot-header-id-3"></button><!-- Accordion header --><div class="ot-acc-hdr"><div class="ot-plus-minus"><span></span><span></span></div><h4 class="ot-cat-header" id="ot-header-id-3">Functional cookies</h4><div class="ot-tgl"><input type="checkbox" name="ot-group-id-3" id="ot-group-id-3" class="category-switch-handler" data-optanongroupid="3" aria-labelledby="ot-header-id-3"> <label class="ot-switch" for="ot-group-id-3"><span class="ot-switch-nob"></span> <span class="ot-label-txt">Functional cookies</span></label> </div></div><!-- accordion detail --><div class="ot-acc-grpcntr ot-acc-txt"><p class="ot-acc-grpdesc ot-category-desc" id="ot-desc-id-3">Functionality cookies, which allow enable the website to provide enhanced functionality and personalisation. They may be set by us or by third party providers whose services we have added to our pages. If you do not allow these cookies then some or all of these services may not function properly.</p><div class="ot-hlst-cntr"><button class="ot-link-btn category-host-list-handler" dir="ltr" aria-label="Functional cookies - Vendor Details button opens Vendor List menu" data-parent-id="3">View Vendor Details</button></div></div></div><div class="ot-accordion-layout ot-cat-item ot-vs-config" data-optanongroupid="4"><button aria-expanded="false" ot-accordion="true" aria-controls="ot-desc-id-4" aria-labelledby="ot-header-id-4"></button><!-- Accordion header --><div class="ot-acc-hdr"><div class="ot-plus-minus"><span></span><span></span></div><h4 class="ot-cat-header" id="ot-header-id-4">Targeting cookies</h4><div class="ot-tgl"><input type="checkbox" name="ot-group-id-4" id="ot-group-id-4" class="category-switch-handler" data-optanongroupid="4" aria-labelledby="ot-header-id-4"> <label class="ot-switch" for="ot-group-id-4"><span class="ot-switch-nob"></span> <span class="ot-label-txt">Targeting cookies</span></label> </div></div><!-- accordion detail --><div class="ot-acc-grpcntr ot-acc-txt"><p class="ot-acc-grpdesc ot-category-desc" id="ot-desc-id-4">These cookies may be set on our site by third parties (e.g. advertising partners). These companies may use them to build a profile of your interests and show you relevant ads on other sites. Rather than directly storing personal information, they use the unique identification of your browser and internet device. Notice regarding the processing of your data collected by companies from or in the United States: If you click "Accept all" or actively accept each of the cookie categories, you simultaneously give your consent pursuant to Art. 49 para. 1 p. 1 lit. DSGVO that your data is processed by companies in or from the United States. The European Court of Justice considers the US to be a country with an insufficient data protection level according to EU standards. There may be a risk that the US authorities, under US law, may have access to your data and you may not be protected by European law. If you do not consent, no transfer will be made to these companies, although some functions of this site may be restricted.</p><div class="ot-hlst-cntr"><button class="ot-link-btn category-host-list-handler" dir="ltr" aria-label="Targeting cookies - Vendor Details button opens Vendor List menu" data-parent-id="4">View Vendor Details</button></div></div></div><!-- Groups sections starts --><!-- Group section ends --><!-- Accordion Group section starts --><!-- Accordion Group section ends --></section></div><section id="ot-pc-lst" class="ot-hide ot-hosts-ui ot-pc-scrollbar"><div id="ot-pc-hdr"><div id="ot-lst-title"><button class="ot-link-btn back-btn-handler" aria-label="Back"><svg id="ot-back-arw" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 444.531 444.531" xml:space="preserve"><title>Back Button</title><g><path fill="#656565" d="M213.13,222.409L351.88,83.653c7.05-7.043,10.567-15.657,10.567-25.841c0-10.183-3.518-18.793-10.567-25.835
-                    l-21.409-21.416C323.432,3.521,314.817,0,304.637,0s-18.791,3.521-25.841,10.561L92.649,196.425
-                    c-7.044,7.043-10.566,15.656-10.566,25.841s3.521,18.791,10.566,25.837l186.146,185.864c7.05,7.043,15.66,10.564,25.841,10.564
-                    s18.795-3.521,25.834-10.564l21.409-21.412c7.05-7.039,10.567-15.604,10.567-25.697c0-10.085-3.518-18.746-10.567-25.978
-                    L213.13,222.409z"></path></g></svg></button><h3>Vendors List</h3></div><div class="ot-lst-subhdr"><div class="ot-search-cntr"><p role="status" class="ot-scrn-rdr"></p><input id="vendor-search-handler" type="text" name="vendor-search-handler" placeholder="Search vendors" aria-label="Vendor list search"> <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 -30 110 110" aria-hidden="true"><title>Search Icon</title><path fill="#2e3644" d="M55.146,51.887L41.588,37.786c3.486-4.144,5.396-9.358,5.396-14.786c0-12.682-10.318-23-23-23s-23,10.318-23,23
-            s10.318,23,23,23c4.761,0,9.298-1.436,13.177-4.162l13.661,14.208c0.571,0.593,1.339,0.92,2.162,0.92
-            c0.779,0,1.518-0.297,2.079-0.837C56.255,54.982,56.293,53.08,55.146,51.887z M23.984,6c9.374,0,17,7.626,17,17s-7.626,17-17,17
-            s-17-7.626-17-17S14.61,6,23.984,6z"></path></svg></div><div class="ot-fltr-cntr"><button id="filter-btn-handler" aria-label="Filter Vendors List" aria-haspopup="true" aria-expanded="false"><svg role="presentation" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 402.577 402.577" xml:space="preserve"><title>Filter Icon</title><g><path fill="#fff" d="M400.858,11.427c-3.241-7.421-8.85-11.132-16.854-11.136H18.564c-7.993,0-13.61,3.715-16.846,11.136
-      c-3.234,7.801-1.903,14.467,3.999,19.985l140.757,140.753v138.755c0,4.955,1.809,9.232,5.424,12.854l73.085,73.083
-      c3.429,3.614,7.71,5.428,12.851,5.428c2.282,0,4.66-0.479,7.135-1.43c7.426-3.238,11.14-8.851,11.14-16.845V172.166L396.861,31.413
-      C402.765,25.895,404.093,19.231,400.858,11.427z"></path></g></svg></button></div><div id="ot-anchor"></div><section id="ot-fltr-modal"><div id="ot-fltr-cnt"><div id="ot-filter-list-header"></div><button id="clear-filters-handler">Clear</button><div class="ot-fltr-scrlcnt ot-pc-scrollbar" role="group" aria-labelledby="ot-filter-list-header"><ul class="ot-fltr-opts"><li class="ot-fltr-opt"><div class="ot-chkbox"><input id="chkbox-id" type="checkbox" class="category-filter-handler"> <label for="chkbox-id"><span class="ot-label-txt">checkbox label</span></label> <span class="ot-label-status">label</span></div></li></ul><div class="ot-fltr-btns"><button id="filter-apply-handler">Apply</button> <button id="filter-cancel-handler">Cancel</button></div></div></div></section></div></div><section id="ot-lst-cnt" class="ot-host-cnt ot-pc-scrollbar"><div id="ot-sel-blk"><div class="ot-sel-all"><div class="ot-sel-all-hdr"><span class="ot-consent-hdr">Consent</span> <span class="ot-li-hdr">Leg.Interest</span></div><div class="ot-sel-all-chkbox"><div class="ot-chkbox" id="ot-selall-hostcntr"><input id="select-all-hosts-groups-handler" type="checkbox"> <label for="select-all-hosts-groups-handler"><span class="ot-label-txt">checkbox label</span></label> <span class="ot-label-status">label</span></div><div class="ot-chkbox" id="ot-selall-vencntr"><input id="select-all-vendor-groups-handler" type="checkbox"> <label for="select-all-vendor-groups-handler"><span class="ot-label-txt">checkbox label</span></label> <span class="ot-label-status">label</span></div><div class="ot-chkbox" id="ot-selall-licntr"><input id="select-all-vendor-leg-handler" type="checkbox"> <label for="select-all-vendor-leg-handler"><span class="ot-label-txt">checkbox label</span></label> <span class="ot-label-status">label</span></div></div></div></div><div class="ot-sdk-row"><div class="ot-sdk-column"><ul id="ot-host-lst"></ul></div></div></section></section><div class="ot-pc-footer ot-pc-scrollbar"><div class="ot-btn-container"> <button class="save-preference-btn-handler onetrust-close-btn-handler" ot-button-order="2">Confirm My Choices</button></div><!-- Footer logo --><div class="ot-pc-footer-logo"><a href="https://www.onetrust.com/solutions/consent-and-preferences/?utm_source=cmp&amp;utm_medium=cmpbanner" target="_blank" rel="noopener noreferrer" aria-label="Powered by OneTrust Opens in a new Tab"><img alt="Powered by Onetrust" src="https://cdn.cookielaw.org/logos/static/powered_by_logo.svg" title="Powered by OneTrust Opens in a new Tab"></a></div></div><!-- Cookie subgroup container --><!-- Vendor list link --><!-- Cookie lost link --><!-- Toggle HTML element --><!-- Checkbox HTML --><!-- plus minus--><!-- Arrow SVG element --><!-- Accordion basic element --><span class="ot-scrn-rdr" aria-atomic="true" aria-live="polite"></span><!-- Vendor Service container and item template --></div><iframe class="ot-text-resize" sandbox="allow-same-origin" title="onetrust-text-resize" style="position: absolute; top: -50000px; width: 100em;" aria-hidden="true"></iframe></div><div id="ot-sdk-btn-floating" class="ot-floating-button ot-hide" data-title="Manage Cookies"><div class="ot-floating-button__front custom-persistent-icon"><button type="button" class="ot-floating-button__open" aria-label="Manage Cookies"></button></div><div class="ot-floating-button__back custom-persistent-icon"><button type="button" class="ot-floating-button__close" aria-label="Close Preferences" aria-hidden="true" style="display: none;"><!--?xml version="1.0" encoding="UTF-8"?--> <svg role="presentation" tabindex="-1" viewBox="0 0 24 24" version="1.1" xmlns="http://www.w3.org/2000/svg"><g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd"><g id="Banner_02" class="ot-floating-button__svg-fill" transform="translate(-318.000000, -725.000000)" fill="#292B2E" fill-rule="nonzero"><g id="Group-2" transform="translate(305.000000, 712.000000)"><g id="icon/16px/white/close"><polygon id="Line1" points="13.3333333 14.9176256 35.0823744 36.6666667 36.6666667 35.0823744 14.9176256 13.3333333"></polygon><polygon id="Line2" transform="translate(25.000000, 25.000000) scale(-1, 1) translate(-25.000000, -25.000000) " points="13.3333333 14.9176256 35.0823744 36.6666667 36.6666667 35.0823744 14.9176256 13.3333333"></polygon></g></g></g></g></svg></button></div></div></div><script>_satellite["_runScript3"](function(event, target, Promise) {
-function hasConsentFor(e,o){return e.includes(o)}const consentArray=event.message.OnetrustActiveGroups.split(","),PERFORMANCE_COOKIES_ID="2",TARGETING_COOKIES_ID="4",hasPerformanceConsent=hasConsentFor(consentArray,PERFORMANCE_COOKIES_ID),hasTargetingConsent=hasConsentFor(consentArray,TARGETING_COOKIES_ID);hasPerformanceConsent||hasTargetingConsent?adobe.optIn.approve(["ecid"],!0):adobe.optIn.deny(["ecid"],!0),hasPerformanceConsent?adobe.optIn.approve(["aa","target"],!0):adobe.optIn.deny(["aa","target"],!0),hasTargetingConsent?adobe.optIn.approve(["aam"],!0):adobe.optIn.deny(["aam"],!0),adobe.optIn.complete(),_satellite.logger.log("Adobe Consent updated: aa:",adobe.optIn.isApproved("aa")),_satellite.logger.log("Adobe Consent updated: ecid:",adobe.optIn.isApproved("ecid")),_satellite.logger.log("Adobe Consent updated: target:",adobe.optIn.isApproved("target")),_satellite.logger.log("Adobe Consent updated: aam:",adobe.optIn.isApproved("aam"));
-});</script><!-- CHEQ INVOCATION TAG -->
-<script async="" src="https://euob.greencolumnhealth.com/sxp/i/272344d89ce4be9ffce91b4f0d091bc4.js" data-ch="Allianz" class="ct_clicktrue_83868" data-jsonp="onCheqResponse">
-</script>
-<!-- END CHEQ INVOCATION TAG --><script>_satellite["_runScript4"](function(event, target, Promise) {
-console.log("mytag");
-});</script><iframe sandbox="allow-scripts allow-same-origin" title="Adobe ID Syncing iFrame" id="destination_publishing_iframe_azeu_undefined" name="destination_publishing_iframe_azeu_undefined_name" src="https://azeu.demdex.net/dest5.html?d_nsid=undefined#https%3A%2F%2Fcustomer-portal-lv-test.athenapaas.com" style="display: none; width: 0px; height: 0px;" class="aamIframeLoaded"></iframe></body>
+PS C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\Athena_Automation\VJ_Playwright> npm run edge:cdp:start
+
+> allianz-automation@1.0.0 edge:cdp:start
+> node tools/pom-generator/scripts/launch-edge-cdp.cjs
+
+Starting dedicated Microsoft Edge...
+Platform: win32
+Process ID: 26720
+Profile: C:\Users\tp70707\.pom-generator-v2\edge-cdp-profile
+
+Edge CDP is ready.
+CDP: http://127.0.0.1:9222
+WebSocket: ws://127.0.0.1:9222/devtools/browser/a511b2b0-18e4-4417-933a-1635ef42d664
+Open your application in the dedicated Edge window.
+PS C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\Athena_Automation\VJ_Playwright> npm run pom-generate -- `
+>>   --brand AZO `
+>>   --channel DJ `
+>>   --product Motor `
+>>   --page login-options `
+>>   --mode create `
+>>   --dry-run `
+>>   --verbose
+
+> allianz-automation@1.0.0 pom-generate
+> npm run pom-generate:build && node dist/tools/pom-generator/cli/pom-generate.cli.js --brand AZO --channel DJ --product Motor --page login-options --mode create --dry-run --verbose
+
+
+> allianz-automation@1.0.0 pom-generate:build
+> tsc -p tools/pom-generator/tsconfig.build.json && tsc-alias -p tools/pom-generator/tsconfig.build.json
+
+POM Generator V2
+Brand:   AZO
+Channel: DJ
+Product: Motor
+Page:    login-options
+Mode:    create
+Output:  C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\Athena_Automation\VJ_Playwright\automationLayer\pomObjects\AZO\DJ\Motor
+Preview only: no generated file writes.
+POM Generator V2 — DRY-RUN
+Page: login-options
+Status: CHANGES PROPOSED
+
+Change summary:
+  Total: 7
+  Safe: 7
+  Review required: 0
+
+Changes by type:
+  Element added: 7
+
+Change details:
+  [SAFE] Element added: acceptAllButton
+  [SAFE] Element added: donTHaveAPolicyWithUsGetANewQuoteLink
+  [SAFE] Element added: linkToAllianzHomePageLink
+  [SAFE] Element added: logInLink
+  [SAFE] Element added: manageCookiesOpensThePreferenceCenterDialogButton
+  [SAFE] Element added: openTrustSealButton
+  [SAFE] Element added: rejectAllButton
+
+Write result:
+  0 files written
+  Dry-run: no files should have been written.
+
+PS C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\Athena_Automation\VJ_Playwright> npm run edge:cdp:stop    
+                  
+> allianz-automation@1.0.0 edge:cdp:stop
+> node tools/pom-generator/scripts/stop-edge-cdp.cjs
+                           
+Closing dedicated Edge CDP (PID 26720)...
+Dedicated Edge CDP browser closed successfully.
+Your regular Edge windows were not targeted.
+PS C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\Athena_Automation\VJ_Playwright> 
