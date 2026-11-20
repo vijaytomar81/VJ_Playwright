@@ -323,6 +323,10 @@ export async function generateEvidenceExcel(
 
     createSummary(workbook, options);
 
+    // Create the All worksheet only when multiple execution statuses exist.
+    const distinctStatuses = new Set(options.tests.map(test => test.status));
+    const shouldCreateAllSheet = distinctStatuses.size > 1;
+
     const sheets = [
         { name: 'All', tests: options.tests },
         {
@@ -340,6 +344,10 @@ export async function generateEvidenceExcel(
     ];
 
     for (const sheet of sheets) {
+        if (sheet.name === 'All' && !shouldCreateAllSheet) {
+            continue;
+        }
+
         if (sheet.name !== 'All' && sheet.tests.length === 0) {
             continue;
         }
