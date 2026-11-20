@@ -1,79 +1,23 @@
-PS C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\Athena_Automation\integration-tests> npx playwright --version
->> npm ls @playwright/test playwright playwright-core
->> npx playwright install --list
-Version 1.65.1
-ferryplaywright@1.0.0 C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\Athena_Automation\integration-tests
-├─┬ @playwright/test@1.65.1
-│ └─┬ playwright@1.65.1
-│   └── playwright-core@1.65.1
-└─┬ allure-playwright@3.13.0
-  └── @playwright/test@1.65.1 deduped
-
-
-Playwright version: 1.63.0
-  Browsers:
-    C:\Users\tp70707\AppData\Local\ms-playwright\chromium-1243
-    C:\Users\tp70707\AppData\Local\ms-playwright\chromium_headless_shell-1243
-    C:\Users\tp70707\AppData\Local\ms-playwright\ffmpeg-1011
-    C:\Users\tp70707\AppData\Local\ms-playwright\firefox-1543
-    C:\Users\tp70707\AppData\Local\ms-playwright\webkit-2359
-    C:\Users\tp70707\AppData\Local\ms-playwright\winldd-1007
-  References:
-    C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\Athena_Automation\VJ_Playwright\node_modules\playwright-core
-PS C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\Athena_Automation\integration-tests> npx cross-env PROJECT=britannia ENV=test AGENT_PORTAL_AUTH=skip playwright test -g "TC1_BRI_DJ_PRE_NB001"
-◇ injected env (10) from configLayer\environments\britannia\.env.test // tip: ⌘ multiple files { path: ['.env.local', '.env'] }
-◇ injected env (7) from configLayer\environments\britannia\.env.local.test // tip: ⌘ suppress logs { quiet: true }
-Project: britannia
-Environment project: britannia
-Environment: test
-Environment file: C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\Athena_Automation\integration-tests\configLayer\environments\britannia\.env.test
-Local environment file: C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\Athena_Automation\integration-tests\configLayer\environments\britannia\.env.local.test
-Generating JSON for project: britannia
-Reading Excel from: C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\Athena_Automation\integration-tests\automationLayer\athena\carInsurance\britannia\data\Britannia_NB_DJ.xlsx
-Skipping agent portal authentication
-Global setup complete.
-No changes for sheet: Britannia_NB
-No changes for sheet: Regression_AnnualOnlyTC
-No changes for sheet: RenewalTC_OptIn
-No changes for sheet: RenewalTC_OptOut
-No changes for sheet: NCD_ClaimTC
-No changes for sheet: SmokeTests_MotorAnnual
-
-Running 1 test using 1 worker
-
-EvidenceReporter: 1 test cases discovered
-◇ injected env (0) from configLayer\environments\britannia\.env.test // tip: ◈ encrypted .env [www.dotenvx.com]
-◇ injected env (7) from configLayer\environments\britannia\.env.local.test // tip: ◈ encrypted .env [www.dotenvx.com]
-Project: britannia
-Environment project: britannia
-Environment: test
-Environment file: C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\Athena_Automation\integration-tests\configLayer\environments\britannia\.env.test
-Local environment file: C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\Athena_Automation\integration-tests\configLayer\environments\britannia\.env.local.test
-  ✘  1 [chromium] › automationLayer\athena\carInsurance\britannia\tests\Regression\Britannia_Hexa\TC1_BRI_DJ_PRE_NB001.spec.ts:16:1 › TC1_BRI_DJ_PRE_NB001 @Britannia_Premier @Bri_Premier_Annual @Bri_Annual (4ms)
-
-
-  1) [chromium] › automationLayer\athena\carInsurance\britannia\tests\Regression\Britannia_Hexa\TC1_BRI_DJ_PRE_NB001.spec.ts:16:1 › TC1_BRI_DJ_PRE_NB001 @Britannia_Premier @Bri_Premier_Annual @Bri_Annual 
-
-    Error: browserType.launch: Executable doesn't exist at C:\Users\tp70707\AppData\Local\ms-playwright\chromium-1255\chrome-win64\chrome.exe
-    ╔════════════════════════════════════════════════════════════╗
-    ║ Looks like Playwright was just installed or updated.       ║
-    ║ Please run the following command to download new browsers: ║
-    ║                                                            ║
-    ║     npx playwright install                                 ║
-    ║                                                            ║
-    ║ <3 Playwright Team                                         ║
-    ╚════════════════════════════════════════════════════════════╝
-
-    Error Context: test-results\Britannia-run-2026-11-20T12-53-35-781Z\artifacts\Regression-Britannia_Hexa--3877c-i-Premier-Annual-Bri-Annual-chromium\error-context.md
-
-  1 failed
-    [chromium] › automationLayer\athena\carInsurance\britannia\tests\Regression\Britannia_Hexa\TC1_BRI_DJ_PRE_NB001.spec.ts:16:1 › TC1_BRI_DJ_PRE_NB001 @Britannia_Premier @Bri_Premier_Annual @Bri_Annual 
-EvidenceFactory: Excel report generated: C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\Athena_Automation\integration-tests\test-results\Britannia-run-2026-11-20T12-53-35-781Z\excel-report\Britannia-report-run-2026-11-20T12-53-35-781Z.xlsx
-EvidenceReporter: 0 passed, 1 failed, 0 not executed
-EvidenceReporter: Excel report: C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\Athena_Automation\integration-tests\test-results\Britannia-run-2026-11-20T12-53-35-781Z\excel-report\Britannia-report-run-2026-11-20T12-53-35-781Z.xlsx
-
-To open last HTML report run:
-
-  npx playwright show-report test-results\Britannia-run-2026-11-20T12-53-35-781Z\playwright
-
-PS C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\Athena_Automation\integration-tests>
+PS C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\Athena_Automation\integration-tests> npx playwright install
+Downloading Chrome for Testing 159.0.8154.6 (playwright chromium v1255) from https://cdn.playwright.dev/builds/cft/159.0.8154.6/win64/chrome-win64.zip
+207.3 MiB [====================] 100% 0.0s
+Chrome for Testing 159.0.8154.6 (playwright chromium v1255) downloaded to C:\Users\tp70707\AppData\Local\ms-playwright\chromium-1255
+Downloading Chrome Headless Shell 159.0.8154.6 (playwright chromium-headless-shell v1255) from https://cdn.playwright.dev/builds/cft/159.0.8154.6/win64/chrome-headless-shell-win64.zip
+123.8 MiB [====================] 100% 0.0s
+Chrome Headless Shell 159.0.8154.6 (playwright chromium-headless-shell v1255) downloaded to C:\Users\tp70707\AppData\Local\ms-playwright\chromium_headless_shell-1255
+Downloading Firefox 159.0 (playwright firefox v1572) from https://cdn.playwright.dev/dbazure/download/playwright/builds/firefox/1572/firefox-win64.zip
+126.1 MiB [====================] 100% 0.0s
+Firefox 159.0 (playwright firefox v1572) downloaded to C:\Users\tp70707\AppData\Local\ms-playwright\firefox-1572
+Downloading WebKit 27.2 (playwright webkit v2388) from https://cdn.playwright.dev/dbazure/download/playwright/builds/webkit/2388/webkit-win64.zip
+Error: Request to https://playwright.download.prss.microsoft.com/dbazure/download/playwright/builds/webkit/2388/webkit-win64.zip timed out after 30000ms
+    at ClientRequest.<anonymous> (C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\Athena_Automation\integration-tests\node_modules\playwright-core\lib\coreBundle.js:9758:15)
+    at ClientRequest.wrapper (node:events:639:12)
+    at ClientRequest.emit (node:events:514:28)
+    at TLSSocket.emitRequestTimeout (node:_http_client:1130:9)
+    at TLSSocket.wrapper (node:events:639:12)
+    at TLSSocket.emit (node:events:526:24)
+    at Socket._onTimeout (node:net:886:8)
+    at Timeout.onStreamTimeout (node:internal/stream_base_commons:242:10)
+    at listOnTimeout (node:internal/timers:687:11)
+    at process.processTimers (node:internal/timers:618:7)
+Downloading WebKit 27.2 (playwright webkit v2388) from https://playwright.download.prss.microsoft.com/dbazure/download/playwright/builds/webkit/2388/webkit-win64.zip
