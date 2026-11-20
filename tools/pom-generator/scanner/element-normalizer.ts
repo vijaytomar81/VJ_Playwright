@@ -26,11 +26,8 @@ const CAPTURED_ATTRIBUTES = [
     'data-cy', 'maxlength',
 ] as const;
 const FIELD_SELECTOR = [
-    '.form-group',
-    '.input-group',
-    'fieldset',
-    '[role="group"]',
-    '[role="radiogroup"]',
+    '.form-group', '.input-group', 'fieldset',
+    '[role="group"]', '[role="radiogroup"]',
 ].join(', ');
 const HEADING_SELECTOR = 'h1, h2, h3, h4, h5, h6';
 function clean(value: string | null | undefined): string {
@@ -89,20 +86,12 @@ function getDirectChildText(
 function getContainerLabel(
     container: Element,
 ): string | undefined {
-    const referenced = getReferencedText(
-        container,
-        'aria-labelledby',
-    );
-    if (referenced) return referenced;
-    const ariaLabel = getAttribute(container, 'aria-label');
-    if (ariaLabel) return ariaLabel;
-    const legend = getDirectChildText(container, 'legend');
-    if (legend) return legend;
-    const label = getDirectChildText(container, 'label');
-    if (label) return label;
-    return getDirectChildText(
-        container,
-        HEADING_SELECTOR,
+    return (
+        getReferencedText(container, 'aria-labelledby') ||
+        getAttribute(container, 'aria-label') ||
+        getDirectChildText(container, 'legend') ||
+        getDirectChildText(container, 'label') ||
+        getDirectChildText(container, HEADING_SELECTOR)
     );
 }
 function getParentFieldLabel(
@@ -114,29 +103,18 @@ function getParentFieldLabel(
             const label = getContainerLabel(parent);
             if (label) return label;
         }
-        // A generic div can carry meaningful field context
-        // when explicitly named or directly labelled.
         if (parent.matches('div')) {
             const labelledBy = getReferencedText(
-                parent,
-                'aria-labelledby',
+                parent, 'aria-labelledby',
             );
-            const ariaLabel = getAttribute(
-                parent,
-                'aria-label',
-            );
+            const ariaLabel = getAttribute(parent, 'aria-label');
             if (labelledBy || ariaLabel) {
                 return labelledBy || ariaLabel;
             }
-            if (
-                parent.matches(
-                    '[class*="field"], [class*="form-control"]',
-                )
-            ) {
-                const label = getDirectChildText(
-                    parent,
-                    'label',
-                );
+            if (parent.matches(
+                '[class*="field"], [class*="form-control"]',
+            )) {
+                const label = getDirectChildText(parent, 'label');
                 if (label) return label;
             }
         }
@@ -149,13 +127,11 @@ function getParentContext(
 ): string | undefined {
     let parent = element.parentElement;
     while (parent) {
-        if (
-            parent.matches(
-                'form, section, fieldset, [role="region"], ' +
-                '[role="group"], div[aria-label], ' +
-                'div[aria-labelledby]',
-            )
-        ) {
+        if (parent.matches(
+            'form, section, fieldset, [role="dialog"], ' +
+            '[role="region"], [role="group"], ' +
+            '[aria-label], [aria-labelledby]',
+        )) {
             const label = getContainerLabel(parent);
             if (label) return label;
         }
@@ -174,20 +150,13 @@ function collectLabels(
     const parentField = getParentFieldLabel(element);
     const group = parentGroup || getParentContext(element);
     const source: ElementLabels['source'] =
-        direct.text
-            ? 'direct'
-            : accessible
-                ? 'accessible'
-                : parentField
-                    ? 'parent-field'
-                    : group
-                        ? 'parent-group'
-                        : 'attribute';
+        direct.text ? 'direct' :
+            accessible ? 'accessible' :
+                parentField ? 'parent-field' :
+                    group ? 'parent-group' : 'attribute';
     return {
         ...(direct.text ? { direct: direct.text } : {}),
-        ...(direct.labelFor
-            ? { labelFor: direct.labelFor }
-            : {}),
+        ...(direct.labelFor ? { labelFor: direct.labelFor } : {}),
         ...(accessible ? { accessible } : {}),
         ...(parentField ? { parentField } : {}),
         ...(group ? { parentGroup: group } : {}),
@@ -217,25 +186,74 @@ function classifyElement(element: Element): ElementKind {
 }
 function getVisibility(element: Element): ElementVisibility {
     if (!element.isConnected) return 'not-rendered';
-    if (
-        element.closest(
-            '[hidden], [aria-hidden="true"], [inert]',
-        )
-    ) {
-        return 'hidden';
-    }
     const view = element.ownerDocument.defaultView;
     if (!view) return 'unknown';
-    const style = view.getComputedStyle(element);
-    if (
-        style.display === 'none' ||
-        style.visibility === 'hidden' ||
-        style.visibility === 'collapse' ||
-        element.getClientRects().length === 0
-    ) {
-        return 'hidden';
+    let current: Element | null = element;
+    while (current) {
+        if (
+            current.hasAttribute('hidden') ||
+            current.hasAttribute('inert') ||
+            current.getAttribute('aria-hidden') === 'true'
+        ) {
+            return 'hidden';
+        }
+        const style = view.getComputedStyle(current);
+        if (
+            style.display === 'none' ||
+            style.visibility === 'hidden' ||
+            style.visibility === 'collapse'
+        ) {
+            return 'hidden';
+        }
+        current = current.parentElement;
     }
-    return 'visible';
+    return element.getClientRects().length === 0
+        ? 'hidden'
+        : 'visible';
+}
+function getOwnText(
+    element: Element,
+    kind: ElementKind,
+): string | undefined {
+    if (kind !== 'button' && kind !== 'link') {
+        return undefined;
+    }
+    // Exclude text inside hidden or decorative descendants.
+    const view = element.ownerDocument.defaultView;
+    if (!view) return undefined;
+    const parts: string[] = [];
+    function visit(node: Node): void {
+        if (node.nodeType === Node.TEXT_NODE) {
+            const text = clean(node.textContent);
+            if (text) parts.push(text);
+            return;
+        }
+        if (!(node instanceof Element)) return;
+        if (node !== element) {
+            if (
+                node.matches(
+                    '[hidden], [aria-hidden="true"], ' +
+                    '[inert], svg, script, style',
+                )
+            ) {
+                return;
+            }
+            const style = view!.getComputedStyle(node);
+            if (
+                style.display === 'none' ||
+                style.visibility === 'hidden' ||
+                style.visibility === 'collapse'
+            ) {
+                return;
+            }
+        }
+        for (const child of Array.from(node.childNodes)) {
+            visit(child);
+        }
+    }
+    visit(element);
+    const text = clean(parts.join(' '));
+    return text && text.length <= 160 ? text : undefined;
 }
 function captureAttributes(
     element: Element,
@@ -251,6 +269,7 @@ function getFingerprint(
     element: Element,
     labels: ElementLabels,
     groupPath: string[],
+    ownText?: string,
 ): ElementFingerprint {
     const attributes = captureAttributes(element);
     return {
@@ -258,19 +277,16 @@ function getFingerprint(
         ...(attributes.id ? { id: attributes.id } : {}),
         ...(attributes.name ? { name: attributes.name } : {}),
         ...(attributes.type
-            ? { inputType: attributes.type }
-            : {}),
+            ? { inputType: attributes.type } : {}),
         ...(attributes.role ? { role: attributes.role } : {}),
         ...(attributes.value ? { value: attributes.value } : {}),
         ...(attributes.placeholder
-            ? { placeholder: attributes.placeholder }
-            : {}),
+            ? { placeholder: attributes.placeholder } : {}),
+        ...(ownText ? { text: ownText } : {}),
         ...(attributes['aria-label']
-            ? { ariaLabel: attributes['aria-label'] }
-            : {}),
+            ? { ariaLabel: attributes['aria-label'] } : {}),
         ...(attributes['aria-labelledby']
-            ? { ariaLabelledBy: attributes['aria-labelledby'] }
-            : {}),
+            ? { ariaLabelledBy: attributes['aria-labelledby'] } : {}),
         labels,
         groupPath,
         attributes,
@@ -313,11 +329,8 @@ function getInitialLocators(
     labels: ElementLabels,
 ): LocatorDefinition {
     const candidates = getLocatorCandidates(element, labels);
-    // Provisional only. The locator validator must
-    // reject any non-unique generic CSS fallback.
     const primary = candidates[0] ?? candidate(
-        'css',
-        element.tagName.toLowerCase(),
+        'css', element.tagName.toLowerCase(),
     );
     return {
         primary,
@@ -327,16 +340,18 @@ function getInitialLocators(
 function toSuggestedName(
     element: Element,
     labels: ElementLabels,
+    ownText?: string,
 ): string {
     const type = getAttribute(element, 'type');
     return (
         labels.direct ||
         labels.accessible ||
-        labels.parentField ||
-        labels.parentGroup ||
+        ownText ||
         getAttribute(element, 'placeholder') ||
         getAttribute(element, 'name') ||
         getAttribute(element, 'id') ||
+        labels.parentField ||
+        labels.parentGroup ||
         (type === 'submit' ? 'submit' : '') ||
         element.tagName.toLowerCase()
     );
@@ -348,15 +363,16 @@ export function normalizeElement(
     const groups = options.groups ?? [];
     const nearest = findNearestGroup(element, groups);
     const groupPath = getGroupPath(nearest, groups);
-    const labels = collectLabels(
-        element,
-        nearest?.name,
-    );
+    const labels = collectLabels(element, nearest?.name);
+    const kind = classifyElement(element);
+    const ownText = getOwnText(element, kind);
     return {
         temporaryId: options.temporaryId,
-        kind: classifyElement(element),
-        suggestedName: toSuggestedName(element, labels),
-        fingerprint: getFingerprint(element, labels, groupPath),
+        kind,
+        suggestedName: toSuggestedName(element, labels, ownText),
+        fingerprint: getFingerprint(
+            element, labels, groupPath, ownText,
+        ),
         locators: getInitialLocators(element, labels),
         visibility: getVisibility(element),
         ...(nearest ? { groupKey: nearest.key } : {}),

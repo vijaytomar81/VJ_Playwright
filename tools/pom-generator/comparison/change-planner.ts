@@ -1,4 +1,3 @@
-
 import type {
     ChangePlan,
     ElementMatch,
@@ -10,23 +9,17 @@ import type {
     ScannedElement,
     StoredElement,
 } from '../models/generator.types';
-
-import type {
-    ElementComparison,
-} from './element-matcher';
-
+import type { ElementComparison } from './element-matcher';
 import { nameElements } from '../core/element-namer';
-
 export interface ChangePlannerOptions {
     mode: GeneratorMode;
     blockNewWhenUnresolved?: boolean;
 }
-
 interface ScanLookup {
     byTemporaryId: Map<string, ScannedElement>;
     namesByTemporaryId: Map<string, string>;
+    conflictsByTemporaryId: Map<string, string>;
 }
-
 function createLookup(
     scan: PageScan,
     metadata: PageMetadata | undefined,
@@ -35,7 +28,6 @@ function createLookup(
         scan.elements,
         metadata?.elements ?? [],
     );
-
     return {
         byTemporaryId: new Map(
             scan.elements.map((element) => [
@@ -49,9 +41,14 @@ function createLookup(
                 element.name,
             ]),
         ),
+        conflictsByTemporaryId: new Map(
+            naming.conflicts.map((conflict) => [
+                conflict.temporaryId,
+                conflict.reason,
+            ]),
+        ),
     };
 }
-
 function sameLocator(
     left: LocatorDefinition,
     right: LocatorDefinition,
@@ -59,7 +56,6 @@ function sameLocator(
     return JSON.stringify(left.primary) ===
         JSON.stringify(right.primary);
 }
-
 function sameFallbacks(
     left: LocatorDefinition,
     right: LocatorDefinition,
@@ -67,7 +63,6 @@ function sameFallbacks(
     return JSON.stringify(left.fallbacks) ===
         JSON.stringify(right.fallbacks);
 }
-
 function addChange(
     changes: GeneratorChange[],
     change: GeneratorChange,
@@ -77,7 +72,6 @@ function addChange(
         change.elementKey ?? '',
         change.actionKey ?? '',
     ].join('|');
-
     const exists = changes.some((entry) =>
         [
             entry.kind,
@@ -85,12 +79,8 @@ function addChange(
             entry.actionKey ?? '',
         ].join('|') === identity,
     );
-
-    if (!exists) {
-        changes.push(change);
-    }
+    if (!exists) changes.push(change);
 }
-
 function findStoredElement(
     metadata: PageMetadata | undefined,
     key: string,
@@ -99,7 +89,6 @@ function findStoredElement(
         (element) => element.stableKey === key,
     );
 }
-
 function resolveName(
     match: ElementMatch,
     lookup: ScanLookup,
@@ -108,39 +97,57 @@ function resolveName(
     const stored = match.existingKey
         ? findStoredElement(metadata, match.existingKey)
         : undefined;
-
     const generated = match.scannedId
         ? lookup.namesByTemporaryId.get(match.scannedId)
         : undefined;
-
     return stored?.name ?? generated;
 }
-
+function getNamingConflict(
+    match: ElementMatch,
+    lookup: ScanLookup,
+): string | undefined {
+    return match.scannedId
+        ? lookup.conflictsByTemporaryId.get(match.scannedId)
+        : undefined;
+}
+function planNamingConflict(
+    match: ElementMatch,
+    lookup: ScanLookup,
+    metadata: PageMetadata | undefined,
+    changes: GeneratorChange[],
+): void {
+    const reason = getNamingConflict(match, lookup);
+    if (!reason) return;
+    const elementName = resolveName(match, lookup, metadata);
+    addChange(changes, {
+        kind: 'element-ambiguous',
+        ...(match.existingKey
+            ? { elementKey: match.existingKey }
+            : {}),
+        ...(elementName ? { elementName } : {}),
+        description:
+            `REVIEW REQUIRED: Naming conflict for ` +
+            `"${elementName ?? 'unknown'}". ${reason}`,
+        safeToApply: false,
+    });
+}
 function planMatchedElement(
     match: ElementMatch,
     lookup: ScanLookup,
     metadata: PageMetadata | undefined,
     changes: GeneratorChange[],
 ): void {
-    if (!match.existingKey || !match.scannedId) {
-        return;
-    }
-
-    const scanned = lookup.byTemporaryId.get(
-        match.scannedId,
-    );
-
+    if (!match.existingKey || !match.scannedId) return;
+    const scanned = lookup.byTemporaryId.get(match.scannedId);
     const stored = findStoredElement(
         metadata,
         match.existingKey,
     );
-
     const elementName = resolveName(
         match,
         lookup,
         metadata,
     );
-
     if (!scanned || !stored) {
         addChange(changes, {
             kind: 'element-ambiguous',
@@ -153,7 +160,6 @@ function planMatchedElement(
         });
         return;
     }
-
     if (!sameLocator(stored.locators, scanned.locators)) {
         addChange(changes, {
             kind: 'primary-locator-changed',
@@ -164,7 +170,6 @@ function planMatchedElement(
             safeToApply: true,
         });
     }
-
     if (!sameFallbacks(stored.locators, scanned.locators)) {
         addChange(changes, {
             kind: 'fallback-locators-changed',
@@ -175,11 +180,9 @@ function planMatchedElement(
             safeToApply: true,
         });
     }
-
     if (
         stored.groupKey !== scanned.groupKey ||
-        stored.repeatableGroupKey !==
-        scanned.repeatableGroupKey
+        stored.repeatableGroupKey !== scanned.repeatableGroupKey
     ) {
         addChange(changes, {
             kind: 'group-changed',
@@ -191,21 +194,16 @@ function planMatchedElement(
         });
     }
 }
-
 function planNewElement(
     match: ElementMatch,
     lookup: ScanLookup,
     changes: GeneratorChange[],
     safeToApply: boolean,
 ): void {
-    if (!match.scannedId || !match.existingKey) {
-        return;
-    }
-
+    if (!match.scannedId || !match.existingKey) return;
     const elementName = lookup.namesByTemporaryId.get(
         match.scannedId,
     );
-
     addChange(changes, {
         kind: 'element-added',
         elementKey: match.existingKey,
@@ -218,34 +216,26 @@ function planNewElement(
         safeToApply,
     });
 }
-
 function planNotFoundElement(
     match: ElementMatch,
     metadata: PageMetadata | undefined,
     changes: GeneratorChange[],
 ): void {
-    if (!match.existingKey) {
-        return;
-    }
-
+    if (!match.existingKey) return;
     const stored = findStoredElement(
         metadata,
         match.existingKey,
     );
-
     addChange(changes, {
         kind: 'element-not-found',
         elementKey: match.existingKey,
-        ...(stored?.name
-            ? { elementName: stored.name }
-            : {}),
+        ...(stored?.name ? { elementName: stored.name } : {}),
         description:
             `Existing element "${stored?.name ?? 'unknown'}" ` +
             'was not found. Preserve it.',
         safeToApply: false,
     });
 }
-
 function planAmbiguousElement(
     match: ElementMatch,
     lookup: ScanLookup,
@@ -257,7 +247,6 @@ function planAmbiguousElement(
         lookup,
         metadata,
     );
-
     addChange(changes, {
         kind: 'element-ambiguous',
         ...(match.existingKey
@@ -270,7 +259,6 @@ function planAmbiguousElement(
         safeToApply: false,
     });
 }
-
 export function planChanges(
     scan: PageScan,
     comparison: ElementComparison,
@@ -279,20 +267,31 @@ export function planChanges(
 ): ChangePlan {
     const changes: GeneratorChange[] = [];
     const lookup = createLookup(scan, metadata);
-
     const blockNewWhenUnresolved =
         options.blockNewWhenUnresolved ?? true;
-
     const unresolvedExisting =
         comparison.notFound > 0 ||
         comparison.ambiguous > 0;
-
     const safeNewElements =
         options.mode === 'create' ||
         !blockNewWhenUnresolved ||
         !unresolvedExisting;
-
+    const processedScannedIds = new Set<string>();
     for (const match of comparison.matches) {
+        if (match.scannedId) {
+            processedScannedIds.add(match.scannedId);
+        }
+        // A naming conflict takes precedence over matching
+        // and prevents SAFE additions or locator updates.
+        if (getNamingConflict(match, lookup)) {
+            planNamingConflict(
+                match,
+                lookup,
+                metadata,
+                changes,
+            );
+            continue;
+        }
         switch (match.status) {
             case 'matched':
                 planMatchedElement(
@@ -302,7 +301,6 @@ export function planChanges(
                     changes,
                 );
                 break;
-
             case 'new':
                 planNewElement(
                     match,
@@ -311,7 +309,6 @@ export function planChanges(
                     safeNewElements,
                 );
                 break;
-
             case 'not-found':
                 planNotFoundElement(
                     match,
@@ -319,7 +316,6 @@ export function planChanges(
                     changes,
                 );
                 break;
-
             case 'ambiguous':
                 planAmbiguousElement(
                     match,
@@ -330,7 +326,22 @@ export function planChanges(
                 break;
         }
     }
-
+    // Do not silently discard naming conflicts when the
+    // element matcher has not returned a corresponding match.
+    for (const [scannedId, reason] of lookup.conflictsByTemporaryId) {
+        if (processedScannedIds.has(scannedId)) continue;
+        const elementName =
+            lookup.namesByTemporaryId.get(scannedId);
+        changes.push({
+            kind: 'element-ambiguous',
+            ...(elementName ? { elementName } : {}),
+            description:
+                `REVIEW REQUIRED: Unmatched scanned element ` +
+                `"${elementName ?? scannedId}" (${scannedId}). ` +
+                reason,
+            safeToApply: false,
+        });
+    }
     if (options.mode === 'update' && !metadata) {
         addChange(changes, {
             kind: 'element-ambiguous',
@@ -339,11 +350,9 @@ export function planChanges(
             safeToApply: false,
         });
     }
-
     const hasConflicts = changes.some(
         (change) => !change.safeToApply,
     );
-
     return {
         mode: options.mode,
         pageName: scan.pageName,
