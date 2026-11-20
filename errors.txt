@@ -1,15 +1,22 @@
-document.querySelectorAll('button.btn-center-edit-car-details').length
-1
 (() => {
-    const el = document.querySelector('button.btn-center-edit-car-details');
+    const el = document.querySelector(
+        'button.btn-center-edit-car-details'
+    );
+
+    if (!el) return 'Button not found';
+
+    const style = getComputedStyle(el);
 
     return {
-        html: el?.outerHTML,
-        text: el?.textContent?.trim(),
-        visible: !!el?.getClientRects().length,
-        disabled: el?.disabled,
-        ariaHidden: el?.getAttribute('aria-hidden'),
-        parentAriaHidden: el?.closest('[aria-hidden="true"]') !== null,
+        html: el.outerHTML,
+        display: style.display,
+        visibility: style.visibility,
+        opacity: style.opacity,
+        width: el.getBoundingClientRect().width,
+        height: el.getBoundingClientRect().height,
+        matchingButtons: [...document.querySelectorAll('button')]
+            .filter(button =>
+                button.textContent?.trim() === 'All done'
+            ).length
     };
 })()
-{html: '<button class="btn btn-white btn-center-edit-car-d…ils" type="button" tabindex="0">All done</button>', text: 'All done', visible: true, disabled: false, ariaHidden: null, …}ariaHidden: nulldisabled: falsehtml: "<button class=\"btn btn-white btn-center-edit-car-details\" type=\"button\" tabindex=\"0\">All done</button>"parentAriaHidden: falsetext: "All done"visible: true[[Prototype]]: Object
