@@ -1,0 +1,8 @@
+git fetch origin
+
+git log --oneline evidence_factory..origin/develop
+
+git rev-list --count evidence_factory..origin/develop
+
+git diff --stat evidence_factory...origin/develop
+
