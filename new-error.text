@@ -1,33 +1,19 @@
-PS C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\Athena_Automation\integration-tests> npm install
-npm error code ERESOLVE
-npm error ERESOLVE could not resolve
-npm error
-npm error While resolving: ferryplaywright@1.0.0
-npm error Found: @eslint/js@9.39.5
-npm error node_modules/@eslint/js
-npm error   dev @eslint/js@"^10.0.1" from the root project
-npm error   @eslint/js@"9.39.5" from eslint@9.39.5
-npm error   node_modules/eslint
-npm error     dev eslint@"^10.11.0" from the root project
-npm error     peer eslint@"^6.0.0 || ^7.0.0 || >=8.0.0" from @eslint-community/eslint-utils@4.10.1
-npm error     node_modules/@eslint-community/eslint-utils
-npm error       @eslint-community/eslint-utils@"^4.8.0" from eslint@9.39.5
-npm error       1 more (@typescript-eslint/utils)
-npm error     7 more (eslint-config-prettier, eslint-plugin-playwright, ...)
-npm error
-npm error Could not resolve dependency:
-npm error dev @eslint/js@"^10.0.1" from the root project
-npm error
-npm error Conflicting peer dependency: eslint@10.15.0
-npm error node_modules/eslint
-npm error   peerOptional eslint@"^10.0.0" from @eslint/js@10.0.1
-npm error   node_modules/@eslint/js
-npm error     dev @eslint/js@"^10.0.1" from the root project
-npm error
-npm error Fix the upstream dependency conflict, or retry this command with --force or --legacy-peer-deps to accept an incorrect (and potentially broken) dependency resolution.
-npm error
-npm error
-npm error For a full report see:
-npm error C:\Users\tp70707\AppData\Local\npm-cache\_logs\2026-11-20T11_49_00_106Z-eresolve-report.txt
-npm error A complete log of this run can be found in: C:\Users\tp70707\AppData\Local\npm-cache\_logs\2026-11-20T11_49_00_106Z-debug-0.log
+PS C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\Athena_Automation\integration-tests> npm run typecheck
+
+> ferryplaywright@1.0.0 typecheck
+> tsc --noEmit
+
+reportingLayer/brand-allure-reporter.ts:39:13 - error TS2554: Expected 2 arguments, but got 1.
+
+39       super.onTestBegin(test);
+               ~~~~~~~~~~~
+
+  node_modules/allure-playwright/dist/types/index.d.ts:37:33
+    37     onTestBegin(test: TestCase, testResult: PlaywrightTestResult): void;
+                                       ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    An argument for 'testResult' was not provided.
+
+
+Found 1 error in reportingLayer/brand-allure-reporter.ts:39
+
 PS C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\Athena_Automation\integration-tests>
