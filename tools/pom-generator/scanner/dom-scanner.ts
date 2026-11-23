@@ -310,6 +310,13 @@ export function scanDom(
 
     const controls = collectInteractiveElements(root);
     const elements: ScannedElement[] = [];
+    let hiddenCount = 0;
+    let locatorRejectedCount = 0;
+    console.log('[POM DEBUG] DOM candidates:', controls.length);
+    console.log('[POM DEBUG] All done candidates:', controls.filter(
+        (control) => control.matches('button') &&
+            clean(control.textContent) === 'All done',
+    ).length);
 
     for (const [index, control] of controls.entries()) {
         const membership = findRepeatableMembership(
@@ -328,10 +335,21 @@ export function scanDom(
                 : {}),
         });
 
+        const isAllDone = control.matches('button') &&
+            clean(control.textContent) === 'All done';
+        if (isAllDone) {
+            console.log('[POM DEBUG] All done normalized:', {
+                visibility: normalized.visibility,
+                kind: normalized.kind,
+                labels: normalized.fingerprint.labels,
+            });
+        }
         if (
             !options.includeHidden &&
             normalized.visibility !== 'visible'
         ) {
+            hiddenCount++;
+            if (isAllDone) console.log('[POM DEBUG] All done: hidden');
             continue;
         }
 
@@ -342,11 +360,25 @@ export function scanDom(
             warnings,
         );
 
+        if (isAllDone) {
+            console.log('[POM DEBUG] All done locator:', {
+                accepted: Boolean(ranked),
+                locators: ranked?.locators,
+            });
+        }
         if (ranked) {
             elements.push(ranked);
+        } else {
+            locatorRejectedCount++;
         }
     }
 
+    console.log('[POM DEBUG] Scan totals:', {
+        candidates: controls.length,
+        accepted: elements.length,
+        hidden: hiddenCount,
+        locatorRejected: locatorRejectedCount,
+    });
     warnings.push(...collectElementWarnings(elements));
 
     const groups: ElementGroup[] = groupResult.groups;
