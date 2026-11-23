@@ -4,12 +4,16 @@ import { build } from 'esbuild';
 import type { Page } from '@playwright/test';
 import type { PageScan } from '../models/generator.types';
 import type {
+    DomScanDiagnostics,
+} from '../scanner/scan-diagnostics';
+import type {
     BrowserScanAdapter,
 } from '../core/generator-service';
 
 interface BrowserScanPayload {
     scan?: PageScan;
     warnings?: string[];
+    diagnostics?: DomScanDiagnostics;
     error?: string;
 }
 
@@ -29,6 +33,12 @@ export interface DomScanAdapterOptions {
      * Normally warnings are diagnostic, not fatal.
      */
     failOnWarnings?: boolean;
+
+    /**
+     * Optional Node-side callback for scanner diagnostics.
+     * The adapter itself never writes to the terminal.
+     */
+    onDiagnostics?: (diagnostics: DomScanDiagnostics) => void;
 }
 
 const GLOBAL_NAME = '__pomGeneratorDomScannerV2';
@@ -171,6 +181,16 @@ export function createDomScanAdapter(
                 `DOM scanner reported warnings:\n` +
                 payload.warnings!.join('\n'),
             );
+        }
+
+        if (options.onDiagnostics) {
+            if (!payload.diagnostics) {
+                throw new Error(
+                    'Browser scanner returned no diagnostics.',
+                );
+            }
+
+            options.onDiagnostics(payload.diagnostics);
         }
 
         return scan;

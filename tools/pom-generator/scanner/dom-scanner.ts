@@ -8,9 +8,13 @@ import type {
 } from '../models/generator.types';
 
 import { rankLocators } from '../core/locator-strategy';
+import {
+    candidateDiagnostic,
+    type DomScanDiagnostics,
+    type ScanCandidateDiagnostic,
+} from './scan-diagnostics';
 import { detectGroups } from './group-detector';
 import { normalizeElement } from './element-normalizer';
-
 import {
     detectRepeatableGroups,
     type DetectedRepeatableGroup,
@@ -25,6 +29,7 @@ export interface DomScanOptions {
 export interface DomScanResult {
     scan: PageScan;
     warnings: string[];
+    diagnostics: DomScanDiagnostics;
 }
 
 interface RepeatableMembership {
@@ -73,7 +78,6 @@ function findRepeatableMembership(
             }
         }
     }
-
     return undefined;
 }
 
@@ -249,38 +253,6 @@ function filterValidatedRepeatables(
     });
 }
 
-function rankScannedElement(
-    control: Element,
-    element: ScannedElement,
-    membership: RepeatableMembership | undefined,
-    warnings: string[],
-): ScannedElement | undefined {
-    const scope = membership
-        ? membership.section
-        : control.ownerDocument;
-
-    const ranking = rankLocators(
-        control,
-        element,
-        { scope },
-    );
-
-    warnings.push(...ranking.warnings);
-
-    if (!ranking.locators) {
-        warnings.push(
-            `Skipped ${element.temporaryId}: no unique, stable ` +
-            `locator${membership ? ' within its repeatable section' : ''}.`,
-        );
-        return undefined;
-    }
-
-    return {
-        ...element,
-        locators: ranking.locators,
-    };
-}
-
 export function scanDom(
     root: ParentNode,
     options: DomScanOptions,
@@ -310,13 +282,7 @@ export function scanDom(
 
     const controls = collectInteractiveElements(root);
     const elements: ScannedElement[] = [];
-    let hiddenCount = 0;
-    let locatorRejectedCount = 0;
-    console.log('[POM DEBUG] DOM candidates:', controls.length);
-    console.log('[POM DEBUG] All done candidates:', controls.filter(
-        (control) => control.matches('button') &&
-            clean(control.textContent) === 'All done',
-    ).length);
+    const candidates: ScanCandidateDiagnostic[] = [];
 
     for (const [index, control] of controls.entries()) {
         const membership = findRepeatableMembership(
@@ -335,50 +301,59 @@ export function scanDom(
                 : {}),
         });
 
-        const isAllDone = control.matches('button') &&
-            clean(control.textContent) === 'All done';
-        if (isAllDone) {
-            console.log('[POM DEBUG] All done normalized:', {
-                visibility: normalized.visibility,
-                kind: normalized.kind,
-                labels: normalized.fingerprint.labels,
-            });
-        }
         if (
             !options.includeHidden &&
             normalized.visibility !== 'visible'
         ) {
-            hiddenCount++;
-            if (isAllDone) console.log('[POM DEBUG] All done: hidden');
+            candidates.push({
+                ...candidateDiagnostic(normalized, 'hidden'),
+                reason: `Visibility: ${normalized.visibility}`,
+            });
             continue;
         }
 
-        const ranked = rankScannedElement(
+        const scope = membership
+            ? membership.section
+            : control.ownerDocument;
+
+        const ranking = rankLocators(
             control,
             normalized,
-            membership,
-            warnings,
+            { scope },
         );
 
-        if (isAllDone) {
-            console.log('[POM DEBUG] All done locator:', {
-                accepted: Boolean(ranked),
-                locators: ranked?.locators,
+        warnings.push(...ranking.warnings);
+
+        if (!ranking.locators) {
+            const reason = membership
+                ? 'No unique, stable locator within repeatable section.'
+                : 'No unique, stable locator.';
+
+            warnings.push(
+                `Skipped ${normalized.temporaryId}: ${reason}`,
+            );
+
+            candidates.push({
+                ...candidateDiagnostic(normalized, 'rejected'),
+                evaluations: ranking.evaluations,
+                reason,
             });
+            continue;
         }
-        if (ranked) {
-            elements.push(ranked);
-        } else {
-            locatorRejectedCount++;
-        }
+
+        const ranked: ScannedElement = {
+            ...normalized,
+            locators: ranking.locators,
+        };
+
+        elements.push(ranked);
+
+        candidates.push({
+            ...candidateDiagnostic(ranked, 'accepted'),
+            locator: ranking.locators.primary,
+        });
     }
 
-    console.log('[POM DEBUG] Scan totals:', {
-        candidates: controls.length,
-        accepted: elements.length,
-        hidden: hiddenCount,
-        locatorRejected: locatorRejectedCount,
-    });
     warnings.push(...collectElementWarnings(elements));
 
     const groups: ElementGroup[] = groupResult.groups;
@@ -392,5 +367,21 @@ export function scanDom(
         repeatableGroups,
     };
 
-    return { scan, warnings };
+    const diagnostics: DomScanDiagnostics = {
+        candidates,
+        total: candidates.length,
+        accepted: elements.length,
+        hidden: candidates.filter(
+            (item) => item.status === 'hidden',
+        ).length,
+        rejected: candidates.filter(
+            (item) => item.status === 'rejected',
+        ).length,
+    };
+
+    return {
+        scan,
+        warnings,
+        diagnostics,
+    };
 }
