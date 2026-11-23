@@ -119,6 +119,54 @@ function isQuestionLabel(
     return !associated || associated === target;
 }
 
+
+function firstControlAfterLabel(
+    element: Element,
+): QuestionLabelResult | undefined {
+    let current = element.parentElement;
+
+    while (current) {
+        const previous = current.previousElementSibling;
+
+        if (previous?.matches('label')) {
+            const label = clean(previous.textContent);
+            const associatedId = clean(previous.getAttribute('for'));
+            const associated = associatedId
+                ? previous.ownerDocument.getElementById(associatedId)
+                : null;
+
+            const controls = Array.from(
+                current.querySelectorAll(CONTROL_SELECTOR),
+            );
+
+            if (
+                label &&
+                (!associated || associated === element) &&
+                controls[0] === element
+            ) {
+                const firstField = current.querySelector(
+                    'label, input:not([type="hidden"]), select, textarea',
+                );
+
+                if (firstField === element) {
+                    return {
+                        label,
+                        source: 'preceding-label',
+                    };
+                }
+            }
+        }
+
+        if (current.matches('form, fieldset, section')) {
+            break;
+        }
+
+        current = current.parentElement;
+    }
+
+    return undefined;
+}
+
 function precedingLabel(
     element: Element,
 ): QuestionLabelResult | undefined {
@@ -222,6 +270,7 @@ export function resolveQuestionLabel(
     return (
         groupQuestion(element) ||
         precedingLabel(element) ||
+        firstControlAfterLabel(element) ||
         containerLabel(element)
     );
 }
