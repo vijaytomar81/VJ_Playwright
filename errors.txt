@@ -22,6 +22,9 @@ Page:    car-details
 Mode:    create
 Output:  C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\Athena_Automation\VJ_Playwright\automationLayer\pomObjects\AZO\DJ\Motor
 Preview only: no generated file writes.
+[POM] Validated radio group "Do you know the registration number of the car?" with options: Yes, No
+[POM] Validated radio group "Transmission" with options: Automatic
+[POM] Validated radio group "Fuel type" with options: Electric
 
 DOM SCAN DIAGNOSTICS
 ====================
@@ -230,4 +233,4 @@ Write result:
   0 files written
   Dry-run: no files should have been written.
 
-PS C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\Athena_Automation\VJ_Playwright>
+PS C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\Athena_Automation\VJ_Playwright> 
