@@ -1,50 +1,5 @@
-PS C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\Athena_Automation\VJ_Playwright> npm run pom-generate -- `
->>   --brand AZO `
->>   --channel DJ `
->>   --product Motor `
->>   --page car-details `
->>   --mode create `
->>   --dry-run `
->>   --verbose
+Get-ChildItem tools/pom-generator/scanner -File |
+    Select-Object Name
 
-> allianz-automation@1.0.0 pom-generate
-> npm run pom-generate:build && node dist/tools/pom-generator/cli/pom-generate.cli.js --brand AZO --channel DJ --product Motor --page car-details --mode create --dry-run --verbose
-
-
-> allianz-automation@1.0.0 pom-generate:build
-> tsc -p tools/pom-generator/tsconfig.build.json && tsc-alias -p tools/pom-generator/tsconfig.build.json
-
-POM Generator V2
-Brand:   AZO
-Channel: DJ
-Product: Motor
-Page:    car-details
-Mode:    create
-Output:  C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\Athena_Automation\VJ_Playwright\automationLayer\pomObjects\AZO\DJ\Motor
-Preview only: no generated file writes.
-POM Generator V2 — DRY-RUN
-Page: car-details
-Status: CHANGES PROPOSED
-
-Change summary:
-  Total: 7
-  Safe: 7
-  Review required: 0
-
-Changes by type:
-  Element added: 7
-
-Change details:
-  [SAFE] Element added: linkToAllianzHomePageLink
-  [SAFE] Element added: manageCookiesButton
-  [SAFE] Element added: openChatWidgetButton
-  [SAFE] Element added: openTrustSealButton
-  [SAFE] Element added: registrationNumberPolarQuestionNoRadio
-  [SAFE] Element added: registrationNumberPolarQuestionYesRadio
-  [SAFE] Element added: viewHowWeLlUseYourInfoLink
-
-Write result:
-  0 files written
-  Dry-run: no files should have been written.
-
-PS C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\Athena_Automation\VJ_Playwright>
+Get-ChildItem tools/pom-generator -Recurse -Filter *.ts |
+    Select-String -Pattern 'locatorRejected|All done locator'
