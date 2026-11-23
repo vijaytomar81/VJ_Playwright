@@ -105,8 +105,18 @@ function groupQuestion(
     return undefined;
 }
 
-function isQuestionLabel(element: Element): boolean {
-    return element.matches('label:not([for])');
+function isQuestionLabel(
+    label: Element,
+    target: Element,
+): boolean {
+    if (!label.matches('label')) return false;
+
+    const forId = clean(label.getAttribute('for'));
+    if (!forId) return true;
+
+    // Never borrow a label belonging to another existing control.
+    const associated = label.ownerDocument.getElementById(forId);
+    return !associated || associated === target;
 }
 
 function precedingLabel(
@@ -117,7 +127,7 @@ function precedingLabel(
     while (current?.parentElement) {
         const previous = current.previousElementSibling;
 
-        if (previous && isQuestionLabel(previous)) {
+        if (previous && isQuestionLabel(previous, element)) {
             const label = clean(previous.textContent);
 
             if (label) {
