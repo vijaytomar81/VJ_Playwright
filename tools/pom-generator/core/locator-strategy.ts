@@ -309,7 +309,14 @@ function collectCandidates(
 
     if (role) {
         const accessibleName =
-            labels.accessible || labels.direct;
+            labels.accessible ||
+            labels.direct ||
+            (
+                element.kind === 'button' ||
+                    element.kind === 'link'
+                    ? fingerprint.text
+                    : undefined
+            );
 
         if (accessibleName) {
             candidates.push({
