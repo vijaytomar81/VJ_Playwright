@@ -5,12 +5,12 @@ PS C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\Athena_Automation
                          
 Starting dedicated Microsoft Edge...
 Platform: win32 
-Process ID: 18164
+Process ID: 20316
 Profile: C:\Users\tp70707\.pom-generator-v2\edge-cdp-profile
 
 Edge CDP is ready.
 CDP: http://127.0.0.1:9222
-WebSocket: ws://127.0.0.1:9222/devtools/browser/cec14421-2888-4c38-b35e-4883b6b27e29
+WebSocket: ws://127.0.0.1:9222/devtools/browser/cfb5929b-24a3-4d51-8faf-c10bfc651cf0
 Open your application in the dedicated Edge window.
 PS C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\Athena_Automation\VJ_Playwright> npm run pom-generate -- `
 >>   --brand AZO `
@@ -222,7 +222,6 @@ Changes by type:
 Change details:
   [SAFE] Element added: allDoneButton
   [SAFE] Element added: carModelInput
-  [SAFE] Element added: dateOfPurchaseInput
   [SAFE] Element added: fuelTypeElectricRadio
   [SAFE] Element added: linkToAllianzHomePageLink
   [SAFE] Element added: makeInput
@@ -231,6 +230,7 @@ Change details:
   [SAFE] Element added: openChatWidgetButton
   [SAFE] Element added: openTrustSealButton
   [SAFE] Element added: playVideoButton
+  [SAFE] Element added: purchaseMonthInput
   [SAFE] Element added: purchaseYearInput
   [SAFE] Element added: registrationNumberNoRadio
   [SAFE] Element added: registrationNumberYesRadio
