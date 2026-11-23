@@ -19,6 +19,7 @@ import {
     detectRepeatableGroups,
     type DetectedRepeatableGroup,
 } from './repeatable-group-detector';
+import { validateRadioGroups } from './radio-group-validator';
 
 export interface DomScanOptions {
     pageName: string;
@@ -356,7 +357,14 @@ export function scanDom(
 
     warnings.push(...collectElementWarnings(elements));
 
-    const groups: ElementGroup[] = groupResult.groups;
+    const radioGroupValidation = validateRadioGroups(
+        groupResult.detected,
+        root,
+    );
+
+    warnings.push(...radioGroupValidation.warnings);
+
+    const groups: ElementGroup[] = radioGroupValidation.groups;
 
     const scan: PageScan = {
         pageName: clean(options.pageName),
