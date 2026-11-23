@@ -1,5 +1,209 @@
-Get-ChildItem tools/pom-generator/scanner -File |
-    Select-Object Name
-
-Get-ChildItem tools/pom-generator -Recurse -Filter *.ts |
-    Select-String -Pattern 'locatorRejected|All done locator'
+<div id="root">
+	<div>
+		<div>
+			<div class="container-fluid">
+				<div class="container pt-3 pb-3">
+					<form class="journeyForm" autocomplete="on" data-gtm-form-interact-id="0">
+						<div class="journey-new-bg" style="height: 0px; top: 0px;"/>
+						<div class="journey-header">
+							<div class="journey-header-background">
+								<a class="header-logo-link" id="goToAllianzHomePage" href="https://www.allianz.co.uk" target="_blank" aria-label="Link to Allianz home page">
+									<img class="flow-logo" alt="Allianz logo icon" src="/Allianz/img/brand-logo.png"/>
+								</div>
+							</div>
+							<div class="progress journey-progress" tabindex="0" aria-label="Journey progress bar with 7 percents completed">
+								<div class="progress-bar" role="progressbar" style="width: 6.66667%;"/>
+							</div>
+							<div class="journey-content">
+								<div class="journey-questions">
+									<div class="journey-questions-title">
+										<h1 class="">Car <span class="last-word">details</span>
+										</h1>
+										<div class="allianz-online-badge allianz-online-badge--nb ">
+											<img class="brand-badge" alt="Allianz Online badge" src="/Allianz/img/allianz-online-badge.svg"/>
+										</div>
+										<div class="journey-questions-body">
+											<div class="journey-questions-body-content">
+												<div class="banner gdpr-info-banner banner-info">
+													<div class="banner-text info-banner-text">
+														<strong class="gdpr-your-data-title">Your data </strong>
+														<br>Before we get started, &nbsp;<a class="p-0" href="https://www.allianz.co.uk/privacy-notice.html" target="_blank" id="personal-info-use">view how we’ll use your info</a>
+														</div>
+													</div>
+													<div class="panel pt-4 px-4 w-100 mobile-padding-bottom-70 mb-150-tablet">
+														<div class="form-group ">
+															<label for="registrationNumberPolarQuestion">Do you know the registration number of the car?</label>
+															<div class="input-group" role="group" aria-label="Do you know the registration number of the car?">
+																<div class="custom-control custom-radio">
+																	<input class="custom-control-input null" id="registrationNumberPolarQuestionfalse" type="radio" value="false" name="registrationNumberPolarQuestion">
+																		<label class="custom-control-label" for="registrationNumberPolarQuestionfalse">Yes</label>
+																	</div>
+																	<div class="custom-control custom-radio">
+																		<input class="custom-control-input null" id="registrationNumberPolarQuestiontrue" type="radio" value="true" name="registrationNumberPolarQuestion" data-gtm-form-interact-field-id="0">
+																			<label class="custom-control-label" for="registrationNumberPolarQuestiontrue">No</label>
+																		</div>
+																	</div>
+																</div>
+																<div class="info-button-panel font-weight-light banner d-flex flex-row how-to-video-banner">
+																	<div class="info-button cursor-pointer"/>
+																	<div class="d-flex flex-column">
+																		<div>
+																			<p>Find out how to manually add your car viewing a short how-to video.</p>
+																		</div>
+																		<div>
+																			<button type="button" class="btn-link text-decoration-underline d-block border-0 bg-transparent">
+																				<span class="fa fa-solid fa-play"/>&nbsp; Play video</button>
+																		</div>
+																	</div>
+																</div>
+																<div class="dashed-panel annual-vehicle-edit number-plate-scan">
+																	<div class="form-group ">
+																		<label for="annualVehicleEdit">Make</label>
+																		<div class="input-group" role="" aria-label="">
+																			<div class="addressLookup margin-bottom-30 w-100">
+																				<input class="form-control  is-valid" id="vehicle-make" aria-describedby="makeDescription" placeholder="Start typing the make of your vehicle..." autocomplete="off" type="text" value="VOLVO" data-gtm-form-interact-field-id="1">
+																					<div id="makeDescription" aria-label=""/>
+																				</div>
+																				<br>
+																					<label class="mt-3 margin-top-30">Car model</label>
+																					<div class="addressLookup margin-bottom-30 w-100">
+																						<input class="form-control  " id="vehicle-shortened-model" aria-describedby="shortenedModelDescription" placeholder="Start typing the model name of your vehicle..." autocomplete="off" type="text" value="EX90" data-gtm-form-interact-field-id="2">
+																							<div id="modelDescription" aria-label=""/>
+																						</div>
+																						<label class="mt-3 margin-top-30">Year of manufacture</label>
+																						<div class="input-group margin-bottom-30" aria-live="assertive">
+																							<select class="form-control form-radius  is-valid" id="vehicle-manufacture-year" aria-describedby="modelYarDescription" data-gtm-form-interact-field-id="3">
+																								<option value="">Please select...</option>
+																								<option value="2026">2026</option>
+																								<option value="2025">2025</option>
+																							</select>
+																							<div id="modelYarDescription" aria-label="Suggestion size 2"/>
+																						</div>
+																						<label class="mt-3 margin-top-30">Date of purchase</label>
+																						<div class="input-group">
+																							<div class="customDate-container">
+																								<div class="custom-month">Month<br>
+																										<input class="form-control customDate-month is-valid" aria-label="Purchase month input field" placeholder="MM" pattern="[0-9]*" maxlength="2" id="purchase-date-month" type="text" value="10" data-gtm-form-interact-field-id="4"/>
+																										<div class="custom-month">Year<br>
+																												<input class="form-control customDate-year is-valid" aria-label="Purchase year input field" placeholder="YYYY" pattern="[0-9]*" maxlength="4" id="purchase-date-year" type="text" value="2026" data-gtm-form-interact-field-id="5"/>
+																											</div>
+																										</div>
+																										<div class="falcon-checkbox form-group mt-3 margin-bottom-30" style="margin-left: 20px;">
+																											<div class="d-flex width-450">
+																												<div class="form-check mr-3">
+																													<input class="custom-control-input true" aria-label="The car hasn't been bought yet" id="notBeenBoughtCheckbox" type="checkbox">
+																														<label class="custom-control-label" for="notBeenBoughtCheckbox">
+																															<div class="checkbox-big"/>
+																															<div class="checkbox-label">
+																																<p>The car hasn't been bought yet</p>
+																															</div>
+																														</label>
+																													</div>
+																												</div>
+																											</div>
+																											<div class="form-group margin-bottom-30 margin-top-30">
+																												<label class="mt-3 margin-top-0">Transmission</label>
+																												<div class="mt-3 mb-3">If the car is semi-automatic or CVT (Continuously Variable Transmission) select 'Automatic’</div>
+																												<div class="input-group width-450 edit-vehicle-transmission" role="group" aria-label="Transmission">
+																													<div class="custom-control custom-radio">
+																														<input class="custom-control-input vehicle-details-radio " id="vehicleTransmissionA" type="radio" value="A" name="vehicleTransmissionA" data-gtm-form-interact-field-id="6">
+																															<label class="custom-control-label" for="vehicleTransmissionA">Automatic</label>
+																														</div>
+																													</div>
+																												</div>
+																												<div class="form-group margin-bottom-30 margin-top-30">
+																													<label class="mt-3 margin-top-0">Fuel type</label>
+																													<div class="input-group width-450 fuel-type" role="group" aria-label="Fuel type">
+																														<div class="custom-control custom-radio">
+																															<input class="custom-control-input vehicle-details-radio" id="vehicleFuelTypeE" type="radio" value="E" name="vehicleFuelTypeE" data-gtm-form-interact-field-id="7">
+																																<label class="custom-control-label" for="vehicleFuelTypeE">Electric</label>
+																															</div>
+																														</div>
+																													</div>
+																													<label class="mt-3 margin-top-30">Number of doors</label>
+																													<div class="input-group margin-bottom-30" aria-live="assertive">
+																														<select class="form-control form-radius " id="vehicle-doors" aria-describedby="doors-description">
+																															<option value="">Please select...</option>
+																															<option value="5">5</option>
+																														</select>
+																														<div id="doors-description" aria-label="Suggestion size 1"/>
+																													</div>
+																												</div>
+																											</div>
+																										</div>
+																									</div>
+																								</div>
+																							</div>
+																						</div>
+																					</div>
+																					<footer class="falcon-footer">
+																						<div class="falcon-footer-divider"/>
+																						<div class="entrust-section">
+																							<div id="trust-logo" class="security-logo position-relative">
+																								<div>
+																									<button type="button" class="trust-logo-btn" aria-label="Open Trust Seal">
+																										<img alt="Trust Seal" src="/Allianz/img/sectigo_trust_seal.png"/>
+																									</div>
+																								</div>
+																								<div class="entrust-section-wording">
+																									<div class="entrust-section-title">We'll keep your details safe</div>
+																									<div class="entrust-section-description">Our website is constantly monitored to <br>check for harmful viruses or malware.</div>
+																									</div>
+																									<div class="d-flex justify-content-end flex-grow-1">
+																										<img alt="Allianz olympics logo icon" src="/Allianz/img/allianz-olympic-logo.svg"/>
+																									</div>
+																									<div class="falcon-footer-divider-bottom"/>
+																									<hr aria-hidden="true">
+																										<div class="trademark-section">
+																											<div class="links-container d-mobile-none">
+																												<a href="/complaints" id="complaints">Complaints</a>
+																												<a href="https://www.allianz.co.uk/cookie-policy.html" target="_blank" id="cookie-policy">Our cookie policy</a>
+																												<a href="https://www.allianz.co.uk/privacy-notice.html" id="data-rights" target="_blank">Personal data rights</a>
+																												<br>
+																													<br/>
+																													<div class="links-container d-desktop-none">
+																														<a href="/complaints" id="complaints">Complaints</a>
+																														<a href="https://www.allianz.co.uk/cookie-policy.html" target="_blank" id="cookie-policy">Our cookie policy</a>
+																														<a href="https://www.allianz.co.uk/privacy-notice.html" id="data-rights" target="_blank">Personal data rights</a>
+																														<br>
+																															<br/>
+																															<hr aria-hidden="true">
+																																<div class="trademark-container">
+																																	<div>This insurance is arranged, underwritten and administered by Liverpool Victoria Insurance Company Limited, which is an Allianz Group company, registered in England and Wales number 3232514. Authorised by the Prudential Regulation Authority and regulated by the Financial Conduct Authority and the Prudential Regulation Authority, register number 202965. Registered address: 57 Ladymead, Guildford, Surrey, GU1 1DB. Allianz Online is a trading name of Liverpool Victoria Insurance Company Limited.</div>
+																																</div>
+																															</div>
+																														</footer>
+																													</form>
+																													<div class="overlay " style="display: none;">
+																														<div class="content">
+																															<div class="ov-spinner">
+																																<div class="bounce1"/>
+																																<div class="bounce2"/>
+																																<div class="bounce3"/>
+																															</div>
+																														</div>
+																													</div>
+																													<div class="alert alert-danger fade show" role="alert" style="display: none;">Service error</div>
+																													<div class="overlay " style="display: none;">
+																														<div class="content">
+																															<div class="ov-spinner">
+																																<div class="bounce1"/>
+																																<div class="bounce2"/>
+																																<div class="bounce3"/>
+																															</div>
+																														</div>
+																													</div>
+																												</div>
+																											</div>
+																										</div>
+																									</div>
+																									<footer class="footer-position">
+																										<div class=" collapsed">
+																											<div class="section-wrap"/>
+																										</div>
+																									</footer>
+																									<div id="versionDisplayContainer">
+																										<div>customer-portal : <b>7.8.124-RC</b>
+																										</div>
+																									</div>
+																								</div>
