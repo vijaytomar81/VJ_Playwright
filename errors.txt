@@ -5,12 +5,12 @@ PS C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\Athena_Automation
                          
 Starting dedicated Microsoft Edge...
 Platform: win32 
-Process ID: 20600
+Process ID: 8284
 Profile: C:\Users\tp70707\.pom-generator-v2\edge-cdp-profile
 
 Edge CDP is ready.
 CDP: http://127.0.0.1:9222
-WebSocket: ws://127.0.0.1:9222/devtools/browser/0419c05b-c655-49ff-99b5-93e05661b1ea
+WebSocket: ws://127.0.0.1:9222/devtools/browser/dad3e82c-b1ba-4f0e-975d-5ae79d4f0f7e
 Open your application in the dedicated Edge window.
 PS C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\Athena_Automation\VJ_Playwright> npm run pom-generate -- `
 >>   --brand AZO `
