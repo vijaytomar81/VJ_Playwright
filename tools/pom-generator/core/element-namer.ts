@@ -26,15 +26,10 @@ const GENERIC_LABELS = new Set([
     'submit', 'element', 'unknown', 'div',
 ]);
 const CONTROL_SUFFIX: Partial<Record<ElementKind, string>> = {
-    input: 'Input',
-    textarea: 'Textarea',
-    date: 'DateInput',
-    select: 'Select',
-    combobox: 'Combobox',
-    checkbox: 'Checkbox',
-    radio: 'Radio',
-    button: 'Button',
-    link: 'Link',
+    input: 'Input', textarea: 'Textarea', date: 'DateInput',
+    select: 'Select', combobox: 'Combobox',
+    checkbox: 'Checkbox', radio: 'Radio',
+    button: 'Button', link: 'Link',
 };
 function words(value: string): string[] {
     return value
@@ -106,33 +101,42 @@ function getChoice(element: ScannedElement): string | undefined {
     if (value === 'false' || value === 'no') return 'no';
     return meaningful(labels.direct, element.fingerprint.value);
 }
+
+
 function deriveSemanticName(element: ScannedElement): string {
     const labels = element.fingerprint.labels;
     const fp = element.fingerprint;
-    // Prefer reliable field context for controls; avoid verbose placeholders.
-    const fieldLabel = ['input', 'textarea', 'date', 'select', 'combobox']
-        .includes(element.kind) ? labels.parentField : undefined;
-    let phrase = meaningful(
-        labels.direct,
-        labels.accessible,
-        fieldLabel,
-        fp.text,
-        fp.placeholder,
-        fp.name,
-        fp.id,
-        element.suggestedName,
-    ) ?? '';
-    if (!phrase || isGeneric(phrase)) {
+    const fieldControl = [
+        'input', 'textarea', 'date', 'select', 'combobox',
+    ].includes(element.kind);
+    const radioContext = element.kind === 'radio'
+        ? meaningful(labels.parentField, labels.parentGroup)
+        : undefined;
+    const question = radioContext
+        ?.replace(/^do you know (?:the )?/i, '')
+        .replace(/\bof the car$/i, '').trim();
+
+    let phrase: string;
+    if (element.kind === 'radio' && question) {
+        const choice = getChoice(element);
+        phrase = choice ? combine(question, choice) : question;
+    } else {
         phrase = meaningful(
-            labels.parentField,
-            labels.parentGroup,
-            fp.id,
-            fp.name,
-        ) ?? 'unnamed';
-    }
-    const choice = getChoice(element);
-    if (choice && !endsWith(words(phrase), words(choice))) {
-        phrase = combine(phrase, choice);
+            labels.direct,
+            fieldControl ? labels.parentField : undefined,
+            labels.accessible, fp.text, fp.placeholder,
+            fp.name, fp.id, element.suggestedName,
+        ) ?? '';
+        if (!phrase || isGeneric(phrase)) {
+            phrase = meaningful(
+                labels.parentField, labels.parentGroup,
+                fp.id, fp.name,
+            ) ?? 'unnamed';
+        }
+        const choice = getChoice(element);
+        if (choice && !endsWith(words(phrase), words(choice))) {
+            phrase = combine(phrase, choice);
+        }
     }
     return camelCase(phrase);
 }

@@ -12,6 +12,7 @@ import {
     getGroupPath,
     type DetectedGroup,
 } from './group-detector';
+import { resolveQuestionLabel } from './question-label-resolver';
 export interface NormalizeElementOptions {
     temporaryId: string;
     groups?: readonly DetectedGroup[];
@@ -95,46 +96,6 @@ function getContainerLabel(
     );
 }
 
-function getParentFieldLabel(
-    element: Element,
-): string | undefined {
-    let parent = element.parentElement;
-    while (parent) {
-        if (parent.matches(FIELD_SELECTOR)) {
-            const label = getContainerLabel(parent);
-            if (label) return label;
-        }
-        if (parent.matches('div')) {
-            const labelledBy = getReferencedText(
-                parent, 'aria-labelledby',
-            );
-            const ariaLabel = getAttribute(parent, 'aria-label');
-            if (labelledBy || ariaLabel) {
-                return labelledBy || ariaLabel;
-            }
-            if (parent.matches(
-                '[class*="field"], [class*="form-control"]',
-            )) {
-                const label = getDirectChildText(parent, 'label');
-                if (label) return label;
-            }
-        }
-
-        // Recognize a visual label immediately before a single-control wrapper.
-        const previous = parent.previousElementSibling;
-        if (
-            previous?.matches('label:not([for])') &&
-            parent.querySelectorAll('input, select, textarea').length === 1
-        ) {
-            const label = clean(previous.textContent);
-            if (label) return label;
-        }
-
-        parent = parent.parentElement;
-    }
-    return undefined;
-}
-
 function getParentContext(
     element: Element,
 ): string | undefined {
@@ -160,7 +121,7 @@ function collectLabels(
     const accessible =
         getReferencedText(element, 'aria-labelledby') ||
         getAttribute(element, 'aria-label');
-    const parentField = getParentFieldLabel(element);
+    const parentField = resolveQuestionLabel(element)?.label;
     const group = parentGroup || getParentContext(element);
     const source: ElementLabels['source'] =
         direct.text ? 'direct' :
