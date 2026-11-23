@@ -22,6 +22,177 @@ Page:    car-details
 Mode:    create
 Output:  C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\Athena_Automation\VJ_Playwright\automationLayer\pomObjects\AZO\DJ\Motor
 Preview only: no generated file writes.
+
+DOM SCAN DIAGNOSTICS
+====================
+Total candidates: 53
+Accepted: 19
+Hidden:   31
+Rejected: 3
+
+ACCEPTED (19)
+----------------------------------------
+  scan_0002 <a> kind=link name="Link to Allianz home page" id="goToAllianzHomePage"
+    Primary: strategy=role value="link" role="link" name="Link to Allianz home page" exact=true
+  scan_0003 <a> kind=link name="view how we’ll use your info" id="personal-info-use"
+    Primary: strategy=role value="link" role="link" name="view how we’ll use your info" exact=true
+  scan_0004 <input> kind=radio name="Yes" id="registrationNumberPolarQuestionfalse"
+    Primary: strategy=role value="radio" role="radio" name="Yes" exact=true
+  scan_0005 <input> kind=radio name="No" id="registrationNumberPolarQuestiontrue"
+    Primary: strategy=role value="radio" role="radio" name="No" exact=true
+  scan_0006 <button> kind=button name="Play video" id=""
+    Primary: strategy=role value="button" role="button" name="Play video" exact=true
+  scan_0007 <input> kind=input name="Start typing the make of your vehicle..." id="vehicle-make"
+    Primary: strategy=id value="vehicle-make"
+  scan_0008 <input> kind=input name="Start typing the model name of your vehicle..." id="vehicle-shortened-model"
+    Primary: strategy=id value="vehicle-shortened-model"
+  scan_0009 <select> kind=select name="vehicle-manufacture-year" id="vehicle-manufacture-year"
+    Primary: strategy=id value="vehicle-manufacture-year"
+  scan_0010 <input> kind=input name="Purchase month input field" id="purchase-date-month"
+    Primary: strategy=role value="textbox" role="textbox" name="Purchase month input field" exact=true
+  scan_0011 <input> kind=input name="Purchase year input field" id="purchase-date-year"
+    Primary: strategy=role value="textbox" role="textbox" name="Purchase year input field" exact=true
+  scan_0012 <input> kind=checkbox name="The car hasn't been bought yet" id="notBeenBoughtCheckbox"
+    Primary: strategy=role value="checkbox" role="checkbox" name="The car hasn't been bought yet" exact=true
+  scan_0013 <input> kind=radio name="Automatic" id="vehicleTransmissionA"
+    Primary: strategy=role value="radio" role="radio" name="Automatic" exact=true
+  scan_0014 <input> kind=radio name="Electric" id="vehicleFuelTypeE"
+    Primary: strategy=role value="radio" role="radio" name="Electric" exact=true
+  scan_0015 <select> kind=select name="vehicle-doors" id="vehicle-doors"
+    Primary: strategy=id value="vehicle-doors"
+  scan_0016 <input> kind=input name="Start typing the model name of your vehicle..." id="vehicle-model"
+    Primary: strategy=id value="vehicle-model"
+  scan_0017 <button> kind=button name="All done" id=""
+    Primary: strategy=role value="button" role="button" name="All done" exact=true
+  scan_0018 <button> kind=button name="Open Trust Seal" id=""
+    Primary: strategy=role value="button" role="button" name="Open Trust Seal" exact=true
+  scan_0051 <button> kind=button name="Manage Cookies" id=""
+    Primary: strategy=role value="button" role="button" name="Manage Cookies" exact=true
+  scan_0053 <button> kind=button name="Open Chat Widget" id=""
+    Primary: strategy=role value="button" role="button" name="Open Chat Widget" exact=true
+
+HIDDEN (31)
+----------------------------------------
+  scan_0001 <a> kind=link name="___" id=""
+    Visibility: hidden
+    Reason: Visibility: hidden
+  scan_0022 <a> kind=link name="Complaints" id="complaints"
+    Visibility: hidden
+    Reason: Visibility: hidden
+  scan_0023 <a> kind=link name="Our cookie policy" id="cookie-policy"
+    Visibility: hidden
+    Reason: Visibility: hidden
+  scan_0024 <a> kind=link name="Personal data rights" id="data-rights"
+    Visibility: hidden
+    Reason: Visibility: hidden
+  scan_0025 <button> kind=button name="Close preference center" id="close-pc-btn-handler"
+    Visibility: hidden
+    Reason: Visibility: hidden
+  scan_0026 <a> kind=link name="More information" id=""
+    Visibility: hidden
+    Reason: Visibility: hidden
+  scan_0027 <button> kind=button name="Allow All" id="accept-recommended-btn-handler"
+    Visibility: hidden
+    Reason: Visibility: hidden
+  scan_0028 <button> kind=button name="Strictly Necessary cookies Always Active" id=""
+    Visibility: hidden
+    Reason: Visibility: hidden
+  scan_0029 <button> kind=button name="View Vendor Details" id=""
+    Visibility: hidden
+    Reason: Visibility: hidden
+  scan_0030 <button> kind=button name="Performance cookies" id=""
+    Visibility: hidden
+    Reason: Visibility: hidden
+  scan_0031 <input> kind=checkbox name="Performance cookies" id="ot-group-id-2"
+    Visibility: hidden
+    Reason: Visibility: hidden
+  scan_0032 <button> kind=button name="View Vendor Details" id=""
+    Visibility: hidden
+    Reason: Visibility: hidden
+  scan_0033 <button> kind=button name="Functional cookies" id=""
+    Visibility: hidden
+    Reason: Visibility: hidden
+  scan_0034 <input> kind=checkbox name="Functional cookies" id="ot-group-id-3"
+    Visibility: hidden
+    Reason: Visibility: hidden
+  scan_0035 <button> kind=button name="View Vendor Details" id=""
+    Visibility: hidden
+    Reason: Visibility: hidden
+  scan_0036 <button> kind=button name="Targeting cookies" id=""
+    Visibility: hidden
+    Reason: Visibility: hidden
+  scan_0037 <input> kind=checkbox name="Targeting cookies" id="ot-group-id-4"
+    Visibility: hidden
+    Reason: Visibility: hidden
+  scan_0038 <button> kind=button name="View Vendor Details" id=""
+    Visibility: hidden
+    Reason: Visibility: hidden
+  scan_0039 <button> kind=button name="Back" id=""
+    Visibility: hidden
+    Reason: Visibility: hidden
+  scan_0040 <input> kind=input name="Vendor list search" id="vendor-search-handler"
+    Visibility: hidden
+    Reason: Visibility: hidden
+  scan_0041 <button> kind=button name="Filter Vendors List" id="filter-btn-handler"
+    Visibility: hidden
+    Reason: Visibility: hidden
+  scan_0042 <button> kind=button name="Clear" id="clear-filters-handler"
+    Visibility: hidden
+    Reason: Visibility: hidden
+  scan_0043 <input> kind=checkbox name="checkbox label" id="chkbox-id"
+    Visibility: hidden
+    Reason: Visibility: hidden
+  scan_0044 <button> kind=button name="Apply" id="filter-apply-handler"
+    Visibility: hidden
+    Reason: Visibility: hidden
+  scan_0045 <button> kind=button name="Cancel" id="filter-cancel-handler"
+    Visibility: hidden
+    Reason: Visibility: hidden
+  scan_0046 <input> kind=checkbox name="checkbox label" id="select-all-hosts-groups-handler"
+    Visibility: hidden
+    Reason: Visibility: hidden
+  scan_0047 <input> kind=checkbox name="checkbox label" id="select-all-vendor-groups-handler"
+    Visibility: hidden
+    Reason: Visibility: hidden
+  scan_0048 <input> kind=checkbox name="checkbox label" id="select-all-vendor-leg-handler"
+    Visibility: hidden
+    Reason: Visibility: hidden
+  scan_0049 <button> kind=button name="Confirm My Choices" id=""
+    Visibility: hidden
+    Reason: Visibility: hidden
+  scan_0050 <a> kind=link name="Powered by OneTrust Opens in a new Tab" id=""
+    Visibility: hidden
+    Reason: Visibility: hidden
+  scan_0052 <button> kind=button name="Close Preferences" id=""
+    Visibility: hidden
+    Reason: Visibility: hidden
+
+REJECTED (3)
+----------------------------------------
+  scan_0019 <a> kind=link name="Complaints" id="complaints"
+    Reason: No unique, stable locator.
+    Attempt: strategy=role value="link" role="link" name="Complaints" exact=true
+      matches=2 target=true accepted=false score=95
+      Reason: Locator matched 2 elements.
+    Attempt: strategy=id value="complaints"
+      matches=2 target=true accepted=false score=85
+      Reason: Locator matched 2 elements.
+  scan_0020 <a> kind=link name="Our cookie policy" id="cookie-policy"
+    Reason: No unique, stable locator.
+    Attempt: strategy=role value="link" role="link" name="Our cookie policy" exact=true
+      matches=2 target=true accepted=false score=95
+      Reason: Locator matched 2 elements.
+    Attempt: strategy=id value="cookie-policy"
+      matches=2 target=true accepted=false score=85
+      Reason: Locator matched 2 elements.
+  scan_0021 <a> kind=link name="Personal data rights" id="data-rights"
+    Reason: No unique, stable locator.
+    Attempt: strategy=role value="link" role="link" name="Personal data rights" exact=true
+      matches=2 target=true accepted=false score=95
+      Reason: Locator matched 2 elements.
+    Attempt: strategy=id value="data-rights"
+      matches=2 target=true accepted=false score=85
+      Reason: Locator matched 2 elements.
 POM Generator V2 — DRY-RUN
 Page: car-details
 Status: CHANGES PROPOSED
@@ -59,10 +230,4 @@ Write result:
   0 files written
   Dry-run: no files should have been written.
 
-PS C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\Athena_Automation\VJ_Playwright> 
-
-[POM DEBUG] DOM candidates: 53
-VM106:1149 [POM DEBUG] All done candidates: 1
-VM106:1167 [POM DEBUG] All done normalized: Objectkind: "button"labels: {parentField: 'Car model', parentGroup: 'Car model', source: 'parent-field'}visibility: "visible"[[Prototype]]: Object
-VM106:1185 [POM DEBUG] All done locator: Objectaccepted: truelocators: {primary: {…}, fallbacks: Array(0)}[[Prototype]]: Object
-VM106:1196 [POM DEBUG] Scan totals: Objectaccepted: 19candidates: 53hidden: 31locatorRejected: 3[[Prototype]]: Object
+PS C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\Athena_Automation\VJ_Playwright>
