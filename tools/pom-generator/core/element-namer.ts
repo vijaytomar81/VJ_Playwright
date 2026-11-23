@@ -123,8 +123,9 @@ function deriveSemanticName(element: ScannedElement): string {
     } else {
         phrase = meaningful(
             labels.direct,
+            labels.accessible,
             fieldControl ? labels.parentField : undefined,
-            labels.accessible, fp.text, fp.placeholder,
+            fp.text, fp.placeholder,
             fp.name, fp.id, element.suggestedName,
         ) ?? '';
         if (!phrase || isGeneric(phrase)) {
