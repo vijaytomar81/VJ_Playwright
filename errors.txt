@@ -1,3 +1,17 @@
+PS C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\Athena_Automation\VJ_Playwright> npm run edge:cdp:start   
+                  
+> allianz-automation@1.0.0 edge:cdp:start
+> node tools/pom-generator/scripts/launch-edge-cdp.cjs
+                         
+Starting dedicated Microsoft Edge...
+Platform: win32 
+Process ID: 20600
+Profile: C:\Users\tp70707\.pom-generator-v2\edge-cdp-profile
+
+Edge CDP is ready.
+CDP: http://127.0.0.1:9222
+WebSocket: ws://127.0.0.1:9222/devtools/browser/0419c05b-c655-49ff-99b5-93e05661b1ea
+Open your application in the dedicated Edge window.
 PS C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\Athena_Automation\VJ_Playwright> npm run pom-generate -- `
 >>   --brand AZO `
 >>   --channel DJ `
@@ -207,8 +221,8 @@ Changes by type:
 
 Change details:
   [SAFE] Element added: allDoneButton
-  [SAFE] Element added: automaticRadio
-  [SAFE] Element added: electricRadio
+  [SAFE] Element added: carModelInput
+  [SAFE] Element added: fuelTypeElectricRadio
   [SAFE] Element added: linkToAllianzHomePageLink
   [SAFE] Element added: manageCookiesButton
   [SAFE] Element added: numberOfDoorsSelect
@@ -217,12 +231,12 @@ Change details:
   [SAFE] Element added: playVideoButton
   [SAFE] Element added: purchaseMonthInput
   [SAFE] Element added: purchaseYearInput
-  [SAFE] Element added: registrationNumberPolarQuestionNoRadio
-  [SAFE] Element added: registrationNumberPolarQuestionYesRadio
+  [SAFE] Element added: registrationNumberNoRadio
+  [SAFE] Element added: registrationNumberYesRadio
   [SAFE] Element added: selectTheCarInput
+  [SAFE] Element added: startTypingTheMakeOfYourVehicleInput
   [SAFE] Element added: theCarHasnTBeenBoughtYetCheckbox
-  [SAFE] Element added: vehicleMakeInput
-  [SAFE] Element added: vehicleShortenedModelInput
+  [SAFE] Element added: transmissionAutomaticRadio
   [SAFE] Element added: viewHowWeLlUseYourInfoLink
   [SAFE] Element added: yearOfManufactureSelect
 
@@ -230,4 +244,4 @@ Write result:
   0 files written
   Dry-run: no files should have been written.
 
-PS C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\Athena_Automation\VJ_Playwright>
+PS C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\Athena_Automation\VJ_Playwright> 
