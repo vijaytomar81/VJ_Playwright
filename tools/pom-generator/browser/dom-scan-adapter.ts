@@ -115,6 +115,101 @@ function validateScan(
     return scan;
 }
 
+async function validateLiveRadioGroups(
+    page: Page,
+    scan: PageScan,
+): Promise<void> {
+    for (const group of scan.groups) {
+        const candidate = group.locator?.primary;
+
+        if (
+            !candidate ||
+            candidate.strategy !== 'role' ||
+            (candidate.role !== 'group' &&
+                candidate.role !== 'radiogroup')
+        ) {
+            continue;
+        }
+
+        const name = candidate.name;
+
+        // Reject the proposed locator if its accessibility
+        // name is missing.
+        if (!name) {
+            delete group.locator;
+            console.warn(
+                `[POM] Radio group "${group.name}": ` +
+                'missing accessible name.',
+            );
+            continue;
+        }
+
+        const locator = page.getByRole(candidate.role, {
+            name,
+            exact: candidate.exact ?? true,
+        });
+
+        const count = await locator.count();
+
+        if (count !== 1) {
+            delete group.locator;
+            console.warn(
+                `[POM] Radio group "${group.name}": ` +
+                `expected one Playwright match, found ${count}.`,
+            );
+            continue;
+        }
+
+        const radios = locator.getByRole('radio');
+        const radioCount = await radios.count();
+
+        if (radioCount === 0) {
+            delete group.locator;
+            console.warn(
+                `[POM] Radio group "${group.name}": ` +
+                'no accessible radio options found.',
+            );
+            continue;
+        }
+
+        const optionNames = await radios.evaluateAll((elements) =>
+            elements.map((element) => {
+                const input = element as HTMLInputElement;
+
+                const ariaLabel = input.getAttribute('aria-label');
+                if (ariaLabel) return ariaLabel.trim();
+
+                const labels = Array.from(input.labels ?? []);
+                return labels
+                    .map((label) => label.textContent?.trim() ?? '')
+                    .filter(Boolean)
+                    .join(' ');
+            }),
+        );
+
+        const normalized = optionNames.map((name) =>
+            name.replace(/\s+/g, ' ').trim().toLowerCase(),
+        );
+
+        if (
+            normalized.some((name) => !name) ||
+            new Set(normalized).size !== normalized.length
+        ) {
+            delete group.locator;
+            console.warn(
+                `[POM] Radio group "${group.name}": ` +
+                'radio option names are empty or duplicated.',
+            );
+            continue;
+        }
+
+        console.log(
+            `[POM] Validated radio group "${group.name}" ` +
+            `with options: ${optionNames.join(', ')}`,
+        );
+    }
+}
+
 /**
  * Create a Playwright-to-browser-DOM scanner adapter.
  *
@@ -172,6 +267,8 @@ export function createDomScanAdapter(
         );
 
         const scan = validateScan(payload, pageName);
+
+        await validateLiveRadioGroups(page, scan);
 
         if (
             options.failOnWarnings &&
