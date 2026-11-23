@@ -1,25 +1,80 @@
-{html: '<button class="btn btn-white btn-center-edit-car-d…ils" type="button" tabindex="0">All done</button>', display: 'block', visibility: 'visible', opacity: '1', width: 200, …}
-display
-: 
-"block"
-height
-: 
-52
-html
-: 
-"<button class=\"btn btn-white btn-center-edit-car-details\" type=\"button\" tabindex=\"0\">All done</button>"
-matchingButtons
-: 
-1
-opacity
-: 
-"1"
-visibility
-: 
-"visible"
-width
-: 
-200
-[[Prototype]]
-: 
-Object
+> allianz-automation@1.0.0 edge:cdp:start
+> node tools/pom-generator/scripts/launch-edge-cdp.cjs
+
+Starting dedicated Microsoft Edge...
+Platform: win32
+Process ID: 17932
+Profile: C:\Users\tp70707\.pom-generator-v2\edge-cdp-profile
+
+Edge CDP is ready.
+CDP: http://127.0.0.1:9222
+WebSocket: ws://127.0.0.1:9222/devtools/browser/cf5e56e7-fe62-4458-9f8d-f4118612e88f
+Open your application in the dedicated Edge window.
+PS C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\Athena_Automation\VJ_Playwright> npm run pom-generate -- `
+>>   --brand AZO `
+>>   --channel DJ `
+>>   --product Motor `
+>>   --page car-details `
+>>   --mode create `
+>>   --dry-run `
+>>   --verbose
+
+> allianz-automation@1.0.0 pom-generate
+> npm run pom-generate:build && node dist/tools/pom-generator/cli/pom-generate.cli.js --brand AZO --channel DJ --product Motor --page car-details --mode create --dry-run --verbose
+
+
+> allianz-automation@1.0.0 pom-generate:build
+> tsc -p tools/pom-generator/tsconfig.build.json && tsc-alias -p tools/pom-generator/tsconfig.build.json
+
+POM Generator V2
+Brand:   AZO
+Channel: DJ
+Product: Motor
+Page:    car-details
+Mode:    create
+Output:  C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\Athena_Automation\VJ_Playwright\automationLayer\pomObjects\AZO\DJ\Motor
+Preview only: no generated file writes.
+POM Generator V2 — DRY-RUN
+Page: car-details
+Status: CHANGES PROPOSED
+
+Change summary:
+  Total: 17
+  Safe: 17
+  Review required: 0
+
+Changes by type:
+  Element added: 17
+
+Change details:
+  [SAFE] Element added: automaticRadio
+  [SAFE] Element added: electricRadio
+  [SAFE] Element added: linkToAllianzHomePageLink
+  [SAFE] Element added: manageCookiesButton
+  [SAFE] Element added: numberOfDoorsSelect
+  [SAFE] Element added: openChatWidgetButton
+  [SAFE] Element added: openTrustSealButton
+  [SAFE] Element added: purchaseMonthInput
+  [SAFE] Element added: purchaseYearInput
+  [SAFE] Element added: registrationNumberPolarQuestionNoRadio
+  [SAFE] Element added: registrationNumberPolarQuestionYesRadio
+  [SAFE] Element added: selectTheCarInput
+  [SAFE] Element added: theCarHasnTBeenBoughtYetCheckbox
+  [SAFE] Element added: vehicleMakeInput
+  [SAFE] Element added: vehicleShortenedModelInput
+  [SAFE] Element added: viewHowWeLlUseYourInfoLink
+  [SAFE] Element added: yearOfManufactureSelect
+
+Write result:
+  0 files written
+  Dry-run: no files should have been written.
+
+PS C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\Athena_Automation\VJ_Playwright> 
+
+[POM DEBUG] DOM candidates: 53
+VM108:1149 [POM DEBUG] All done candidates: 1
+VM108:1167 [POM DEBUG] All done normalized: Objectkind: "button"labels: {parentField: 'Car model', parentGroup: 'Car model', source: 'parent-field'}visibility: "visible"[[Prototype]]: Objectconstructor: ƒ Object()hasOwnProperty: ƒ hasOwnProperty()isPrototypeOf: ƒ isPrototypeOf()propertyIsEnumerable: ƒ propertyIsEnumerable()toLocaleString: ƒ toLocaleString()toString: ƒ toString()valueOf: ƒ valueOf()__defineGetter__: ƒ __defineGetter__()__defineSetter__: ƒ __defineSetter__()__lookupGetter__: ƒ __lookupGetter__()__lookupSetter__: ƒ __lookupSetter__()__proto__: (...)get __proto__: ƒ __proto__()set __proto__: ƒ __proto__()
+VM108:1185 [POM DEBUG] All done locator: Objectaccepted: falselocators: undefined[[Prototype]]: Object
+VM108:1196 [POM DEBUG] Scan totals: Objectaccepted: 17candidates: 53hidden: 31locatorRejected: 5[[Prototype]]: Object
+
+
