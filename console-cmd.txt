@@ -1,0 +1,22 @@
+(() => {
+    const input = document.getElementById('vehicle-make');
+    if (!input) return console.log('vehicle-make not found');
+
+    let node = input;
+    for (let depth = 0; node && depth < 6; depth++) {
+        console.log({
+            depth,
+            tag: node.tagName,
+            className: node.className,
+            id: node.id,
+            previousSibling: node.previousElementSibling?.outerHTML.slice(0, 500),
+            directLabels: [...node.children]
+                .filter(child => child.matches('label'))
+                .map(label => label.outerHTML.slice(0, 500)),
+            controlCount: node.querySelectorAll(
+                'input:not([type="hidden"]), select, textarea'
+            ).length
+        });
+        node = node.parentElement;
+    }
+})();
