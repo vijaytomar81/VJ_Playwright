@@ -125,7 +125,7 @@ pipeline {
                             catchError(buildResult: 'UNSTABLE', stageResult: 'UNSTABLE', catchInterruptions: false,
                                 message: 'JUnit results could not be published; continuing with other reports') {
                                 echo "[REPORTS] Publishing JUnit ${junitFile}"
-                                junit testResults: junitFile, allowEmptyResults: false
+                                junit testResults: toWorkspaceRelativePath(junitFile), allowEmptyResults: false
                             }
                         } else {
                             unstable("[REPORTS] Missing ${junitFile}; no Jenkins test-results view can be published.")
@@ -141,7 +141,7 @@ pipeline {
                                 message: 'Playwright HTML could not be published; continuing with other reports') {
                                 echo '[REPORTS] Publishing Playwright HTML report'
                                 publishHTML(target: [allowMissing: false, alwaysLinkToLastBuild: true, keepAll: true,
-                                    reportDir: htmlDirectory, reportFiles: 'index.html', reportName: 'Playwright Report'])
+                                    reportDir: toWorkspaceRelativePath(htmlDirectory), reportFiles: 'index.html', reportName: 'Playwright Report'])
                             }
                         }
 
@@ -163,7 +163,7 @@ pipeline {
                                     fi
                                 '''
                                 withEnv(["JAVA_HOME=${env.WORKSPACE}/.allure-jre"]) {
-                                    allure(includeProperties: false, results: [[path: allureDirectory]])
+                                    allure(includeProperties: false, results: [[path: toWorkspaceRelativePath(allureDirectory)]])
                                 }
                             }
                         }
@@ -181,7 +181,7 @@ pipeline {
 
                 if (paths) {
                     echo "[REPORTS] Archiving current run: ${paths.runDirectory}"
-                    archiveArtifacts artifacts: "${paths.runDirectory}/**", allowEmptyArchive: true
+                    archiveArtifacts artifacts: "${toWorkspaceRelativePath(paths.runDirectory)}/**", allowEmptyArchive: true
                 }
 
                 if (params.RECIPIENT_EMAILS?.trim()) {
@@ -216,4 +216,11 @@ def readCommonPlan() {
 @com.cloudbees.groovy.cps.NonCPS
 def parseCommonPlan(String text) {
     return new groovy.json.JsonSlurperClassic().parseText(text)
+}
+
+def toWorkspaceRelativePath(String path) {
+    def prefix = "${env.WORKSPACE}/"
+    return path.startsWith(prefix)
+        ? path.substring(prefix.length())
+        : path
 }

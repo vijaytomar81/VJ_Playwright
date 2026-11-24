@@ -200,7 +200,7 @@ pipeline {
                     }
 
                     // Marks the build UNSTABLE when tests fail and feeds Jenkins test trends.
-                    def summary = junit(testResults: junitFile)
+                    def summary = junit(testResults: toWorkspaceRelativePath(junitFile))
 
                     env.TESTS_TOTAL = summary.totalCount.toString()
                     env.TESTS_PASSED = summary.passCount.toString()
@@ -230,7 +230,7 @@ pipeline {
                     echo "[REPORTS] EvidenceFactory directory: ${paths.runDirectory}"
 
                     // Archive only this build's run, not all historical workspace runs.
-                    archiveArtifacts artifacts: "${paths.runDirectory}/**",
+                    archiveArtifacts artifacts: "${toWorkspaceRelativePath(paths.runDirectory)}/**",
                         allowEmptyArchive: true
 
                     // Report failures mark the build UNSTABLE without improving a FAILED build.
@@ -241,7 +241,7 @@ pipeline {
                                 allowMissing: false,
                                 alwaysLinkToLastBuild: true,
                                 keepAll: true,
-                                reportDir: paths.playwrightReportDirectory,
+                                reportDir: toWorkspaceRelativePath(paths.playwrightReportDirectory),
                                 reportFiles: 'index.html',
                                 reportName: 'Playwright Report'
                             ])
@@ -257,7 +257,7 @@ pipeline {
                                 message: 'Allure report could not be generated') {
                                 withEnv(["JAVA_HOME=${env.WORKSPACE}/.allure-jre"]) {
                                     allure(includeProperties: false,
-                                        results: [[path: paths.allureResultsDirectory]])
+                                        results: [[path: toWorkspaceRelativePath(paths.allureResultsDirectory)]])
                                 }
                             }
                         } else {
@@ -375,4 +375,11 @@ def resultsEmailBody(String result) {
 // TEST_FILTER is free text typed into the job form, so escape it before putting it in HTML.
 def escapeHtml(String text) {
     return (text ?: '').replace('&', '&amp;').replace('<', '&lt;').replace('>', '&gt;').replace('"', '&quot;')
+}
+
+def toWorkspaceRelativePath(String path) {
+    def prefix = "${env.WORKSPACE}/"
+    return path.startsWith(prefix)
+        ? path.substring(prefix.length())
+        : path
 }
