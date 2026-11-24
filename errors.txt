@@ -1,23 +1,13 @@
-PS C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\Athena_Automation\integration-tests> npx playwright --version
->> 
->> Select-String -Path ".\node_modules\playwright\lib\reporters\html.js" -Pattern "onEnd|onExit|_buildReport"
->> 
->> Select-String -Path ".\node_modules\playwright\lib\reporters\multiplexer.js" -Pattern "onEnd|onExit|await"
-Version 1.65.1
-Select-String : Cannot find path 'C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\Athena_Automation\integration-tests\node_modules\playwright\lib\reporters\html.js' because it does not 
-exist.
-At line:3 char:1
-+ Select-String -Path ".\node_modules\playwright\lib\reporters\html.js" ...
-+ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    + CategoryInfo          : ObjectNotFound: (C:\Users\tp7070...porters\html.js:String) [Select-String], ItemNotFoundException
-    + FullyQualifiedErrorId : PathNotFound,Microsoft.PowerShell.Commands.SelectStringCommand
- 
-Select-String : Cannot find path 'C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\Athena_Automation\integration-tests\node_modules\playwright\lib\reporters\multiplexer.js' because it does 
-not exist.
-At line:5 char:1
-+ Select-String -Path ".\node_modules\playwright\lib\reporters\multiple ...
-+ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    + CategoryInfo          : ObjectNotFound: (C:\Users\tp7070...\multiplexer.js:String) [Select-String], ItemNotFoundException
-    + FullyQualifiedErrorId : PathNotFound,Microsoft.PowerShell.Commands.SelectStringCommand
- 
-PS C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\Athena_Automation\integration-tests>
+npm ls @playwright/test playwright playwright-core
+
+Get-ChildItem -Path ".\node_modules\playwright\lib" -Recurse -File |
+    Where-Object {
+        $_.Name -match "html|multiplexer|reporter|bundle"
+    } |
+    Select-Object -ExpandProperty FullName
+
+
+
+Get-ChildItem -Path ".\node_modules\playwright" -Recurse -File -Filter "*.d.ts" |
+    Select-String -Pattern "onExit\(|onExit\?|onEnd\(|onEnd\?" -Context 5,5
+
