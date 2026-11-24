@@ -34,3 +34,9 @@ Select-String -Path ".\node_modules\playwright\types\testReporter.d.ts" -Pattern
 
 =======
 
+Reset the timeout after installation
+
+Remove-Item Env:PLAYWRIGHT_DOWNLOAD_CONNECTION_TIMEOUT -ErrorAction SilentlyContinue
+
+=======
+
