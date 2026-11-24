@@ -1,17 +1,10 @@
-PS C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\Athena_Automation\integration-tests> npm ci
-npm error code EUSAGE
-npm error
-npm error `npm ci` can only install packages when your package.json and package-lock.json or npm-shrinkwrap.json are in sync. Please update your lock file with `npm install` before continuing.
-npm error
-npm error Missing: allure-js-commons@3.15.0 from lock file
-npm error Missing: allure-playwright@3.15.0 from lock file
-npm error Missing: dependency-cruiser@18.9.0 from lock file
-npm error Missing: exceljs@3.10.0 from lock file
-npm error Missing: treee@0.1.0 from lock file
-npm error Missing: md5@2.3.0 from lock file
-npm error Invalid: lock file's acorn@8.18.0 does not satisfy acorn@8.19.0
-npm error Missing: acorn-jsx-walk@2.0.0 from lock file
-npm error Missing: acorn-loose@8.5.2 from lock file
-npm error Invalid: lock file's acorn-walk@8.3.4 does not satisfy acorn-walk@8.3.5
-npm error Missing: commander@15.1.0 from lock file
-npm error Missing: enhanced-resolve@5.27.0 from lock file
+browser: chromium
+browserVersion: 159.0.8154.6
+browserChannel
+viewport: 1280x720
+device: Windows (10.0.26200)
+headless: false
+scenarioId: BRI_DJ_PRE_NB001
+NBStartTime: 2026-11-24T10:38:26.789Z
+VRN: HJ64GZC
+screenshot: ../artifacts/screenshots/failure-chromium-837c5718d03cf37a-retry-0-repeat-0-worker-0.png
