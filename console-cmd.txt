@@ -15,3 +15,9 @@ Get-ChildItem -Path . -Force -Recurse -Filter ".evidencefactory-current-run.json
 
 Test-Path -LiteralPath ".\.evidencefactory-current-run.json" -PathType Leaf
 
+npx playwright --version
+
+Select-String -Path ".\node_modules\playwright\lib\reporters\html.js" -Pattern "onEnd|onExit|_buildReport"
+
+Select-String -Path ".\node_modules\playwright\lib\reporters\multiplexer.js" -Pattern "onEnd|onExit|await"
+
