@@ -1,236 +1,121 @@
-PS C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\Athena_Automation\VJ_Playwright> npm run pom-generate -- `
->>   --brand AZO `
->>   --channel DJ `
->>   --product Motor `
->>   --page car-details `
->>   --mode create `
->>   --dry-run `
->>   --verbose
-
-> allianz-automation@1.0.0 pom-generate
-> npm run pom-generate:build && node dist/tools/pom-generator/cli/pom-generate.cli.js --brand AZO --channel DJ --product Motor --page car-details --mode create --dry-run --verbose
-
-
-> allianz-automation@1.0.0 pom-generate:build
-> tsc -p tools/pom-generator/tsconfig.build.json && tsc-alias -p tools/pom-generator/tsconfig.build.json
-
-POM Generator V2
-Brand:   AZO
-Channel: DJ
-Product: Motor
-Page:    car-details
-Mode:    create
-Output:  C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\Athena_Automation\VJ_Playwright\automationLayer\pomObjects\AZO\DJ\Motor
-Preview only: no generated file writes.
-[POM] Validated radio group "Do you know the registration number of the car?" with options: Yes, No
-[POM] Validated radio group "Transmission" with options: Automatic
-[POM] Validated radio group "Fuel type" with options: Electric
-
-DOM SCAN DIAGNOSTICS
-====================
-Total candidates: 53
-Accepted: 19
-Hidden:   31
-Rejected: 3
-
-ACCEPTED (19)
-----------------------------------------
-  scan_0002 <a> kind=link name="Link to Allianz home page" id="goToAllianzHomePage"
-    Primary: strategy=role value="link" role="link" name="Link to Allianz home page" exact=true
-  scan_0003 <a> kind=link name="view how we’ll use your info" id="personal-info-use"
-    Primary: strategy=role value="link" role="link" name="view how we’ll use your info" exact=true
-  scan_0004 <input> kind=radio name="Yes" id="registrationNumberPolarQuestionfalse"
-    Primary: strategy=role value="radio" role="radio" name="Yes" exact=true
-  scan_0005 <input> kind=radio name="No" id="registrationNumberPolarQuestiontrue"
-    Primary: strategy=role value="radio" role="radio" name="No" exact=true
-  scan_0006 <button> kind=button name="Play video" id=""
-    Primary: strategy=role value="button" role="button" name="Play video" exact=true
-  scan_0007 <input> kind=input name="Start typing the make of your vehicle..." id="vehicle-make"
-    Primary: strategy=id value="vehicle-make"
-  scan_0008 <input> kind=input name="Start typing the model name of your vehicle..." id="vehicle-shortened-model"
-    Primary: strategy=id value="vehicle-shortened-model"
-  scan_0009 <select> kind=select name="vehicle-manufacture-year" id="vehicle-manufacture-year"
-    Primary: strategy=id value="vehicle-manufacture-year"
-  scan_0010 <input> kind=input name="Purchase month input field" id="purchase-date-month"
-    Primary: strategy=role value="textbox" role="textbox" name="Purchase month input field" exact=true
-  scan_0011 <input> kind=input name="Purchase year input field" id="purchase-date-year"
-    Primary: strategy=role value="textbox" role="textbox" name="Purchase year input field" exact=true
-  scan_0012 <input> kind=checkbox name="The car hasn't been bought yet" id="notBeenBoughtCheckbox"
-    Primary: strategy=role value="checkbox" role="checkbox" name="The car hasn't been bought yet" exact=true
-  scan_0013 <input> kind=radio name="Automatic" id="vehicleTransmissionA"
-    Primary: strategy=role value="radio" role="radio" name="Automatic" exact=true
-  scan_0014 <input> kind=radio name="Electric" id="vehicleFuelTypeE"
-    Primary: strategy=role value="radio" role="radio" name="Electric" exact=true
-  scan_0015 <select> kind=select name="vehicle-doors" id="vehicle-doors"
-    Primary: strategy=id value="vehicle-doors"
-  scan_0016 <input> kind=input name="Start typing the model name of your vehicle..." id="vehicle-model"
-    Primary: strategy=id value="vehicle-model"
-  scan_0017 <button> kind=button name="All done" id=""
-    Primary: strategy=role value="button" role="button" name="All done" exact=true
-  scan_0018 <button> kind=button name="Open Trust Seal" id=""
-    Primary: strategy=role value="button" role="button" name="Open Trust Seal" exact=true
-  scan_0051 <button> kind=button name="Manage Cookies" id=""
-    Primary: strategy=role value="button" role="button" name="Manage Cookies" exact=true
-  scan_0053 <button> kind=button name="Open Chat Widget" id=""
-    Primary: strategy=role value="button" role="button" name="Open Chat Widget" exact=true
-
-HIDDEN (31)
-----------------------------------------
-  scan_0001 <a> kind=link name="___" id=""
-    Visibility: hidden
-    Reason: Visibility: hidden
-  scan_0022 <a> kind=link name="Complaints" id="complaints"
-    Visibility: hidden
-    Reason: Visibility: hidden
-  scan_0023 <a> kind=link name="Our cookie policy" id="cookie-policy"
-    Visibility: hidden
-    Reason: Visibility: hidden
-  scan_0024 <a> kind=link name="Personal data rights" id="data-rights"
-    Visibility: hidden
-    Reason: Visibility: hidden
-  scan_0025 <button> kind=button name="Close preference center" id="close-pc-btn-handler"
-    Visibility: hidden
-    Reason: Visibility: hidden
-  scan_0026 <a> kind=link name="More information" id=""
-    Visibility: hidden
-    Reason: Visibility: hidden
-  scan_0027 <button> kind=button name="Allow All" id="accept-recommended-btn-handler"
-    Visibility: hidden
-    Reason: Visibility: hidden
-  scan_0028 <button> kind=button name="Strictly Necessary cookies Always Active" id=""
-    Visibility: hidden
-    Reason: Visibility: hidden
-  scan_0029 <button> kind=button name="View Vendor Details" id=""
-    Visibility: hidden
-    Reason: Visibility: hidden
-  scan_0030 <button> kind=button name="Performance cookies" id=""
-    Visibility: hidden
-    Reason: Visibility: hidden
-  scan_0031 <input> kind=checkbox name="Performance cookies" id="ot-group-id-2"
-    Visibility: hidden
-    Reason: Visibility: hidden
-  scan_0032 <button> kind=button name="View Vendor Details" id=""
-    Visibility: hidden
-    Reason: Visibility: hidden
-  scan_0033 <button> kind=button name="Functional cookies" id=""
-    Visibility: hidden
-    Reason: Visibility: hidden
-  scan_0034 <input> kind=checkbox name="Functional cookies" id="ot-group-id-3"
-    Visibility: hidden
-    Reason: Visibility: hidden
-  scan_0035 <button> kind=button name="View Vendor Details" id=""
-    Visibility: hidden
-    Reason: Visibility: hidden
-  scan_0036 <button> kind=button name="Targeting cookies" id=""
-    Visibility: hidden
-    Reason: Visibility: hidden
-  scan_0037 <input> kind=checkbox name="Targeting cookies" id="ot-group-id-4"
-    Visibility: hidden
-    Reason: Visibility: hidden
-  scan_0038 <button> kind=button name="View Vendor Details" id=""
-    Visibility: hidden
-    Reason: Visibility: hidden
-  scan_0039 <button> kind=button name="Back" id=""
-    Visibility: hidden
-    Reason: Visibility: hidden
-  scan_0040 <input> kind=input name="Vendor list search" id="vendor-search-handler"
-    Visibility: hidden
-    Reason: Visibility: hidden
-  scan_0041 <button> kind=button name="Filter Vendors List" id="filter-btn-handler"
-    Visibility: hidden
-    Reason: Visibility: hidden
-  scan_0042 <button> kind=button name="Clear" id="clear-filters-handler"
-    Visibility: hidden
-    Reason: Visibility: hidden
-  scan_0043 <input> kind=checkbox name="checkbox label" id="chkbox-id"
-    Visibility: hidden
-    Reason: Visibility: hidden
-  scan_0044 <button> kind=button name="Apply" id="filter-apply-handler"
-    Visibility: hidden
-    Reason: Visibility: hidden
-  scan_0045 <button> kind=button name="Cancel" id="filter-cancel-handler"
-    Visibility: hidden
-    Reason: Visibility: hidden
-  scan_0046 <input> kind=checkbox name="checkbox label" id="select-all-hosts-groups-handler"
-    Visibility: hidden
-    Reason: Visibility: hidden
-  scan_0047 <input> kind=checkbox name="checkbox label" id="select-all-vendor-groups-handler"
-    Visibility: hidden
-    Reason: Visibility: hidden
-  scan_0048 <input> kind=checkbox name="checkbox label" id="select-all-vendor-leg-handler"
-    Visibility: hidden
-    Reason: Visibility: hidden
-  scan_0049 <button> kind=button name="Confirm My Choices" id=""
-    Visibility: hidden
-    Reason: Visibility: hidden
-  scan_0050 <a> kind=link name="Powered by OneTrust Opens in a new Tab" id=""
-    Visibility: hidden
-    Reason: Visibility: hidden
-  scan_0052 <button> kind=button name="Close Preferences" id=""
-    Visibility: hidden
-    Reason: Visibility: hidden
-
-REJECTED (3)
-----------------------------------------
-  scan_0019 <a> kind=link name="Complaints" id="complaints"
-    Reason: No unique, stable locator.
-    Attempt: strategy=role value="link" role="link" name="Complaints" exact=true
-      matches=2 target=true accepted=false score=95
-      Reason: Locator matched 2 elements.
-    Attempt: strategy=id value="complaints"
-      matches=2 target=true accepted=false score=85
-      Reason: Locator matched 2 elements.
-  scan_0020 <a> kind=link name="Our cookie policy" id="cookie-policy"
-    Reason: No unique, stable locator.
-    Attempt: strategy=role value="link" role="link" name="Our cookie policy" exact=true
-      matches=2 target=true accepted=false score=95
-      Reason: Locator matched 2 elements.
-    Attempt: strategy=id value="cookie-policy"
-      matches=2 target=true accepted=false score=85
-      Reason: Locator matched 2 elements.
-  scan_0021 <a> kind=link name="Personal data rights" id="data-rights"
-    Reason: No unique, stable locator.
-    Attempt: strategy=role value="link" role="link" name="Personal data rights" exact=true
-      matches=2 target=true accepted=false score=95
-      Reason: Locator matched 2 elements.
-    Attempt: strategy=id value="data-rights"
-      matches=2 target=true accepted=false score=85
-      Reason: Locator matched 2 elements.
-POM Generator V2 — DRY-RUN
-Page: car-details
-Status: CHANGES PROPOSED
-
-Change summary:
-  Total: 19
-  Safe: 19
-  Review required: 0
-
-Changes by type:
-  Element added: 19
-
-Change details:
-  [SAFE] Element added: allDoneButton
-  [SAFE] Element added: carModelInput
-  [SAFE] Element added: fuelTypeElectricRadio
-  [SAFE] Element added: linkToAllianzHomePageLink
-  [SAFE] Element added: makeInput
-  [SAFE] Element added: manageCookiesButton
-  [SAFE] Element added: numberOfDoorsSelect
-  [SAFE] Element added: openChatWidgetButton
-  [SAFE] Element added: openTrustSealButton
-  [SAFE] Element added: playVideoButton
-  [SAFE] Element added: purchaseMonthInput
-  [SAFE] Element added: purchaseYearInput
-  [SAFE] Element added: registrationNumberNoRadio
-  [SAFE] Element added: registrationNumberYesRadio
-  [SAFE] Element added: selectTheCarInput
-  [SAFE] Element added: theCarHasnTBeenBoughtYetCheckbox
-  [SAFE] Element added: transmissionAutomaticRadio
-  [SAFE] Element added: viewHowWeLlUseYourInfoLink
-  [SAFE] Element added: yearOfManufactureSelect
-
-Write result:
-  0 files written
-  Dry-run: no files should have been written.
-
-PS C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\Athena_Automation\VJ_Playwright> 
+8 failed
+    [britannia] › automationLayer/insurance/lv/automatedTests/motor/regression/E2E_Scenarios.spec.ts:39:5 › Motor_E2E_TestCase3_PCW_CTM_ReplaceCar_ChangeAddress - Monthly @RegressionTestMotor 
+    [britannia] › automationLayer/insurance/lv/automatedTests/motor/regression/E2E_Scenarios.spec.ts:83:5 › Motor_E2E_TestCase6_PCW_CTM_EditCar_PrepareRenewal_RemovePncd @RegressionTestMotor 
+    [britannia] › automationLayer/insurance/lv/automatedTests/motor/regression/E2E_Scenarios.spec.ts:143:5 › Motor_E2E_TestCase7_Direct_EditCar_PrepareRenewal - Annual @RegressionTestMotor 
+    [britannia] › automationLayer/insurance/lv/automatedTests/motor/regression/E2E_Scenarios.spec.ts:189:5 › Motor_E2E_TestCase23_PCW_Confused_AgentReplaceCar - Annual @RegressionTestMotor 
+    [britannia] › automationLayer/insurance/lv/automatedTests/motor/regression/E2E_Scenarios.spec.ts:225:5 › Motor_E2E_TestCase25_PCW_CTM_AgentReplaceCar - Monthly @RegressionTestMotor 
+    [britannia] › automationLayer/insurance/lv/automatedTests/motor/smoke/AthenaSmoke_NewBusiness.spec.ts:301:5 › Smoke_TC16: Britannia cover paid annually, with legal expenses and protected no claims discount @AthenaSmoke 
+    [britannia] › automationLayer/insurance/lv/automatedTests/motor/smoke/AthenaSmoke_NewBusiness.spec.ts:401:5 › Smoke_TC21: Essentials cover paid monthly, one additional driver @AthenaSmoke 
+    [britannia] › automationLayer/insurance/lv/automatedTests/motor/smoke/DeploymentSmoke.spec.ts:134:5 › Motor_PCW_MSM_PolicyPurchased - Annual @DeploymentSmokeTest 
+  58 passed (41.0m)
+EvidenceFactory: Excel report generated: /home/jenkins/work/workspace/TestEnvPlaywrightBritannia/test-results/evidence-run-2026-11-24T06-46-11-047Z/excel-report/evidence-report-run-2026-11-24T06-46-11-047Z.xlsx
+EvidenceReporter: 58 passed, 8 failed, 0 not executed
+EvidenceReporter: Excel report: /home/jenkins/work/workspace/TestEnvPlaywrightBritannia/test-results/evidence-run-2026-11-24T06-46-11-047Z/excel-report/evidence-report-run-2026-11-24T06-46-11-047Z.xlsx
+[Pipeline] }
+[Pipeline] // withCredentials
+[Pipeline] }
+[Pipeline] // withCredentials
+[Pipeline] }
+[Pipeline] // withCredentials
+[Pipeline] }
+[Pipeline] // timeout
+[Pipeline] }
+[Pipeline] // script
+[Pipeline] }
+[Pipeline] // stage
+[Pipeline] stage
+[Pipeline] { (Evaluate results)
+[Pipeline] script
+[Pipeline] {
+[Pipeline] sh
++ node configLayer/execution/commonJob/runner.cjs evaluate
+....
+....
+[Pipeline] unstable
+WARNING: Failed, skipped, or flaky scenarios. See EvidenceFactory results-summary.json and reports.
+[Pipeline] }
+[Pipeline] // script
+[Pipeline] }
+[Pipeline] // stage
+[Pipeline] stage
+[Pipeline] { (Declarative: Post Actions)
+[Pipeline] script
+[Pipeline] {
+[Pipeline] echo
+[REPORTS] prepared=true; mode=Execute tests; HTML=true; Allure=true
+[Pipeline] fileExists
+[Pipeline] readFile
+[Pipeline] echo
+[REPORTS] EvidenceFactory directory: /home/jenkins/work/workspace/TestEnvPlaywrightBritannia/test-results/evidence-run-2026-11-24T06-46-11-047Z
+[Pipeline] fileExists
+[Pipeline] catchError
+[Pipeline] {
+[Pipeline] echo
+[REPORTS] Publishing JUnit /home/jenkins/work/workspace/TestEnvPlaywrightBritannia/test-results/evidence-run-2026-11-24T06-46-11-047Z/junit/results.xml
+[Pipeline] junit
+Recording test results
+No test report files were found. Configuration error?
+[Pipeline] }
+ERROR: JUnit results could not be published; continuing with other reports
+ERROR: No test report files were found. Configuration error?
+[Pipeline] // catchError
+[Pipeline] fileExists
+[Pipeline] catchError
+[Pipeline] {
+[Pipeline] echo
+[REPORTS] Publishing Playwright HTML report
+[Pipeline] publishHTML
+[htmlpublisher] Archiving HTML reports...
+[htmlpublisher] Archiving at BUILD level /home/jenkins/work/workspace/TestEnvPlaywrightBritannia/test-results/evidence-run-2026-11-24T06-46-11-047Z/playwright to Playwright_20Report
+[htmlpublisher] Copying recursive using current thread
+[Pipeline] }
+[Pipeline] // catchError
+[Pipeline] fileExists
+[Pipeline] catchError
+[Pipeline] {
+[Pipeline] echo
+[REPORTS] Generating Allure report
+[Pipeline] sh
++ [ ! -x .allure-jre/bin/java ]
++ mkdir -p .allure-jre
++ node -e fetch('https://api.adoptium.net/v3/binary/latest/17/ga/linux/x64/jre/hotspot/normal/eclipse').then(r => { if (!r.ok) throw new Error('HTTP '+r.status); return r.arrayBuffer(); }).then(b => require('fs').writeFileSync('.allure-jre.tar.gz',Buffer.from(b)))
++ tar -xzf .allure-jre.tar.gz -C .allure-jre --strip-components=1
++ rm -f .allure-jre.tar.gz
+[Pipeline] withEnv
+[Pipeline] {
+[Pipeline] allure
+[Allure] No installation selected, using the only available: allure
+Unpacking https://repo1.maven.org/maven2/io/qameta/allure/allure-commandline/2.43.0/allure-commandline-2.43.0.zip to /home/jenkins/work/tools/org.allurereport.jenkins.tools.AllureCommandlineInstallation/allure on test-playwright-docker-agent-1-0006y77th2xii on LV cloud
+Using Allure 2
+Using Allure CLI: /home/jenkins/work/tools/org.allurereport.jenkins.tools.AllureCommandlineInstallation/allure/bin/allure
+[TestEnvPlaywrightBritannia] $ /home/jenkins/work/tools/org.allurereport.jenkins.tools.AllureCommandlineInstallation/allure/bin/allure generate -c -o /home/jenkins/work/workspace/TestEnvPlaywrightBritannia/allure-report
+allure-results does not exist
+Report successfully generated to /home/jenkins/work/workspace/TestEnvPlaywrightBritannia/allure-report
+Allure report was successfully generated.
+Archiving Allure report via ArtifactManager…
+Allure artifact archived via ArtifactManager.
+[Pipeline] }
+[Pipeline] // withEnv
+[Pipeline] }
+[Pipeline] // catchError
+[Pipeline] fileExists
+[Pipeline] echo
+[REPORTS] EvidenceFactory Excel report available: /home/jenkins/work/workspace/TestEnvPlaywrightBritannia/test-results/evidence-run-2026-11-24T06-46-11-047Z/excel-report/evidence-report-run-2026-11-24T06-46-11-047Z.xlsx
+[Pipeline] echo
+[REPORTS] Archiving current run: /home/jenkins/work/workspace/TestEnvPlaywrightBritannia/test-results/evidence-run-2026-11-24T06-46-11-047Z
+[Pipeline] archiveArtifacts
+Archiving artifacts
+‘/home/jenkins/work/workspace/TestEnvPlaywrightBritannia/test-results/evidence-run-2026-11-24T06-46-11-047Z/**’ doesn’t match anything, but ‘test-results/evidence-run-2026-11-24T06-46-11-047Z/**’ does. Perhaps that’s what you mean?
+No artifacts found that match the file pattern "/home/jenkins/work/workspace/TestEnvPlaywrightBritannia/test-results/evidence-run-2026-11-24T06-46-11-047Z/**". Configuration error?
+[Pipeline] }
+[Pipeline] // script
+[Pipeline] }
+[Pipeline] // stage
+[Pipeline] }
+[Pipeline] // withEnv
+[Pipeline] }
+[Pipeline] // withEnv
+[Pipeline] }
+[Pipeline] // node
+[Pipeline] End of Pipeline
+Finished: UNSTABLE
