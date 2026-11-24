@@ -1,12 +1,3 @@
-git branch --show-current
-git status
-git add .
-git diff --cached --stat
-git commit -m "Update evidence factory and resolve dependency issues"
-
-
-git push -u origin HEAD
-
 =====
 
 Create new branch:
@@ -17,3 +8,15 @@ git fetch origin &&
 git switch -c evidence_factory_fix origin/develop &&
 git push -u origin evidence_factory_fix
 
+=====
+
+commit and Push
+
+git branch --show-current
+git status
+git add .
+git diff --cached --stat
+git commit -m "Fix evidence factory issues"
+git push -u origin evidence_factory_fix
+
+=====
