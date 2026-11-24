@@ -1,1 +1,26 @@
-/home/jenkins/work/workspace/TestEnvPlaywrightBritannia on test-playwright-docker-agent-1-0006y77th2xii
+PS C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\Athena_Automation\integration-tests> Get-ChildItem -Path . -Force -Recurse -Filter ".evidencefactory-current-run.json"
+Get-ChildItem : Could not find a part of the path 'C:\Users\tp70707\OneDrive - Allianz\My 
+Documents\Automation\Athena_Automation\integration-tests\test-results\Britannia-run-2026-11-20T14-19-51-813Z\artifacts\Regression-Britannia_Hexa--3877c-i-Premier-Annual-Bri-Annual-chromium'.
+At line:1 char:1
++ Get-ChildItem -Path . -Force -Recurse -Filter ".evidencefactory-curre ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : ReadError: (C:\Users\tp7070...Annual-chromium:String) [Get-ChildItem], DirectoryNotFoundException
+    + FullyQualifiedErrorId : DirIOError,Microsoft.PowerShell.Commands.GetChildItemCommand
+ 
+Get-ChildItem : Could not find a part of the path 'C:\Users\tp70707\OneDrive - Allianz\My 
+Documents\Automation\Athena_Automation\integration-tests\test-results\Britannia-run-2026-11-23T11-17-08-952Z\artifacts\Regression-Britannia_Hexa--3877c-i-Premier-Annual-Bri-Annual-chromium'.
+At line:1 char:1
++ Get-ChildItem -Path . -Force -Recurse -Filter ".evidencefactory-curre ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : ReadError: (C:\Users\tp7070...Annual-chromium:String) [Get-ChildItem], DirectoryNotFoundException
+    + FullyQualifiedErrorId : DirIOError,Microsoft.PowerShell.Commands.GetChildItemCommand
+ 
+Get-ChildItem : Could not find a part of the path 'C:\Users\tp70707\OneDrive - Allianz\My 
+Documents\Automation\Athena_Automation\integration-tests\test-results\Britannia-run-2026-11-24T10-37-50-984Z\artifacts\Regression-Britannia_Hexa--3877c-i-Premier-Annual-Bri-Annual-chromium'.
+At line:1 char:1
++ Get-ChildItem -Path . -Force -Recurse -Filter ".evidencefactory-curre ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : ReadError: (C:\Users\tp7070...Annual-chromium:String) [Get-ChildItem], DirectoryNotFoundException
+    + FullyQualifiedErrorId : DirIOError,Microsoft.PowerShell.Commands.GetChildItemCommand
+ 
+PS C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\Athena_Automation\integration-tests>
