@@ -20,3 +20,13 @@ git commit -m "Fix evidence factory issues"
 git push -u origin evidence_factory_fix
 
 =====
+
+Reset and hard pull:
+
+git fetch origin &&
+git reset --hard origin/develop
+
+git clean -nd
+
+git clean -fd
+
