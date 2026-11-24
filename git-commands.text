@@ -30,3 +30,12 @@ git clean -nd
 
 git clean -fd
 
+=====
+
+Compare two branches:
+
+git fetch origin &&
+git rev-list --left-right --count evidence_factory_fix...origin/develop
+
+git status --short
+
