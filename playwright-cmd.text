@@ -1,0 +1,36 @@
+=======
+
+Step 1 — Correct the Playwright version
+
+npm install @playwright/test@1.62.1 --no-save --package-lock=false
+
+=======
+
+Step 2 — Install all browsers
+
+$env:PLAYWRIGHT_DOWNLOAD_CONNECTION_TIMEOUT = "300000"
+
+npx playwright install
+
+=======
+
+Step 3 — Verify the Playwright version
+
+npx playwright --version
+
+npm ls @playwright/test playwright playwright-core
+
+=======
+
+Step 4 — Verify installed browsers
+
+npx playwright install --list
+
+=======
+
+Step 5 — Verify the reporter lifecycle
+
+Select-String -Path ".\node_modules\playwright\types\testReporter.d.ts" -Pattern "onExit\?" -Context 5,5
+
+=======
+
