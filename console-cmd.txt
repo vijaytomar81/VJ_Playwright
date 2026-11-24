@@ -8,3 +8,8 @@ JenkinsfileTestsWithReport
 reportingLayer/evidenceFactory/README.md
 
 tp70707@AVD-HEX-73 MINGW64 ~/OneDrive - Allianz/My Documents/Automation/Athena_Automation/integration-tests (evidence_factory)
+
+
+
+Get-ChildItem -Path . -Force -Recurse -Filter ".evidencefactory-current-run.json"
+
