@@ -1,36 +1,50 @@
-=======
+PS C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\Athena_Automation\integration-tests> npx playwright --version
+>> 
+>> npm ls @playwright/test playwright playwright-core
+Version 1.62.1
+ferryplaywright@1.0.0 C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\Athena_Automation\integration-tests
+├─┬ @playwright/test@1.62.1
+│ └─┬ playwright@1.62.1
+│   └── playwright-core@1.62.1
+└─┬ allure-playwright@3.15.0
+  └── @playwright/test@1.62.1 deduped
 
-Step 1 — Correct the Playwright version
+PS C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\Athena_Automation\integration-tests> npx playwright install --list
 
-npm install @playwright/test@1.62.1 --no-save --package-lock=false
+Playwright version: 1.62.1
+  Browsers:
+    C:\Users\tp70707\AppData\Local\ms-playwright\chromium-1234
+    C:\Users\tp70707\AppData\Local\ms-playwright\chromium_headless_shell-1234
+    C:\Users\tp70707\AppData\Local\ms-playwright\ffmpeg-1011
+    C:\Users\tp70707\AppData\Local\ms-playwright\firefox-1538
+    C:\Users\tp70707\AppData\Local\ms-playwright\webkit-2336
+    C:\Users\tp70707\AppData\Local\ms-playwright\winldd-1007
+  References:
+    C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\Athena_Automation\integration-tests\node_modules\playwright-core
 
-=======
+Playwright version: 1.63.0
+  Browsers:
+    C:\Users\tp70707\AppData\Local\ms-playwright\chromium-1243
+    C:\Users\tp70707\AppData\Local\ms-playwright\chromium_headless_shell-1243
+    C:\Users\tp70707\AppData\Local\ms-playwright\ffmpeg-1011
+    C:\Users\tp70707\AppData\Local\ms-playwright\firefox-1543
+    C:\Users\tp70707\AppData\Local\ms-playwright\webkit-2359
+    C:\Users\tp70707\AppData\Local\ms-playwright\winldd-1007
+  References:
+    C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\Athena_Automation\VJ_Playwright\node_modules\playwright-core
+PS C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\Athena_Automation\integration-tests> Select-String -Path ".\node_modules\playwright\types\testReporter.d.ts" -Pattern "onExit\?" -Context 5,5
 
-Step 2 — Install all browsers
+  node_modules\playwright\types\testReporter.d.ts:177:  /**
+  node_modules\playwright\types\testReporter.d.ts:178:   * Called immediately before test runner exists. At this point all the reporters have received the
+  node_modules\playwright\types\testReporter.d.ts:179:   * [reporter.onEnd(result)](https://playwright.dev/docs/api/class-reporter#reporter-on-end) signal, so all the reports
+  node_modules\playwright\types\testReporter.d.ts:180:   * should be build. You can run the code that uploads the reports in this hook.
+  node_modules\playwright\types\testReporter.d.ts:181:   */
+> node_modules\playwright\types\testReporter.d.ts:182:  onExit?(): Promise<void>;
+  node_modules\playwright\types\testReporter.d.ts:183:
+  node_modules\playwright\types\testReporter.d.ts:184:  /**
+  node_modules\playwright\types\testReporter.d.ts:185:   * Called when something has been written to the standard error in the worker process.
+  node_modules\playwright\types\testReporter.d.ts:186:   * @param chunk Output chunk.
+  node_modules\playwright\types\testReporter.d.ts:187:   * @param test Test that was running. Note that output may happen when no test is running, in which case this will be [void].
 
-$env:PLAYWRIGHT_DOWNLOAD_CONNECTION_TIMEOUT = "300000"
 
-npx playwright install
-
-=======
-
-Step 3 — Verify the Playwright version
-
-npx playwright --version
-
-npm ls @playwright/test playwright playwright-core
-
-=======
-
-Step 4 — Verify installed browsers
-
-npx playwright install --list
-
-=======
-
-Step 5 — Verify the reporter lifecycle
-
-Select-String -Path ".\node_modules\playwright\types\testReporter.d.ts" -Pattern "onExit\?" -Context 5,5
-
-=======
-
+PS C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\Athena_Automation\integration-tests> 
