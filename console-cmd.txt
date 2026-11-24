@@ -1,1 +1,10 @@
 git grep -l -E 'archiveArtifacts|publishHTML|Publishing JUnit|Archiving current run|Generating Allure report|EvidenceFactory directory'
+
+
+tp70707@AVD-HEX-73 MINGW64 ~/OneDrive - Allianz/My Documents/Automation/Athena_Automation/integration-tests (evidence_factory)
+$ git grep -l -E 'archiveArtifacts|publishHTML|Publishing JUnit|Archiving current run|Generating Allure report|EvidenceFactory directory'
+JenkinsfileCommonTests
+JenkinsfileTestsWithReport
+reportingLayer/evidenceFactory/README.md
+
+tp70707@AVD-HEX-73 MINGW64 ~/OneDrive - Allianz/My Documents/Automation/Athena_Automation/integration-tests (evidence_factory)
