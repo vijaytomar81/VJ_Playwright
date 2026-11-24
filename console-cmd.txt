@@ -13,3 +13,5 @@ tp70707@AVD-HEX-73 MINGW64 ~/OneDrive - Allianz/My Documents/Automation/Athena_A
 
 Get-ChildItem -Path . -Force -Recurse -Filter ".evidencefactory-current-run.json"
 
+Test-Path -LiteralPath ".\.evidencefactory-current-run.json" -PathType Leaf
+
