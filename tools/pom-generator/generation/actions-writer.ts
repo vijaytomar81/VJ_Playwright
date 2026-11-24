@@ -1,8 +1,9 @@
 
 import type {
-    ActionOperation,
+    ElementActionOperation,
+    ElementStoredAction,
     PageMetadata,
-    StoredAction,
+    RadioGroupStoredAction,
     StoredElement,
 } from '../models/generator.types';
 
@@ -17,11 +18,20 @@ export interface ActionsWriterResult {
     warnings: string[];
 }
 
-interface ActionDefinition {
-    action: StoredAction;
+interface ElementActionDefinition {
+    action: ElementStoredAction;
     element: StoredElement;
     indexed: boolean;
 }
+
+interface RadioActionDefinition {
+    action: RadioGroupStoredAction;
+    groupAccessor: string;
+}
+
+type ActionDefinition =
+    | ElementActionDefinition
+    | RadioActionDefinition;
 
 const IDENTIFIER = /^[A-Za-z_$][A-Za-z0-9_$]*$/;
 
@@ -62,8 +72,13 @@ function validateImportPath(value: string): string {
     return value;
 }
 
+function toGroupAccessorName(value: string): string {
+    const pascal = toPascalCase(value);
+    return pascal[0].toLowerCase() + pascal.slice(1) + 'Group';
+}
+
 function isSupportedOperation(
-    operation: ActionOperation,
+    operation: ElementActionOperation,
     kind: StoredElement['kind'],
 ): boolean {
     switch (operation) {
@@ -97,14 +112,11 @@ function isSupportedOperation(
                 'textarea',
                 'combobox',
             ].includes(kind);
-
-        default:
-            return false;
     }
 }
 
 function valueParameter(
-    operation: ActionOperation,
+    operation: ElementActionOperation,
 ): string | undefined {
     switch (operation) {
         case 'fill':
@@ -118,7 +130,7 @@ function valueParameter(
 }
 
 function actionStatement(
-    operation: ActionOperation,
+    operation: ElementActionOperation,
 ): string {
     switch (operation) {
         case 'fill':
@@ -152,29 +164,18 @@ function collectActions(
         ]),
     );
 
+    const groups = new Map(
+        metadata.groups.map((group) => [
+            group.key,
+            group,
+        ]),
+    );
+
     const result: ActionDefinition[] = [];
     const methodNames = new Set<string>();
     const actionKeys = new Set<string>();
 
     for (const action of metadata.actions) {
-        const element = elements.get(action.elementKey);
-
-        if (!element) {
-            warnings.push(
-                `Action "${action.stableKey}" references ` +
-                `unknown element "${action.elementKey}".`,
-            );
-            continue;
-        }
-
-        if (element.status !== 'active') {
-            warnings.push(
-                `Action "${action.stableKey}" references ` +
-                `inactive element "${element.stableKey}".`,
-            );
-            continue;
-        }
-
         if (
             !IDENTIFIER.test(action.methodName) ||
             RESERVED.has(action.methodName)
@@ -198,41 +199,95 @@ function collectActions(
             );
         }
 
-        if (!isSupportedOperation(action.operation, element.kind)) {
-            warnings.push(
-                `Action "${action.stableKey}" has unsupported ` +
-                `operation "${action.operation}" for "${element.kind}".`,
-            );
-            continue;
-        }
+        if (action.operation === 'selectRadio') {
+            const group = groups.get(action.groupKey);
+            const candidate = group?.locator?.primary;
 
-        const indexed = Boolean(
-            action.indexed || element.indexed,
-        );
+            if (
+                !group ||
+                candidate?.strategy !== 'role' ||
+                (
+                    candidate.role !== 'group' &&
+                    candidate.role !== 'radiogroup'
+                ) ||
+                !candidate.name
+            ) {
+                warnings.push(
+                    `Radio action "${action.stableKey}" has no ` +
+                    'validated group locator.',
+                );
+                continue;
+            }
 
-        if (indexed && !element.repeatableGroupKey) {
-            warnings.push(
-                `Indexed action "${action.stableKey}" has no ` +
-                'repeatable group.',
+            const groupAccessor = toGroupAccessorName(
+                group.name,
             );
-            continue;
+
+            result.push({
+                action,
+                groupAccessor,
+            });
+        } else {
+            const element = elements.get(action.elementKey);
+
+            if (!element) {
+                warnings.push(
+                    `Action "${action.stableKey}" references ` +
+                    `unknown element "${action.elementKey}".`,
+                );
+                continue;
+            }
+
+            if (element.status !== 'active') {
+                warnings.push(
+                    `Action "${action.stableKey}" references ` +
+                    `inactive element "${element.stableKey}".`,
+                );
+                continue;
+            }
+
+            if (
+                !isSupportedOperation(
+                    action.operation,
+                    element.kind,
+                )
+            ) {
+                warnings.push(
+                    `Action "${action.stableKey}" has unsupported ` +
+                    `operation "${action.operation}" for ` +
+                    `"${element.kind}".`,
+                );
+                continue;
+            }
+
+            const indexed = Boolean(
+                action.indexed || element.indexed,
+            );
+
+            if (indexed && !element.repeatableGroupKey) {
+                warnings.push(
+                    `Indexed action "${action.stableKey}" has no ` +
+                    'repeatable group.',
+                );
+                continue;
+            }
+
+            result.push({
+                action,
+                element,
+                indexed,
+            });
         }
 
         actionKeys.add(action.stableKey);
         methodNames.add(action.methodName);
-
-        result.push({
-            action,
-            element,
-            indexed,
-        });
     }
 
     return result;
 }
 
-function renderAction(
-    definition: ActionDefinition,
+function renderElementAction(
+    definition: ElementActionDefinition,
 ): string {
     const { action, element, indexed } = definition;
     const parameters: string[] = [];
@@ -257,6 +312,42 @@ function renderAction(
         `    ${actionStatement(action.operation)}`,
         '  }',
     ].join('\n');
+}
+
+function renderRadioAction(
+    definition: RadioActionDefinition,
+): string {
+    const { action, groupAccessor } = definition;
+
+    return [
+        `  async ${action.methodName}(value: string): Promise<void> {`,
+        `    const group = await this.page.${groupAccessor}();`,
+        "    const radio = group.getByRole('radio', {",
+        '      name: value,',
+        '      exact: true,',
+        '    });',
+        '    const count = await radio.count();',
+        '    if (count !== 1) {',
+        '      throw new Error(',
+        `        ${JSON.stringify(
+            `Radio action "${action.methodName}" expected one option`,
+        )} +`,
+        '        ` for "${value}", found ${count}.`,',
+        '      );',
+        '    }',
+        '    await radio.check();',
+        '  }',
+    ].join('\n');
+}
+
+function renderAction(
+    definition: ActionDefinition,
+): string {
+    if ('groupAccessor' in definition) {
+        return renderRadioAction(definition);
+    }
+
+    return renderElementAction(definition);
 }
 
 export function generateActionsFile(

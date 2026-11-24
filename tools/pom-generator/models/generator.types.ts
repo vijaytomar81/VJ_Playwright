@@ -146,7 +146,7 @@ export interface StoredElement {
     indexed?: boolean;
 }
 
-export type ActionOperation =
+export type ElementActionOperation =
     | 'fill'
     | 'click'
     | 'check'
@@ -154,14 +154,30 @@ export type ActionOperation =
     | 'selectOption'
     | 'press';
 
-export interface StoredAction {
+export type ActionOperation =
+    | ElementActionOperation
+    | 'selectRadio';
+
+export interface ElementStoredAction {
     stableKey: ActionKey;
     elementKey: ElementKey;
+    groupKey?: never;
     methodName: string;
-    operation: ActionOperation;
+    operation: ElementActionOperation;
     indexed?: boolean;
 }
+export interface RadioGroupStoredAction {
+    stableKey: ActionKey;
+    groupKey: GroupKey;
+    elementKey?: never;
+    methodName: string;
+    operation: 'selectRadio';
+    indexed?: never;
+}
 
+export type StoredAction =
+    | ElementStoredAction
+    | RadioGroupStoredAction;
 export interface PageMetadata {
     schemaVersion: 2;
     pageName: string;

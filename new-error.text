@@ -1,3 +1,0 @@
-npx playwright --version
-npm ls @playwright/test playwright playwright-core
-npx playwright install --list

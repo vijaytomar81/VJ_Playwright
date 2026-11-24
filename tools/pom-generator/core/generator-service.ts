@@ -2,7 +2,7 @@ import { readFile } from 'node:fs/promises';
 import { join, relative, resolve, sep } from 'node:path';
 import type { Page } from '@playwright/test';
 import type {
-    ActionOperation,
+    ElementActionOperation,
     ChangePlan,
     GeneratorMode,
     GeneratorResult,
@@ -68,7 +68,7 @@ function nextKey(
         return key;
     };
 }
-function operationFor(element: StoredElement): ActionOperation {
+function operationFor(element: StoredElement): ElementActionOperation {
     switch (element.kind) {
         case 'checkbox':
         case 'radio':

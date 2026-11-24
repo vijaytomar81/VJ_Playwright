@@ -220,6 +220,16 @@ function removeLegacyIdComments(source: string): string {
     );
 }
 
+function sameActionAssociation(
+    previous: StoredAction,
+    current: StoredAction,
+): boolean {
+    return previous.operation === current.operation &&
+        (previous.operation === 'selectRadio'
+            ? previous.groupKey === current.groupKey
+            : previous.elementKey === current.elementKey);
+}
+
 export function mergeActionFiles(
     existingSource: string,
     generatedSource: string,
@@ -284,9 +294,9 @@ export function mergeActionFiles(
         const oldAction = previous.get(id);
 
         if (oldAction) {
-            if (oldAction.elementKey !== action.elementKey) {
+            if (!sameActionAssociation(oldAction, action)) {
                 throw new Error(
-                    `Action "${id}" changed its element association.`,
+                    `Action "${id}" changed its element or group association.`,
                 );
             }
 
