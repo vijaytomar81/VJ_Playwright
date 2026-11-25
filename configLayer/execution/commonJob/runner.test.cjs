@@ -128,6 +128,10 @@ test('discovery and execution use the same project and filters', () => {
   assert.ok(argsFor(p, false).some((arg) => arg.includes('brand-allure-reporter.ts')));
   assert.ok(argsFor(make(), false).some((arg) => arg.includes(',allure-playwright,')));
   assert.ok(!argsFor(p, true).some((arg) => arg.includes('allure')));
+  assert.ok(argsFor(p, false).some((arg) => arg.includes(',json,')));
+  assert.ok(argsFor(make(), false).some((arg) => arg.includes(',json,')));
+  assert.ok(!argsFor(p, true).some((arg) => arg.includes(',json,')));
+  assert.ok(!argsFor(p, false).some((arg) => arg.includes('custom-html-reporter')));
 });
 
 test('runner clears inherited framework/auth settings and forces CI browser behavior', () => {
@@ -161,6 +165,7 @@ test('runner clears inherited framework/auth settings and forces CI browser beha
   assert.equal(env.SUPPORT_PORTAL_USERNAME, 'synthetic-user');
   assert.equal(env.SUPPORT_PORTAL_PASSWORD, 'synthetic-password');
   assert.equal(env.COMMON_JOB_PHASE, 'list');
+  assert.equal(envFor(make(), {}, false).PLAYWRIGHT_JSON_OUTPUT_FILE, 'results.json');
 });
 
 test('parameter plan records choices but never copies secrets', () => {

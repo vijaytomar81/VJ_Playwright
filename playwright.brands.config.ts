@@ -119,7 +119,7 @@ export default defineConfig({
   workers: parseWorkers(process.env.WORKERS),
   reporter: [
     ['list'],
-    ['./reportingLayer/custom-html-reporter.js'],
+    ['json', { outputFile: 'results.json' }],
     ['html', { open: 'never', outputFolder: 'playwright-report' }],
     ['junit', { outputFile: 'results.xml' }],
     ['./reportingLayer/brand-allure-reporter.ts', { resultsDir: 'allure-results' }],
