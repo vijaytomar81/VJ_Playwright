@@ -16,6 +16,8 @@
     "node": "^20.19.0 || ^22.13.0 || >=24"
   },
   "devDependencies": {
+    "@babel/parser": "7.29.14",
+    "@babel/types": "7.29.14",
     "@eslint/js": "^10.0.1",
     "@playwright/test": "1.62.1",
     "@types/node": "^25.2.0",
@@ -24,6 +26,7 @@
     "chance": "^1.1.13",
     "cross-env": "^10.1.0",
     "dependency-cruiser": "^18.7.1",
+    "esbuild": "0.28.2",
     "eslint": "^10.11.0",
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-playwright": "^2.12.0",
@@ -36,6 +39,7 @@
     "xlsx": "^0.18.5"
   },
   "dependencies": {
+    "@azure/msal-node": "7.2.2",
     "dotenv": "^17.2.3",
     "exceljs": "^3.4.0",
     "googleapis": "^170.1.0",

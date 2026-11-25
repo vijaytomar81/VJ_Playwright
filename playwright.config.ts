@@ -1,13 +1,5 @@
 import { defineConfig, devices } from '@playwright/test';
 
-import {
-  evidenceFields,
-} from './configLayer/schema/evidence/evidence-schema';
-
-import {
-  summarySchema,
-} from './configLayer/schema/evidence/summary-schema';
-
 export default defineConfig({
 
   /*
@@ -38,17 +30,6 @@ export default defineConfig({
   retries: process.env.CI ? 2 : 0,
 
   workers: process.env.CI ? 1 : undefined,
-
-  /*
-   * Consumer-owned EvidenceFactory schemas.
-   */
-  metadata: {
-    evidence: {
-      evidenceFields,
-      summarySchema,
-    },
-  },
-
 
   reporter: [
     [

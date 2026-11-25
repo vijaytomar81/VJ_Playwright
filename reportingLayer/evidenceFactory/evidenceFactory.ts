@@ -5,8 +5,8 @@ import {
 import { basename, join, resolve, relative, isAbsolute } from 'node:path';
 
 import { generateEvidenceExcel, type ExcelEvidenceTest } from './excelGenerator';
-import { evidenceFields } from '../../configLayer/evidenceFactory/schema/evidence-schema';
-import { summarySchema } from '../../configLayer/evidenceFactory/schema/summary-schema';
+import { evidenceFields } from './schema/evidence-schema';
+import { summarySchema } from './schema/summary-schema';
 
 interface Annotation {
     type: string;
