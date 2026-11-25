@@ -1,0 +1,11 @@
+import { defineConfig } from '@playwright/test';
+import { createConfig } from './playwright.config.base';
+
+// Real invocations always set PROJECT explicitly: npm scripts pass it via cross-env, and the
+// VS Code extension uses the brand-specific playwright.<brand>.config.ts files instead of this
+// one. If PROJECT is missing, this file is being probed for metadata only (e.g. the extension's
+// workspace-wide config scan) - resolve to an empty test dir rather than throwing, so it doesn't
+// block discovery of the brand-specific configs.
+export default process.env.PROJECT
+  ? createConfig(process.env.PROJECT)
+  : defineConfig({ testDir: './__no_pw_tests__' });
