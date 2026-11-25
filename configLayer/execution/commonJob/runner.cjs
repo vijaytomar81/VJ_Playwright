@@ -85,10 +85,10 @@ function plan(input, exists = fs.existsSync) {
   const testPath = (input.TEST_PATH || '').trim().replaceAll('\\', '/');
   insist(
     !testPath ||
-    (!testPath.startsWith('-') &&
-      !path.posix.isAbsolute(testPath) &&
-      !/^[A-Za-z]:/.test(testPath) &&
-      !testPath.split('/').includes('..')),
+      (!testPath.startsWith('-') &&
+        !path.posix.isAbsolute(testPath) &&
+        !/^[A-Za-z]:/.test(testPath) &&
+        !testPath.split('/').includes('..')),
     'TEST_PATH must be a relative folder/file path without .. or leading options.'
   );
   for (const key of ['TEST_FILTER', 'EXCLUDE_FILTER']) {
@@ -142,7 +142,7 @@ function argsFor(p, list) {
   const allure =
     p.framework === 'insurance' ? './reportingLayer/brand-allure-reporter.ts' : 'allure-playwright';
   args.push(
-    `--reporter=${list ? `list,${audit}` : `list,json,html,junit,${allure},${audit}`}`
+    `--reporter=${list ? `list,${audit}` : `list,html,junit,${allure},./reportingLayer/custom-html-reporter.js,${audit}`}`
   );
   if (list) args.push('--list');
   // Playwright treats file filters as regexes: escape user paths so +, [, etc. stay literal.
@@ -163,7 +163,6 @@ function envFor(p, source, list) {
     TEST_SUITE: p.suite,
     PWDEBUG: '',
     COMMON_JOB_PHASE: list ? 'list' : 'execute',
-    PLAYWRIGHT_JSON_OUTPUT_FILE: 'results.json',
     PLAYWRIGHT_JUNIT_OUTPUT_FILE: 'results.xml',
     PLAYWRIGHT_HTML_OUTPUT_DIR: 'playwright-report',
     PLAYWRIGHT_HTML_OPEN: 'never',
@@ -201,7 +200,6 @@ function main(command) {
     // Only generated outputs, relative to the Jenkins checkout; no parameter controls deletion.
     for (const output of [
       'common-job',
-      'results.json',
       'results.xml',
       'playwright-report',
       'test-results',
