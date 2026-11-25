@@ -6,7 +6,8 @@
     "pom-generate:build": "tsc -p tools/pom-generator/tsconfig.build.json && tsc-alias -p tools/pom-generator/tsconfig.build.json",
     "pom-generate": "npm run pom-generate:build && node dist/tools/pom-generator/cli/pom-generate.cli.js",
     "edge:cdp:start": "node tools/pom-generator/scripts/launch-edge-cdp.cjs",
-    "edge:cdp:stop": "node tools/pom-generator/scripts/stop-edge-cdp.cjs"
+    "edge:cdp:stop": "node tools/pom-generator/scripts/stop-edge-cdp.cjs",
+    "evidence:generate": "ts-node reportingLayer/evidenceFactory.ts"
   },
   "keywords": [],
   "author": "",

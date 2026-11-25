@@ -1,14 +1,18 @@
 import { errors, Page } from '@playwright/test';
-import { ACTION_TIMEOUT } from 'configLayer/execution/timeouts';
+import { ACTION_TIMEOUT } from '../../configLayer/execution/timeouts';
+import { captureExecutionEnvironmentMetadata } from './executionEnvironmentMetadata';
 
 export class BasePage {
   protected page: Page;
 
   constructor(page: Page) {
     this.page = page;
+    captureExecutionEnvironmentMetadata(page);
   }
+
   setPage(page: Page): void {
     this.page = page;
+    captureExecutionEnvironmentMetadata(page);
   }
 
   async goto(url: string) {

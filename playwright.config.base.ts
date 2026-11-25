@@ -2,16 +2,21 @@ import { defineConfig, devices } from '@playwright/test';
 import { loadEnvironment } from './configLayer/execution/loadEnvironment';
 import { getProjectConfig } from './configLayer/execution/projectsRegistry';
 import { parseRetries, videoOption } from './configLayer/execution/playwrightArtifacts';
+import reportPaths from './configLayer/execution/reportPaths.json';
 import {
   ACTION_TIMEOUT,
   EXPECT_TIMEOUT,
   NAVIGATION_TIMEOUT,
 } from './configLayer/execution/timeouts';
 
+const { validateReportPaths } = require('./configLayer/execution/validateReportPaths.cjs');
+
 /**
  * @see https://playwright.dev/docs/test-configuration
  */
 export function createConfig(project: string | undefined) {
+  validateReportPaths();
+
   const { testDir } = getProjectConfig(project);
   loadEnvironment(project);
 
@@ -29,13 +34,16 @@ export function createConfig(project: string | undefined) {
     retries,
     /* Opt out of parallel tests on CI. */
     workers: 3,
+    outputDir: reportPaths.testResults,
     /* Reporter to use. See https://playwright.dev/docs/test-reporters */
     reporter: [
       ['list'],
-      ['./reportingLayer/custom-html-reporter.js'],
-      ['html', { open: 'never', outputFolder: 'playwright-report' }],
-      ['junit', { outputFile: 'results.xml' }],
-      ['allure-playwright', { resultsDir: 'allure-results' }],
+      // ['./reportingLayer/custom-html-reporter.js'],
+      ['html', { open: 'never', outputFolder: reportPaths.playwrightHtml }],
+      ['json', { outputFile: reportPaths.json }],
+      ['junit', { outputFile: reportPaths.junit }],
+      ['allure-playwright', { resultsDir: reportPaths.allureResults }],
+      ['./reportingLayer/reporters/evidenceReporter.ts'],
     ],
     globalSetup: require.resolve('./global-setup.ts'),
     timeout: 300000, // 5 minutes for all tests
@@ -47,8 +55,8 @@ export function createConfig(project: string | undefined) {
 
       trace: 'on-first-retry',
       /* Capture a screenshot right after a test fails, saved under test-results/ */
-      screenshot: 'only-on-failure',
-      /* VIDEO_MODE: off (default), on, retain-on-failure, on-first-retry. See docs/Reporting.md. */
+      screenshot: { mode: 'only-on-failure', fullPage: true },
+      /* VIDEO_MODE: off (default), on, retain-on-failure or on-first-retry. See docs/Reporting.md. */
       video: videoOption(retries),
       /* Without these, a single stuck click/waitFor/goto waits out the whole 5-minute test
          timeout (e.g. when an environment shows an error page). Calls that pass their own

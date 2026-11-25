@@ -1,0 +1,10 @@
+{
+    "json": "results.json",
+    "junit": "results.xml",
+    "playwrightHtml": "playwright-report",
+    "allureResults": "allure-results",
+    "allureReport": "allure-report",
+    "testResults": "test-results",
+    "commonJob": "common-job",
+    "evidenceFactoryOutput": "evidence-reports"
+}

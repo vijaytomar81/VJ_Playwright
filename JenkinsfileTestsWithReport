@@ -3,6 +3,8 @@
 //   UNSTABLE - one or more tests failed, or a report failed to generate
 //   FAILURE  - the run itself broke (bad parameters, npm ci, missing credentials, global setup,
 //              or no tests ran at all)
+def evidenceFactoryPrepared = false
+
 pipeline {
     agent {
         docker {
@@ -40,6 +42,7 @@ pipeline {
         CI = 'true'
         KEEP_BROWSER_OPEN = 'false'
         PWDEBUG = ''
+        EVIDENCEFACTORY_AUTO_GENERATE = 'false'
         // The Playwright image's default npm cache dir (/.npm) is root-owned, but this container
         // runs as a non-root user - point npm's cache inside the workspace instead so `npm ci`
         // doesn't need root/sudo access.
@@ -54,6 +57,8 @@ pipeline {
 
         stage('Validate parameters') {
             steps {
+                sh 'node configLayer/execution/validateReportPaths.cjs'
+
                 sh '''
                     if [ -z "$(echo "${TEST_FILTER}" | tr -d '[:space:]')" ]; then
                         echo "TEST_FILTER is required - an empty filter would run the entire suite."
@@ -100,9 +105,13 @@ pipeline {
             steps {
                 // The workspace persists between builds - clear last run's output so a stale
                 // results.xml can never be mistaken for this run's results.
-                sh 'rm -rf results.xml playwright-report test-results allure-results custom-test-reports'
+                sh '''
+                    node -e "const fs = require('node:fs'); const p = require('./configLayer/execution/reportPaths.json'); require('./configLayer/execution/validateReportPaths.cjs').validateReportPaths(); for (const output of [p.json, p.junit, p.playwrightHtml, p.testResults, p.allureResults, p.commonJob, 'custom-test-reports']) fs.rmSync(output, { recursive: true, force: true });"
+                '''
 
                 script {
+                    evidenceFactoryPrepared = true
+
                     // Binds Jenkins-stored secrets as real env vars for this step only. These
                     // values live in the gitignored .env.local.<env> file locally, which doesn't
                     // exist in this workspace, so nothing overrides them - see
@@ -146,14 +155,15 @@ pipeline {
         stage('Evaluate test results') {
             steps {
                 script {
+                    def reportPaths = readReportPaths()
                     def exitCode = env.PLAYWRIGHT_EXIT_CODE
-                    if (!fileExists('results.xml')) {
-                        error("Playwright exited with ${exitCode} without writing results.xml - tests did not run.")
+                    if (!fileExists(reportPaths.junit)) {
+                        error("Playwright exited with ${exitCode} without writing ${reportPaths.junit} - tests did not run.")
                     }
 
                     // Marks the build UNSTABLE by itself when any test failed. Also feeds the
                     // Test Result Trend graph on the job page.
-                    def summary = junit(testResults: 'results.xml')
+                    def summary = junit(testResults: reportPaths.junit)
 
                     // Kept for the results email, which is sent from post.
                     env.TESTS_TOTAL = summary.totalCount.toString()
@@ -176,33 +186,62 @@ pipeline {
 
     post {
         always {
-            archiveArtifacts artifacts: 'playwright-report/**,test-results/**,custom-test-reports/**',
-                             allowEmptyArchive: true
-
-            // catchError marks report problems as UNSTABLE. It never improves the result, so an
-            // already-FAILED build stays FAILED.
-            catchError(buildResult: 'UNSTABLE', stageResult: 'UNSTABLE', message: 'Playwright HTML report could not be published') {
-                // Requires the "HTML Publisher" Jenkins plugin. Publishes Playwright's own HTML
-                // report as a build tab, with screenshots/traces viewable inline.
-                publishHTML(target: [
-                    allowMissing: false,
-                    alwaysLinkToLastBuild: true,
-                    keepAll: true,
-                    reportDir: 'playwright-report',
-                    reportFiles: 'index.html',
-                    reportName: 'Playwright Report'
-                ])
-            }
-
             script {
-                if (params.GENERATE_ALLURE_REPORT) {
-                    catchError(buildResult: 'UNSTABLE', stageResult: 'UNSTABLE', message: 'Allure report could not be generated') {
-                        // Requires the "Allure Jenkins Plugin" + an "Allure Commandline" tool in
-                        // Global Tool Configuration. The plugin carries history between builds itself.
-                        // The CLI runs inside this container; JAVA_HOME is the JRE downloaded by the
-                        // Install dependencies stage.
-                        withEnv(["JAVA_HOME=${env.WORKSPACE}/.allure-jre"]) {
-                            allure(includeProperties: false, results: [[path: 'allure-results']])
+                if (evidenceFactoryPrepared) {
+                    def reportPaths = readReportPaths()
+                    archiveArtifacts artifacts: "${reportPaths.playwrightHtml}/**,${reportPaths.testResults}/**,custom-test-reports/**",
+                                     allowEmptyArchive: true
+
+                    // catchError marks report problems as UNSTABLE. It never improves the result, so an
+                    // already-FAILED build stays FAILED.
+                    catchError(buildResult: 'UNSTABLE', stageResult: 'UNSTABLE', message: 'Playwright HTML report could not be published') {
+                        // Requires the "HTML Publisher" Jenkins plugin. Publishes Playwright's own HTML
+                        // report as a build tab, with screenshots/traces viewable inline.
+                        publishHTML(target: [
+                            allowMissing: false,
+                            alwaysLinkToLastBuild: true,
+                            keepAll: true,
+                            reportDir: reportPaths.playwrightHtml,
+                            reportFiles: 'index.html',
+                            reportName: 'Playwright Report'
+                        ])
+                    }
+
+                    if (params.GENERATE_ALLURE_REPORT) {
+                        catchError(buildResult: 'UNSTABLE', stageResult: 'UNSTABLE', message: 'Allure report could not be generated') {
+                            // Requires the "Allure Jenkins Plugin" + an "Allure Commandline" tool in
+                            // Global Tool Configuration. The plugin carries history between builds itself.
+                            // The CLI runs inside this container; JAVA_HOME is the JRE downloaded by the
+                            // Install dependencies stage.
+                            withEnv(["JAVA_HOME=${env.WORKSPACE}/.allure-jre"]) {
+                                allure(includeProperties: false, results: [[path: reportPaths.allureResults]])
+                            }
+                        }
+                    }
+
+                    catchError(buildResult: 'UNSTABLE', stageResult: 'UNSTABLE', catchInterruptions: false,
+                               message: 'EvidenceFactory report could not be generated') {
+                        withEnv([
+                            "ENV=${params.TEST_ENV}",
+                            "EVIDENCEFACTORY_PROJECT=${params.PROJECT_NAME}",
+                            "EVIDENCEFACTORY_JSON_FILE=${reportPaths.json}",
+                            'EVIDENCEFACTORY_ALLURE_REPORT_DIR='
+                        ]) {
+                            def output = sh(returnStdout: true, script: '''
+                                node -r ts-node/register -e "require('./reportingLayer/evidenceFactory').generateEvidenceFactory().then(file => console.log('EVIDENCEFACTORY_OUTPUT=' + require('node:path').relative(process.cwd(), file))).catch(error => { console.error(error); process.exitCode = 1; })"
+                            ''').trim()
+                            echo output
+                            def result = output.readLines().find { it.startsWith('EVIDENCEFACTORY_OUTPUT=') }
+                            if (!result) error('EvidenceFactory did not return its output file.')
+                            def outputFile = result.substring('EVIDENCEFACTORY_OUTPUT='.length())
+                            def outputRoot = sh(returnStdout: true, script: '''
+                                node -e "const path = require('node:path'); const p = require('./configLayer/execution/reportPaths.json'); console.log(path.relative(process.cwd(), path.resolve(p.evidenceFactoryOutput)));"
+                            ''').trim()
+                            if (!outputFile.startsWith("${outputRoot}/") || !fileExists(outputFile)) {
+                                error('EvidenceFactory returned an invalid output file.')
+                            }
+                            def runDirectory = outputFile.substring(0, outputFile.lastIndexOf('/'))
+                            archiveArtifacts artifacts: "${runDirectory}/**", allowEmptyArchive: false
                         }
                     }
                 }
@@ -214,6 +253,16 @@ pipeline {
             }
         }
     }
+}
+
+def readReportPaths() {
+    def text = readFile('configLayer/execution/reportPaths.json')
+    return parseReportPaths(text)
+}
+
+@com.cloudbees.groovy.cps.NonCPS
+def parseReportPaths(String text) {
+    return new groovy.json.JsonSlurperClassic().parseText(text)
 }
 
 // Based on sendTestEmail() in testReporting.groovy from the Selenium repo. Needs the

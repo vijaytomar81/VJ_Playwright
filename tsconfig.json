@@ -23,9 +23,6 @@
       "@ferry/*": [
         "./automationLayer/insurance/ferry/*"
       ],
-      "@baseTest": [
-        "./automationLayer/common/baseTest.ts"
-      ],
       "@framework-config": [
         "./configLayer/framework-config/index.ts"
       ],
@@ -35,10 +32,7 @@
     },
     "noEmit": true
   },
-  "include": [
-    "**/*.ts",
-    "**/*.js"
-, "playwright.brands.config.ts.bk"  ],
+  "include": ["**/*.ts", "**/*.js"],
   "exclude": [
     "node_modules",
     "dist"

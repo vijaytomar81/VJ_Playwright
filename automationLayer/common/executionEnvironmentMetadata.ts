@@ -1,4 +1,4 @@
-import { test, type Page } from '@playwright/test';
+import { test, type Page, type TestInfo } from '@playwright/test';
 import { platform, release } from 'node:os';
 
 const NOT_KNOWN = '';
@@ -13,9 +13,21 @@ const NOT_KNOWN = '';
  * - Supports desktop and mobile-emulated contexts.
  * - Captures the Host OS and optional Remote Device information.
  * - Avoids duplicate metadata annotations.
+ * - Safely handles calls outside an active Playwright test.
  */
 export function captureExecutionEnvironmentMetadata(page: Page): void {
-    const testInfo = test.info();
+    let testInfo: TestInfo;
+
+    /*
+     * Page objects may be initialized outside an active
+     * Playwright test. Metadata collection must not prevent
+     * normal page object initialization.
+     */
+    try {
+        testInfo = test.info();
+    } catch {
+        return;
+    }
 
     const browser = page.context().browser();
     const viewport = page.viewportSize();

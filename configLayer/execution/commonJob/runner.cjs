@@ -2,6 +2,9 @@ const fs = require('node:fs');
 const path = require('node:path');
 const { spawnSync } = require('node:child_process');
 
+const reportPaths = require('../reportPaths.json');
+const { validateReportPaths } = require('../validateReportPaths.cjs');
+
 const targets = {
   'athena-ferry': { profile: 'ferry', project: 'ferry', folder: 'ferry' },
   'athena-allianz-motor': {
@@ -85,10 +88,10 @@ function plan(input, exists = fs.existsSync) {
   const testPath = (input.TEST_PATH || '').trim().replaceAll('\\', '/');
   insist(
     !testPath ||
-      (!testPath.startsWith('-') &&
-        !path.posix.isAbsolute(testPath) &&
-        !/^[A-Za-z]:/.test(testPath) &&
-        !testPath.split('/').includes('..')),
+    (!testPath.startsWith('-') &&
+      !path.posix.isAbsolute(testPath) &&
+      !/^[A-Za-z]:/.test(testPath) &&
+      !testPath.split('/').includes('..')),
     'TEST_PATH must be a relative folder/file path without .. or leading options.'
   );
   for (const key of ['TEST_FILTER', 'EXCLUDE_FILTER']) {
@@ -140,9 +143,9 @@ function argsFor(p, list) {
   if (p.grepInvert) args.push(`--grep-invert=${p.grepInvert}`);
   const audit = './configLayer/execution/commonJob/reporter.cjs';
   const allure =
-    p.framework === 'insurance' ? './reportingLayer/brand-allure-reporter.ts' : 'allure-playwright';
+    p.framework === 'insurance' ? './reportingLayer/reporters/brand-allure-reporter.ts' : 'allure-playwright';
   args.push(
-    `--reporter=${list ? `list,${audit}` : `list,html,junit,${allure},./reportingLayer/custom-html-reporter.js,${audit}`}`
+    `--reporter=${list ? `list,${audit}` : `list,html,json,junit,${allure},./reportingLayer/custom-html-reporter.js,${audit}`}`
   );
   if (list) args.push('--list');
   // Playwright treats file filters as regexes: escape user paths so +, [, etc. stay literal.
@@ -163,8 +166,11 @@ function envFor(p, source, list) {
     TEST_SUITE: p.suite,
     PWDEBUG: '',
     COMMON_JOB_PHASE: list ? 'list' : 'execute',
-    PLAYWRIGHT_JUNIT_OUTPUT_FILE: 'results.xml',
-    PLAYWRIGHT_HTML_OUTPUT_DIR: 'playwright-report',
+    PLAYWRIGHT_JSON_OUTPUT_FILE: list
+      ? source.PLAYWRIGHT_JSON_OUTPUT_FILE || reportPaths.json
+      : reportPaths.json,
+    PLAYWRIGHT_JUNIT_OUTPUT_FILE: reportPaths.junit,
+    PLAYWRIGHT_HTML_OUTPUT_DIR: reportPaths.playwrightHtml,
     PLAYWRIGHT_HTML_OPEN: 'never',
   };
   // Avoid inheriting a previous target's default-config or authentication settings.
@@ -196,25 +202,28 @@ function evaluate(summary, exitCode) {
 }
 
 function main(command) {
+  validateReportPaths();
+
   if (command === 'prepare') {
     // Only generated outputs, relative to the Jenkins checkout; no parameter controls deletion.
     for (const output of [
-      'common-job',
-      'results.xml',
-      'playwright-report',
-      'test-results',
-      'allure-results',
+      reportPaths.commonJob,
+      reportPaths.json,
+      reportPaths.junit,
+      reportPaths.playwrightHtml,
+      reportPaths.testResults,
+      reportPaths.allureResults,
       'custom-test-reports',
     ]) {
       fs.rmSync(path.resolve(output), { recursive: true, force: true });
     }
     const p = plan(process.env);
-    fs.mkdirSync('common-job');
-    fs.writeFileSync('common-job/plan.json', JSON.stringify(p, null, 2));
+    fs.mkdirSync(reportPaths.commonJob);
+    fs.writeFileSync(path.join(reportPaths.commonJob, 'plan.json'), JSON.stringify(p, null, 2));
     console.log(`${p.target} | ${p.environment} | ${p.suite} | ${p.mode}`);
     return 0;
   }
-  const p = JSON.parse(fs.readFileSync('common-job/plan.json', 'utf8'));
+  const p = JSON.parse(fs.readFileSync(path.join(reportPaths.commonJob, 'plan.json'), 'utf8'));
   if (command === 'list' || command === 'execute') {
     const list = command === 'list';
     const result = spawnSync(
@@ -227,9 +236,9 @@ function main(command) {
     );
     if (result.error) throw result.error;
     const code = result.status ?? 1;
-    if (!list) fs.writeFileSync('common-job/exit-code.txt', String(code));
+    if (!list) fs.writeFileSync(path.join(reportPaths.commonJob, 'exit-code.txt'), String(code));
     if (list && code === 0) {
-      const inventory = JSON.parse(fs.readFileSync('common-job/inventory.json', 'utf8'));
+      const inventory = JSON.parse(fs.readFileSync(path.join(reportPaths.commonJob, 'inventory.json'), 'utf8'));
       insist(
         inventory.tests.some((t) => !t.setup),
         'No scenario tests selected (setup-only or empty selection). Adjust suite/path/filters.'
@@ -238,9 +247,9 @@ function main(command) {
     return code;
   }
   if (command === 'evaluate') {
-    const file = 'common-job/results-summary.json';
+    const file = path.join(reportPaths.commonJob, 'results-summary.json');
     const summary = fs.existsSync(file) ? JSON.parse(fs.readFileSync(file, 'utf8')) : null;
-    const exitCode = Number(fs.readFileSync('common-job/exit-code.txt', 'utf8'));
+    const exitCode = Number(fs.readFileSync(path.join(reportPaths.commonJob, 'exit-code.txt'), 'utf8'));
     const result = evaluate(summary, exitCode);
     console.log(
       JSON.stringify({ result: ['SUCCESS', 'FAILURE', 'UNSTABLE'][result], ...summary }, null, 2)

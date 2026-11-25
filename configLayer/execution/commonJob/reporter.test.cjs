@@ -5,6 +5,7 @@ const os = require('node:os');
 const path = require('node:path');
 const { spawnSync } = require('node:child_process');
 const { evaluate } = require('./runner.cjs');
+const reportPaths = require('../reportPaths.json');
 
 // Real reporter lifecycle, with synthetic browser-free scenarios; no insurance tests execute.
 test('reporter inventories tests and distinguishes scenario failures from setup failure', () => {
@@ -56,13 +57,13 @@ test('reporter inventories tests and distinguishes scenario failures from setup 
       );
     const discovery = invoke('list');
     assert.equal(discovery.status, 0, discovery.stderr + discovery.stdout);
-    const inventory = JSON.parse(fs.readFileSync(path.join(dir, 'common-job/inventory.json')));
+    const inventory = JSON.parse(fs.readFileSync(path.join(dir, reportPaths.commonJob, 'inventory.json')));
     assert.equal(inventory.tests.length, 4);
     assert.equal(inventory.tests.filter((t) => t.setup).length, 1);
-    assert.ok(!fs.existsSync(path.join(dir, 'common-job/results-summary.json')));
+    assert.ok(!fs.existsSync(path.join(dir, reportPaths.commonJob, 'results-summary.json')));
     const execution = invoke('execute');
     assert.equal(execution.status, 1);
-    let summary = JSON.parse(fs.readFileSync(path.join(dir, 'common-job/results-summary.json')));
+    let summary = JSON.parse(fs.readFileSync(path.join(dir, reportPaths.commonJob, 'results-summary.json')));
     assert.equal(summary.selectedTests, 3);
     assert.equal(summary.passed, 1);
     assert.equal(summary.failed, 1);
@@ -71,22 +72,22 @@ test('reporter inventories tests and distinguishes scenario failures from setup 
     assert.equal(evaluate(summary, execution.status), 2);
     const brokenSetup = invoke('execute', true);
     assert.equal(brokenSetup.status, 1);
-    summary = JSON.parse(fs.readFileSync(path.join(dir, 'common-job/results-summary.json')));
+    summary = JSON.parse(fs.readFileSync(path.join(dir, reportPaths.commonJob, 'results-summary.json')));
     assert.equal(summary.setupFailed, true);
     assert.equal(summary.passed, 0);
     assert.equal(summary.skipped, 3);
     assert.equal(evaluate(summary, brokenSetup.status), 1);
     assert.deepEqual(
-      JSON.parse(fs.readFileSync(path.join(dir, 'common-job/inventory.json'))),
+      JSON.parse(fs.readFileSync(path.join(dir, reportPaths.commonJob, 'inventory.json'))),
       inventory
     );
     const shardDiscovery = invoke('list', false, '1/2');
     assert.equal(shardDiscovery.status, 0, shardDiscovery.stdout + shardDiscovery.stderr);
-    const shardInventory = JSON.parse(fs.readFileSync(path.join(dir, 'common-job/inventory.json')));
+    const shardInventory = JSON.parse(fs.readFileSync(path.join(dir, reportPaths.commonJob, 'inventory.json')));
     const scenarios = shardInventory.tests.filter((t) => !t.setup);
     assert.ok(scenarios.length > 0 && scenarios.length < 3);
     invoke('execute', false, '1/2');
-    summary = JSON.parse(fs.readFileSync(path.join(dir, 'common-job/results-summary.json')));
+    summary = JSON.parse(fs.readFileSync(path.join(dir, reportPaths.commonJob, 'results-summary.json')));
     assert.equal(summary.selectedTests, scenarios.length);
     assert.deepEqual(summary.runtimeErrors, []);
   } finally {

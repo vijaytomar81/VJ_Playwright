@@ -1,12 +1,16 @@
 import { hostname, userInfo } from 'node:os';
-import {
-    existsSync, statSync, mkdirSync, readFileSync, copyFileSync, cpSync,
-} from 'node:fs';
-import { basename, join, resolve, relative, isAbsolute } from 'node:path';
+import { existsSync, readFileSync } from 'node:fs';
+import { resolve } from 'node:path';
 
-import { generateEvidenceExcel, type ExcelEvidenceTest } from './excelGenerator';
+import reportPaths from '../configLayer/execution/reportPaths.json';
+import { generateEvidenceExcel, type ExcelEvidenceTest } from './excel/excelGenerator';
 import { evidenceFields } from './schema/evidence-schema';
 import { summarySchema } from './schema/summary-schema';
+import {
+    createRunDirectory, copyReports, resolveScreenshot,
+} from './evidenceArtifacts';
+
+const { validateReportPaths } = require('../configLayer/execution/validateReportPaths.cjs');
 
 interface Annotation {
     type: string;
@@ -73,77 +77,6 @@ function duration(milliseconds: number): string {
         `${String(seconds % 60).padStart(2, '0')}`;
 }
 
-function toPascalCase(value: string): string {
-    return value.trim()
-        .replace(/([a-z0-9])([A-Z])/g, '$1 $2')
-        .split(/[^a-zA-Z0-9]+/)
-        .filter(Boolean)
-        .map(word =>
-            word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()
-        )
-        .join('');
-}
-
-/**
- * Generates a timestamp using the execution machine's local time.
- */
-function localTimestamp(date: Date): string {
-    const pad = (value: number, length = 2): string =>
-        String(value).padStart(length, '0');
-
-    return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-` +
-        `${pad(date.getDate())}T${pad(date.getHours())}-` +
-        `${pad(date.getMinutes())}-${pad(date.getSeconds())}-` +
-        `${pad(date.getMilliseconds(), 3)}`;
-}
-
-/**
- * Creates the EvidenceFactory directory after Playwright has completed.
- */
-function createRunDirectory(project: string, startedAt: Date) {
-    const resultsRoot = resolve(process.cwd(), 'test-results');
-    const prefix = toPascalCase(project) || 'Evidence';
-    const timestamp = localTimestamp(startedAt);
-
-    mkdirSync(resultsRoot, { recursive: true });
-
-    let counter = 0;
-
-    while (true) {
-        const runId = counter === 0
-            ? timestamp
-            : `${timestamp}-${counter}`;
-
-        const runDirectory = join(resultsRoot, `${prefix}-run-${runId}`);
-
-        try {
-            mkdirSync(runDirectory);
-
-            const excelDirectory = join(runDirectory, 'excel-report');
-            const screenshotsDirectory = join(
-                runDirectory, 'artifacts', 'screenshots',
-            );
-
-            mkdirSync(excelDirectory, { recursive: true });
-            mkdirSync(screenshotsDirectory, { recursive: true });
-
-            return {
-                runId,
-                runDirectory,
-                excelDirectory,
-                screenshotsDirectory,
-                outputFile: join(excelDirectory, `${prefix}-report.xlsx`),
-            };
-        } catch (error) {
-            if ((error as NodeJS.ErrnoException).code !== 'EEXIST') {
-                throw error;
-            }
-
-            counter++;
-        }
-    }
-}
-
 function collectSpecs(suites: readonly JsonSuite[]): JsonSpec[] {
     return suites.flatMap(suite => [
         ...(suite.specs ?? []),
@@ -204,51 +137,32 @@ function testStatus(test: JsonTest): ExcelEvidenceTest['status'] {
 }
 
 /**
- * Copies full-page failure screenshots associated with this test.
+ * Resolves native full-page failure screenshots associated with this test.
  * The latest available failure screenshot is linked from Excel.
  */
-function copyScreenshots(
+function failureScreenshot(
     test: JsonTest,
-    excelDirectory: string,
-    screenshotsDirectory: string,
+    runDirectory: string,
 ): string {
     let screenshot = UNKNOWN;
 
     for (const result of test.results) {
         for (const attachment of result.attachments ?? []) {
             if (
-                !attachment.name.startsWith('full-page-failure:') ||
+                attachment.name !== 'screenshot' ||
                 attachment.contentType !== 'image/png' ||
                 !attachment.path
             ) {
                 continue;
             }
 
-            const filename = attachment.name.slice(
-                'full-page-failure:'.length,
+            const copiedScreenshot = resolveScreenshot(
+                attachment.path, runDirectory,
             );
 
-            if (!/^failure-[a-zA-Z0-9_-]+\.png$/.test(filename)) {
-                continue;
+            if (copiedScreenshot) {
+                screenshot = copiedScreenshot;
             }
-
-            const source = isAbsolute(attachment.path)
-                ? attachment.path
-                : resolve(process.cwd(), attachment.path);
-
-            if (!existsSync(source) || !statSync(source).isFile()) {
-                console.warn(
-                    `EvidenceFactory: Screenshot not found: ${source}`,
-                );
-                continue;
-            }
-
-            const destination = join(screenshotsDirectory, filename);
-
-            copyFileSync(source, destination);
-
-            screenshot = relative(excelDirectory, destination)
-                .replace(/\\/g, '/');
         }
     }
 
@@ -257,8 +171,7 @@ function copyScreenshots(
 
 function buildTests(
     specs: readonly JsonSpec[],
-    excelDirectory: string,
-    screenshotsDirectory: string,
+    runDirectory: string,
 ): ExcelEvidenceTest[] {
     return specs.flatMap(spec => spec.tests.map(test => {
         const last = test.results[test.results.length - 1];
@@ -267,8 +180,8 @@ function buildTests(
 
         delete annotations.screenshot;
 
-        const screenshot = copyScreenshots(
-            test, excelDirectory, screenshotsDirectory,
+        const screenshot = failureScreenshot(
+            test, runDirectory,
         );
 
         if (screenshot) {
@@ -318,24 +231,28 @@ function summaryValue(
         : values.values().next().value ?? UNKNOWN;
 }
 
-/**
- * Copies existing native reports without modifying their original files.
- */
-function copyReport(source: string, destination: string): void {
-    if (!existsSync(source)) return;
-
-    if (statSync(source).isDirectory()) {
-        cpSync(source, destination, { recursive: true });
-    } else {
-        mkdirSync(destination, { recursive: true });
-        copyFileSync(source, join(destination, basename(source)));
-    }
-}
-
 export async function generateEvidenceFactory(): Promise<string> {
-    const jsonFile = resolve(
-        process.env.EVIDENCEFACTORY_JSON_FILE || 'results.json',
-    );
+    validateReportPaths();
+
+    const jsonFile = resolve(reportPaths.json);
+
+    if (
+        process.env.EVIDENCEFACTORY_JSON_FILE &&
+        resolve(process.env.EVIDENCEFACTORY_JSON_FILE) !== jsonFile
+    ) {
+        throw new Error(
+            `EvidenceFactory: JSON report must use the configured location: ${reportPaths.json}`,
+        );
+    }
+
+    if (
+        process.env.EVIDENCEFACTORY_ALLURE_REPORT_DIR &&
+        resolve(process.env.EVIDENCEFACTORY_ALLURE_REPORT_DIR) !== resolve(reportPaths.allureReport)
+    ) {
+        throw new Error(
+            `EvidenceFactory: Allure report must use the configured location: ${reportPaths.allureReport}`,
+        );
+    }
 
     if (!existsSync(jsonFile)) {
         throw new Error(`EvidenceFactory: JSON report not found: ${jsonFile}`);
@@ -376,9 +293,25 @@ export async function generateEvidenceFactory(): Promise<string> {
 
     const product = known(process.env.PRODUCT);
     const paths = createRunDirectory(project, startedAt);
+    const { runId, runDirectory, outputFile } = paths;
+
+    const reportSources = Object.entries(reportPaths)
+        .filter(([key]) =>
+            key !== 'json' &&
+            key !== 'allureReport' &&
+            key !== 'evidenceFactoryOutput',
+        )
+        .map(([, path]) => path);
+
+    if (process.env.EVIDENCEFACTORY_ALLURE_REPORT_DIR) {
+        reportSources.push(reportPaths.allureReport);
+    }
+
+    // Copy native reports before resolving Excel screenshot hyperlinks.
+    copyReports(runDirectory, jsonFile, reportSources);
 
     const rows = buildTests(
-        specs, paths.excelDirectory, paths.screenshotsDirectory,
+        specs, runDirectory,
     );
 
     const passed = rows.filter(row => row.status === 'passed').length;
@@ -386,8 +319,6 @@ export async function generateEvidenceFactory(): Promise<string> {
     const notExecuted = rows.filter(
         row => row.status === 'notExecuted',
     ).length;
-
-    const { runId, runDirectory, outputFile } = paths;
 
     const summaryData: Record<string, unknown> = {
         runId,
@@ -424,18 +355,6 @@ export async function generateEvidenceFactory(): Promise<string> {
         summaryData,
         tests: rows,
     });
-
-    copyReport('playwright-report', join(runDirectory, 'playwright'));
-    copyReport('results.xml', join(runDirectory, 'junit'));
-    copyReport('allure-results', join(runDirectory, 'allure', 'results'));
-    copyReport('common-job', join(runDirectory, 'common-job'));
-
-    if (process.env.EVIDENCEFACTORY_ALLURE_REPORT_DIR) {
-        copyReport(
-            process.env.EVIDENCEFACTORY_ALLURE_REPORT_DIR,
-            join(runDirectory, 'allure', 'report'),
-        );
-    }
 
     console.log(
         `EvidenceFactory: ${passed} passed, ` +

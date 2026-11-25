@@ -14,7 +14,7 @@ pipeline {
         string(name: 'TEST_PATH', defaultValue: '', description: 'Optional relative folder/file path, preferably from repository root. Literal path, not a regex. Empty = whole target.')
         string(name: 'TEST_FILTER', defaultValue: '', description: 'Optional title/tag regular expression. Empty = no title filter.')
         string(name: 'EXCLUDE_FILTER', defaultValue: '', description: 'Optional title/tag regular expression to exclude.')
-        string(name: 'WORKERS', defaultValue: '1', description: 'Parallel tests: positive count or percentage, e.g. 1 or 50%. Start with 1.')
+        string(name: 'WORKERS', defaultValue: '1', description: 'Parallel tests: positive count or percentage, e.g. 1, 4, or 50%. Start with 1.')
         choice(name: 'RETRIES', choices: ['0', '1', '2'], description: 'Default 0 for baseline results. Retrying can repeat purchases.')
         choice(name: 'AUTH_MODE', choices: ['default', 'skip', 'sapiens', 'allianz', 'sapiensKeycloak'], description: 'default: current skips startup login; proposed uses brand method. skip does not disable proposed on-demand login.')
         choice(name: 'VIDEO_MODE', choices: ['off', 'on', 'retain-on-failure', 'on-first-retry'], description: 'on-first-retry requires RETRIES > 0.')
@@ -29,6 +29,7 @@ pipeline {
         CI = 'true'
         KEEP_BROWSER_OPEN = 'false'
         PWDEBUG = ''
+        EVIDENCEFACTORY_AUTO_GENERATE = 'false'
     }
 
     options {
@@ -39,6 +40,7 @@ pipeline {
     stages {
         stage('Validate and prepare') {
             steps {
+                sh 'node configLayer/execution/validateReportPaths.cjs'
                 sh 'node configLayer/execution/commonJob/runner.cjs prepare'
                 script {
                     commonJobPrepared = true
@@ -114,37 +116,40 @@ pipeline {
             script {
                 echo "[REPORTS] prepared=${commonJobPrepared}; mode=${params.RUN_MODE}; HTML=${params.PUBLISH_HTML_REPORT}; Allure=${params.GENERATE_ALLURE_REPORT}"
                 if (commonJobPrepared && params.RUN_MODE == 'Execute tests') {
-                    if (fileExists('results.xml')) {
+                    def reportPaths = readReportPaths()
+                    if (fileExists(reportPaths.junit)) {
                         catchError(buildResult: 'UNSTABLE', stageResult: 'UNSTABLE', catchInterruptions: false,
                             message: 'JUnit results could not be published; continuing with other reports') {
-                            echo '[REPORTS] Publishing JUnit results.xml'
-                            junit testResults: 'results.xml', allowEmptyResults: false
+                            echo "[REPORTS] Publishing JUnit ${reportPaths.junit}"
+                            junit testResults: reportPaths.junit, allowEmptyResults: false
                         }
                     } else {
-                        unstable('[REPORTS] Missing results.xml; no Jenkins test-results view can be published. Check execution output and archived artifacts.')
+                        unstable("[REPORTS] Missing ${reportPaths.junit}; no Jenkins test-results view can be published. Check execution output and archived artifacts.")
                     }
                 } else {
                     echo '[REPORTS] Execution publication skipped: discovery-only build or preparation did not complete.'
                 }
                 if (commonJobPrepared && params.RUN_MODE == 'Execute tests') {
+                    def reportPaths = readReportPaths()
                     if (!params.PUBLISH_HTML_REPORT) {
                         echo '[REPORTS] Playwright HTML publication disabled by PUBLISH_HTML_REPORT=false; files will still be archived.'
-                    } else if (!fileExists('playwright-report/index.html')) {
-                        unstable('[REPORTS] Missing playwright-report/index.html; Playwright HTML cannot be published.')
+                    } else if (!fileExists("${reportPaths.playwrightHtml}/index.html")) {
+                        unstable("[REPORTS] Missing ${reportPaths.playwrightHtml}/index.html; Playwright HTML cannot be published.")
                     } else {
                         catchError(buildResult: 'UNSTABLE', stageResult: 'UNSTABLE', catchInterruptions: false,
                             message: 'Playwright HTML could not be published; continuing with other reports') {
                             echo '[REPORTS] Publishing Playwright HTML report'
                             publishHTML(target: [allowMissing: false, alwaysLinkToLastBuild: true, keepAll: true,
-                                reportDir: 'playwright-report', reportFiles: 'index.html', reportName: 'Playwright Report'])
+                                reportDir: reportPaths.playwrightHtml, reportFiles: 'index.html', reportName: 'Playwright Report'])
                         }
                     }
                 }
                 if (commonJobPrepared && params.RUN_MODE == 'Execute tests') {
+                    def reportPaths = readReportPaths()
                     if (!params.GENERATE_ALLURE_REPORT) {
                         echo '[REPORTS] Allure publication disabled by GENERATE_ALLURE_REPORT=false. Enable it for the Jenkins Allure Report link; raw results will still be archived.'
-                    } else if (!fileExists('allure-results')) {
-                        unstable('[REPORTS] Missing allure-results; Allure cannot be generated.')
+                    } else if (!fileExists(reportPaths.allureResults)) {
+                        unstable("[REPORTS] Missing ${reportPaths.allureResults}; Allure cannot be generated.")
                     } else {
                         catchError(buildResult: 'UNSTABLE', stageResult: 'UNSTABLE', catchInterruptions: false,
                             message: 'Allure report could not be generated; artifacts will still be archived') {
@@ -158,7 +163,7 @@ pipeline {
                                 fi
                             '''
                             withEnv(["JAVA_HOME=${env.WORKSPACE}/.allure-jre"]) {
-                                allure(includeProperties: false, results: [[path: 'allure-results']])
+                                allure(includeProperties: false, results: [[path: reportPaths.allureResults]])
                             }
                         }
                     }
@@ -166,8 +171,38 @@ pipeline {
             }
             script {
                 if (commonJobPrepared) {
+                    def reportPaths = readReportPaths()
                     echo '[REPORTS] Archiving run inventory, summaries, reports and attachments'
-                    archiveArtifacts artifacts: 'common-job/**,results.xml,playwright-report/**,test-results/**,allure-results/**,custom-test-reports/**', allowEmptyArchive: true
+                    archiveArtifacts artifacts: "${reportPaths.commonJob}/**,${reportPaths.json},${reportPaths.junit},${reportPaths.playwrightHtml}/**,${reportPaths.testResults}/**,${reportPaths.allureResults}/**,custom-test-reports/**", allowEmptyArchive: true
+                }
+                if (commonJobPrepared && params.RUN_MODE == 'Execute tests') {
+                    def reportPaths = readReportPaths()
+                    def plan = readCommonPlan()
+                    catchError(buildResult: 'UNSTABLE', stageResult: 'UNSTABLE', catchInterruptions: false,
+                        message: 'EvidenceFactory generation failed; native reports will still be archived') {
+                        withEnv([
+                            "ENV=${plan.environment}",
+                            "EVIDENCEFACTORY_PROJECT=${plan.project ?: plan.brand}",
+                            "EVIDENCEFACTORY_JSON_FILE=${reportPaths.json}",
+                            'EVIDENCEFACTORY_ALLURE_REPORT_DIR='
+                        ]) {
+                            def output = sh(returnStdout: true, script: '''
+                                node -r ts-node/register -e "require('./reportingLayer/evidenceFactory').generateEvidenceFactory().then(file => console.log('EVIDENCEFACTORY_OUTPUT=' + require('node:path').relative(process.cwd(), file))).catch(error => { console.error(error); process.exitCode = 1; })"
+                            ''').trim()
+                            echo output
+                            def result = output.readLines().find { it.startsWith('EVIDENCEFACTORY_OUTPUT=') }
+                            if (!result) error('EvidenceFactory did not return its output file.')
+                            def outputFile = result.substring('EVIDENCEFACTORY_OUTPUT='.length())
+                            def outputRoot = sh(returnStdout: true, script: '''
+                                node -e "const path = require('node:path'); const p = require('./configLayer/execution/reportPaths.json'); console.log(path.relative(process.cwd(), path.resolve(p.evidenceFactoryOutput)));"
+                            ''').trim()
+                            if (!outputFile.startsWith("${outputRoot}/") || !fileExists(outputFile)) {
+                                error('EvidenceFactory returned an invalid output file.')
+                            }
+                            def runDirectory = outputFile.substring(0, outputFile.lastIndexOf('/'))
+                            archiveArtifacts artifacts: "${runDirectory}/**", allowEmptyArchive: false
+                        }
+                    }
                 }
                 if (params.RECIPIENT_EMAILS?.trim()) {
                     try {
@@ -189,7 +224,13 @@ pipeline {
 
 def readCommonPlan() {
     // Finish the Pipeline step before constructing a non-serializable parser.
-    def text = readFile('common-job/plan.json')
+    def reportPaths = readReportPaths()
+    def text = readFile("${reportPaths.commonJob}/plan.json")
+    return parseCommonPlan(text)
+}
+
+def readReportPaths() {
+    def text = readFile('configLayer/execution/reportPaths.json')
     return parseCommonPlan(text)
 }
 

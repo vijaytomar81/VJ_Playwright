@@ -1,15 +1,34 @@
 
-# Playwright
 node_modules/
+# Excel temporary lock files.
+~$*.xlsx
 /test-results/
 /playwright-report/
+/allure-results/
+/allure-report/
+/.allure-jre/
+/results.xml
+/results.json
 /blob-report/
 /playwright/.cache/
 /playwright/.auth/
+auth.json
+configLayer/environments/**/.env.local
+configLayer/environments/**/.env.local.*
+!configLayer/environments/**/.env.local.example
+custom-test-reports/
+/common-job/
+# Workbook-generated Ferry test data.
+/generated/
+.vscode/*
+!.vscode/settings.json
+# Agent portal tokens written at run time (old framework).
+automationLayer/agentPortalAuth/auth.json
+automationLayer/agentPortalAuth/bearerToken.json
+.idea
+.run
+automationLayer/athena/agentPortalAuth/
 .DS_Store
 /results/
 /archive/
 dist/
-# Ignore generated POM objects and metadata
-/automationLayer/pomObjects/
-/tmp/

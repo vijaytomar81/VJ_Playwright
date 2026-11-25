@@ -5,9 +5,10 @@ const os = require('node:os');
 const path = require('node:path');
 const { spawnSync } = require('node:child_process');
 const { argsFor, envFor } = require('./runner.cjs');
+const reportPaths = require('../reportPaths.json');
 
 // Real production reporter selection and output settings; only browser-free synthetic tests run.
-test('failed execution still writes JUnit, Playwright HTML, Allure and archived-summary inputs', () => {
+test('failed execution still writes JSON, JUnit, Playwright HTML, Allure and archived-summary inputs', () => {
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'common-jenkins-reports-'));
   const root = path.resolve(__dirname, '../../..');
   const p = {
@@ -64,23 +65,32 @@ test('failed execution still writes JUnit, Playwright HTML, Allure and archived-
     };
     const discovery = invoke(true);
     assert.equal(discovery.status, 0, discovery.stdout + discovery.stderr);
-    assert.ok(!fs.existsSync(path.join(dir, 'results.xml')));
+    assert.ok(!fs.existsSync(path.join(dir, reportPaths.json)));
+    assert.ok(!fs.existsSync(path.join(dir, reportPaths.junit)));
     const run = invoke(false);
     assert.equal(run.status, 1, run.stdout + run.stderr);
-    const xml = fs.readFileSync(path.join(dir, 'results.xml'), 'utf8');
+    const json = JSON.parse(
+      fs.readFileSync(path.join(dir, reportPaths.json), 'utf8')
+    );
+    assert.ok(Array.isArray(json.suites));
+    assert.equal(json.stats.expected, 1);
+    assert.equal(json.stats.unexpected, 1);
+    assert.ok(json.stats.startTime);
+    assert.ok(Number.isFinite(json.stats.duration));
+    const xml = fs.readFileSync(path.join(dir, reportPaths.junit), 'utf8');
     assert.match(xml, /<testcase[^>]*name="pass"/);
     assert.match(xml, /<failure/);
-    assert.ok(fs.statSync(path.join(dir, 'playwright-report/index.html')).size > 0);
-    const allure = fs.readdirSync(path.join(dir, 'allure-results'));
+    assert.ok(fs.statSync(path.join(dir, reportPaths.playwrightHtml, 'index.html')).size > 0);
+    const allure = fs.readdirSync(path.join(dir, reportPaths.allureResults));
     const statuses = allure
       .filter((name) => name.endsWith('-result.json'))
       .map(
-        (name) => JSON.parse(fs.readFileSync(path.join(dir, 'allure-results', name), 'utf8')).status
+        (name) => JSON.parse(fs.readFileSync(path.join(dir, reportPaths.allureResults, name), 'utf8')).status
       );
     assert.deepEqual(statuses.sort(), ['failed', 'passed']);
     assert.ok(allure.some((name) => name.includes('attachment')));
     const summary = JSON.parse(
-      fs.readFileSync(path.join(dir, 'common-job/results-summary.json'), 'utf8')
+      fs.readFileSync(path.join(dir, reportPaths.commonJob, 'results-summary.json'), 'utf8')
     );
     assert.equal(summary.passed, 1);
     assert.equal(summary.failed, 1);
