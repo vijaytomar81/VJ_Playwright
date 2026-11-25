@@ -98,9 +98,9 @@ pipeline {
 
         stage('Run Playwright tests') {
             steps {
-                // The workspace persists between builds - clear last run's output so stale
-                // results.xml or results.json can never be mistaken for this run's results.
-                sh 'rm -rf results.xml results.json playwright-report test-results allure-results custom-test-reports'
+                // The workspace persists between builds - clear last run's output so a stale
+                // results.xml can never be mistaken for this run's results.
+                sh 'rm -rf results.xml playwright-report test-results allure-results custom-test-reports'
 
                 script {
                     // Binds Jenkins-stored secrets as real env vars for this step only. These
@@ -176,6 +176,9 @@ pipeline {
 
     post {
         always {
+            archiveArtifacts artifacts: 'playwright-report/**,test-results/**,custom-test-reports/**',
+                             allowEmptyArchive: true
+
             // catchError marks report problems as UNSTABLE. It never improves the result, so an
             // already-FAILED build stays FAILED.
             catchError(buildResult: 'UNSTABLE', stageResult: 'UNSTABLE', message: 'Playwright HTML report could not be published') {
@@ -204,27 +207,6 @@ pipeline {
                     }
                 }
             }
-
-            // Generate EvidenceFactory after Playwright execution and native report generation.
-            script {
-                if (env.PLAYWRIGHT_EXIT_CODE != null) {
-                    catchError(buildResult: 'UNSTABLE', stageResult: 'UNSTABLE', message: 'EvidenceFactory report could not be generated') {
-                        if (!fileExists('results.json')) {
-                            error('Missing results.json; EvidenceFactory cannot be generated.')
-                        }
-
-                        withEnv([
-                            "EVIDENCEFACTORY_PROJECT=${params.PROJECT_NAME}",
-                            'EVIDENCEFACTORY_JSON_FILE=results.json'
-                        ]) {
-                            sh 'npx --no-install ts-node --transpile-only reportingLayer/evidenceFactory/evidenceFactory.ts'
-                        }
-                    }
-                }
-            }
-
-            archiveArtifacts artifacts: 'playwright-report/**,test-results/**',
-                             allowEmptyArchive: true
 
             // Last, so the subject shows the final result including report problems.
             script {
