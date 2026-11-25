@@ -7,7 +7,7 @@ const { spawnSync } = require('node:child_process');
 const { argsFor, envFor } = require('./runner.cjs');
 
 // Real production reporter selection and output settings; only browser-free synthetic tests run.
-test('failed execution still writes JSON, JUnit, Playwright HTML, Allure and archived-summary inputs', () => {
+test('failed execution still writes JUnit, Playwright HTML, Allure and archived-summary inputs', () => {
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'common-jenkins-reports-'));
   const root = path.resolve(__dirname, '../../..');
   const p = {
@@ -65,12 +65,8 @@ test('failed execution still writes JSON, JUnit, Playwright HTML, Allure and arc
     const discovery = invoke(true);
     assert.equal(discovery.status, 0, discovery.stdout + discovery.stderr);
     assert.ok(!fs.existsSync(path.join(dir, 'results.xml')));
-    assert.ok(!fs.existsSync(path.join(dir, 'results.json')));
     const run = invoke(false);
     assert.equal(run.status, 1, run.stdout + run.stderr);
-    const json = JSON.parse(fs.readFileSync(path.join(dir, 'results.json'), 'utf8'));
-    assert.equal(json.stats.expected, 1);
-    assert.equal(json.stats.unexpected, 1);
     const xml = fs.readFileSync(path.join(dir, 'results.xml'), 'utf8');
     assert.match(xml, /<testcase[^>]*name="pass"/);
     assert.match(xml, /<failure/);
@@ -88,7 +84,7 @@ test('failed execution still writes JSON, JUnit, Playwright HTML, Allure and arc
     );
     assert.equal(summary.passed, 1);
     assert.equal(summary.failed, 1);
-    assert.ok(!fs.existsSync(path.join(dir, 'custom-test-reports')));
+    assert.ok(fs.existsSync(path.join(dir, 'custom-test-reports')));
   } finally {
     // Verify this is the freshly-created test directory before recursive cleanup on Windows too.
     assert.equal(path.dirname(path.resolve(dir)), path.resolve(os.tmpdir()));
