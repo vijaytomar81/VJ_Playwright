@@ -1,3 +1,11 @@
-Get-ChildItem -Path .\node_modules\playwright\lib -Recurse -Filter "*.js" -File |
-    Select-String -Pattern 'class ScreenshotRecorder|_captureScreenshot|_captureScreenshots' |
-    Select-Object Path, LineNumber, Line
+node -p "require('playwright/package.json').version"
+node -p "require('@playwright/test/package.json').version"
+
+
+Get-ChildItem -Path .\node_modules\playwright\lib -Recurse -File |
+    Select-String -Pattern 'ScreenshotRecorder|captureScreenshot|test-failed-' |
+    Select-Object Path, LineNumber
+
+Select-String -Path .\node_modules\playwright\types\test.d.ts `
+    -Pattern 'screenshot: ScreenshotMode' -Context 2,2
+
