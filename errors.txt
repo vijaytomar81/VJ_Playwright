@@ -1,28 +1,3 @@
-PS C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\Athena_Automation\integration-tests> node -p "require('playwright/package.json').version"
->> node -p "require('@playwright/test/package.json').version"
-1.62.1
-1.62.1
-PS C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\Athena_Automation\integration-tests> Get-ChildItem -Path .\node_modules\playwright\lib -Recurse -File |
->>     Select-String -Pattern 'ScreenshotRecorder|captureScreenshot|test-failed-' |
->>     Select-Object Path, LineNumber
-
-Path                                                                                                                                 LineNumber
-----                                                                                                                                 ----------
-C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\Athena_Automation\integration-tests\node_modules\playwright\lib\index.js        627
-C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\Athena_Automation\integration-tests\node_modules\playwright\lib\index.js        636
-C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\Athena_Automation\integration-tests\node_modules\playwright\lib\index.js        646
-C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\Athena_Automation\integration-tests\node_modules\playwright\lib\index.js        676
-C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\Athena_Automation\integration-tests\node_modules\playwright\lib\index.js        687
-
-
-PS C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\Athena_Automation\integration-tests> Select-String -Path .\node_modules\playwright\types\test.d.ts `
->>     -Pattern 'screenshot: ScreenshotMode' -Context 2,2
-
-  node_modules\playwright\types\test.d.ts:7022:   * Learn more about [automatic screenshots](https://playwright.dev/docs/test-use-options#recording-options).
-  node_modules\playwright\types\test.d.ts:7023:   */
-> node_modules\playwright\types\test.d.ts:7024:  screenshot: ScreenshotMode | { mode: ScreenshotMode } & Pick<PageScreenshotOptions, 'fullPage' | 'omitBackground'>;
-  node_modules\playwright\types\test.d.ts:7025:  /**
-  node_modules\playwright\types\test.d.ts:7026:   * Whether to record trace for each test. Defaults to `'off'`. The initial run of a test is the "first run";
-
-
-PS C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\Athena_Automation\integration-tests> 
+git switch evidence_factory_fix &&
+git fetch origin &&
+git merge origin/develop
