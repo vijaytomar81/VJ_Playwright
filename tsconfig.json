@@ -38,7 +38,7 @@
   "include": [
     "**/*.ts",
     "**/*.js"
-  ],
+, "playwright.brands.config.ts.bk"  ],
   "exclude": [
     "node_modules",
     "dist"
