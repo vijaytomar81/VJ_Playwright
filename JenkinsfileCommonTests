@@ -164,34 +164,10 @@ pipeline {
                     }
                 }
             }
-
-            // Generate EvidenceFactory after Playwright execution and native report generation.
-            script {
-                if (commonJobPrepared && params.RUN_MODE == 'Execute tests') {
-                    if (!fileExists('results.json')) {
-                        unstable('[REPORTS] Missing results.json; EvidenceFactory cannot be generated.')
-                    } else {
-                        catchError(buildResult: 'UNSTABLE', stageResult: 'UNSTABLE', catchInterruptions: false,
-                            message: 'EvidenceFactory report could not be generated; artifacts will still be archived') {
-                            def plan = readCommonPlan()
-
-                            echo '[REPORTS] Generating EvidenceFactory report'
-
-                            withEnv([
-                                "EVIDENCEFACTORY_PROJECT=${plan.project ?: plan.brand}",
-                                'EVIDENCEFACTORY_JSON_FILE=results.json'
-                            ]) {
-                                sh 'npx --no-install ts-node --transpile-only reportingLayer/evidenceFactory/evidenceFactory.ts'
-                            }
-                        }
-                    }
-                }
-            }
-
             script {
                 if (commonJobPrepared) {
                     echo '[REPORTS] Archiving run inventory, summaries, reports and attachments'
-                    archiveArtifacts artifacts: 'common-job/**,results.xml,playwright-report/**,test-results/**,allure-results/**', allowEmptyArchive: true
+                    archiveArtifacts artifacts: 'common-job/**,results.xml,playwright-report/**,test-results/**,allure-results/**,custom-test-reports/**', allowEmptyArchive: true
                 }
                 if (params.RECIPIENT_EMAILS?.trim()) {
                     try {
