@@ -1,3 +1,1 @@
-git switch evidence_factory_fix &&
-git fetch origin &&
-git merge origin/develop
+npm install --save-dev --save-exact allure-playwright@3.15.0
