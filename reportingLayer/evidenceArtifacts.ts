@@ -6,7 +6,7 @@ import { basename, join, resolve, relative, isAbsolute } from 'node:path';
 
 import reportPaths from '../configLayer/execution/reportPaths.json';
 
-const { validateReportPaths } = require('../configLayer/execution/validateReportPaths.cjs');
+import { validateReportPaths } from '../configLayer/execution/validateReportPaths.cjs';
 
 const DEFAULT_PROJECT_NAME = 'Evidence';
 
