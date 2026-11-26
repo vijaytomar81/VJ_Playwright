@@ -1,86 +1,18 @@
-tp70707@AVD-HEX-73 MINGW64 ~/OneDrive - Allianz/My Documents/Automation/Athena_Automation/integration-tests (evidence_factory_fix)
-$ git status --short
+sed -i 's|reportingLayer/reports/brand-allure-reporter.ts|reportingLayer/reporters/brand-allure-reporter.ts|' automationLayer/insurance/unitTests/allureNavigationIdentity.test.ts
+
+
 
 git --no-pager diff -- automationLayer/insurance/unitTests/allureNavigationIdentity.test.ts
 
 git ls-files '*brand-allure-reporter*'
 
 git diff --check
- M automationLayer/insurance/unitTests/allureNavigationIdentity.test.ts
-diff --git a/automationLayer/insurance/unitTests/allureNavigationIdentity.test.ts b/automationLayer/insurance/unitTests/allureNavigationIdentity.test.ts
-index bef5ad2..e026cf6 100644
---- a/automationLayer/insurance/unitTests/allureNavigationIdentity.test.ts
-+++ b/automationLayer/insurance/unitTests/allureNavigationIdentity.test.ts
-@@ -72,7 +72,7 @@ test('Allure keeps repeated navigation titles separate by route while grouping r
-     return { results, discovery: fs.readFileSync(jsonPath, 'utf8') };
-   }
-   const original = run(require.resolve('allure-playwright'), 'original');
--  const fixed = run(path.join(root, 'reportingLayer/brand-allure-reporter.ts'), 'fixed');
-+  const fixed = run(path.join(root, 'reportingLayer/reports/brand-allure-reporter.ts'), 'fixed');
-   // All 16 logical cases execute in both runs (four have a retry), but the stock reporter
-   // collapses generated page identities across the four specs.
-   expect(original.results).toHaveLength(20);
-reportingLayer/reporters/brand-allure-reporter.ts
 
-tp70707@AVD-HEX-73 MINGW64 ~/OneDrive - Allianz/My Documents/Automation/Athena_Automation/integration-tests (evidence_factory_fix)
-$ npm run test:unit -- allureNavigationIdentity.test.ts
+
+test -f reportingLayer/reporters/brand-allure-reporter.ts && echo "PASS: Reporter file exists" || echo "FAIL: Reporter file missing"
+
+
+npm run test:unit -- allureNavigationIdentity.test.ts
 echo "Exit code: $?"
 
-> ferryplaywright@1.0.0 test:unit
-> playwright test -c automationLayer/insurance/unitTests/playwright.config.ts allureNavigationIdentity.test.ts
 
-
-Running 1 test using 1 worker
-
-  ✘  1 …work-unit] › automationLayer\insurance\unitTests\allureNavigationIdentity.test.ts:14:5 › Allure keeps repeated navigation titles separate by route while grouping real retries (5.3s)
-
-
-  1) [framework-unit] › automationLayer\insurance\unitTests\allureNavigationIdentity.test.ts:14:5 › Allure keeps repeated navigation titles separate by route while grouping real retries 
-
-    Error: Error: Cannot find module 'C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\Athena_Automation\integration-tests\reportingLayer\reports\brand-allure-reporter.ts'
-    Require stack:
-    - C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\Athena_Automation\integration-tests\node_modules\playwright\lib\common\index.js
-    - C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\Athena_Automation\integration-tests\node_modules\playwright\lib\program.js
-    - C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\Athena_Automation\integration-tests\node_modules\@playwright\test\cli.js
-        at Module._resolveFilename (node:internal/modules/cjs/loader:1564:15)
-        at wrapResolveFilename (node:internal/modules/cjs/loader:1118:27)
-        at defaultResolve (node:internal/modules/cjs/loader:1199:20)
-        at nextStep (node:internal/modules/customization_hooks:189:26)
-        at resolve (C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\Athena_Automation\integration-tests\node_modules\playwright\lib\common\index.js:864:19)
-        at nextStep (node:internal/modules/customization_hooks:189:26)
-        at resolveWithHooks (node:internal/modules/customization_hooks:417:10)
-        at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1212:25)
-        at require.resolve (node:internal/modules/helpers:175:31)
-        at C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\Athena_Automation\integration-tests\node_modules\playwright\lib\common\index.js:667:21
-        at Array.map (<anonymous>)
-        at resolveReporters (C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\Athena_Automation\integration-tests\node_modules\playwright\lib\common\index.js:664:34)
-        at new FullConfigInternal (C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\Athena_Automation\integration-tests\node_modules\playwright\lib\common\index.js:568:56)
-        at loadConfig (C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\Athena_Automation\integration-tests\node_modules\playwright\lib\common\index.js:1332:22)
-        at Object.loadConfigFromFile (C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\Athena_Automation\integration-tests\node_modules\playwright\lib\common\index.js:1546:10)
-        at runTests (C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\Athena_Automation\integration-tests\node_modules\playwright\lib\cli\testActions.js:46:18)
-        at _Command.<anonymous> (C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\Athena_Automation\integration-tests\node_modules\playwright\lib\program.js:55:7) {
-      code: 'MODULE_NOT_FOUND',
-      requireStack: [
-        'C:\\Users\\tp70707\\OneDrive - Allianz\\My Documents\\Automation\\Athena_Automation\\integration-tests\\node_modules\\playwright\\lib\\common\\index.js',
-        'C:\\Users\\tp70707\\OneDrive - Allianz\\My Documents\\Automation\\Athena_Automation\\integration-tests\\node_modules\\playwright\\lib\\program.js',
-        'C:\\Users\\tp70707\\OneDrive - Allianz\\My Documents\\Automation\\Athena_Automation\\integration-tests\\node_modules\\@playwright\\test\\cli.js'
-      ]
-    }
-
-
-    expect(received).toBe(expected) // Object.is equality
-
-    Expected: 0
-    Received: 1
-        at C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\Athena_Automation\integration-tests\node_modules\playwright\lib\common\index.js:667:21
-        at run (C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\Athena_Automation\integration-tests\automationLayer\insurance\unitTests\allureNavigationIdentity.test.ts:67:58)
-        at C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\Athena_Automation\integration-tests\automationLayer\insurance\unitTests\allureNavigationIdentity.test.ts:75:17
-
-    Error Context: test-results\unit\allureNavigationIdentity-A-2f1f6-while-grouping-real-retries-framework-unit\error-context.md
-
-  1 failed
-    [framework-unit] › automationLayer\insurance\unitTests\allureNavigationIdentity.test.ts:14:5 › Allure keeps repeated navigation titles separate by route while grouping real retries 
-Exit code: 1
-
-tp70707@AVD-HEX-73 MINGW64 ~/OneDrive - Allianz/My Documents/Automation/Athena_Automation/integration-tests (evidence_factory_fix)
-$ 
