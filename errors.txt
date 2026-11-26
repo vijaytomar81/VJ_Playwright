@@ -1,22 +1,40 @@
-npx --no-install playwright test -c playwright.brands.config.ts --list --reporter=list
-
-
-
-git add playwright.brands.config.ts
+tp70707@AVD-HEX-73 MINGW64 ~/OneDrive - Allianz/My Documents/Automation/Athena_Automation/integration-tests (evidence_factory_fix)
+$ git add playwright.brands.config.ts
 
 git diff --cached --check
 
 git --no-pager diff --cached --stat
 
 git status --short
+warning: in the working copy of 'playwright.brands.config.ts', LF will be replaced by CRLF the next time Git touches it
+ playwright.brands.config.ts | 31 +++++++++++++++++++------------
+ 1 file changed, 19 insertions(+), 12 deletions(-)
+ M .vscode/settings.json
+M  playwright.brands.config.ts
 
+tp70707@AVD-HEX-73 MINGW64 ~/OneDrive - Allianz/My Documents/Automation/Athena_Automation/integration-tests (evidence_factory_fix)
+$ git commit -m "Restore EvidenceFactory integration in brand configuration"
+✔ Backed up original state in git stash (30f3b9c)
+✔ Running tasks for staged files...
+✔ Applying modifications from tasks...
+✔ Cleaning up temporary files...
+[evidence_factory_fix fc91afa] Restore EvidenceFactory integration in brand configuration
+ Committer: Tomar <tp70707@group.net>
+Your name and email address were configured automatically based
+on your username and hostname. Please check that they are accurate.
+You can suppress this message by setting them explicitly:
 
+    git config --global user.name "Your Name"
+    git config --global user.email you@example.com
 
+After doing this, you may fix the identity used for this commit with:
 
-git commit -m "Restore EvidenceFactory integration in brand configuration"
+    git commit --amend --reset-author
 
+ 1 file changed, 15 insertions(+), 5 deletions(-)
 
-git status
+tp70707@AVD-HEX-73 MINGW64 ~/OneDrive - Allianz/My Documents/Automation/Athena_Automation/integration-tests (evidence_factory_fix)
+$ git status
 
 git --no-pager log -4 --oneline
 
@@ -25,6 +43,39 @@ git --no-pager show --stat HEAD
 git show HEAD:playwright.brands.config.ts | grep -nE 'validateReportPaths|reportPaths|evidenceReporter|brand-allure-reporter|fullPage'
 
 git show --format= --check HEAD
+On branch evidence_factory_fix
+Your branch is ahead of 'origin/evidence_factory_fix' by 4 commits.
+  (use "git push" to publish your local commits)
 
+Changes not staged for commit:
+  (use "git add <file>..." to update what will be committed)
+  (use "git restore <file>..." to discard changes in working directory)
+        modified:   .vscode/settings.json
 
+no changes added to commit (use "git add" and/or "git commit -a")
+fc91afa (HEAD -> evidence_factory_fix) Restore EvidenceFactory integration in brand configuration
+40e26c9 Fix EvidenceFactory reporting integration
+9d2abbc Merge branch 'evidence_factory_revert' into 'develop'
+61b1e1b (origin/evidence_factory_revert, evidence_factory_revert) Revert "Merge branch 'evidence_factory' into 'develop'"
+commit fc91afa99c8bb6f192c769e2682929bb1b2d3c71 (HEAD -> evidence_factory_fix)
+Author: Tomar <tp70707@group.net>
+Date:   Thu Nov 26 15:18:00 2026 +0100
 
+    Restore EvidenceFactory integration in brand configuration
+
+ playwright.brands.config.ts | 20 +++++++++++++++-----
+ 1 file changed, 15 insertions(+), 5 deletions(-)
+5:import reportPaths from './configLayer/execution/reportPaths.json';
+11:import { validateReportPaths } from './configLayer/execution/validateReportPaths.cjs';
+25:validateReportPaths();
+124:  outputDir: reportPaths.testResults,
+128:    ['html', { open: 'never', outputFolder: reportPaths.playwrightHtml }],
+129:    ['json', { outputFile: reportPaths.json }],
+130:    ['junit', { outputFile: reportPaths.junit }],
+132:      './reportingLayer/reporters/brand-allure-reporter.ts',
+133:      { resultsDir: reportPaths.allureResults },
+135:    ['./reportingLayer/reporters/evidenceReporter.ts'],
+142:    screenshot: { mode: 'only-on-failure', fullPage: true },
+
+tp70707@AVD-HEX-73 MINGW64 ~/OneDrive - Allianz/My Documents/Automation/Athena_Automation/integration-tests (evidence_factory_fix)
+$ 
