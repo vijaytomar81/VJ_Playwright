@@ -1,80 +1,27 @@
-git status --short
+tp70707@AVD-HEX-73 MINGW64 ~/OneDrive - Allianz/My Documents/Automation/Athena_Automation/integration-tests (evidence_factory_fix)
+$ git status --short
 
 git --no-pager diff -- automationLayer/insurance/unitTests/allureNavigationIdentity.test.ts
 
 git diff --check
 
 git --no-pager diff --stat
-
-
-
-
-npm run test:unit -- allureNavigationIdentity.test.ts
-echo "Exit code: $?"
-
-
-
-
-npx --no-install eslint automationLayer/insurance/unitTests/allureNavigationIdentity.test.ts
-echo "Exit code: $?"
-
-npx --no-install tsc --noEmit
-echo "Exit code: $?"
-
-
-
-
-git --no-pager diff HEAD -- package.json package-lock.json
-
-git status --short
-
-git diff --check
-
-
-
-=========
-
-git add -- automationLayer/insurance/unitTests/allureNavigationIdentity.test.ts
-
-
-git status --short
-
-git --no-pager diff --cached --stat
-
-git --no-pager diff --cached
-
-git diff --cached --check
-
-
-
-git commit -m "Fix relocated Allure reporter path in navigation identity unit test"
-
-
-
-
-git status
-
-git --no-pager log -1 --oneline
-
-git --no-pager show --format= HEAD
-
-git show --format= --check HEAD
-
-
-
-git push origin evidence_factory_fix
-
-
-
-git status
-
-git rev-list --left-right --count origin/evidence_factory_fix...HEAD
-
-git --no-pager log -4 --oneline
-
-
-============
-
+ M automationLayer/insurance/unitTests/allureNavigationIdentity.test.ts
+diff --git a/automationLayer/insurance/unitTests/allureNavigationIdentity.test.ts b/automationLayer/insurance/unitTests/allureNavigationIdentity.test.ts
+index bef5ad2..8a6d15e 100644
+--- a/automationLayer/insurance/unitTests/allureNavigationIdentity.test.ts
++++ b/automationLayer/insurance/unitTests/allureNavigationIdentity.test.ts
+@@ -72,7 +72,7 @@ test('Allure keeps repeated navigation titles separate by route while grouping r
+     return { results, discovery: fs.readFileSync(jsonPath, 'utf8') };
+   }
+   const original = run(require.resolve('allure-playwright'), 'original');
+-  const fixed = run(path.join(root, 'reportingLayer/brand-allure-reporter.ts'), 'fixed');
++  const fixed = run(path.join(root, 'reportingLayer//reports/brand-allure-reporter.ts'), 'fixed');
+   // All 16 logical cases execute in both runs (four have a retry), but the stock reporter
+   // collapses generated page identities across the four specs.
+   expect(original.results).toHaveLength(20);
+ automationLayer/insurance/unitTests/allureNavigationIdentity.test.ts | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
 tp70707@AVD-HEX-73 MINGW64 ~/OneDrive - Allianz/My Documents/Automation/Athena_Automation/integration-tests (evidence_factory_fix)
 $ npm run test:unit -- allureNavigationIdentity.test.ts
@@ -137,5 +84,22 @@ Running 1 test using 1 worker
 Exit code: 1
 
 tp70707@AVD-HEX-73 MINGW64 ~/OneDrive - Allianz/My Documents/Automation/Athena_Automation/integration-tests (evidence_factory_fix)
-$ 
+$ npx --no-install eslint automationLayer/insurance/unitTests/allureNavigationIdentity.test.ts
+echo "Exit code: $?"
+Exit code: 0
 
+tp70707@AVD-HEX-73 MINGW64 ~/OneDrive - Allianz/My Documents/Automation/Athena_Automation/integration-tests (evidence_factory_fix)
+$ npx --no-install tsc --noEmit
+echo "Exit code: $?"
+Exit code: 0
+
+tp70707@AVD-HEX-73 MINGW64 ~/OneDrive - Allianz/My Documents/Automation/Athena_Automation/integration-tests (evidence_factory_fix)
+$ git --no-pager diff HEAD -- package.json package-lock.json
+
+git status --short
+
+git diff --check
+ M automationLayer/insurance/unitTests/allureNavigationIdentity.test.ts
+
+tp70707@AVD-HEX-73 MINGW64 ~/OneDrive - Allianz/My Documents/Automation/Athena_Automation/integration-tests (evidence_factory_fix)
+$ 
