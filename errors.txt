@@ -1,16 +1,46 @@
-git add reportingLayer/evidenceArtifacts.ts reportingLayer/evidenceFactory.ts
+tp70707@AVD-HEX-73 MINGW64 ~/OneDrive - Allianz/My Documents/Automation/Athena_Automation/integration-tests (evidence_factory_fix)
+$ git add reportingLayer/evidenceArtifacts.ts reportingLayer/evidenceFactory.ts
 
 git --no-pager diff -- reportingLayer/evidenceArtifacts.ts reportingLayer/evidenceFactory.ts
 
 git status --short
+M  .gitignore
+M  .vscode/settings.json
+M  JenkinsfileCommonTests
+M  JenkinsfileTestsWithReport
+M  automationLayer/common/basePage.ts
+A  automationLayer/common/executionEnvironmentMetadata.ts
+M  configLayer/execution/commonJob/reporter.cjs
+M  configLayer/execution/commonJob/reporter.test.cjs
+M  configLayer/execution/commonJob/reports.test.cjs
+M  configLayer/execution/commonJob/runner.cjs
+A  configLayer/execution/reportPaths.json
+A  configLayer/execution/validateReportPaths.cjs
+M  package-lock.json
+M  package.json
+M  playwright.brands.config.ts
+M  playwright.config.base.ts
+A  reportingLayer/README.md
+A  reportingLayer/evidenceArtifacts.ts
+A  reportingLayer/evidenceFactory.ts
+A  reportingLayer/excel/excelGenerator.ts
+A  reportingLayer/excel/excelStyleConfig.ts
+A  reportingLayer/excel/excelStyles.ts
+A  reportingLayer/excel/missingFields.ts
+R  reportingLayer/brand-allure-reporter.ts -> reportingLayer/reporters/brand-allure-reporter.ts
+A  reportingLayer/reporters/evidenceReporter.ts
+A  reportingLayer/schema/evidence-schema.ts
+A  reportingLayer/schema/summary-schema.ts
 
+tp70707@AVD-HEX-73 MINGW64 ~/OneDrive - Allianz/My Documents/Automation/Athena_Automation/integration-tests (evidence_factory_fix)
+$ npx --no-install eslint playwright.config.base.ts reportingLayer/evidenceArtifacts.ts reportingLayer/evidenceFactory.ts
 
+tp70707@AVD-HEX-73 MINGW64 ~/OneDrive - Allianz/My Documents/Automation/Athena_Automation/integration-tests (evidence_factory_fix)
+$ npx --no-install tsc --noEmit
 
-npx --no-install eslint playwright.config.base.ts reportingLayer/evidenceArtifacts.ts reportingLayer/evidenceFactory.ts
+tp70707@AVD-HEX-73 MINGW64 ~/OneDrive - Allianz/My Documents/Automation/Athena_Automation/integration-tests (evidence_factory_fix)
+$ node -r ts-node/register -e "const base = require('./playwright.config.base'); const artifacts = require('./reportingLayer/evidenceArtifacts'); const factory = require('./reportingLayer/evidenceFactory'); if (typeof base.createConfig !== 'function' || typeof artifacts.createRunDirectory !== 'function' || typeof factory.generateEvidenceFactory !== 'function') throw new Error('Module import verification failed'); console.log('EvidenceFactory module imports validated successfully.');"
+EvidenceFactory module imports validated successfully.
 
-
-npx --no-install tsc --noEmit
-
-
-node -r ts-node/register -e "const base = require('./playwright.config.base'); const artifacts = require('./reportingLayer/evidenceArtifacts'); const factory = require('./reportingLayer/evidenceFactory'); if (typeof base.createConfig !== 'function' || typeof artifacts.createRunDirectory !== 'function' || typeof factory.generateEvidenceFactory !== 'function') throw new Error('Module import verification failed'); console.log('EvidenceFactory module imports validated successfully.');"
-
+tp70707@AVD-HEX-73 MINGW64 ~/OneDrive - Allianz/My Documents/Automation/Athena_Automation/integration-tests (evidence_factory_fix)
+$ 
