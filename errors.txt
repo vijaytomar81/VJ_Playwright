@@ -1,85 +1,1191 @@
-tp70707@AVD-HEX-73 MINGW64 ~/OneDrive - Allianz/My Documents/Automation/Athena_Automation/integration-tests (evidence_factory_fix)
-$ git status
++ npm run test:unit
 
-git rev-list --left-right --count origin/evidence_factory_fix...HEAD
 
-git --no-pager log -3 --oneline
 
-git --no-pager show --format= HEAD
+> ferryplaywright@1.0.0 test:unit
 
-git show --format= --check HEAD
-On branch evidence_factory_fix
-Your branch is up to date with 'origin/evidence_factory_fix'.
+> playwright test -c automationLayer/insurance/unitTests/playwright.config.ts
 
-nothing to commit, working tree clean
-0       0
-5e642fd (HEAD -> evidence_factory_fix, origin/evidence_factory_fix) Fix browser metadata compatibility with framework unit tests
-45526ee Fix EvidenceFactory validator ESLint errors
-fc91afa Restore EvidenceFactory integration in brand configuration
-diff --git a/.vscode/settings.json b/.vscode/settings.json
-index 1f02804..095b092 100644
---- a/.vscode/settings.json
-+++ b/.vscode/settings.json
-@@ -2,15 +2,12 @@
-   "playwright.env": {
-     // Website environment: test, dev, uat or nft (availability depends on the brand).
-     "ENV": "test",
--
-     // Agent login: allianz (Active Directory), sapiens (Microsoft), sapiensKeycloak (Keycloak).
-     // Proposed Insurance framework: skip uses the brand default; login happens only when needed.
-     // Current Athena framework: skip disables the startup login.
-     "AGENT_PORTAL_AUTH": "skip",
--
-     // Proposed Insurance framework: maximum tests running at once (in parallel).
-     "WORKERS": "4",
--
-     // Proposed Insurance framework: true pauses at test end for manual inspection; Resume or close the browser to finish.
-     "KEEP_BROWSER_OPEN": "false"
-   },
-@@ -18,5 +15,8 @@
-   "editor.defaultFormatter": "esbenp.prettier-vscode",
-   "editor.codeActionsOnSave": {
-     "source.fixAll.eslint": "explicit"
-+  },
-+  "[jsonc]": {
-+    "editor.defaultFormatter": "vscode.json-language-features"
-   }
- }
-diff --git a/automationLayer/common/executionEnvironmentMetadata.ts b/automationLayer/common/executionEnvironmentMetadata.ts
-index f49dd57..8bac0f4 100644
---- a/automationLayer/common/executionEnvironmentMetadata.ts
-+++ b/automationLayer/common/executionEnvironmentMetadata.ts
-@@ -29,7 +29,29 @@ export function captureExecutionEnvironmentMetadata(page: Page): void {
-     return;
-   }
- 
--  const browser = page.context().browser();
-+  /*
-+   * Framework unit tests may use mocked Page objects
-+   * without browser metadata APIs.
-+   */
-+  if (!page || typeof page.context !== 'function' || typeof page.viewportSize !== 'function') {
-+    return;
-+  }
-+
-+  const context = page.context();
-+
-+  if (!context || typeof context.browser !== 'function') {
-+    return;
-+  }
-+
-+  const browser = context.browser();
-+
-+  if (
-+    browser &&
-+    (typeof browser.browserType !== 'function' || typeof browser.version !== 'function')
-+  ) {
-+    return;
-+  }
-+
-   const viewport = page.viewportSize();
- 
-   /*
 
-tp70707@AVD-HEX-73 MINGW64 ~/OneDrive - Allianz/My Documents/Automation/Athena_Automation/integration-tests (evidence_factory_fix)
-$ 
+
+
+
+Running 371 tests using 16 workers
+
+
+
+  ✓    1 [framework-unit] › automationLayer/insurance/unitTests/cookieBanner.test.ts:34:5 › a vanished consent button does not hide a remaining blocking overlay (11ms)
+
+[agent-customer-search] {"event":"opening-customer-search","searchId":"2ca9d3f447","afterMs":10,"path":"/"}
+
+[agent-customer-search] {"event":"opening-customer-search","searchId":"2ca9d3f447","afterMs":6,"path":"/"}
+
+[agent-customer-search] {"event":"search-route-opened","searchId":"2ca9d3f447","afterMs":15,"path":"/search"}
+
+[agent-customer-search] {"event":"customer-form-ready","searchId":"2ca9d3f447","afterMs":17,"path":"/search"}
+
+[agent-customer-search] {"event":"search-route-opened","searchId":"2ca9d3f447","afterMs":18,"path":"/search"}
+
+[agent-customer-search] {"event":"customer-form-ready","searchId":"2ca9d3f447","afterMs":22,"path":"/search"}
+
+[agent-customer-search] {"event":"submitting-search","searchId":"2ca9d3f447","afterMs":31,"path":"/search","attempt":1}
+
+[agent-customer-search] {"event":"submitting-search","searchId":"2ca9d3f447","afterMs":27,"path":"/search","attempt":1}
+
+[agent-customer-search] {"event":"search-result-state","searchId":"2ca9d3f447","afterMs":36,"path":"/search","attempt":1,"sameOrigin":true,"emailMatches":true,"expiredQuotesFilterPresent":true,"emailLinks":1,"postcodeLinks":0,"visibleLinks":2,"validationCount":0,"noResults":false}
+
+[agent-customer-search] {"event":"result-selected","searchId":"2ca9d3f447","afterMs":37,"path":"/search","attempt":1,"strategy":"email","recovered":false}
+
+[agent-customer-search] {"event":"search-result-state","searchId":"2ca9d3f447","afterMs":35,"path":"/search","attempt":1,"sameOrigin":true,"emailMatches":true,"expiredQuotesFilterPresent":true,"emailLinks":0,"postcodeLinks":1,"visibleLinks":2,"validationCount":0,"noResults":false}
+
+[agent-customer-search] {"event":"result-selected","searchId":"2ca9d3f447","afterMs":35,"path":"/search","attempt":1,"strategy":"postcode","recovered":false}
+
+[agent-customer-search] {"event":"opening-result","searchId":"2ca9d3f447","afterMs":39,"path":"/search"}
+
+[agent-customer-search] {"event":"opening-result","searchId":"2ca9d3f447","afterMs":39,"path":"/search"}
+
+[agent-customer-search] {"event":"customer-opened","searchId":"2ca9d3f447","afterMs":43,"path":"/search","customerPath":"/search","popup":false}
+
+[agent-customer-search] {"event":"customer-opened","searchId":"2ca9d3f447","afterMs":42,"path":"/search","customerPath":"/search","popup":false}
+
+  ✓    5 [framework-unit] › automationLayer/insurance/unitTests/cookieBanner.test.ts:46:5 › cookie banner browser errors propagate (12ms)
+
+  ✓    6 [framework-unit] › automationLayer/insurance/unitTests/cookieBanner.test.ts:28:5 › a consent button that disappears during click is accepted when the overlay is also gone (11ms)
+
+  ✓    4 [framework-unit] › automationLayer/insurance/unitTests/cookieBanner.test.ts:40:5 › a visible cookie banner is dismissed once (26ms)
+
+  ✓    7 [framework-unit] › automationLayer/insurance/unitTests/customerSearch.test.ts:283:5 › a placeholder appearing after result counting cannot make the opening click ambiguous (53ms)
+
+  ✓    3 [framework-unit] › automationLayer/insurance/unitTests/customerSearch.test.ts:243:5 › Ferry opens /search from portal home without following the misleading navigation link (60ms)
+
+[agent-customer-search] {"event":"opening-customer-search","searchId":"2ca9d3f447","afterMs":2,"path":"/"}
+
+[agent-customer-search] {"event":"opening-customer-search","searchId":"2ca9d3f447","afterMs":4,"path":"/"}
+
+[agent-customer-search] {"event":"search-route-opened","searchId":"2ca9d3f447","afterMs":6,"path":"/search"}
+
+[agent-customer-search] {"event":"opening-customer-search","searchId":"2ca9d3f447","afterMs":5,"path":"/"}
+
+[agent-customer-search] {"event":"customer-form-ready","searchId":"2ca9d3f447","afterMs":10,"path":"/search"}
+
+[agent-customer-search] {"event":"opening-customer-search","searchId":"2ca9d3f447","afterMs":1,"path":"/"}
+
+[agent-customer-search] {"event":"search-route-opened","searchId":"2ca9d3f447","afterMs":8,"path":"/search"}
+
+[agent-customer-search] {"event":"search-route-opened","searchId":"2ca9d3f447","afterMs":4,"path":"/search"}
+
+[agent-customer-search] {"event":"customer-form-ready","searchId":"2ca9d3f447","afterMs":5,"path":"/search"}
+
+[agent-customer-search] {"event":"search-route-opened","searchId":"2ca9d3f447","afterMs":14,"path":"/search"}
+
+[agent-customer-search] {"event":"customer-form-ready","searchId":"2ca9d3f447","afterMs":17,"path":"/search"}
+
+[agent-customer-search] {"event":"submitting-search","searchId":"2ca9d3f447","afterMs":10,"path":"/search","attempt":1}
+
+[agent-customer-search] {"event":"submitting-search","searchId":"2ca9d3f447","afterMs":22,"path":"/search","attempt":1}
+
+[agent-customer-search] {"event":"customer-form-ready","searchId":"2ca9d3f447","afterMs":20,"path":"/search"}
+
+[agent-customer-search] {"event":"search-result-state","searchId":"2ca9d3f447","afterMs":14,"path":"/search","attempt":1,"sameOrigin":true,"emailMatches":true,"expiredQuotesFilterPresent":true,"emailLinks":2,"postcodeLinks":0,"visibleLinks":3,"validationCount":0,"noResults":false}
+
+[agent-customer-search] {"event":"result-selected","searchId":"2ca9d3f447","afterMs":14,"path":"/search","attempt":1,"strategy":"email-deduplicated","recovered":false}
+
+[agent-customer-search] {"event":"search-result-state","searchId":"2ca9d3f447","afterMs":26,"path":"/search","attempt":1,"sameOrigin":true,"emailMatches":true,"expiredQuotesFilterPresent":true,"emailLinks":0,"postcodeLinks":2,"visibleLinks":3,"validationCount":0,"noResults":false}
+
+[agent-customer-search] {"event":"opening-result","searchId":"2ca9d3f447","afterMs":16,"path":"/search"}
+
+[agent-customer-search] {"event":"submitting-search","searchId":"2ca9d3f447","afterMs":27,"path":"/search","attempt":1}
+
+[agent-customer-search] {"event":"ambiguous-result-targets","searchId":"2ca9d3f447","afterMs":27,"path":"/search","missingHrefs":0,"fragmentHrefs":0,"pathShapes":["/customers/customer-0","/customers/customer-1"]}
+
+[agent-customer-search] {"event":"failed","searchId":"2ca9d3f447","afterMs":28,"path":"/search","errorType":"Error"}
+
+[agent-customer-search] {"event":"failure-state","searchId":"2ca9d3f447","afterMs":28,"path":"/search","sameOrigin":true,"emailMatches":true,"expiredQuotesFilterPresent":true,"emailLinks":0,"postcodeLinks":2,"visibleLinks":3,"validationCount":0,"noResults":false}
+
+[agent-customer-search] {"event":"customer-opened","searchId":"2ca9d3f447","afterMs":19,"path":"/search","customerPath":"/search","popup":false}
+
+[agent-customer-search] {"event":"search-result-state","searchId":"2ca9d3f447","afterMs":35,"path":"/search","attempt":1,"sameOrigin":true,"emailMatches":true,"expiredQuotesFilterPresent":true,"emailLinks":0,"postcodeLinks":1,"visibleLinks":2,"validationCount":0,"noResults":false}
+
+[agent-customer-search] {"event":"result-selected","searchId":"2ca9d3f447","afterMs":35,"path":"/search","attempt":1,"strategy":"postcode","recovered":false}
+
+[agent-customer-search] {"event":"opening-result","searchId":"2ca9d3f447","afterMs":39,"path":"/search"}
+
+[agent-customer-search] {"event":"submitting-search","searchId":"2ca9d3f447","afterMs":27,"path":"/search","attempt":1}
+
+[agent-customer-search] {"event":"search-result-state","searchId":"2ca9d3f447","afterMs":34,"path":"/search","attempt":1,"sameOrigin":true,"emailMatches":true,"expiredQuotesFilterPresent":true,"emailLinks":0,"postcodeLinks":0,"visibleLinks":1,"validationCount":0,"noResults":true}
+
+[agent-customer-search] {"event":"no-matching-result","searchId":"2ca9d3f447","afterMs":36,"path":"/search","attempt":1,"retry":true}
+
+[agent-customer-search] {"event":"opening-customer-search","searchId":"2ca9d3f447","afterMs":6,"path":"/"}
+
+[agent-customer-search] {"event":"search-route-opened","searchId":"2ca9d3f447","afterMs":9,"path":"/search"}
+
+[agent-customer-search] {"event":"customer-form-ready","searchId":"2ca9d3f447","afterMs":12,"path":"/search"}
+
+[agent-customer-search] {"event":"submitting-search","searchId":"2ca9d3f447","afterMs":18,"path":"/search","attempt":1}
+
+  ✓    8 [framework-unit] › automationLayer/insurance/unitTests/cookieBanner.test.ts:22:5 › an absent optional cookie banner does not require a click (14ms)
+
+  ✓   10 [framework-unit] › automationLayer/insurance/unitTests/customerSearch.test.ts:313:5 › duplicate postcode results are not resolved by choosing the first link (37ms)
+
+[agent-customer-search] {"event":"customer-opened","searchId":"2ca9d3f447","afterMs":43,"path":"/search","customerPath":"/search","popup":false}
+
+[agent-customer-search] {"event":"submitting-search","searchId":"2ca9d3f447","afterMs":42,"path":"/search","attempt":2}
+
+[agent-customer-search] {"event":"search-result-state","searchId":"2ca9d3f447","afterMs":47,"path":"/search","attempt":2,"sameOrigin":true,"emailMatches":true,"expiredQuotesFilterPresent":true,"emailLinks":0,"postcodeLinks":0,"visibleLinks":1,"validationCount":0,"noResults":true}
+
+[agent-customer-search] {"event":"no-matching-result","searchId":"2ca9d3f447","afterMs":48,"path":"/search","attempt":2,"retry":true}
+
+[agent-customer-search] {"event":"result-wait-expired","searchId":"2ca9d3f447","afterMs":26,"path":"/search","attempt":1}
+
+[agent-customer-search] {"event":"search-result-state","searchId":"2ca9d3f447","afterMs":27,"path":"/search","attempt":1,"sameOrigin":true,"emailMatches":true,"expiredQuotesFilterPresent":true,"emailLinks":0,"postcodeLinks":0,"visibleLinks":1,"validationCount":0,"noResults":false}
+
+[agent-customer-search] {"event":"opening-customer-search","searchId":"2ca9d3f447","afterMs":4,"path":"/"}
+
+[agent-customer-search] {"event":"search-route-opened","searchId":"2ca9d3f447","afterMs":13,"path":"/search"}
+
+  ✓   11 [framework-unit] › automationLayer/insurance/unitTests/customerSearch.test.ts:290:5 › postcode matching tolerates extra whitespace and case differences (52ms)
+
+[agent-customer-search] {"event":"submitting-search","searchId":"2ca9d3f447","afterMs":54,"path":"/search","attempt":3}
+
+[agent-customer-search] {"event":"search-result-state","searchId":"2ca9d3f447","afterMs":58,"path":"/search","attempt":3,"sameOrigin":true,"emailMatches":true,"expiredQuotesFilterPresent":true,"emailLinks":0,"postcodeLinks":0,"visibleLinks":1,"validationCount":0,"noResults":true}
+
+[agent-customer-search] {"event":"no-matching-result","searchId":"2ca9d3f447","afterMs":59,"path":"/search","attempt":3,"retry":false}
+
+[agent-customer-search] {"event":"failed","searchId":"2ca9d3f447","afterMs":60,"path":"/search","errorType":"Error"}
+
+[agent-customer-search] {"event":"failure-state","searchId":"2ca9d3f447","afterMs":60,"path":"/search","sameOrigin":true,"emailMatches":true,"expiredQuotesFilterPresent":true,"emailLinks":0,"postcodeLinks":0,"visibleLinks":1,"validationCount":0,"noResults":true}
+
+[agent-customer-search] {"event":"no-matching-result","searchId":"2ca9d3f447","afterMs":29,"path":"/search","attempt":1,"retry":true}
+
+[agent-customer-search] {"event":"submitting-search","searchId":"2ca9d3f447","afterMs":32,"path":"/search","attempt":2}
+
+[agent-customer-search] {"event":"search-result-state","searchId":"2ca9d3f447","afterMs":36,"path":"/search","attempt":2,"sameOrigin":true,"emailMatches":true,"expiredQuotesFilterPresent":true,"emailLinks":0,"postcodeLinks":1,"visibleLinks":2,"validationCount":0,"noResults":false}
+
+[agent-customer-search] {"event":"result-selected","searchId":"2ca9d3f447","afterMs":36,"path":"/search","attempt":2,"strategy":"postcode","recovered":true}
+
+[agent-customer-search] {"event":"opening-result","searchId":"2ca9d3f447","afterMs":38,"path":"/search"}
+
+  ✓    9 [framework-unit] › automationLayer/insurance/unitTests/cookieBanner.test.ts:53:5 › cookie dismissal timeout propagates instead of being treated as an absent banner (14ms)
+
+  ✓   14 [framework-unit] › automationLayer/insurance/unitTests/customerSearch.test.ts:320:5 › duplicate links to the same customer can open once without repeating the search (28ms)
+
+[agent-customer-search] {"event":"customer-opened","searchId":"2ca9d3f447","afterMs":49,"path":"/search","customerPath":"/search","popup":false}
+
+[agent-customer-search] {"event":"customer-form-ready","searchId":"2ca9d3f447","afterMs":26,"path":"/search"}
+
+[agent-customer-search] {"event":"opening-customer-search","searchId":"2ca9d3f447","afterMs":1,"path":"/"}
+
+[agent-customer-search] {"event":"opening-customer-search","searchId":"2ca9d3f447","afterMs":6,"path":"/"}
+
+[agent-customer-search] {"event":"search-route-opened","searchId":"2ca9d3f447","afterMs":3,"path":"/search"}
+
+[agent-customer-search] {"event":"submitting-search","searchId":"2ca9d3f447","afterMs":32,"path":"/search","attempt":1}
+
+[agent-customer-search] {"event":"customer-form-ready","searchId":"2ca9d3f447","afterMs":4,"path":"/search"}
+
+[agent-customer-search] {"event":"submitting-search","searchId":"2ca9d3f447","afterMs":20,"path":"/search","attempt":1}
+
+[agent-customer-search] {"event":"search-result-state","searchId":"2ca9d3f447","afterMs":24,"path":"/search","attempt":1,"sameOrigin":true,"emailMatches":true,"expiredQuotesFilterPresent":true,"emailLinks":2,"postcodeLinks":0,"visibleLinks":3,"validationCount":0,"noResults":false}
+
+[agent-customer-search] {"event":"policy-result-check","searchId":"2ca9d3f447","afterMs":25,"path":"/search","matchingRows":0,"matchingLinks":0}
+
+[agent-customer-search] {"event":"ambiguous-result-targets","searchId":"2ca9d3f447","afterMs":25,"path":"/search","missingHrefs":0,"fragmentHrefs":0,"pathShapes":["/customers/customer-0","/customers/customer-1"]}
+
+[agent-customer-search] {"event":"failed","searchId":"2ca9d3f447","afterMs":25,"path":"/search","errorType":"Error"}
+
+[agent-customer-search] {"event":"failure-state","searchId":"2ca9d3f447","afterMs":26,"path":"/search","sameOrigin":true,"emailMatches":true,"expiredQuotesFilterPresent":true,"emailLinks":2,"postcodeLinks":0,"visibleLinks":3,"validationCount":0,"noResults":false}
+
+[agent-customer-search] {"event":"search-result-state","searchId":"2ca9d3f447","afterMs":38,"path":"/search","attempt":1,"sameOrigin":true,"emailMatches":true,"expiredQuotesFilterPresent":true,"emailLinks":0,"postcodeLinks":0,"visibleLinks":1,"validationCount":0,"noResults":true}
+
+[agent-customer-search] {"event":"no-matching-result","searchId":"2ca9d3f447","afterMs":130,"path":"/search","attempt":1,"retry":true}
+
+[agent-customer-search] {"event":"search-route-opened","searchId":"2ca9d3f447","afterMs":13,"path":"/search"}
+
+[agent-customer-search] {"event":"customer-form-ready","searchId":"2ca9d3f447","afterMs":17,"path":"/search"}
+
+[agent-customer-search] {"event":"submitting-search","searchId":"2ca9d3f447","afterMs":21,"path":"/search","attempt":1}
+
+[agent-customer-search] {"event":"search-result-state","searchId":"2ca9d3f447","afterMs":28,"path":"/search","attempt":1,"sameOrigin":true,"emailMatches":true,"expiredQuotesFilterPresent":true,"emailLinks":1,"postcodeLinks":0,"visibleLinks":2,"validationCount":0,"noResults":false}
+
+[agent-customer-search] {"event":"result-selected","searchId":"2ca9d3f447","afterMs":28,"path":"/search","attempt":1,"strategy":"email","recovered":false}
+
+[agent-customer-search] {"event":"opening-result","searchId":"2ca9d3f447","afterMs":107,"path":"/search"}
+
+[agent-customer-search] {"event":"opening-customer-search","searchId":"2ca9d3f447","afterMs":7,"path":"/"}
+
+[agent-customer-search] {"event":"search-route-opened","searchId":"2ca9d3f447","afterMs":15,"path":"/search"}
+
+[agent-customer-search] {"event":"customer-form-ready","searchId":"2ca9d3f447","afterMs":18,"path":"/search"}
+
+[agent-customer-search] {"event":"submitting-search","searchId":"2ca9d3f447","afterMs":22,"path":"/search","attempt":1}
+
+[agent-customer-search] {"event":"search-result-state","searchId":"2ca9d3f447","afterMs":26,"path":"/search","attempt":1,"sameOrigin":true,"emailMatches":true,"expiredQuotesFilterPresent":true,"emailLinks":1,"postcodeLinks":0,"visibleLinks":3,"validationCount":0,"noResults":false}
+
+[agent-customer-search] {"event":"result-selected","searchId":"2ca9d3f447","afterMs":26,"path":"/search","attempt":1,"strategy":"email","recovered":false}
+
+[agent-customer-search] {"event":"opening-result","searchId":"2ca9d3f447","afterMs":82,"path":"/search"}
+
+[agent-customer-search] {"event":"customer-opened","searchId":"2ca9d3f447","afterMs":85,"path":"/search","customerPath":"/search","popup":false}
+
+[agent-customer-search] {"event":"opening-customer-search","searchId":"2ca9d3f447","afterMs":2,"path":"/"}
+
+[agent-customer-search] {"event":"search-route-opened","searchId":"2ca9d3f447","afterMs":4,"path":"/search"}
+
+[agent-customer-search] {"event":"customer-form-ready","searchId":"2ca9d3f447","afterMs":6,"path":"/search"}
+
+[agent-customer-search] {"event":"submitting-search","searchId":"2ca9d3f447","afterMs":11,"path":"/search","attempt":1}
+
+[agent-customer-search] {"event":"search-result-state","searchId":"2ca9d3f447","afterMs":15,"path":"/","attempt":1,"sameOrigin":false,"emailMatches":true,"expiredQuotesFilterPresent":true,"emailLinks":0,"postcodeLinks":1,"visibleLinks":2,"validationCount":0,"noResults":false}
+
+[agent-customer-search] {"event":"failed","searchId":"2ca9d3f447","afterMs":16,"path":"/","errorType":"Error"}
+
+[agent-customer-search] {"event":"failure-state","searchId":"2ca9d3f447","afterMs":16,"path":"/","sameOrigin":false,"emailMatches":true,"expiredQuotesFilterPresent":true,"emailLinks":0,"postcodeLinks":1,"visibleLinks":2,"validationCount":0,"noResults":false}
+
+[agent-customer-search] {"event":"opening-customer-search","searchId":"2ca9d3f447","afterMs":2,"path":"/"}
+
+[agent-customer-search] {"event":"search-route-opened","searchId":"2ca9d3f447","afterMs":13,"path":"/search"}
+
+[agent-customer-search] {"event":"customer-form-ready","searchId":"2ca9d3f447","afterMs":15,"path":"/search"}
+
+[agent-customer-search] {"event":"submitting-search","searchId":"2ca9d3f447","afterMs":18,"path":"/search","attempt":1}
+
+[agent-customer-search] {"event":"search-result-state","searchId":"2ca9d3f447","afterMs":20,"path":"/search","attempt":1,"sameOrigin":true,"emailMatches":false,"expiredQuotesFilterPresent":true,"emailLinks":0,"postcodeLinks":1,"visibleLinks":2,"validationCount":0,"noResults":false}
+
+[agent-customer-search] {"event":"failed","searchId":"2ca9d3f447","afterMs":21,"path":"/search","errorType":"Error"}
+
+[agent-customer-search] {"event":"failure-state","searchId":"2ca9d3f447","afterMs":21,"path":"/search","sameOrigin":true,"emailMatches":false,"expiredQuotesFilterPresent":true,"emailLinks":0,"postcodeLinks":1,"visibleLinks":2,"validationCount":0,"noResults":false}
+
+  ✓   15 [framework-unit] › automationLayer/insurance/unitTests/customerSearch.test.ts:307:5 › a result timeout without an explicit empty message permits the next search (58ms)
+
+  ✓   12 [framework-unit] › automationLayer/insurance/unitTests/customerSearch.test.ts:296:5 › three empty searches fail with full-page evidence and never open a customer (84ms)
+
+[agent-customer-search] {"event":"submitting-search","searchId":"2ca9d3f447","afterMs":135,"path":"/search","attempt":2}
+
+[agent-customer-search] {"event":"search-result-state","searchId":"2ca9d3f447","afterMs":140,"path":"/search","attempt":2,"sameOrigin":true,"emailMatches":true,"expiredQuotesFilterPresent":true,"emailLinks":0,"postcodeLinks":1,"visibleLinks":2,"validationCount":0,"noResults":false}
+
+[agent-customer-search] {"event":"result-selected","searchId":"2ca9d3f447","afterMs":140,"path":"/search","attempt":2,"strategy":"postcode","recovered":true}
+
+[agent-customer-search] {"event":"opening-result","searchId":"2ca9d3f447","afterMs":143,"path":"/search"}
+
+[agent-customer-search] {"event":"customer-opened","searchId":"2ca9d3f447","afterMs":146,"path":"/search","customerPath":"/search","popup":false}
+
+  ✓   18 [framework-unit] › automationLayer/insurance/unitTests/customerSearch.test.ts:335:5 › a policy absent from ambiguous result rows does not select an unrelated customer (108ms)
+
+[agent-customer-search] {"event":"customer-opened","searchId":"2ca9d3f447","afterMs":111,"path":"/search","customerPath":"/search","popup":false}
+
+  ✓   19 [framework-unit] › automationLayer/insurance/unitTests/customerSearch.test.ts:343:5 › a cleared search email fails immediately rather than retrying an incorrect search (88ms)
+
+[agent-customer-search] {"event":"opening-customer-search","searchId":"2ca9d3f447","afterMs":6,"path":"/"}
+
+  ✓   16 [framework-unit] › automationLayer/insurance/unitTests/customerSearch.test.ts:270:5 › a unique email link is preferred when the address is outside the clickable link (127ms)
+
+  ✓   20 [framework-unit] › automationLayer/insurance/unitTests/customerSearch.test.ts:360:5 › redirecting to login stops without capturing the login page or retrying authentication (85ms)
+
+[agent-customer-search] {"event":"opening-customer-search","searchId":"2ca9d3f447","afterMs":8,"path":"/"}
+
+  ✓   17 [framework-unit] › automationLayer/insurance/unitTests/customerSearch.test.ts:276:5 › the same-email placeholder is excluded while the real customer result opens (96ms)
+
+[agent-customer-search] {"event":"search-route-opened","searchId":"2ca9d3f447","afterMs":9,"path":"/search"}
+
+[agent-customer-search] {"event":"search-route-opened","searchId":"2ca9d3f447","afterMs":11,"path":"/search"}
+
+[agent-customer-search] {"event":"customer-form-ready","searchId":"2ca9d3f447","afterMs":14,"path":"/search"}
+
+[agent-customer-search] {"event":"customer-form-ready","searchId":"2ca9d3f447","afterMs":16,"path":"/search"}
+
+[agent-customer-search] {"event":"opening-customer-search","searchId":"2ca9d3f447","afterMs":2,"path":"/"}
+
+[agent-customer-search] {"event":"opening-customer-search","searchId":"2ca9d3f447","afterMs":1,"path":"/"}
+
+[agent-customer-search] {"event":"search-route-opened","searchId":"2ca9d3f447","afterMs":4,"path":"/search"}
+
+[agent-customer-search] {"event":"search-route-opened","searchId":"2ca9d3f447","afterMs":3,"path":"/search"}
+
+[agent-customer-search] {"event":"customer-form-ready","searchId":"2ca9d3f447","afterMs":8,"path":"/search"}
+
+[agent-customer-search] {"event":"customer-form-ready","searchId":"2ca9d3f447","afterMs":7,"path":"/search"}
+
+[agent-customer-search] {"event":"opening-customer-search","searchId":"2ca9d3f447","afterMs":1,"path":"/"}
+
+[agent-customer-search] {"event":"opening-customer-search","searchId":"2ca9d3f447","afterMs":1,"path":"/"}
+
+[agent-customer-search] {"event":"search-route-opened","searchId":"2ca9d3f447","afterMs":2,"path":"/search"}
+
+[agent-customer-search] {"event":"search-route-opened","searchId":"2ca9d3f447","afterMs":3,"path":"/search"}
+
+[agent-customer-search] {"event":"customer-form-ready","searchId":"2ca9d3f447","afterMs":4,"path":"/search"}
+
+[agent-customer-search] {"event":"submitting-search","searchId":"2ca9d3f447","afterMs":11,"path":"/search","attempt":1}
+
+[agent-customer-search] {"event":"submitting-search","searchId":"2ca9d3f447","afterMs":13,"path":"/search","attempt":1}
+
+[agent-customer-search] {"event":"customer-form-ready","searchId":"2ca9d3f447","afterMs":6,"path":"/search"}
+
+[agent-customer-search] {"event":"submitting-search","searchId":"2ca9d3f447","afterMs":30,"path":"/search","attempt":1}
+
+  ✓   13 [framework-unit] › automationLayer/insurance/unitTests/customerSearch.test.ts:262:5 › a later indexed customer is found on the second read-only search (160ms)
+
+[agent-customer-search] {"event":"search-result-state","searchId":"2ca9d3f447","afterMs":17,"path":"/search","attempt":1,"sameOrigin":true,"emailMatches":true,"expiredQuotesFilterPresent":true,"emailLinks":0,"postcodeLinks":1,"visibleLinks":2,"validationCount":0,"noResults":false}
+
+[agent-customer-search] {"event":"result-selected","searchId":"2ca9d3f447","afterMs":17,"path":"/search","attempt":1,"strategy":"postcode","recovered":false}
+
+[agent-customer-search] {"event":"submitting-search","searchId":"2ca9d3f447","afterMs":33,"path":"/search","attempt":1}
+
+[agent-customer-search] {"event":"submitting-search","searchId":"2ca9d3f447","afterMs":11,"path":"/search","attempt":1}
+
+[agent-customer-search] {"event":"opening-result","searchId":"2ca9d3f447","afterMs":19,"path":"/search"}
+
+[agent-customer-search] {"event":"failed","searchId":"2ca9d3f447","afterMs":20,"path":"/search","errorType":"Error"}
+
+[agent-customer-search] {"event":"failure-state","searchId":"2ca9d3f447","afterMs":20,"path":"/search","sameOrigin":true,"emailMatches":true,"expiredQuotesFilterPresent":true,"emailLinks":0,"postcodeLinks":1,"visibleLinks":2,"validationCount":0,"noResults":false}
+
+[agent-customer-search] {"event":"search-result-state","searchId":"2ca9d3f447","afterMs":19,"path":"/search","attempt":1,"sameOrigin":true,"emailMatches":true,"expiredQuotesFilterPresent":true,"emailLinks":0,"postcodeLinks":1,"visibleLinks":2,"validationCount":0,"noResults":false}
+
+[agent-customer-search] {"event":"result-selected","searchId":"2ca9d3f447","afterMs":20,"path":"/search","attempt":1,"strategy":"postcode","recovered":false}
+
+[agent-customer-search] {"event":"search-result-state","searchId":"2ca9d3f447","afterMs":46,"path":"/search","attempt":1,"sameOrigin":true,"emailMatches":true,"expiredQuotesFilterPresent":true,"emailLinks":0,"postcodeLinks":1,"visibleLinks":2,"validationCount":1,"noResults":false}
+
+[agent-customer-search] {"event":"search-result-state","searchId":"2ca9d3f447","afterMs":39,"path":"/search","attempt":1,"sameOrigin":true,"emailMatches":true,"expiredQuotesFilterPresent":true,"emailLinks":2,"postcodeLinks":0,"visibleLinks":3,"validationCount":0,"noResults":false}
+
+[agent-customer-search] {"event":"policy-result-check","searchId":"2ca9d3f447","afterMs":40,"path":"/search","matchingRows":1,"matchingLinks":1}
+
+[agent-customer-search] {"event":"result-selected","searchId":"2ca9d3f447","afterMs":42,"path":"/search","attempt":1,"strategy":"policy-row","recovered":false}
+
+[agent-customer-search] {"event":"opening-result","searchId":"2ca9d3f447","afterMs":46,"path":"/search"}
+
+[agent-customer-search] {"event":"submitting-search","searchId":"2ca9d3f447","afterMs":17,"path":"/search","attempt":1}
+
+[agent-customer-search] {"event":"failed","searchId":"2ca9d3f447","afterMs":20,"path":"/search","errorType":"Error"}
+
+[agent-customer-search] {"event":"failure-state-unavailable","searchId":"2ca9d3f447","afterMs":21,"path":"/search"}
+
+[agent-customer-search] {"event":"search-result-state","searchId":"2ca9d3f447","afterMs":30,"path":"/search","attempt":1,"sameOrigin":true,"emailMatches":true,"expiredQuotesFilterPresent":true,"emailLinks":0,"postcodeLinks":1,"visibleLinks":2,"validationCount":0,"noResults":false}
+
+[agent-customer-search] {"event":"result-selected","searchId":"2ca9d3f447","afterMs":30,"path":"/search","attempt":1,"strategy":"postcode","recovered":false}
+
+[agent-customer-search] {"event":"opening-result","searchId":"2ca9d3f447","afterMs":33,"path":"/search"}
+
+[agent-customer-search] {"event":"customer-opened","searchId":"2ca9d3f447","afterMs":35,"path":"/search","customerPath":"/search","popup":false}
+
+[agent-customer-search] {"event":"opening-result","searchId":"2ca9d3f447","afterMs":22,"path":"/search"}
+
+[agent-customer-search] {"event":"customer-opened","searchId":"2ca9d3f447","afterMs":25,"path":"/search","customerPath":"/customer/selected","popup":true}
+
+  ✓   23 [framework-unit] › automationLayer/insurance/unitTests/customerSearch.test.ts:369:5 › a failed customer opening never replays the result click or search (31ms)
+
+[agent-customer-search] {"event":"failed","searchId":"2ca9d3f447","afterMs":47,"path":"/search","errorType":"Error"}
+
+[agent-customer-search] {"event":"failure-state","searchId":"2ca9d3f447","afterMs":48,"path":"/search","sameOrigin":true,"emailMatches":true,"expiredQuotesFilterPresent":true,"emailLinks":0,"postcodeLinks":1,"visibleLinks":2,"validationCount":1,"noResults":false}
+
+[agent-customer-search] {"event":"customer-opened","searchId":"2ca9d3f447","afterMs":50,"path":"/search","customerPath":"/search","popup":false}
+
+  ✓   21 [framework-unit] › automationLayer/insurance/unitTests/customerSearch.test.ts:327:5 › ambiguous customer results can be resolved by the exact purchased policy row (65ms)
+
+  ✓   25 [framework-unit] › automationLayer/insurance/unitTests/customerSearch.test.ts:386:5 › browser failures during polling propagate without being treated as empty results (31ms)
+
+  ✓   22 [framework-unit] › automationLayer/insurance/unitTests/customerSearch.test.ts:351:5 › a portal validation alert prevents search retries and opening results (66ms)
+
+  ✓   26 [framework-unit] › automationLayer/insurance/unitTests/customerSearch.test.ts:395:5 › successful diagnostics include result strategy and query-free API response metadata (47ms)
+
+  ✓   24 [framework-unit] › automationLayer/insurance/unitTests/customerSearch.test.ts:379:5 › popup customer results return the popup and remove search listeners (34ms)
+
+  ✓   27 [framework-unit] › automationLayer/insurance/unitTests/balancePayment.test.ts:97:5 › payoff leaves an already offered fresh-card form for its own payment step (5ms)
+
+  ✓   28 [framework-unit] › automationLayer/insurance/unitTests/balancePayment.test.ts:12:5 › card consent is enabled once and is not toggled off on the next call (18ms)
+
+  ✓   29 [framework-unit] › automationLayer/insurance/unitTests/balancePayment.test.ts:93:5 › balance journey bypasses fresh card and waits for payment details (23ms)
+
+  ✓   30 [framework-unit] › automationLayer/insurance/unitTests/balancePayment.test.ts:34:5 › balance payment submits once and surfaces a gateway failure (12ms)
+
+  ✓   31 [framework-unit] › automationLayer/insurance/unitTests/balancePayment.test.ts:89:5 › balance journey uses fresh card and waits for payment details (28ms)
+
+  ✓   32 [framework-unit] › automationLayer/insurance/unitTests/customerServicing.test.ts:310:5 › an ambiguous address match fails instead of choosing an arbitrary flat (12ms)
+
+  ✓   35 [framework-unit] › automationLayer/insurance/unitTests/customerServicing.test.ts:337:5 › extras entry uses the car changes tile and optional extras link (11ms)
+
+  ✓   36 [framework-unit] › automationLayer/insurance/unitTests/customerServicing.test.ts:352:5 › policyholder and extras still reject monthly prerequisites before browser actions (12ms)
+
+  ✓   33 [framework-unit] › automationLayer/insurance/unitTests/customerServicing.test.ts:294:5 › future move selects the requested flat and date without submitting the address form (27ms)
+
+  ✓   34 [framework-unit] › automationLayer/insurance/unitTests/customerServicing.test.ts:322:5 › policyholder entry uses the policy summary edit-driver-0 route (12ms)
+
+  ✓   40 [framework-unit] › automationLayer/insurance/unitTests/customerServicing.test.ts:415:5 › unchanged policyholder marital status is rejected before browser actions (8ms)
+
+  ✓   38 [framework-unit] › automationLayer/insurance/unitTests/customerServicing.test.ts:371:5 › address fill finds the address but Check the cost happens only in submit (10ms)
+
+  ✓   41 [framework-unit] › automationLayer/insurance/unitTests/customerServicing.test.ts:394:5 › marital-only fill declines surname update and leaves navigation to submit (11ms)
+
+  ✓   39 [framework-unit] › automationLayer/insurance/unitTests/customerServicing.test.ts:381:5 › policyholder fill replaces the full surname without submitting the page (9ms)
+
+  ✓   37 [framework-unit] › automationLayer/insurance/unitTests/customerServicing.test.ts:400:5 › surname acknowledgement restores the requested status instead of a hardcoded workaround (16ms)
+
+  ✓   42 [framework-unit] › automationLayer/insurance/unitTests/customerServicing.test.ts:428:5 › extras fill targets add/remove explicitly and never clicks Next (4ms)
+
+  ✓   47 [framework-unit] › automationLayer/insurance/unitTests/customerServicing.test.ts:490:5 › shared annual terms page identifies a no-charge change (6ms)
+
+  ✓   44 [framework-unit] › automationLayer/insurance/unitTests/customerServicing.test.ts:482:5 › shared annual terms page identifies an additional premium from the Pay button (5ms)
+
+  ✓   43 [framework-unit] › automationLayer/insurance/unitTests/customerServicing.test.ts:439:5 › servicing annual catalogue data is independent of its base and has no monthly prerequisite (22ms)
+
+  ✓   45 [framework-unit] › automationLayer/insurance/unitTests/customerServicing.test.ts:486:5 › shared annual terms page identifies a refund without treating it as an additional premium (6ms)
+
+  ✓   49 [framework-unit] › automationLayer/insurance/unitTests/customerServicing.test.ts:500:5 › dashboard entry reopens its captured URL only when another screen is open (11ms)
+
+  ✓   46 [framework-unit] › automationLayer/insurance/unitTests/customerServicing.test.ts:94:5 › policyholder journey maps the requested surname and effective date (86ms)
+
+  ✓   53 [framework-unit] › automationLayer/insurance/unitTests/customerServicing.test.ts:260:5 › the real customer entry accepts monthly address changes (8ms)
+
+  ✓   55 [framework-unit] › automationLayer/insurance/unitTests/customerServicing.test.ts:277:5 › uncertain address card payments are never automatically submitted again (6ms)
+
+  ✓   48 [framework-unit] › automationLayer/insurance/unitTests/customerServicing.test.ts:494:5 › an unclassified payment screen fails navigation instead of skipping every financial alternative (66ms)
+
+  ✓   50 [framework-unit] › automationLayer/insurance/unitTests/customerServicing.test.ts:521:5 › PNCD removal follows current-cover refund and completion without a breakdown modal (73ms)
+
+  ✓   58 [framework-unit] › automationLayer/insurance/unitTests/customerServicing.test.ts:597:5 › breakdown uses its modal and submits the selection before leaving Edit car (6ms)
+
+  ✓   52 [framework-unit] › automationLayer/insurance/unitTests/customerServicing.test.ts:565:5 › cover change can pay in full and follow an offered card form (86ms)
+
+  ✓   59 [framework-unit] › automationLayer/insurance/unitTests/customerServicing.test.ts:614:5 › monthly summary captures recurring payment separately and rejects missing amounts (7ms)
+
+  ✓   51 [framework-unit] › automationLayer/insurance/unitTests/customerServicing.test.ts:539:5 › monthly breakdown follows its level modal, monthly choice and recurring-payment summary (93ms)
+
+  ✓   57 [framework-unit] › automationLayer/insurance/unitTests/customerServicing.test.ts:588:5 › PNCD fill removes only PNCD and does not navigate until submit (9ms)
+
+  ✓   56 [framework-unit] › automationLayer/insurance/unitTests/customerServicing.test.ts:578:5 › cover entry uses Edit car or cover rather than the separate MLE extras link (8ms)
+
+  ✓   60 [framework-unit] › automationLayer/insurance/unitTests/customerServicing.test.ts:633:5 › cover payment failure propagates after one submission (6ms)
+
+  ✓   62 [framework-unit] › automationLayer/insurance/unitTests/customerServicing.test.ts:662:5 › unknown cover payment outcome fails instead of silently capturing an empty result (4ms)
+
+  ✓   61 [framework-unit] › automationLayer/insurance/unitTests/customerServicing.test.ts:648:5 › monthly cover refund can bypass payment choice and fresh-card entry (13ms)
+
+  ✓   54 [framework-unit] › automationLayer/insurance/unitTests/customerServicing.test.ts:210:5 › monthly address changes can choose full payment and follow the optional card form (84ms)
+
+  ✓   63 [framework-unit] › automationLayer/insurance/unitTests/customerServicing.test.ts:195:5 › address entry leaves account details open so it is itself a navigation target (29ms)
+
+  ✓   65 [framework-unit] › automationLayer/insurance/unitTests/dataSources.test.ts:33:5 › Ferry source receives the requested sheet and row before policy mapping (27ms)
+
+  ✓   64 [framework-unit] › automationLayer/insurance/unitTests/ferryAgentPayment.test.ts:25:5 › agent payment formats the supplied card month/year when the customer-row agent field is absent (5ms)
+
+  ✓   66 [framework-unit] › automationLayer/insurance/unitTests/ferryAgentPayment.test.ts:33:5 › an explicit agent expiry is preserved rather than replaced by a different format (4ms)
+
+  ✓   67 [framework-unit] › automationLayer/insurance/unitTests/ferryAgentPayment.test.ts:39:5 › blank agent expiry can use a two-digit year and padded month (4ms)
+
+  ✓   68 [framework-unit] › automationLayer/insurance/unitTests/dataSources.test.ts:14:5 › motor and home catalogs build independent policy inputs from supplied rows (10ms)
+
+  ✓   70 [framework-unit] › automationLayer/insurance/unitTests/ferryAgentPayment.test.ts:45:5 › missing or invalid fallback expiry fails before invoking payment entry (10ms)
+
+  ✓   69 [framework-unit] › automationLayer/insurance/unitTests/dataSources.test.ts:46:5 › JSON source preserves exact-name priority, sheet selection and ambiguity rejection (21ms)
+
+  ✓   71 [framework-unit] › automationLayer/insurance/unitTests/ferryQuoteDialogs.test.ts:40:5 › Ferry dismisses the legal-expenses upgrade before declining hire car (5ms)
+
+  ✓   72 [framework-unit] › automationLayer/insurance/unitTests/ferryQuoteDialogs.test.ts:44:5 › Ferry dismisses each upgrade when both extras are requested (9ms)
+
+  ✓   75 [framework-unit] › automationLayer/insurance/unitTests/ferrySharedPages.test.ts:128:5 › annual cover choice continues without declining renewal and legacy choice still advances (10ms)
+
+  ✓   80 [framework-unit] › automationLayer/insurance/unitTests/ferrySharedPages.test.ts:245:5 › additional-driver claims pages reject unsupported claims without changing legacy support (6ms)
+
+  ✓   79 [framework-unit] › automationLayer/insurance/unitTests/ferrySharedPages.test.ts:149:5 › revisited cover choice selects and advances only when the choice is shown (6ms)
+
+  ✓   76 [framework-unit] › automationLayer/insurance/unitTests/ferrySharedPages.test.ts:140:5 › revisited cover choice leaves an already-open quote alone (6ms)
+
+  ✓   78 [framework-unit] › automationLayer/insurance/unitTests/ferrySharedPages.test.ts:117:5 › the direct driveaway choice opens renewal refusal without another Next submission (8ms)
+
+  ✓   81 [framework-unit] › automationLayer/insurance/unitTests/ferrySharedPages.test.ts:224:5 › working additional drivers retain accessible industry selectors for all three driver numbers (6ms)
+
+  ✓   83 [framework-unit] › automationLayer/insurance/unitTests/ferrySharedPages.test.ts:189:5 › all three shared additional-driver licence pages use their own numbered fields without advancing (8ms)
+
+  ✓   84 [framework-unit] › automationLayer/insurance/unitTests/ferrySharedPages.test.ts:206:5 › additional-driver licence without a number retains type, duration and no-convictions answers (19ms)
+
+  ✓   82 [framework-unit] › automationLayer/insurance/unitTests/ferrySharedPages.test.ts:158:5 › add-driver stages retain separate registry instances and stable constructor names (9ms)
+
+  ✓   86 [framework-unit] › automationLayer/insurance/unitTests/ferrySharedPages.test.ts:286:5 › legacy debit entry retains its original sort-code fields and immediate submit (6ms)
+
+  ✓   85 [framework-unit] › automationLayer/insurance/unitTests/ferrySharedPages.test.ts:270:5 › agent direct debit confirms the modal before choosing the collection day and submits with Next (26ms)
+
+  ✓   90 [framework-unit] › automationLayer/insurance/unitTests/ferrySharedPages.test.ts:328:5 › shared usage and personal forms keep field entry separate from submission (5ms)
+
+  ✓   73 [framework-unit] › automationLayer/insurance/unitTests/customerServicing.test.ts:74:5 › address journey starts at account details and captures its payment/refund outcome (85ms)
+
+  ✓   74 [framework-unit] › automationLayer/insurance/unitTests/customerServicing.test.ts:232:5 › monthly address changes use instalments by default and bypass an absent card form (76ms)
+
+  ✓   88 [framework-unit] › automationLayer/insurance/unitTests/ferrySharedPages.test.ts:357:5 › quote add-driver and dealership stages reuse controls without premature navigation (9ms)
+
+  ✓   89 [framework-unit] › automationLayer/insurance/unitTests/ferrySharedPages.test.ts:313:5 › claims retain both numbered inputs and fail before entering unsupported claim counts (11ms)
+
+  ✓   92 [framework-unit] › automationLayer/insurance/unitTests/ferrySharedPages.test.ts:384:5 › summary gives the registration and mobile number the portal asks for before the terms (15ms)
+
+  ✓   95 [framework-unit] › automationLayer/insurance/unitTests/ferrySharedPages.test.ts:408:5 › account activation uses the supplied password and defers submission (8ms)
+
+  ✓   87 [framework-unit] › automationLayer/insurance/unitTests/ferrySharedPages.test.ts:295:5 › main licence conviction follow-up retains internal navigation and final submission boundary (9ms)
+
+  ✓   91 [framework-unit] › automationLayer/insurance/unitTests/ferrySharedPages.test.ts:373:5 › summary retains agent preference and checked consent without advancing until submit (15ms)
+
+  ✓   93 [framework-unit] › automationLayer/insurance/unitTests/ferrySharedPages.test.ts:258:5 › customer direct debit retains the proposed sort-code selectors and saves only on submit (13ms)
+
+  ✓   96 [framework-unit] › automationLayer/insurance/unitTests/financialPriceReaders.test.ts:50:5 › monthly summary reads its standalone price without relying on legacy sentence wording (6ms)
+
+  ✓   94 [framework-unit] › automationLayer/insurance/unitTests/ferrySharedPages.test.ts:397:5 › cover date confirms twice and leaves Next for submit (15ms)
+
+  ✓   77 [framework-unit] › automationLayer/insurance/unitTests/customerServicing.test.ts:113:5 › extras journey preserves an explicit remove choice and defaults to the earliest date (79ms)
+
+  ✓   97 [framework-unit] › automationLayer/insurance/unitTests/financialPriceReaders.test.ts:58:5 › monthly summary rejects multiple prices instead of choosing an arbitrary amount (6ms)
+
+  ✓   99 [framework-unit] › automationLayer/insurance/unitTests/financialPriceReaders.test.ts:79:5 › a refund heading without an amount still fails classification (5ms)
+
+  ✓   98 [framework-unit] › automationLayer/insurance/unitTests/financialPriceReaders.test.ts:65:5 › refund amount waits for rendering and reads the price even when the broad text lookup is empty (6ms)
+
+  ✓  101 [framework-unit] › automationLayer/insurance/unitTests/goCompareThirdParty.test.ts:129:5 › failed handoff is surfaced once without entering insurer checkout (14ms)
+
+  ✓  104 [framework-unit] › automationLayer/insurance/unitTests/goCompareThirdParty.test.ts:137:5 › external entry rejects unsupported data before opening a site (7ms)
+
+  ✓  106 [framework-unit] › automationLayer/insurance/unitTests/goCompareThirdParty.test.ts:174:5 › results waits for its own popup and switches only after the popup is ready (9ms)
+
+  ✓  103 [framework-unit] › automationLayer/insurance/unitTests/goCompareThirdParty.test.ts:84:5 › GoCompare source mapping keeps unique email and excludes source credentials (12ms)
+
+  ✓  105 [framework-unit] › automationLayer/insurance/unitTests/goCompareThirdParty.test.ts:246:5 › partner email uses the configured brand identity with a unique Allianz alias (30ms)
+
+  ✓  111 [framework-unit] › automationLayer/insurance/unitTests/goCompareThirdParty.test.ts:291:5 › insurer account replaces the partner email before filling password and registering (6ms)
+
+  ✓  102 [framework-unit] › automationLayer/insurance/unitTests/goCompareThirdParty.test.ts:121:5 › handoff can land directly on quote without submitting assumptions (34ms)
+
+  ✓  108 [framework-unit] › automationLayer/insurance/unitTests/goCompareThirdParty.test.ts:146:5 › driver experience fills without leaving and submits Continue exactly once (21ms)
+
+  ✓  110 [framework-unit] › automationLayer/insurance/unitTests/goCompareThirdParty.test.ts:262:5 › original GoCompare email helper fills once without overwriting the brand address (10ms)
+
+  ✓  113 [framework-unit] › automationLayer/insurance/unitTests/goCompareThirdParty.test.ts:370:5 › insurer assumptions can continue without cookies but does not hide a failed cookie click (6ms)
+
+  ✓  112 [framework-unit] › automationLayer/insurance/unitTests/goCompareThirdParty.test.ts:342:5 › insurer assumptions dismisses a late cookie banner before continuing (4ms)
+
+  ✓  109 [framework-unit] › automationLayer/insurance/unitTests/goCompareThirdParty.test.ts:216:5 › mapped GoCompare cover input fills the real cover adapter before submitting (13ms)
+
+  ✓  114 [framework-unit] › automationLayer/insurance/unitTests/journey.test.ts:54:5 › portal-dependent optional steps are decided after the preceding page submits (9ms)
+
+  ✓  117 [framework-unit] › automationLayer/insurance/unitTests/journey.test.ts:137:5 › completes steps in order and maps captured values to the result (10ms)
+
+  ✓  115 [framework-unit] › automationLayer/insurance/unitTests/journey.test.ts:77:5 › stopping at an absent portal branch raises a specific navigation error before filling it (6ms)
+
+  ✓  116 [framework-unit] › automationLayer/insurance/unitTests/journey.test.ts:92:5 › an error detecting a portal branch propagates instead of silently skipping it (5ms)
+
+  ✓  118 [framework-unit] › automationLayer/insurance/unitTests/journey.test.ts:163:5 › stops the journey when a page fails (4ms)
+
+  ✓  120 [framework-unit] › automationLayer/insurance/unitTests/journey.test.ts:198:5 › an entry can start at a later page without executing earlier pages (4ms)
+
+  ✓  123 [framework-unit] › automationLayer/insurance/unitTests/journey.test.ts:156:5 › skips every operation for a conditional page that does not apply (5ms)
+
+  ✓  122 [framework-unit] › automationLayer/insurance/unitTests/journey.test.ts:191:5 › from resumes an already open page without re-entering or refilling (9ms)
+
+  ✓  121 [framework-unit] › automationLayer/insurance/unitTests/journey.test.ts:181:5 › untilFilled fills once and finish submits the customised value (12ms)
+
+  ✓  119 [framework-unit] › automationLayer/insurance/unitTests/journey.test.ts:169:5 › until leaves the target unfilled and finish preserves a manual edit (13ms)
+
+  ✓  127 [framework-unit] › automationLayer/insurance/unitTests/journey.test.ts:216:5 › rejects a conditional target that is not part of the selected policy (6ms)
+
+  ✓  124 [framework-unit] › automationLayer/insurance/unitTests/journey.test.ts:210:5 › rejects a target before the entry point without entering the journey (5ms)
+
+  ✓  128 [framework-unit] › automationLayer/insurance/unitTests/journey.test.ts:223:5 › page objects are reused within a registry and replaced after a tab switch (8ms)
+
+  ✓  100 [framework-unit] › automationLayer/insurance/unitTests/goCompareThirdParty.test.ts:104:5 › external handoff switches tabs before assumptions and reuses insurer checkout (158ms)
+
+  ✓  129 [framework-unit] › automationLayer/insurance/unitTests/lvSharedPages.test.ts:80:5 › legacy quote remains usable without configuration and retains its upgrade dismissal (6ms)
+
+  ✓  107 [framework-unit] › automationLayer/insurance/unitTests/goCompareThirdParty.test.ts:206:5 › external journey completes through payment to captured insurer dashboard (149ms)
+
+  ✓  133 [framework-unit] › automationLayer/insurance/unitTests/lvSharedPages.test.ts:132:5 › licence fill retains supplied birth-date components and does not advance (7ms)
+
+  ✓  131 [framework-unit] › automationLayer/insurance/unitTests/lvSharedPages.test.ts:101:5 › dashboard keeps the legacy payment selector and a separate motor/home selector (8ms)
+
+  ✓  134 [framework-unit] › automationLayer/insurance/unitTests/lvSharedPages.test.ts:153:5 › claims need their details; legacy positive-claim helpers are preserved (11ms)
+
+  ✓  125 [framework-unit] › automationLayer/insurance/unitTests/customerServicing.test.ts:131:5 › new customer actions do not advertise unimplemented agent routes (20ms)
+
+  ✓  135 [framework-unit] › automationLayer/insurance/unitTests/lvSharedPages.test.ts:168:5 › legacy MTA payment keeps its selector while the journey confirms a no-charge change (6ms)
+
+  ✓  130 [framework-unit] › automationLayer/insurance/unitTests/lvSharedPages.test.ts:90:5 › home quote uses home selectors and sets monthly frequency before declining extras (11ms)
+
+  ✓  132 [framework-unit] › automationLayer/insurance/unitTests/lvSharedPages.test.ts:112:5 › student personal details use education and leave Next for submit (15ms)
+
+  ✓  136 [framework-unit] › automationLayer/insurance/unitTests/lvSharedPages.test.ts:69:5 › motor quote accepts tier configuration and fills without advancing (9ms)
+
+  ✓  137 [framework-unit] › automationLayer/insurance/unitTests/lvSharedPages.test.ts:178:5 › GoCompare account stage shares source fields but defers its handoff (6ms)
+
+  ✓  138 [framework-unit] › automationLayer/insurance/unitTests/lvSharedPages.test.ts:188:5 › partner registration has its own registry identity and uses the shared account controls (13ms)
+
+  ✓  141 [framework-unit] › automationLayer/insurance/unitTests/motorApi.test.ts:131:5 › buy forwards a selected PCW entry without inventing request data (6ms)
+
+  ✓  140 [framework-unit] › automationLayer/insurance/unitTests/motorApi.test.ts:119:5 › buy defaults to Direct and exposes the original purchase data and captured results (13ms)
+
+  ✓  139 [framework-unit] › automationLayer/insurance/unitTests/motorApi.test.ts:28:5 › driver removal stays on current cover and renewal preparation returns its own result (15ms)
+
+  ✓  143 [framework-unit] › automationLayer/insurance/unitTests/motorApi.test.ts:138:5 › parking uses the existing customer edit-car action and does not invent a date (10ms)
+
+  ✓  145 [framework-unit] › automationLayer/insurance/unitTests/motorApi.test.ts:159:5 › address maps flat input to the supported already-moved, home-kept route (9ms)
+
+  ✓  142 [framework-unit] › automationLayer/insurance/unitTests/motorApi.test.ts:18:5 › monthly future-address input preserves the named move and payment choice (10ms)
+
+  ✓  144 [framework-unit] › automationLayer/insurance/unitTests/motorApi.test.ts:151:5 › parking preserves an explicitly chosen effective date (13ms)
+
+  ✓  148 [framework-unit] › automationLayer/insurance/unitTests/motorApi.test.ts:207:5 › a failed change propagates once without retrying a payment or changing the purchase snapshot (11ms)
+
+  ✓  147 [framework-unit] › automationLayer/insurance/unitTests/motorApi.test.ts:176:5 › replacement accepts a preset unchanged, including manual vehicle and payment options (9ms)
+
+  ✓  150 [framework-unit] › automationLayer/insurance/unitTests/motorApi.test.ts:226:5 › optional extras preserves an explicit remove choice instead of defaulting to add (8ms)
+
+  ✓  149 [framework-unit] › automationLayer/insurance/unitTests/motorApi.test.ts:216:5 › policyholder passes the full surname and effective date through the existing customer route (9ms)
+
+  ✓  151 [framework-unit] › automationLayer/insurance/unitTests/motorApi.test.ts:266:5 › advanced purchase returns the original run without completing or filling pages (6ms)
+
+  ✓  126 [framework-unit] › automationLayer/insurance/unitTests/customerServicing.test.ts:246:5 › a monthly refund can bypass both payment choice and the card form (77ms)
+
+  ✓  152 [framework-unit] › automationLayer/insurance/unitTests/motorApi.test.ts:255:5 › running cancellation keeps explicit end-date input and never silently prepares or backdates a policy (8ms)
+
+  ✓  155 [framework-unit] › automationLayer/insurance/unitTests/motorApi.test.ts:246:5 › before-start cancellation returns the captured confirmation and refund unchanged (9ms)
+
+  ✓  157 [framework-unit] › automationLayer/insurance/unitTests/motorApi.test.ts:273:5 › advanced agent replacement returns the existing run to preserve confirmation inspection (12ms)
+
+  ✓  156 [framework-unit] › automationLayer/insurance/unitTests/motorApi.test.ts:292:5 › payment operations use the purchased policy and propagate a failed payment without retry (9ms)
+
+  ✓  158 [framework-unit] › automationLayer/insurance/unitTests/motorApi.test.ts:314:5 › current-cover API preserves the PNCD or breakdown change and uses the existing MTA engine (8ms)
+
+  ✓  153 [framework-unit] › automationLayer/insurance/unitTests/motorApi.test.ts:284:5 › failed cancellation propagates once and is never retried automatically (11ms)
+
+  ✓  154 [framework-unit] › automationLayer/insurance/unitTests/motorApi.test.ts:236:5 › agent replacement explicitly chooses the agent route and preserves main-driver/payment inputs (15ms)
+
+  ✓  160 [framework-unit] › automationLayer/insurance/unitTests/mtaNavigationInputs.test.ts:24:5 › monthly navigation preparation supplies DD and preserves PCW prerequisites without changing its source (11ms)
+
+  ✓  161 [framework-unit] › automationLayer/insurance/unitTests/mtaNavigationInputs.test.ts:51:5 › manual registrations are not silently used as recognised NB vehicles (5ms)
+
+  ✓  162 [framework-unit] › automationLayer/insurance/unitTests/mtaNavigationInputs.test.ts:60:5 › the previously annual MTA indexes identify their monthly-only payment targets (6ms)
+
+  ✓  159 [framework-unit] › automationLayer/insurance/unitTests/mtaNavigationInputs.test.ts:38:5 › reverse car preparation swaps both rating endpoints and preserves change timing (18ms)
+
+  ✓  163 [framework-unit] › automationLayer/insurance/unitTests/mtaNavigationInputs.test.ts:68:5 › a monthly payment presentation passes its prerequisite to navigation preparation (6ms)
+
+  ✓  146 [framework-unit] › automationLayer/insurance/unitTests/motorApi.test.ts:187:5 › annual-only customer changes keep the real journey guards before any browser actions (76ms)
+
+  ✓  168 [framework-unit] › automationLayer/insurance/unitTests/navigationInputs.test.ts:129:5 › home direct and PCW candidates provide monthly payment data when required (10ms)
+
+  ✓  169 [framework-unit] › automationLayer/insurance/unitTests/navigationInputs.test.ts:118:5 › LV PCW monthly targets retain the provider request and supply direct-debit data (17ms)
+
+  ✓  170 [framework-unit] › automationLayer/insurance/unitTests/navigationInputs.test.ts:107:5 › LV motor monthly target selects basicMonthly and ordinary targets keep basicAnnual (13ms)
+
+  ✓  171 [framework-unit] › automationLayer/insurance/unitTests/navigationInputs.test.ts:167:5 › Ferry monthly target selects monthly cover without adding drivers; ordinary pages use annual (12ms)
+
+  ✓  173 [framework-unit] › automationLayer/insurance/unitTests/navigationInputs.test.ts:185:5 › drive-away catalog contains only annual/free cover and at most one additional driver (10ms)
+
+  ✓  174 [framework-unit] › automationLayer/insurance/unitTests/navigationInputs.test.ts:194:5 › candidate selection is lazy and rejects an unsupported target without journey execution (8ms)
+
+  ✓  175 [framework-unit] › automationLayer/insurance/unitTests/navigationInputs.test.ts:216:5 › the index forwards selected target prerequisites before invoking the journey (11ms)
+
+  ✓  176 [framework-unit] › automationLayer/insurance/unitTests/navigationInputs.test.ts:250:5 › external GoCompare candidates keep external and insurer payment frequencies aligned (10ms)
+
+  ✓  177 [framework-unit] › automationLayer/insurance/unitTests/paymentAndFormRegression.test.ts:19:5 › monthly checkout captures a whole-pound deposit (3ms)
+
+Car usage: main-driver question absent; retaining the single-driver default
+
+  ✓  179 [framework-unit] › automationLayer/insurance/unitTests/paymentAndFormRegression.test.ts:23:5 › monthly checkout preserves a deposit with pence and thousands separators (3ms)
+
+  ✓  178 [framework-unit] › automationLayer/insurance/unitTests/paymentAndFormRegression.test.ts:29:5 › monthly checkout rejects text without a deposit amount (6ms)
+
+  ✓  180 [framework-unit] › automationLayer/insurance/unitTests/paymentAndFormRegression.test.ts:105:5 › an omitted main-driver question does not block the default driver choice (17ms)
+
+Car usage: main-driver question absent; retaining the single-driver default
+
+Car usage: Registered keeper reset during rendering; restoring requested choice
+
+  ✓  182 [framework-unit] › automationLayer/insurance/unitTests/paymentAndFormRegression.test.ts:117:5 › a requested named driver is never silently ignored (4ms)
+
+  ✓  183 [framework-unit] › automationLayer/insurance/unitTests/paymentAndFormRegression.test.ts:124:5 › car usage restores the requested keeper after rendering resets it (6ms)
+
+Car usage: main-driver question absent; retaining the single-driver default
+
+Car usage: Legal owner reset during rendering; restoring requested choice
+
+  ✓  181 [framework-unit] › automationLayer/insurance/unitTests/paymentAndFormRegression.test.ts:111:5 › the default main driver is selected when its question is offered (11ms)
+
+Car usage: Annual mileage reset during rendering; restoring requested choice
+
+  ✓  172 [framework-unit] › automationLayer/insurance/unitTests/navigationInputs.test.ts:144:5 › Ferry targets select exactly one, two or three existing drivers in either portal (103ms)
+
+  ✓  185 [framework-unit] › automationLayer/insurance/unitTests/paymentAndFormRegression.test.ts:142:5 › refund classification accepts the amount before the word refund (3ms)
+
+  ✓  184 [framework-unit] › automationLayer/insurance/unitTests/paymentAndFormRegression.test.ts:130:5 › car usage restores owner and mileage when later answers reset them independently of keeper (10ms)
+
+  ✓  186 [framework-unit] › automationLayer/insurance/unitTests/paymentAndFormRegression.test.ts:160:5 › payoff recognises the stored-card accessible name and submits exactly once (7ms)
+
+  ✓  187 [framework-unit] › automationLayer/insurance/unitTests/paymentAndFormRegression.test.ts:214:5 › a portal payment rejection is reported without resubmitting the card (5ms)
+
+  ✓  189 [framework-unit] › automationLayer/insurance/unitTests/paymentAndFormRegression.test.ts:185:5 › extras declines an offered tier upgrade before submitting the requested change (4ms)
+
+  ✓  190 [framework-unit] › automationLayer/insurance/unitTests/pcwHarness.test.ts:72:5 › preparing a harness request opens the provider and editor without sending (3ms)
+
+  ✓  188 [framework-unit] › automationLayer/insurance/unitTests/pcwHarness.test.ts:22:5 › renewal upgrade/downgrade baselines prepare CTM requests with this test identity and start date (23ms)
+
+  ✓  191 [framework-unit] › automationLayer/insurance/unitTests/pcwHarness.test.ts:95:5 › Confused entry opens a prepared harness without sending or switching tabs (8ms)
+
+  ✓  192 [framework-unit] › automationLayer/insurance/unitTests/pcwHarness.test.ts:132:5 › missing provider request fails before opening the harness (5ms)
+
+  ✓  193 [framework-unit] › automationLayer/insurance/unitTests/pcwHarness.test.ts:118:5 › CTM entry prepares the correct provider and customer request (8ms)
+
+  ✓  194 [framework-unit] › automationLayer/insurance/unitTests/pcwHarness.test.ts:145:5 › normal request submission still prepares, sends, and returns the new response (9ms)
+
+  ✓  195 [framework-unit] › automationLayer/insurance/unitTests/pcwHarness.test.ts:166:5 › Home CTM prepares its harness without sending or changing the customer tab (8ms)
+
+  ✓  196 [framework-unit] › automationLayer/insurance/unitTests/pcwHarness.test.ts:192:5 › Home Confused prepares its harness without sending or changing the customer tab (19ms)
+
+  ✓  197 [framework-unit] › automationLayer/insurance/unitTests/pcwHarness.test.ts:218:5 › case 15 MSM template substitutes the test identity and date without a live request (12ms)
+
+  ✓  198 [framework-unit] › automationLayer/insurance/unitTests/navigationCoverage.test.ts:19:5 › only the last mandatory stopping point is selected for a linear journey (14ms)
+
+  ✓  202 [framework-unit] › automationLayer/insurance/unitTests/policyMapping.test.ts:16:5 › LV motor maps customer, vehicle, cover, and card data without changing the row (11ms)
+
+  ✓  199 [framework-unit] › automationLayer/insurance/unitTests/navigationCoverage.test.ts:40:5 › independent optional screens and presentations cannot hide behind a later endpoint (7ms)
+
+  ✓  200 [framework-unit] › automationLayer/insurance/unitTests/navigationCoverage.test.ts:26:5 › one branch endpoint covers all earlier pages guarded by that same predicate (8ms)
+
+  ✓  203 [framework-unit] › automationLayer/insurance/unitTests/policyMapping.test.ts:47:5 › LV motor recognises Allianz Silver and Britannia Premier tiers (10ms)
+
+  ✓  201 [framework-unit] › automationLayer/insurance/unitTests/navigationCoverage.test.ts:98:5 › third-party routes retain manual targets without any coverage tags (26ms)
+
+  ✓  204 [framework-unit] › automationLayer/insurance/unitTests/navigationCoverage.test.ts:58:5 › new mandatory endpoints and new independent options automatically join coverage (9ms)
+
+  ✓  206 [framework-unit] › automationLayer/insurance/unitTests/policyMapping.test.ts:56:5 › LV motor maps one or two claims and a conviction, and refuses more (18ms)
+
+  ✓  209 [framework-unit] › automationLayer/insurance/unitTests/policyMapping.test.ts:173:5 › LV motor maps monthly payment, extras, licence number and protected no claims discount (10ms)
+
+  ✓  208 [framework-unit] › automationLayer/insurance/unitTests/policyMapping.test.ts:120:5 › LV motor maps up to three additional drivers, the second with a licence number (21ms)
+
+  ✓  210 [framework-unit] › automationLayer/insurance/unitTests/policyMapping.test.ts:250:5 › LV home recognises Silver and Gold and preserves declared claims (6ms)
+
+  ✓  212 [framework-unit] › automationLayer/insurance/unitTests/policyMapping.test.ts:216:5 › LV home maps property, occupancy, customer, cover, and payment data (7ms)
+
+  ✓  207 [framework-unit] › automationLayer/insurance/unitTests/policyMapping.test.ts:92:5 › LV motor refuses unsupported additional drivers and payment types (26ms)
+
+  ✓  215 [framework-unit] › automationLayer/insurance/unitTests/policyMapping.test.ts:314:5 › Ferry free drive-away rows need neither card nor cover tier (6ms)
+
+  ✓  214 [framework-unit] › automationLayer/insurance/unitTests/policyMapping.test.ts:294:5 › Ferry monthly combined cover includes direct debit and preserves leading zeroes (7ms)
+
+  ✓  213 [framework-unit] › automationLayer/insurance/unitTests/policyMapping.test.ts:207:5 › LV motor identifies invalid boolean columns and unknown cover tiers (13ms)
+
+  ✓  217 [framework-unit] › automationLayer/insurance/unitTests/policyMapping.test.ts:325:5 › Ferry maps supported claims without losing their date or reason (9ms)
+
+  ✓  216 [framework-unit] › automationLayer/insurance/unitTests/policyMapping.test.ts:262:5 › LV home rejects unsupported payment, invalid booleans, and unknown tiers (9ms)
+
+  ✓  211 [framework-unit] › automationLayer/insurance/unitTests/navigationCoverage.test.ts:70:5 › the actual index tags the endpoint and each presentation, retaining all manual targets (14ms)
+
+  ✓  218 [framework-unit] › automationLayer/insurance/unitTests/policyMapping.test.ts:347:5 › Ferry rejects unsupported claim and additional-driver counts (9ms)
+
+  ✓  219 [framework-unit] › automationLayer/insurance/unitTests/policyReference.test.ts:13:5 › purchase reference rejects a missing policy number (5ms)
+
+  ✓  220 [framework-unit] › automationLayer/insurance/unitTests/policyMapping.test.ts:360:5 › Ferry rejects unknown payment and tier values instead of choosing defaults (10ms)
+
+  ✓  221 [framework-unit] › automationLayer/insurance/unitTests/policyMapping.test.ts:274:5 › Ferry maps an annual policy and takes product from the selected sheet context (11ms)
+
+  ✓  222 [framework-unit] › automationLayer/insurance/unitTests/policyReference.test.ts:17:5 › purchase reference rejects whitespace-only policy numbers (5ms)
+
+  ✓  223 [framework-unit] › automationLayer/insurance/unitTests/policyReference.test.ts:23:5 › purchase reference rejects a non-string policy number at the runtime boundary (4ms)
+
+  ✓  226 [framework-unit] › automationLayer/insurance/unitTests/policyReference.test.ts:45:5 › free cover can return a valid identity without inventing price or deposit (6ms)
+
+  ✓  224 [framework-unit] › automationLayer/insurance/unitTests/policyReference.test.ts:29:5 › valid captured identity and financial results are preserved, not reformatted (6ms)
+
+  ✓  228 [framework-unit] › automationLayer/insurance/unitTests/portalCompatibility.test.ts:73:5 › Allianz Policy details remains a valid completion destination (10ms)
+
+  ✓  229 [framework-unit] › automationLayer/insurance/unitTests/portalCompatibility.test.ts:63:5 › Britannia Your car policy is a valid completion destination without a confirmation popup (6ms)
+
+  ✓  230 [framework-unit] › automationLayer/insurance/unitTests/portalCompatibility.test.ts:181:5 › shared LV policy-summary entry accepts Britannia legacy tile wording (10ms)
+
+  ✓  227 [framework-unit] › automationLayer/insurance/unitTests/portalCompatibility.test.ts:79:5 › Trustpilot feedback is dismissed through its own modal close control (13ms)
+
+  ✓  231 [framework-unit] › automationLayer/insurance/unitTests/portalCompatibility.test.ts:185:5 › shared LV policy-summary entry accepts Allianz current tile wording (8ms)
+
+  ✓  235 [framework-unit] › automationLayer/insurance/unitTests/portalCompatibility.test.ts:248:5 › verification dismisses cookies after email retrieval and again before submitting (6ms)
+
+  ✓  234 [framework-unit] › automationLayer/insurance/unitTests/portalCompatibility.test.ts:189:5 › Ferry account entry accepts both icon and combined-account dashboard labels (9ms)
+
+  ✓  225 [framework-unit] › automationLayer/insurance/unitTests/policyReference.test.ts:52:5 › the real purchase completion rejects a journey that never captured policy identity (70ms)
+
+  ✓  232 [framework-unit] › automationLayer/insurance/unitTests/portalCompatibility.test.ts:121:5 › Ferry account details returns from the inner policy dashboard before selecting the account tile (29ms)
+
+  ✓  233 [framework-unit] › automationLayer/insurance/unitTests/portalCompatibility.test.ts:147:5 › Ferry account navigation refuses to back out of a journey or payment page (7ms)
+
+  ✓  238 [framework-unit] › automationLayer/insurance/unitTests/portalCompatibility.test.ts:351:5 › Ferry combined-cover agent capture reads digit-based policy numbers and ignores duplicates (5ms)
+
+  ✓  236 [framework-unit] › automationLayer/insurance/unitTests/portalCompatibility.test.ts:328:5 › current Ferry quote adds MLE and removes hire car using independent extra rows (14ms)
+
+  ✓  239 [framework-unit] › automationLayer/insurance/unitTests/portalCompatibility.test.ts:365:5 › cancellation end-date submission accepts Continue with cancellation (7ms)
+
+  ✓  241 [framework-unit] › automationLayer/insurance/unitTests/portalCompatibility.test.ts:379:5 › cancellation summary is identified by its final action without requiring a heading variant (6ms)
+
+  ✓  237 [framework-unit] › automationLayer/insurance/unitTests/portalCompatibility.test.ts:340:5 › current Ferry quote retains already-correct extras without toggling them (14ms)
+
+  ✓  240 [framework-unit] › automationLayer/insurance/unitTests/portalCompatibility.test.ts:218:5 › an uncertain checkout timeout never resubmits a payment even if Pay remains visible (11ms)
+
+  ✓  242 [framework-unit] › automationLayer/insurance/unitTests/purchaseApis.test.ts:64:5 › Home preserves PCW request data, monthly payment and captured deposit (8ms)
+
+  ✓  244 [framework-unit] › automationLayer/insurance/unitTests/purchaseApis.test.ts:84:5 › Ferry annual purchase defaults to the customer portal and preserves the captured reference (7ms)
+
+  ✓  245 [framework-unit] › automationLayer/insurance/unitTests/purchaseApis.test.ts:105:5 › Ferry free drive-away purchase does not add card data, a premium or a deposit (18ms)
+
+  ✓  248 [framework-unit] › automationLayer/insurance/unitTests/purchaseApis.test.ts:117:5 › Ferry agent failure is propagated without falling back to another portal or retrying (9ms)
+
+  ✓  243 [framework-unit] › automationLayer/insurance/unitTests/purchaseApis.test.ts:53:5 › Home defaults to Direct and exposes the complete original purchase results (12ms)
+
+  ✓  205 [framework-unit] › automationLayer/insurance/unitTests/navigationCoverage.test.ts:112:5 › new journey factories must be added to the navigation inventory audit (216ms)
+
+  ✓  246 [framework-unit] › automationLayer/insurance/unitTests/purchaseApis.test.ts:76:5 › Home purchase failure is propagated once without retrying payment (13ms)
+
+  ✓  247 [framework-unit] › automationLayer/insurance/unitTests/purchaseApis.test.ts:93:5 › Ferry agent combined purchase preserves product, monthly payment and input identity (18ms)
+
+  ✓  249 [framework-unit] › automationLayer/insurance/unitTests/purchaseApis.test.ts:127:5 › agentPortal.open awaits the existing login entry with the same page registry (7ms)
+
+  ✓  250 [framework-unit] › automationLayer/insurance/unitTests/renewal.test.ts:20:5 › renewal request uses the persisted term end and customer, including the month boundary (4ms)
+
+  ✓  251 [framework-unit] › automationLayer/insurance/unitTests/renewal.test.ts:34:5 › renewal dates support persisted epoch milliseconds and an explicit window (9ms)
+
+  ✓  255 [framework-unit] › automationLayer/insurance/unitTests/savedPolicyChecks.test.ts:80:5 › saved registration check reads the panel and tolerates surrounding layout whitespace (4ms)
+
+  ✓  252 [framework-unit] › automationLayer/insurance/unitTests/renewal.test.ts:44:5 › renewal refuses wrong policy identity, missing party/date and invalid windows (10ms)
+
+  ✓  259 [framework-unit] › automationLayer/insurance/unitTests/savedPolicyChecks.test.ts:47:5 › saved address reopens the captured dashboard when Policy Summary has no Back button (4ms)
+
+  ✓  254 [framework-unit] › automationLayer/insurance/unitTests/renewal.test.ts:121:5 › a failed renewal write is not retried and disposes the API session (11ms)
+
+  ✓  253 [framework-unit] › automationLayer/insurance/unitTests/renewal.test.ts:101:5 › preparation sends exactly one proposal and returns only after observing a pending renewal (15ms)
+
+  ✓  258 [framework-unit] › automationLayer/insurance/unitTests/savedPolicyChecks.test.ts:84:5 › saved address check reopens account details and accepts postcode layout differences (8ms)
+
+  ✓  257 [framework-unit] › automationLayer/insurance/unitTests/renewal.test.ts:128:5 › missing renewal configuration fails before contacting any service (8ms)
+
+  ✓  256 [framework-unit] › automationLayer/insurance/unitTests/purchaseApis.test.ts:142:5 › agentPortal.open propagates authentication failure without an extra login attempt (9ms)
+
+  ✓  265 [framework-unit] › automationLayer/insurance/unitTests/savedPolicyChecks.test.ts:116:5 › saved checks reject empty expected values before touching the browser (7ms)
+
+  ✓  263 [framework-unit] › automationLayer/insurance/unitTests/savedPolicyChecks.test.ts:97:5 › saved address accepts an unspaced expected postcode and a spaced saved postcode (8ms)
+
+  ✓  266 [framework-unit] › automationLayer/insurance/unitTests/servicingNavigation.test.ts:66:5 › manual-refund target opens without entering an amount or submitting a refund (11ms)
+
+  ✓  267 [framework-unit] › automationLayer/insurance/unitTests/servicingNavigation.test.ts:101:5 › agent driver licence fill leaves Next to submit (5ms)
+
+  ✓  268 [framework-unit] › automationLayer/insurance/unitTests/servicingNavigation.test.ts:138:5 › Ferry servicing prerequisites retain real source drivers and prepare extras and monthly cover (9ms)
+
+  ✓  271 [framework-unit] › automationLayer/insurance/unitTests/servicingNavigation.test.ts:128:5 › Ferry free driveaway driver addition excludes paid-cover dates and settlement (5ms)
+
+  ✓  270 [framework-unit] › automationLayer/insurance/unitTests/servicingNavigation.test.ts:120:5 › conviction-only policyholder servicing does not invoke marital-status editing (9ms)
+
+  ✓  269 [framework-unit] › automationLayer/insurance/unitTests/servicingNavigation.test.ts:85:5 › the second repeat-driver prompt is reached after filling both distinct drivers (17ms)
+
+  ✓  273 [framework-unit] › automationLayer/insurance/unitTests/servicingNavigationRegression.test.ts:110:5 › Ferry stored-card settlement recognises the amount-to-pay accessible name and submits once (5ms)
+
+  ✓  272 [framework-unit] › automationLayer/insurance/unitTests/servicingNavigationRegression.test.ts:84:5 › LV search chooses Motor before submitting the registration and email search (7ms)
+
+  ✓  277 [framework-unit] › automationLayer/insurance/unitTests/servicingNavigationRegression.test.ts:135:5 › cancellation does not silently bypass date questions on an unknown page (7ms)
+
+  ✓  275 [framework-unit] › automationLayer/insurance/unitTests/servicingNavigationRegression.test.ts:126:5 › cancellation retains each date question when the portal offers it (5ms)
+
+  ✓  274 [framework-unit] › automationLayer/insurance/unitTests/servicingNavigationRegression.test.ts:119:5 › cancellation skips unavailable date questions only after the reason screen is visible (10ms)
+
+  ✓  278 [framework-unit] › automationLayer/insurance/unitTests/servicingNavigationRegression.test.ts:143:5 › additional-driver confirmation accepts terms then pays when the change increases premium (5ms)
+
+  ✓  280 [framework-unit] › automationLayer/insurance/unitTests/servicingNavigationRegression.test.ts:170:5 › cancellation reason continues using the current portal button wording (3ms)
+
+  ✓  279 [framework-unit] › automationLayer/insurance/unitTests/servicingNavigationRegression.test.ts:159:5 › adding a driver can save a refund instead of waiting for a Pay button (3ms)
+
+  ✓  281 [framework-unit] › automationLayer/insurance/unitTests/servicingNavigationRegression.test.ts:176:5 › a dashboard with a direct new-car quote remains open until the quote-start step submits (4ms)
+
+  ✓  284 [framework-unit] › automationLayer/insurance/unitTests/servicingNavigationRegression.test.ts:214:5 › Ferry car entry dismisses a late cookie banner before the driveaway acknowledgement (3ms)
+
+  ✓  282 [framework-unit] › automationLayer/insurance/unitTests/servicingNavigationRegression.test.ts:190:5 › the pre-quote driveaway tile still submits Next before declining renewal (5ms)
+
+  ✓  283 [framework-unit] › automationLayer/insurance/unitTests/servicingNavigationRegression.test.ts:203:5 › the direct driveaway button reaches the reminder without clicking an underlying Next (4ms)
+
+  ✓  286 [framework-unit] › automationLayer/insurance/unitTests/servicingPageContracts.test.ts:48:5 › customer result in the same tab is followed without waiting for a nonexistent popup (4ms)
+
+  ✓  285 [framework-unit] › automationLayer/insurance/unitTests/servicingNavigationRegression.test.ts:243:5 › Ferry customer replacement keeps policy drivers rather than answering an NB driver question (5ms)
+
+  ✓  287 [framework-unit] › automationLayer/insurance/unitTests/servicingPageContracts.test.ts:56:5 › customer popup listener is registered before the click and removed after readiness (6ms)
+
+  ✓  288 [framework-unit] › automationLayer/insurance/unitTests/servicingPageContracts.test.ts:72:5 › a failed result click is surfaced once and removes its popup listener (4ms)
+
+  ✓  289 [framework-unit] › automationLayer/insurance/unitTests/servicingPageContracts.test.ts:179:5 › servicing forms are ready without NB employment or conviction group IDs (3ms)
+
+  ✓  290 [framework-unit] › automationLayer/insurance/unitTests/servicingPageContracts.test.ts:86:5 › same-tab backdating waits for the tool control rather than the customer-page marker (5ms)
+
+  ✓  276 [framework-unit] › automationLayer/insurance/unitTests/servicingNavigation.test.ts:55:5 › each servicing route has distinct screen identities for pause and resume (53ms)
+
+  ✓  292 [framework-unit] › automationLayer/insurance/unitTests/servicingPageContracts.test.ts:205:5 › Ferry settlement sees visible Save even if an earlier Pay template is hidden (4ms)
+
+  ✓  293 [framework-unit] › automationLayer/insurance/unitTests/servicingPageContracts.test.ts:193:5 › cancellation readiness depends on the first form controls rather than heading wording (4ms)
+
+  ✓  294 [framework-unit] › automationLayer/insurance/unitTests/servicingPageContracts.test.ts:222:5 › Ferry settlement selects a fresh card without also submitting a stored-card charge (4ms)
+
+  ✓  291 [framework-unit] › automationLayer/insurance/unitTests/servicingPageContracts.test.ts:163:5 › all conviction variants fill the scoped code input without clicking a placeholder or unrelated autocomplete (8ms)
+
+  ✓  295 [framework-unit] › automationLayer/insurance/unitTests/servicingPageContracts.test.ts:232:5 › Ferry monthly choice uses its text option and leaves Next to submit (5ms)
+
+  ✓  296 [framework-unit] › automationLayer/insurance/unitTests/servicingPageContracts.test.ts:243:5 › MLE navigation buys editable entry cover instead of cover with MLE included as standard (6ms)
+
+  ✓  297 [framework-unit] › automationLayer/insurance/unitTests/servicingPageContracts.test.ts:260:5 › Ferry replacement can fill the car without a new-business finance question (4ms)
+
+  ✓  298 [framework-unit] › automationLayer/insurance/unitTests/servicingPageContracts.test.ts:270:5 › Ferry agent replacement skips the customer driver prompt and exposes the documented new-card form (5ms)
+
+  ✓  302 [framework-unit] › automationLayer/insurance/unitTests/servicingPaymentBranches.test.ts:120:5 › unknown agent payment states propagate instead of being silently skipped (5ms)
+
+  ✓  299 [framework-unit] › automationLayer/insurance/unitTests/servicingPageContracts.test.ts:254:5 › Ferry plate change retains the effective-date screen documented by legacy regression 11 (5ms)
+
+  ✓  300 [framework-unit] › automationLayer/insurance/unitTests/servicingPaymentBranches.test.ts:96:5 › agent stored-card screen bypasses fresh-card entry and submits the actual accessible Pay button once (9ms)
+
+  ✓  301 [framework-unit] › automationLayer/insurance/unitTests/servicingPaymentBranches.test.ts:109:5 › gateway and completed payment screens do not replay a stored-card payment (11ms)
+
+  ✓  303 [framework-unit] › automationLayer/insurance/unitTests/servicingPaymentBranches.test.ts:144:5 › agent address and policyholder leave an embedded date for the following date step (4ms)
+
+  ✓  304 [framework-unit] › automationLayer/insurance/unitTests/servicingPaymentBranches.test.ts:126:5 › new-card and stored-card driver branches are mutually exclusive and both lead to completion (8ms)
+
+  ✓  305 [framework-unit] › automationLayer/insurance/unitTests/servicingPaymentBranches.test.ts:211:5 › agent policyholder keeps the surname through the scoped marital-status prompt (5ms)
+
+  ✓  306 [framework-unit] › automationLayer/insurance/unitTests/servicingPaymentBranches.test.ts:169:5 › Ferry summary dismisses its acknowledgement before Next without submitting from fill (6ms)
+
+  ✓  307 [framework-unit] › automationLayer/insurance/unitTests/servicingTransitions.test.ts:36:5 › surname submission retains the chosen status after Yes leaves the marital-status page (7ms)
+
+  ✓  309 [framework-unit] › automationLayer/insurance/unitTests/servicingTransitions.test.ts:99:5 › address completion accepts Policy Summary without requiring a car dashboard tile (3ms)
+
+  ✓  310 [framework-unit] › automationLayer/insurance/unitTests/servicingTransitions.test.ts:105:5 › optional card entry is bypassed when payment has already returned to Policy Summary (4ms)
+
+  ✓  308 [framework-unit] › automationLayer/insurance/unitTests/servicingPaymentBranches.test.ts:251:5 › agent additional-driver acknowledgement is cleared before answering residency (8ms)
+
+  ✓  311 [framework-unit] › automationLayer/insurance/unitTests/servicingTransitions.test.ts:123:5 › both cancellation branches visit reason and retention before their date question (5ms)
+
+  ✓  312 [framework-unit] › automationLayer/insurance/unitTests/servicingTransitions.test.ts:111:5 › a hidden earlier refund match does not hide the currently offered refund (4ms)
+
+  ✓  313 [framework-unit] › automationLayer/insurance/unitTests/servicingTransitions.test.ts:144:5 › cancellation indexes the second retention screen after the reason and before summary (8ms)
+
+  ✓  314 [framework-unit] › automationLayer/insurance/unitTests/servicingTransitions.test.ts:173:5 › LV second-policy car entry dismisses the multi-policy modal before entering registration (4ms)
+
+  ✓  316 [framework-unit] › automationLayer/insurance/unitTests/sharedCheckoutPages.test.ts:163:5 › agent journey makes exactly one payment call and adds no wait of its own (9ms)
+
+  ✓  317 [framework-unit] › automationLayer/insurance/unitTests/sharedCheckoutPages.test.ts:144:5 › customer payment fill stops before Pay; the legacy customer method still pays immediately (13ms)
+
+  ✓  319 [framework-unit] › automationLayer/insurance/unitTests/sharedCheckoutPages.test.ts:206:5 › direct debit recovers when confirmation stays visible immediately after its first acceptance (15ms)
+
+  ✓  321 [framework-unit] › automationLayer/insurance/unitTests/sharedCheckoutPages.test.ts:230:5 › verification fill forwards the email and waits for submit; legacy verification still advances (9ms)
+
+  ✓  322 [framework-unit] › automationLayer/insurance/unitTests/sharedCheckoutPages.test.ts:257:5 › verification retrieval failure does not submit the screen (5ms)
+
+  ✓  320 [framework-unit] › automationLayer/insurance/unitTests/sharedCheckoutPages.test.ts:215:5 › direct debit submit uses Next when Save Direct Debit is absent (14ms)
+
+  ✓  323 [framework-unit] › automationLayer/insurance/unitTests/sharedCheckoutPages.test.ts:276:5 › summary fill saves missing registration and corrects flagged phone before accepting terms (13ms)
+
+  ✓  325 [framework-unit] › automationLayer/insurance/unitTests/sharedCheckoutPages.test.ts:297:5 › shared agent landing probe returns true/false without running a login or search operation (5ms)
+
+  ✓  324 [framework-unit] › automationLayer/insurance/unitTests/sharedCheckoutPages.test.ts:291:5 › legacy summary terms action still advances immediately (6ms)
+
+  ✓  318 [framework-unit] › automationLayer/insurance/unitTests/sharedCheckoutPages.test.ts:188:5 › direct debit retains ordinal collection days including teens (62ms)
+
+  ✓  328 [framework-unit] › automationLayer/insurance/unitTests/sharedHomeAccountPages.test.ts:135:5 › the legacy final property action retains immediate auto-navigation (4ms)
+
+  ✓  327 [framework-unit] › automationLayer/insurance/unitTests/sharedHomeAccountPages.test.ts:119:5 › unsupported property risks fail before any field entry or auto-navigation (14ms)
+
+  ✓  326 [framework-unit] › automationLayer/insurance/unitTests/sharedHomeAccountPages.test.ts:102:5 › property fill enters the supplied address and construction data without leaving the screen (14ms)
+
+  ✓  330 [framework-unit] › automationLayer/insurance/unitTests/sharedHomeAccountPages.test.ts:158:5 › policyholder fill maps ISO birth date correctly and leaves advancing to submit (9ms)
+
+  ✓  329 [framework-unit] › automationLayer/insurance/unitTests/sharedHomeAccountPages.test.ts:142:5 › property journey pause/resume preserves manual address edits and advances only once (8ms)
+
+  ✓  331 [framework-unit] › automationLayer/insurance/unitTests/sharedHomeAccountPages.test.ts:186:5 › legacy policyholder granular entry keeps the supplied day/month/year order (9ms)
+
+  ✓  332 [framework-unit] › automationLayer/insurance/unitTests/sharedHomeAccountPages.test.ts:196:5 › account fill uses the supplied password twice without registering before submit (6ms)
+
+  ✓  333 [framework-unit] › automationLayer/insurance/unitTests/sharedHomeAccountPages.test.ts:172:5 › unsupported policyholder branches fail before entering personal information (11ms)
+
+  ✓  334 [framework-unit] › automationLayer/insurance/unitTests/sharedHomeAccountPages.test.ts:207:5 › legacy account convenience method still types its existing default and registers immediately (7ms)
+
+  ✓  315 [framework-unit] › automationLayer/insurance/unitTests/sharedCheckoutPages.test.ts:175:5 › direct debit restores a cleared account and accepts a reopened modal without saving early (119ms)
+
+  ✓  336 [framework-unit] › automationLayer/insurance/unitTests/sharedLegacyPages.test.ts:79:5 › adding another driver answers Yes and leaves Next to submit (4ms)
+
+  ✓  335 [framework-unit] › automationLayer/insurance/unitTests/sharedLegacyPages.test.ts:64:5 › legacy add-driver still answers Yes and advances; journey fill stops before Next (12ms)
+
+  ✓  337 [framework-unit] › automationLayer/insurance/unitTests/sharedLegacyPages.test.ts:86:5 › LV NCD retains legacy prefix matching and journey literal matching without early submit (8ms)
+
+  ✓  339 [framework-unit] › automationLayer/insurance/unitTests/sharedLegacyPages.test.ts:120:5 › shared Products page supports journey pause/resume with one product selection (7ms)
+
+  ✓  338 [framework-unit] › automationLayer/insurance/unitTests/sharedLegacyPages.test.ts:105:5 › Ferry NCD distinguishes omitted protection from explicit No and Yes (10ms)
+
+  ✓  340 [framework-unit] › automationLayer/insurance/unitTests/sharedLegacyPages.test.ts:152:5 › shared Property Use fills supplied values without advancing and retains numeric adult input (6ms)
+
+  ✓  344 [framework-unit] › automationLayer/insurance/unitTests/sharedVehiclePages.test.ts:126:5 › LV submit falls back to Next when lookup and All done are absent (4ms)
+
+  ✓  343 [framework-unit] › automationLayer/insurance/unitTests/sharedVehiclePages.test.ts:112:5 › LV manual fill leaves the screen open and submit chooses All done (7ms)
+
+  ✓  341 [framework-unit] › automationLayer/insurance/unitTests/sharedVehiclePages.test.ts:98:5 › LV registration fill stops before lookup while legacy searchCar still submits (6ms)
+
+  ✓  342 [framework-unit] › automationLayer/insurance/unitTests/sharedLegacyPages.test.ts:172:5 › unsupported proposed Property Use input fails before field entry (9ms)
+
+  ✓  164 [framework-unit] › automationLayer/insurance/unitTests/navigationIndex.test.ts:99:5 › navigation discovery rejects an entry page missing from the shared journey (1.1s)
+
+  ✓  346 [framework-unit] › automationLayer/insurance/unitTests/sharedVehiclePages.test.ts:164:5 › legacy LV manual fallback still advances with Next (3ms)
+
+  ✓  345 [framework-unit] › automationLayer/insurance/unitTests/sharedVehiclePages.test.ts:134:5 › LV submit preserves lookup priority if both lookup and All done are visible (5ms)
+
+  ✓  166 [framework-unit] › automationLayer/insurance/unitTests/navigationIndex.test.ts:113:5 › a route file numbers pages after the entry screen without describe groups (1.1s)
+
+  ✓  347 [framework-unit] › automationLayer/insurance/unitTests/sharedVehiclePages.test.ts:140:5 › legacy LV manual search retains its transmission/fuel arguments and autocomplete completion (8ms)
+
+  ✓  350 [framework-unit] › automationLayer/insurance/unitTests/sharedVehiclePages.test.ts:208:5 › legacy LV modification methods still answer and advance once (5ms)
+
+  ✓  349 [framework-unit] › automationLayer/insurance/unitTests/sharedVehiclePages.test.ts:197:5 › legacy LV registration helper keeps Tab/Enter confirmation (9ms)
+
+  ✓  348 [framework-unit] › automationLayer/insurance/unitTests/sharedVehiclePages.test.ts:178:5 › LV modification fill commits a supplied registration with Add, not keyboard or Next (10ms)
+
+  ✓  352 [framework-unit] › automationLayer/insurance/unitTests/sharedVehiclePages.test.ts:255:5 › legacy Ferry manual search still fills and advances with Next (5ms)
+
+  ✓  351 [framework-unit] › automationLayer/insurance/unitTests/sharedVehiclePages.test.ts:217:5 › Ferry registration fill retains drive-away acknowledgement and finance choice before lookup (9ms)
+
+  ✓  353 [framework-unit] › automationLayer/insurance/unitTests/sharedVehiclePages.test.ts:270:5 › Ferry modification fill preserves its registration flow without an LV Add confirmation (9ms)
+
+  ✓  356 [framework-unit] › automationLayer/insurance/unitTests/sharedVehiclePages.test.ts:307:5 › Ferry manual lookup can recover a delayed model selection without an early submit (5ms)
+
+  ✓  355 [framework-unit] › automationLayer/insurance/unitTests/sharedVehiclePages.test.ts:298:5 › manual model-selection failure never advances or falls through to another vehicle (9ms)
+
+  ✓  354 [framework-unit] › automationLayer/insurance/unitTests/sharedVehiclePages.test.ts:239:5 › Ferry manual fill advances only on submit and resets to lookup for the next registered input (9ms)
+
+  ✓  357 [framework-unit] › automationLayer/insurance/unitTests/sharedVehiclePages.test.ts:318:5 › a vehicle journey resumes after manual edits without refilling registration or submitting twice (8ms)
+
+  ✓  359 [framework-unit] › automationLayer/insurance/unitTests/sharedVehiclePages.test.ts:337:5 › Ferry public property aliases expose the original controls (10ms)
+
+  ✓  358 [framework-unit] › automationLayer/insurance/unitTests/sharedVehiclePages.test.ts:287:5 › modification checks omit registration entry when no registration was supplied (8ms)
+
+  ✓  360 [framework-unit] › automationLayer/insurance/unitTests/withChanges.test.ts:12:5 › merges nested changes, replaces arrays, and leaves the original unchanged (5ms)
+
+Looking for verification email for first@example.invalid...
+
+  ✓  362 [framework-unit] › automationLayer/insurance/unitTests/withChanges.test.ts:37:5 › replacement data is copied so subsequent edits do not leak in either direction (4ms)
+
+  ✓  361 [framework-unit] › automationLayer/insurance/unitTests/withChanges.test.ts:26:5 › editing a derived policy cannot change untouched data in its base or sibling (6ms)
+
+  ✓  167 [framework-unit] › automationLayer/insurance/unitTests/navigationIndex.test.ts:131:5 › navigation indexes alternative payment presentations as optional targets (1.1s)
+
+  ✓  364 [framework-unit] › automationLayer/insurance/unitTests/workerDependencies.test.ts:106:5 › registry supplies email to shared verification pages and preserves it when switching tabs (3ms)
+
+  ✓  366 [framework-unit] › automationLayer/insurance/unitTests/workerDependencies.test.ts:136:5 › Ferry activation uses supplied email service without invoking the legacy inbox (3ms)
+
+  ✓  367 [framework-unit] › automationLayer/insurance/unitTests/workerDependencies.test.ts:181:5 › agent sessions cache within their service instance without sharing across workers (5ms)
+
+  ✓  365 [framework-unit] › automationLayer/insurance/unitTests/workerDependencies.test.ts:16:5 › brand configuration snapshots injected settings without writing process.env (12ms)
+
+  ✓  370 [framework-unit] › automationLayer/insurance/unitTests/workerDependencies.test.ts:287:5 › partner email formatting requires explicit configuration (3ms)
+
+Verification code found: 123456
+
+Looking for verification email for second@example.invalid...
+
+  ✓  368 [framework-unit] › automationLayer/insurance/unitTests/workerDependencies.test.ts:206:5 › agent login failures propagate without automatic replay (8ms)
+
+  ✓  369 [framework-unit] › automationLayer/insurance/unitTests/workerDependencies.test.ts:226:5 › agent entry uses its own tab when customer activation can still redirect the customer tab (11ms)
+
+Verification code found: 654321
+
+Looking for verification email for first@example.invalid...
+
+Verification code found: 123456
+
+  ✓  363 [framework-unit] › automationLayer/insurance/unitTests/workerDependencies.test.ts:60:5 › configured email clients remain isolated and use their supplied credentials (54ms)
+
+  ✓  165 [framework-unit] › automationLayer/insurance/unitTests/navigationIndex.test.ts:78:5 › navigation discovery lists only reachable pages and numbers each route from 01 (2.1s)
+
+  ✓  371 [framework-unit] › automationLayer/insurance/unitTests/workerFixture.test.ts:18:1 › worker fixtures supply services without loading browsers, data or agent credentials (13ms)
+
+  ✘    2 [framework-unit] › automationLayer/insurance/unitTests/allureNavigationIdentity.test.ts:14:5 › Allure keeps repeated navigation titles separate by route while grouping real retries (6.7s)
+
+  ✓  260 [framework-unit] › automationLayer/insurance/unitTests/savedPolicyChecks.test.ts:90:5 › saved address check rejects the right postcode at the wrong house (4.9s)
+
+  ✓  261 [framework-unit] › automationLayer/insurance/unitTests/savedPolicyChecks.test.ts:102:5 › saved address check rejects the right house at the wrong postcode (4.9s)
+
+  ✓  264 [framework-unit] › automationLayer/insurance/unitTests/savedPolicyChecks.test.ts:109:5 › saved address treats punctuation in a house number literally (4.9s)
+
+  ✓  262 [framework-unit] › automationLayer/insurance/unitTests/portalDiscovery.test.ts:17:5 › portal-first discovery preserves both businesses and brand product boundaries (7.6s)
+
+
+
+
+
+  1) [framework-unit] › automationLayer/insurance/unitTests/allureNavigationIdentity.test.ts:14:5 › Allure keeps repeated navigation titles separate by route while grouping real retries 
+
+
+
+    Error: Error: Cannot find module '/var/jenkins_home/workspace/ntegrationTestsQualityGate_MR-34/reportingLayer/brand-allure-reporter.ts'
+
+    Require stack:
+
+    - /var/jenkins_home/workspace/ntegrationTestsQualityGate_MR-34/node_modules/playwright/lib/common/index.js
+
+    - /var/jenkins_home/workspace/ntegrationTestsQualityGate_MR-34/node_modules/playwright/lib/program.js
+
+    - /var/jenkins_home/workspace/ntegrationTestsQualityGate_MR-34/node_modules/@playwright/test/cli.js
+
+        at Function._resolveFilename (node:internal/modules/cjs/loader:1430:15)
+
+        at Function.resolve (node:internal/modules/helpers:157:19)
+
+        at /var/jenkins_home/workspace/ntegrationTestsQualityGate_MR-34/node_modules/playwright/lib/common/index.js:667:21
+
+        at Array.map (<anonymous>)
+
+        at resolveReporters (/var/jenkins_home/workspace/ntegrationTestsQualityGate_MR-34/node_modules/playwright/lib/common/index.js:664:34)
+
+        at new FullConfigInternal (/var/jenkins_home/workspace/ntegrationTestsQualityGate_MR-34/node_modules/playwright/lib/common/index.js:568:56)
+
+        at loadConfig (/var/jenkins_home/workspace/ntegrationTestsQualityGate_MR-34/node_modules/playwright/lib/common/index.js:1332:22)
+
+        at Object.loadConfigFromFile (/var/jenkins_home/workspace/ntegrationTestsQualityGate_MR-34/node_modules/playwright/lib/common/index.js:1546:10)
+
+        at runTests (/var/jenkins_home/workspace/ntegrationTestsQualityGate_MR-34/node_modules/playwright/lib/cli/testActions.js:46:18)
+
+        at _Command.<anonymous> (/var/jenkins_home/workspace/ntegrationTestsQualityGate_MR-34/node_modules/playwright/lib/program.js:55:7) {
+
+      code: 'MODULE_NOT_FOUND',
+
+      requireStack: [
+
+        '/var/jenkins_home/workspace/ntegrationTestsQualityGate_MR-34/node_modules/playwright/lib/common/index.js',
+
+        '/var/jenkins_home/workspace/ntegrationTestsQualityGate_MR-34/node_modules/playwright/lib/program.js',
+
+        '/var/jenkins_home/workspace/ntegrationTestsQualityGate_MR-34/node_modules/@playwright/test/cli.js'
+
+      ]
+
+    }
+
+
+
+
+
+    expect(received).toBe(expected) // Object.is equality
+
+
+
+    Expected: 0
+
+    Received: 1
+
+        at /var/jenkins_home/workspace/ntegrationTestsQualityGate_MR-34/node_modules/playwright/lib/common/index.js:667:21
+
+        at run (/var/jenkins_home/workspace/ntegrationTestsQualityGate_MR-34/automationLayer/insurance/unitTests/allureNavigationIdentity.test.ts:67:58)
+
+        at /var/jenkins_home/workspace/ntegrationTestsQualityGate_MR-34/automationLayer/insurance/unitTests/allureNavigationIdentity.test.ts:75:17
+
+
+
+    Error Context: test-results/unit/allureNavigationIdentity-A-2f1f6-while-grouping-real-retries-framework-unit/error-context.md
+
+
+
+  1 failed
+
+    [framework-unit] › automationLayer/insurance/unitTests/allureNavigationIdentity.test.ts:14:5 › Allure keeps repeated navigation titles separate by route while grouping real retries 
+
+  370 passed (14.2s)
+
+script returned exit code 1
