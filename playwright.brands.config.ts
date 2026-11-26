@@ -2,11 +2,13 @@ import { defineConfig, devices, Project } from '@playwright/test';
 import { brands, BrandName } from './automationLayer/insurance/allBrands';
 import { hasEnvironment } from './automationLayer/insurance/shared/brands/BrandConfig';
 import { parseRetries, videoOption } from './configLayer/execution/playwrightArtifacts';
+import reportPaths from './configLayer/execution/reportPaths.json';
 import {
   ACTION_TIMEOUT,
   EXPECT_TIMEOUT,
   NAVIGATION_TIMEOUT,
 } from './configLayer/execution/timeouts';
+import { validateReportPaths } from './configLayer/execution/validateReportPaths.cjs';
 
 /**
  * Brand-agnostic suite: the same specs under automationLayer/insurance run once per brand,
@@ -19,6 +21,8 @@ import {
  *
  * The legacy per-brand configs (playwright.config.ts with PROJECT=...) are unaffected.
  */
+
+validateReportPaths();
 
 process.env.ENV ??= 'test';
 const env = process.env.ENV;
@@ -117,19 +121,22 @@ export default defineConfig({
   // Parallel workers: WORKERS=4 or WORKERS=50% (of CPU cores); the --workers CLI flag overrides
   // it. Defaults to 1 because the test env is slow and every test pays with the same card.
   workers: parseWorkers(process.env.WORKERS),
+  outputDir: reportPaths.testResults,
   reporter: [
     ['list'],
-    ['./reportingLayer/custom-html-reporter.js'],
-    ['html', { open: 'never', outputFolder: 'playwright-report' }],
-    ['junit', { outputFile: 'results.xml' }],
-    ['./reportingLayer/brand-allure-reporter.ts', { resultsDir: 'allure-results' }],
+    // ['./reportingLayer/custom-html-reporter.js'],
+    ['html', { open: 'never', outputFolder: reportPaths.playwrightHtml }],
+    ['json', { outputFile: reportPaths.json }],
+    ['junit', { outputFile: reportPaths.junit }],
+    ['./reportingLayer/reporters/brand-allure-reporter.ts', { resultsDir: reportPaths.allureResults }],
+    ['./reportingLayer/reporters/evidenceReporter.ts'],
   ],
   // Per-test timeout comes from the shared fixtures (10 min, as in Selenium).
   expect: { timeout: EXPECT_TIMEOUT },
   use: {
     ignoreHTTPSErrors: env === 'localhost',
     trace: 'retain-on-failure',
-    screenshot: 'only-on-failure',
+    screenshot: { mode: 'only-on-failure', fullPage: true },
     // VIDEO_MODE: off (default), on, retain-on-failure, on-first-retry. See docs/Reporting.md.
     video: videoOption(retries),
     actionTimeout: ACTION_TIMEOUT,
