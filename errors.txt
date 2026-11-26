@@ -1,3 +1,9 @@
+
+
 git --no-pager diff -- automationLayer/common/executionEnvironmentMetadata.ts
 
+wc -l automationLayer/common/executionEnvironmentMetadata.ts
+
 git diff --check
+
+git status --short
