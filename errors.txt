@@ -1,25 +1,16 @@
-tp70707@AVD-HEX-73 MINGW64 ~/OneDrive - Allianz/My Documents/Automation/Athena_Automation/integration-tests (evidence_factory_fix)
-$ git --no-pager diff -- reportingLayer/evidenceFactory.ts
+git add reportingLayer/evidenceArtifacts.ts reportingLayer/evidenceFactory.ts
 
-git diff --check -- reportingLayer/evidenceFactory.ts
+git --no-pager diff -- reportingLayer/evidenceArtifacts.ts reportingLayer/evidenceFactory.ts
 
-npx --no-install eslint reportingLayer/evidenceFactory.ts
+git status --short
 
-wc -l reportingLayer/evidenceFactory.ts
-diff --git a/reportingLayer/evidenceFactory.ts b/reportingLayer/evidenceFactory.ts
-index 65e7471..b211d8b 100644
---- a/reportingLayer/evidenceFactory.ts
-+++ b/reportingLayer/evidenceFactory.ts
-@@ -10,7 +10,7 @@ import {
-     createRunDirectory, copyReports, resolveScreenshot,
- } from './evidenceArtifacts';
- 
--const { validateReportPaths } = require('../configLayer/execution/validateReportPaths.cjs');
-+import { validateReportPaths } from '../configLayer/execution/validateReportPaths.cjs';
- 
- interface Annotation {
-     type: string;
-396 reportingLayer/evidenceFactory.ts
 
-tp70707@AVD-HEX-73 MINGW64 ~/OneDrive - Allianz/My Documents/Automation/Athena_Automation/integration-tests (evidence_factory_fix)
-$ 
+
+npx --no-install eslint playwright.config.base.ts reportingLayer/evidenceArtifacts.ts reportingLayer/evidenceFactory.ts
+
+
+npx --no-install tsc --noEmit
+
+
+node -r ts-node/register -e "const base = require('./playwright.config.base'); const artifacts = require('./reportingLayer/evidenceArtifacts'); const factory = require('./reportingLayer/evidenceFactory'); if (typeof base.createConfig !== 'function' || typeof artifacts.createRunDirectory !== 'function' || typeof factory.generateEvidenceFactory !== 'function') throw new Error('Module import verification failed'); console.log('EvidenceFactory module imports validated successfully.');"
+
