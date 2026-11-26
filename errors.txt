@@ -1,1 +1,689 @@
-git restore -- .vscode/settings.json
++ npm run lint
+
+
+
+> ferryplaywright@1.0.0 lint
+
+> eslint .
+
+
+
+
+
+/var/jenkins_home/workspace/ntegrationTestsQualityGate_MR-34/apiIntegration/claims/britannia/client/claimClient.ts
+
+  3:69  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+
+
+/var/jenkins_home/workspace/ntegrationTestsQualityGate_MR-34/apiIntegration/claims/ferry/client/claimClient.ts
+
+  3:69  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+
+
+/var/jenkins_home/workspace/ntegrationTestsQualityGate_MR-34/apiIntegration/gmail/gmailHelper.ts
+
+   81:17  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+   96:17  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+  135:19  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+  205:19  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+
+
+/var/jenkins_home/workspace/ntegrationTestsQualityGate_MR-34/automationLayer/PCW/CTM/pages/CTM_CarDetailsPage.ts
+
+    1:25  warning  'expect' is defined but never used        @typescript-eslint/no-unused-vars
+
+  210:39  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+  442:35  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+
+
+/var/jenkins_home/workspace/ntegrationTestsQualityGate_MR-34/automationLayer/PCW/CTM/pages/CTM_YourDetailsPage.ts
+
+  903:44  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+
+
+/var/jenkins_home/workspace/ntegrationTestsQualityGate_MR-34/automationLayer/PCW/CTM/pages/CTM_YourPolicyPage.ts
+
+  343:44  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+  368:48  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+  618:33  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+  627:36  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+  650:38  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+  670:41  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+  721:47  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+  802:44  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+  834:42  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+  847:42  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+
+
+/var/jenkins_home/workspace/ntegrationTestsQualityGate_MR-34/automationLayer/PCW/CTM/pages/CTM_YourQuotePage.ts
+
+  69:49  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+
+
+/var/jenkins_home/workspace/ntegrationTestsQualityGate_MR-34/automationLayer/PCW/CTM/tests/Britannia_CTMNBUi.spec.ts
+
+  37:13  warning  Do not nest `test.step()` methods  playwright/no-nested-step
+
+  43:13  warning  Do not nest `test.step()` methods  playwright/no-nested-step
+
+  48:13  warning  Do not nest `test.step()` methods  playwright/no-nested-step
+
+  53:13  warning  Do not nest `test.step()` methods  playwright/no-nested-step
+
+  58:13  warning  Do not nest `test.step()` methods  playwright/no-nested-step
+
+  62:13  warning  Do not nest `test.step()` methods  playwright/no-nested-step
+
+  78:13  warning  Do not nest `test.step()` methods  playwright/no-nested-step
+
+
+
+/var/jenkins_home/workspace/ntegrationTestsQualityGate_MR-34/automationLayer/PCW/Goco/pages/GoCo_DriverDetailsPage.ts
+
+    1:8   warning  'test' is defined but never used          @typescript-eslint/no-unused-vars
+
+  357:40  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+
+
+/var/jenkins_home/workspace/ntegrationTestsQualityGate_MR-34/automationLayer/PCW/Goco/pages/GoCo_DriverExperiencePage.ts
+
+  1066:32  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+  1150:40  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+  1390:41  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+  1470:45  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+  1482:48  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+
+
+/var/jenkins_home/workspace/ntegrationTestsQualityGate_MR-34/automationLayer/PCW/Goco/pages/Goco_CarDetailsPage.ts
+
+  298:39  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+
+
+/var/jenkins_home/workspace/ntegrationTestsQualityGate_MR-34/automationLayer/PCW/Goco/pages/Goco_CarDrivingDetailsPage.ts
+
+  402:40  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+  408:35  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+  417:34  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+  503:41  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+
+
+/var/jenkins_home/workspace/ntegrationTestsQualityGate_MR-34/automationLayer/PCW/Goco/pages/Goco_CoverDetailsPage.ts
+
+  122:41  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+
+
+/var/jenkins_home/workspace/ntegrationTestsQualityGate_MR-34/automationLayer/PCW/Goco/pages/Goco_YourquotePage.ts
+
+  119:52  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+
+
+/var/jenkins_home/workspace/ntegrationTestsQualityGate_MR-34/automationLayer/athena/carInsurance/az_motor/tests/Regression/Reg_TC01_BritanniaEssentials_AnnualPayment.spec.ts
+
+  189:11  warning  Do not nest `test.step()` methods  playwright/no-nested-step
+
+  195:11  warning  Do not nest `test.step()` methods  playwright/no-nested-step
+
+  212:11  warning  Do not nest `test.step()` methods  playwright/no-nested-step
+
+  222:11  warning  Do not nest `test.step()` methods  playwright/no-nested-step
+
+  226:11  warning  Do not nest `test.step()` methods  playwright/no-nested-step
+
+  230:11  warning  Do not nest `test.step()` methods  playwright/no-nested-step
+
+  234:11  warning  Do not nest `test.step()` methods  playwright/no-nested-step
+
+  239:11  warning  Do not nest `test.step()` methods  playwright/no-nested-step
+
+  243:11  warning  Do not nest `test.step()` methods  playwright/no-nested-step
+
+  252:11  warning  Do not nest `test.step()` methods  playwright/no-nested-step
+
+
+
+/var/jenkins_home/workspace/ntegrationTestsQualityGate_MR-34/automationLayer/athena/carInsurance/az_motor/tests/Regression/Reg_TC02_BritanniaPremier_AnnualPayment.spec.ts
+
+  310:11  warning  Do not nest `test.step()` methods  playwright/no-nested-step
+
+  315:11  warning  Do not nest `test.step()` methods  playwright/no-nested-step
+
+  319:11  warning  Do not nest `test.step()` methods  playwright/no-nested-step
+
+  325:11  warning  Do not nest `test.step()` methods  playwright/no-nested-step
+
+  329:11  warning  Do not nest `test.step()` methods  playwright/no-nested-step
+
+  334:11  warning  Do not nest `test.step()` methods  playwright/no-nested-step
+
+
+
+/var/jenkins_home/workspace/ntegrationTestsQualityGate_MR-34/automationLayer/athena/carInsurance/az_motor/tests/Regression/Reg_TC06_BritanniaEssentials_AnnualPayment.spec.ts
+
+  166:11  warning  Do not nest `test.step()` methods  playwright/no-nested-step
+
+  171:11  warning  Do not nest `test.step()` methods  playwright/no-nested-step
+
+  176:11  warning  Do not nest `test.step()` methods  playwright/no-nested-step
+
+  180:11  warning  Do not nest `test.step()` methods  playwright/no-nested-step
+
+  186:11  warning  Do not nest `test.step()` methods  playwright/no-nested-step
+
+  197:11  warning  Do not nest `test.step()` methods  playwright/no-nested-step
+
+  201:11  warning  Do not nest `test.step()` methods  playwright/no-nested-step
+
+  206:11  warning  Do not nest `test.step()` methods  playwright/no-nested-step
+
+  212:11  warning  Do not nest `test.step()` methods  playwright/no-nested-step
+
+  222:11  warning  Do not nest `test.step()` methods  playwright/no-nested-step
+
+
+
+/var/jenkins_home/workspace/ntegrationTestsQualityGate_MR-34/automationLayer/athena/carInsurance/az_motor/tests/Regression/Reg_TC07_BritanniaPremier_MonthlyPayment.spec.ts
+
+  187:11  warning  Do not nest `test.step()` methods  playwright/no-nested-step
+
+  192:11  warning  Do not nest `test.step()` methods  playwright/no-nested-step
+
+  196:11  warning  Do not nest `test.step()` methods  playwright/no-nested-step
+
+
+
+/var/jenkins_home/workspace/ntegrationTestsQualityGate_MR-34/automationLayer/athena/carInsurance/az_motor/tests/Regression/Reg_TC08_BritanniaCar_AnnualPayment.spec.ts
+
+  259:11  warning  Do not nest `test.step()` methods  playwright/no-nested-step
+
+  264:11  warning  Do not nest `test.step()` methods  playwright/no-nested-step
+
+  268:11  warning  Do not nest `test.step()` methods  playwright/no-nested-step
+
+
+
+/var/jenkins_home/workspace/ntegrationTestsQualityGate_MR-34/automationLayer/athena/carInsurance/az_motor/tests/Regression/Reg_TC10_BritanniaPremier_AnnualPayment.spec.ts
+
+  206:11  warning  Do not nest `test.step()` methods  playwright/no-nested-step
+
+  210:11  warning  Do not nest `test.step()` methods  playwright/no-nested-step
+
+  214:11  warning  Do not nest `test.step()` methods  playwright/no-nested-step
+
+  221:11  warning  Do not nest `test.step()` methods  playwright/no-nested-step
+
+  234:11  warning  Do not nest `test.step()` methods  playwright/no-nested-step
+
+  239:11  warning  Do not nest `test.step()` methods  playwright/no-nested-step
+
+  243:11  warning  Do not nest `test.step()` methods  playwright/no-nested-step
+
+  253:11  warning  Do not nest `test.step()` methods  playwright/no-nested-step
+
+
+
+/var/jenkins_home/workspace/ntegrationTestsQualityGate_MR-34/automationLayer/athena/carInsurance/az_motor/utils/agentPortalUtils.ts
+
+  49:13  warning  Empty block statement  no-empty
+
+
+
+/var/jenkins_home/workspace/ntegrationTestsQualityGate_MR-34/automationLayer/athena/carInsurance/az_motor/utils/pageUtils.ts
+
+  184:13  warning  Empty block statement  no-empty
+
+
+
+/var/jenkins_home/workspace/ntegrationTestsQualityGate_MR-34/automationLayer/athena/carInsurance/britannia/tests/Regression/Britannia_Hexa/TC19_BRI_DJ_ESS_NB005.spec.ts
+
+  7:3  warning  'getPolicyNumber' is defined but never used  @typescript-eslint/no-unused-vars
+
+
+
+/var/jenkins_home/workspace/ntegrationTestsQualityGate_MR-34/automationLayer/athena/carInsurance/britannia/tests/Regression/Reg_TC01_BritanniaEssentials_AnnualPayment.spec.ts
+
+  189:11  warning  Do not nest `test.step()` methods  playwright/no-nested-step
+
+  195:11  warning  Do not nest `test.step()` methods  playwright/no-nested-step
+
+  212:11  warning  Do not nest `test.step()` methods  playwright/no-nested-step
+
+  222:11  warning  Do not nest `test.step()` methods  playwright/no-nested-step
+
+  226:11  warning  Do not nest `test.step()` methods  playwright/no-nested-step
+
+  230:11  warning  Do not nest `test.step()` methods  playwright/no-nested-step
+
+  234:11  warning  Do not nest `test.step()` methods  playwright/no-nested-step
+
+  239:11  warning  Do not nest `test.step()` methods  playwright/no-nested-step
+
+  243:11  warning  Do not nest `test.step()` methods  playwright/no-nested-step
+
+  252:11  warning  Do not nest `test.step()` methods  playwright/no-nested-step
+
+
+
+/var/jenkins_home/workspace/ntegrationTestsQualityGate_MR-34/automationLayer/athena/carInsurance/britannia/tests/Regression/Reg_TC02_BritanniaPremier_AnnualPayment.spec.ts
+
+  311:11  warning  Do not nest `test.step()` methods  playwright/no-nested-step
+
+  316:11  warning  Do not nest `test.step()` methods  playwright/no-nested-step
+
+  320:11  warning  Do not nest `test.step()` methods  playwright/no-nested-step
+
+  326:11  warning  Do not nest `test.step()` methods  playwright/no-nested-step
+
+  330:11  warning  Do not nest `test.step()` methods  playwright/no-nested-step
+
+  335:11  warning  Do not nest `test.step()` methods  playwright/no-nested-step
+
+
+
+/var/jenkins_home/workspace/ntegrationTestsQualityGate_MR-34/automationLayer/athena/carInsurance/britannia/tests/Regression/Reg_TC06_BritanniaEssentials_AnnualPayment.spec.ts
+
+  166:11  warning  Do not nest `test.step()` methods  playwright/no-nested-step
+
+  171:11  warning  Do not nest `test.step()` methods  playwright/no-nested-step
+
+  176:11  warning  Do not nest `test.step()` methods  playwright/no-nested-step
+
+  180:11  warning  Do not nest `test.step()` methods  playwright/no-nested-step
+
+  186:11  warning  Do not nest `test.step()` methods  playwright/no-nested-step
+
+  197:11  warning  Do not nest `test.step()` methods  playwright/no-nested-step
+
+  201:11  warning  Do not nest `test.step()` methods  playwright/no-nested-step
+
+  206:11  warning  Do not nest `test.step()` methods  playwright/no-nested-step
+
+  212:11  warning  Do not nest `test.step()` methods  playwright/no-nested-step
+
+  222:11  warning  Do not nest `test.step()` methods  playwright/no-nested-step
+
+
+
+/var/jenkins_home/workspace/ntegrationTestsQualityGate_MR-34/automationLayer/athena/carInsurance/britannia/tests/Regression/Reg_TC07_BritanniaPremier_MonthlyPayment.spec.ts
+
+  186:11  warning  Do not nest `test.step()` methods  playwright/no-nested-step
+
+  191:11  warning  Do not nest `test.step()` methods  playwright/no-nested-step
+
+  195:11  warning  Do not nest `test.step()` methods  playwright/no-nested-step
+
+
+
+/var/jenkins_home/workspace/ntegrationTestsQualityGate_MR-34/automationLayer/athena/carInsurance/britannia/tests/Regression/Reg_TC08_BritanniaCar_AnnualPayment.spec.ts
+
+  259:11  warning  Do not nest `test.step()` methods  playwright/no-nested-step
+
+  264:11  warning  Do not nest `test.step()` methods  playwright/no-nested-step
+
+  268:11  warning  Do not nest `test.step()` methods  playwright/no-nested-step
+
+
+
+/var/jenkins_home/workspace/ntegrationTestsQualityGate_MR-34/automationLayer/athena/carInsurance/britannia/tests/Regression/Reg_TC10_BritanniaPremier_AnnualPayment.spec.ts
+
+  207:11  warning  Do not nest `test.step()` methods  playwright/no-nested-step
+
+  211:11  warning  Do not nest `test.step()` methods  playwright/no-nested-step
+
+  215:11  warning  Do not nest `test.step()` methods  playwright/no-nested-step
+
+  222:11  warning  Do not nest `test.step()` methods  playwright/no-nested-step
+
+  235:11  warning  Do not nest `test.step()` methods  playwright/no-nested-step
+
+  240:11  warning  Do not nest `test.step()` methods  playwright/no-nested-step
+
+  244:11  warning  Do not nest `test.step()` methods  playwright/no-nested-step
+
+  254:11  warning  Do not nest `test.step()` methods  playwright/no-nested-step
+
+
+
+/var/jenkins_home/workspace/ntegrationTestsQualityGate_MR-34/automationLayer/athena/carInsurance/britannia/utils/agentPortalUtils.ts
+
+  49:13  warning  Empty block statement  no-empty
+
+
+
+/var/jenkins_home/workspace/ntegrationTestsQualityGate_MR-34/automationLayer/athena/carInsurance/britannia/utils/pageUtils.ts
+
+  181:13  warning  Empty block statement                     no-empty
+
+  541:63  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+  548:68  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+  555:12  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+
+
+/var/jenkins_home/workspace/ntegrationTestsQualityGate_MR-34/automationLayer/athena/carInsurance/commonPages/QuotePage.ts
+
+  266:13  warning  Empty block statement                     no-empty
+
+  285:45  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+  378:52  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+  649:58  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+
+
+/var/jenkins_home/workspace/ntegrationTestsQualityGate_MR-34/automationLayer/athena/carInsurance/commonPages/QuoteSummaryPage.ts
+
+  49:52  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+
+
+/var/jenkins_home/workspace/ntegrationTestsQualityGate_MR-34/automationLayer/athena/homeInsurance/az_home/pages/CustomerPortal/NB-Journey/PolicyHolderDetailsPage.ts
+
+  388:50  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+
+
+/var/jenkins_home/workspace/ntegrationTestsQualityGate_MR-34/automationLayer/athena/homeInsurance/az_home/pages/CustomerPortal/NB-Journey/PropertyDetailsPage.ts
+
+  219:35  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+
+
+/var/jenkins_home/workspace/ntegrationTestsQualityGate_MR-34/automationLayer/athena/homeInsurance/az_home/pages/CustomerPortal/NB-Journey/PropertyUsePage.ts
+
+  116:38  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+
+
+/var/jenkins_home/workspace/ntegrationTestsQualityGate_MR-34/automationLayer/athena/homeInsurance/az_home/pages/CustomerPortal/NB-Journey/QuotePage.ts
+
+  565:36  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+  642:52  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+
+
+/var/jenkins_home/workspace/ntegrationTestsQualityGate_MR-34/automationLayer/athena/homeInsurance/az_home/utils/agentPortalUtils.ts
+
+  49:13  warning  Empty block statement  no-empty
+
+
+
+/var/jenkins_home/workspace/ntegrationTestsQualityGate_MR-34/automationLayer/athena/homeInsurance/az_home/utils/pageUtils.ts
+
+  188:13  warning  Empty block statement  no-empty
+
+
+
+/var/jenkins_home/workspace/ntegrationTestsQualityGate_MR-34/automationLayer/ferry/pages/AgentPortal/EditRenewalInvite/EditRenewalInviteQuoteSummaryPage.ts
+
+  1:10  warning  'Locator' is defined but never used  @typescript-eslint/no-unused-vars
+
+
+
+/var/jenkins_home/workspace/ntegrationTestsQualityGate_MR-34/automationLayer/ferry/tests/Regression/AnnualOnly/Reg_TC01_Skoda_Essentials_Annual_Customer-Portal.spec.ts
+
+  187:11  warning  Do not nest `test.step()` methods  playwright/no-nested-step
+
+  193:11  warning  Do not nest `test.step()` methods  playwright/no-nested-step
+
+  210:11  warning  Do not nest `test.step()` methods  playwright/no-nested-step
+
+  220:11  warning  Do not nest `test.step()` methods  playwright/no-nested-step
+
+  224:11  warning  Do not nest `test.step()` methods  playwright/no-nested-step
+
+  228:11  warning  Do not nest `test.step()` methods  playwright/no-nested-step
+
+  232:11  warning  Do not nest `test.step()` methods  playwright/no-nested-step
+
+  237:11  warning  Do not nest `test.step()` methods  playwright/no-nested-step
+
+  241:11  warning  Do not nest `test.step()` methods  playwright/no-nested-step
+
+  255:11  warning  Do not nest `test.step()` methods  playwright/no-nested-step
+
+
+
+/var/jenkins_home/workspace/ntegrationTestsQualityGate_MR-34/automationLayer/ferry/tests/Regression/AnnualOnly/Reg_TC02_Audi_Plus_Annual_Customer-Portal.spec.ts
+
+  306:11  warning  Do not nest `test.step()` methods  playwright/no-nested-step
+
+  311:11  warning  Do not nest `test.step()` methods  playwright/no-nested-step
+
+  315:11  warning  Do not nest `test.step()` methods  playwright/no-nested-step
+
+  321:11  warning  Do not nest `test.step()` methods  playwright/no-nested-step
+
+  325:11  warning  Do not nest `test.step()` methods  playwright/no-nested-step
+
+  330:11  warning  Do not nest `test.step()` methods  playwright/no-nested-step
+
+
+
+/var/jenkins_home/workspace/ntegrationTestsQualityGate_MR-34/automationLayer/ferry/tests/Regression/AnnualOnly/Reg_TC11_VW_Essentials_Annual_Customer-Portal.spec.ts
+
+  289:11  warning  Unexpected use of page.waitForTimeout()  playwright/no-wait-for-timeout
+
+
+
+/var/jenkins_home/workspace/ntegrationTestsQualityGate_MR-34/automationLayer/ferry/tests/Regression/AnnualOnly/Reg_TC19_Skoda_Annual_Plus_Agent-Portal.spec.ts
+
+  240:11  warning  Do not nest `test.step()` methods  playwright/no-nested-step
+
+  245:11  warning  Do not nest `test.step()` methods  playwright/no-nested-step
+
+  249:11  warning  Do not nest `test.step()` methods  playwright/no-nested-step
+
+
+
+/var/jenkins_home/workspace/ntegrationTestsQualityGate_MR-34/automationLayer/ferry/tests/Regression/Driveaway+Annual/Reg_TC31_Cupra_DAPlusAnnual_Essentials_Customer-Portal.spec.ts
+
+  208:11  warning  Do not nest `test.step()` methods  playwright/no-nested-step
+
+  212:11  warning  Do not nest `test.step()` methods  playwright/no-nested-step
+
+  216:11  warning  Do not nest `test.step()` methods  playwright/no-nested-step
+
+  223:11  warning  Do not nest `test.step()` methods  playwright/no-nested-step
+
+  232:11  warning  Do not nest `test.step()` methods  playwright/no-nested-step
+
+  244:11  warning  Do not nest `test.step()` methods  playwright/no-nested-step
+
+  248:11  warning  Do not nest `test.step()` methods  playwright/no-nested-step
+
+  256:11  warning  Do not nest `test.step()` methods  playwright/no-nested-step
+
+  261:11  warning  Do not nest `test.step()` methods  playwright/no-nested-step
+
+  265:11  warning  Do not nest `test.step()` methods  playwright/no-nested-step
+
+
+
+/var/jenkins_home/workspace/ntegrationTestsQualityGate_MR-34/automationLayer/ferry/tests/Regression/DriveawayOnly/Reg_TC04_VW_Customer-Portal.spec.ts
+
+  189:11  warning  Do not nest `test.step()` methods  playwright/no-nested-step
+
+  193:11  warning  Do not nest `test.step()` methods  playwright/no-nested-step
+
+  197:11  warning  Do not nest `test.step()` methods  playwright/no-nested-step
+
+  203:11  warning  Do not nest `test.step()` methods  playwright/no-nested-step
+
+  211:11  warning  Do not nest `test.step()` methods  playwright/no-nested-step
+
+  224:11  warning  Do not nest `test.step()` methods  playwright/no-nested-step
+
+  228:11  warning  Do not nest `test.step()` methods  playwright/no-nested-step
+
+  232:11  warning  Do not nest `test.step()` methods  playwright/no-nested-step
+
+  238:11  warning  Do not nest `test.step()` methods  playwright/no-nested-step
+
+
+
+/var/jenkins_home/workspace/ntegrationTestsQualityGate_MR-34/automationLayer/ferry/tests/Regression/DriveawayOnly/Reg_TC23_Seat_Customer-Portal.spec.ts
+
+  215:11  warning  Do not nest `test.step()` methods  playwright/no-nested-step
+
+  219:11  warning  Do not nest `test.step()` methods  playwright/no-nested-step
+
+  223:11  warning  Do not nest `test.step()` methods  playwright/no-nested-step
+
+  229:11  warning  Do not nest `test.step()` methods  playwright/no-nested-step
+
+  237:11  warning  Do not nest `test.step()` methods  playwright/no-nested-step
+
+  242:11  warning  Do not nest `test.step()` methods  playwright/no-nested-step
+
+  247:11  warning  Do not nest `test.step()` methods  playwright/no-nested-step
+
+
+
+/var/jenkins_home/workspace/ntegrationTestsQualityGate_MR-34/automationLayer/ferry/tests/Regression/DriveawayOnly/Reg_TC33_Cupra_Customer-Portal.spec.ts
+
+  190:11  warning  Do not nest `test.step()` methods  playwright/no-nested-step
+
+  194:11  warning  Do not nest `test.step()` methods  playwright/no-nested-step
+
+  200:11  warning  Do not nest `test.step()` methods  playwright/no-nested-step
+
+  205:11  warning  Do not nest `test.step()` methods  playwright/no-nested-step
+
+  214:11  warning  Do not nest `test.step()` methods  playwright/no-nested-step
+
+  226:11  warning  Do not nest `test.step()` methods  playwright/no-nested-step
+
+  230:11  warning  Do not nest `test.step()` methods  playwright/no-nested-step
+
+  236:11  warning  Do not nest `test.step()` methods  playwright/no-nested-step
+
+  241:11  warning  Do not nest `test.step()` methods  playwright/no-nested-step
+
+
+
+/var/jenkins_home/workspace/ntegrationTestsQualityGate_MR-34/automationLayer/ferry/tests/Renewals/Edit_Renewal_Invite_Agent_Portal/Edit_Car_Details_Journey/Edit_Car_Details_TC01_Seat_AnnualPolicy_AnnualPayment_Essentials_Change_Number_Plate.spec.ts
+
+  217:11  warning  Do not nest `test.step()` methods  playwright/no-nested-step
+
+  222:11  warning  Do not nest `test.step()` methods  playwright/no-nested-step
+
+  235:11  warning  Do not nest `test.step()` methods  playwright/no-nested-step
+
+  240:11  warning  Do not nest `test.step()` methods  playwright/no-nested-step
+
+
+
+/var/jenkins_home/workspace/ntegrationTestsQualityGate_MR-34/automationLayer/ferry/tests/Renewals/Edit_Renewal_Invite_Agent_Portal/Edit_Car_Details_Journey/WIP_Edit_Car_Details_TC02_Skoda_AnnualPolicy_AnnualPayment_Essentials_Add_Driver_Without_DLN.spec.ts
+
+  234:11  warning  Do not nest `test.step()` methods  playwright/no-nested-step
+
+  239:11  warning  Do not nest `test.step()` methods  playwright/no-nested-step
+
+  244:11  warning  Do not nest `test.step()` methods  playwright/no-nested-step
+
+  261:11  warning  Do not nest `test.step()` methods  playwright/no-nested-step
+
+  271:11  warning  Do not nest `test.step()` methods  playwright/no-nested-step
+
+  275:11  warning  Do not nest `test.step()` methods  playwright/no-nested-step
+
+  279:11  warning  Do not nest `test.step()` methods  playwright/no-nested-step
+
+  283:11  warning  Do not nest `test.step()` methods  playwright/no-nested-step
+
+  288:11  warning  Do not nest `test.step()` methods  playwright/no-nested-step
+
+
+
+/var/jenkins_home/workspace/ntegrationTestsQualityGate_MR-34/configLayer/execution/validateReportPaths.cjs
+
+    1:12  error  A `require()` style import is forbidden                            @typescript-eslint/no-require-imports
+
+    1:12  error  'require' is not defined                                           no-undef
+
+    2:14  error  A `require()` style import is forbidden                            @typescript-eslint/no-require-imports
+
+    2:14  error  'require' is not defined                                           no-undef
+
+    4:21  error  A `require()` style import is forbidden                            @typescript-eslint/no-require-imports
+
+    4:21  error  'require' is not defined                                           no-undef
+
+  215:13  error  Unexpected control character(s) in regular expression: \x00, \x1f  no-control-regex
+
+  253:9   error  There is no `cause` attached to the symptom error being thrown     preserve-caught-error
+
+  293:35  error  '__dirname' is not defined                                         no-undef
+
+  299:50  error  'process' is not defined                                           no-undef
+
+  305:35  error  'process' is not defined                                           no-undef
+
+  361:1   error  'module' is not defined                                            no-undef
+
+  363:5   error  'require' is not defined                                           no-undef
+
+  363:22  error  'module' is not defined                                            no-undef
+
+  366:9   error  'console' is not defined                                           no-undef
+
+  368:9   error  'console' is not defined                                           no-undef
+
+  369:9   error  'process' is not defined                                           no-undef
+
+
+
+/var/jenkins_home/workspace/ntegrationTestsQualityGate_MR-34/dataLayer/dataGenerator/excelToJson.ts
+
+   6:24  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+  21:33  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+  27:18  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+  29:20  warning  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+
+
+✖ 232 problems (17 errors, 215 warnings)
+
+
+
+script returned exit code 1
