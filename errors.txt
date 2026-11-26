@@ -1,4 +1,5 @@
-npx --no-install eslint automationLayer/insurance/unitTests/allureNavigationIdentity.test.ts
+tp70707@AVD-HEX-73 MINGW64 ~/OneDrive - Allianz/My Documents/Automation/Athena_Automation/integration-tests (evidence_factory_fix)
+$ npx --no-install eslint automationLayer/insurance/unitTests/allureNavigationIdentity.test.ts
 echo "Exit code: $?"
 
 npx --no-install tsc --noEmit
@@ -7,47 +8,121 @@ echo "Exit code: $?"
 git --no-pager diff HEAD -- package.json package-lock.json
 
 git diff --check
+Exit code: 0
+Exit code: 0
+warning: in the working copy of 'automationLayer/insurance/unitTests/allureNavigationIdentity.test.ts', LF will be replaced by CRLF the next time Git touches it
 
+tp70707@AVD-HEX-73 MINGW64 ~/OneDrive - Allianz/My Documents/Automation/Athena_Automation/integration-tests (evidence_factory_fix)
+$ git add -- automationLayer/insurance/unitTests/allureNavigationIdentity.test.ts
+warning: in the working copy of 'automationLayer/insurance/unitTests/allureNavigationIdentity.test.ts', LF will be replaced by CRLF the next time Git touches it
 
-
-
-git add -- automationLayer/insurance/unitTests/allureNavigationIdentity.test.ts
-
-
-
-git status --short
+tp70707@AVD-HEX-73 MINGW64 ~/OneDrive - Allianz/My Documents/Automation/Athena_Automation/integration-tests (evidence_factory_fix)
+$ git status --short
 
 git --no-pager diff --cached --stat
 
 git --no-pager diff --cached
 
 git diff --cached --check
+M  automationLayer/insurance/unitTests/allureNavigationIdentity.test.ts
+ automationLayer/insurance/unitTests/allureNavigationIdentity.test.ts | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+diff --git a/automationLayer/insurance/unitTests/allureNavigationIdentity.test.ts b/automationLayer/insurance/unitTests/allureNavigationIdentity.test.ts
+index bef5ad2..1bdde57 100644
+--- a/automationLayer/insurance/unitTests/allureNavigationIdentity.test.ts
++++ b/automationLayer/insurance/unitTests/allureNavigationIdentity.test.ts
+@@ -72,7 +72,7 @@ test('Allure keeps repeated navigation titles separate by route while grouping r
+     return { results, discovery: fs.readFileSync(jsonPath, 'utf8') };
+   }
+   const original = run(require.resolve('allure-playwright'), 'original');
+-  const fixed = run(path.join(root, 'reportingLayer/brand-allure-reporter.ts'), 'fixed');
++  const fixed = run(path.join(root, 'reportingLayer/reporters/brand-allure-reporter.ts'), 'fixed');
+   // All 16 logical cases execute in both runs (four have a retry), but the stock reporter
+   // collapses generated page identities across the four specs.
+   expect(original.results).toHaveLength(20);
 
+tp70707@AVD-HEX-73 MINGW64 ~/OneDrive - Allianz/My Documents/Automation/Athena_Automation/integration-tests (evidence_factory_fix)
+$ git commit -m "Fix relocated Allure reporter path in navigation identity unit test"
+✔ Backed up original state in git stash (09e4331)
+✔ Running tasks for staged files...
+✔ Applying modifications from tasks...
+✔ Cleaning up temporary files...
+[evidence_factory_fix 1bf773d] Fix relocated Allure reporter path in navigation identity unit test
+ Committer: Tomar <tp70707@group.net>
+Your name and email address were configured automatically based
+on your username and hostname. Please check that they are accurate.
+You can suppress this message by setting them explicitly:
 
+    git config --global user.name "Your Name"
+    git config --global user.email you@example.com
 
-git commit -m "Fix relocated Allure reporter path in navigation identity unit test"
+After doing this, you may fix the identity used for this commit with:
 
+    git commit --amend --reset-author
 
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
-git status
+tp70707@AVD-HEX-73 MINGW64 ~/OneDrive - Allianz/My Documents/Automation/Athena_Automation/integration-tests (evidence_factory_fix)
+$ git status
 
 git --no-pager log -1 --oneline
 
 git --no-pager show --format= HEAD
 
 git show --format= --check HEAD
+On branch evidence_factory_fix
+Your branch is ahead of 'origin/evidence_factory_fix' by 1 commit.
+  (use "git push" to publish your local commits)
 
+nothing to commit, working tree clean
+1bf773d (HEAD -> evidence_factory_fix) Fix relocated Allure reporter path in navigation identity unit test
+diff --git a/automationLayer/insurance/unitTests/allureNavigationIdentity.test.ts b/automationLayer/insurance/unitTests/allureNavigationIdentity.test.ts
+index bef5ad2..1bdde57 100644
+--- a/automationLayer/insurance/unitTests/allureNavigationIdentity.test.ts
++++ b/automationLayer/insurance/unitTests/allureNavigationIdentity.test.ts
+@@ -72,7 +72,7 @@ test('Allure keeps repeated navigation titles separate by route while grouping r
+     return { results, discovery: fs.readFileSync(jsonPath, 'utf8') };
+   }
+   const original = run(require.resolve('allure-playwright'), 'original');
+-  const fixed = run(path.join(root, 'reportingLayer/brand-allure-reporter.ts'), 'fixed');
++  const fixed = run(path.join(root, 'reportingLayer/reporters/brand-allure-reporter.ts'), 'fixed');
+   // All 16 logical cases execute in both runs (four have a retry), but the stock reporter
+   // collapses generated page identities across the four specs.
+   expect(original.results).toHaveLength(20);
 
+tp70707@AVD-HEX-73 MINGW64 ~/OneDrive - Allianz/My Documents/Automation/Athena_Automation/integration-tests (evidence_factory_fix)
+$ git push origin evidence_factory_fix
+Enumerating objects: 11, done.
+Counting objects: 100% (11/11), done.
+Delta compression using up to 8 threads
+Compressing objects: 100% (6/6), done.
+Writing objects: 100% (6/6), 521 bytes | 260.00 KiB/s, done.
+Total 6 (delta 5), reused 0 (delta 0), pack-reused 0 (from 0)
+remote: warning: core.fsyncObjectFiles is deprecated; use core.fsync instead
+remote: warning: core.fsyncObjectFiles is deprecated; use core.fsync instead
+remote: 
+remote: View merge request for evidence_factory_fix:
+remote:   https://gitlab-lv-dev.athenapaas.com/athenapaas/integration-tests/-/merge_requests/34
+remote: 
+remote: warning: core.fsyncObjectFiles is deprecated; use core.fsync instead
+To https://gitlab-lv-dev.athenapaas.com/athenapaas/integration-tests.git
+   5e642fd..1bf773d  evidence_factory_fix -> evidence_factory_fix
 
-
-git push origin evidence_factory_fix
-
-
-
-git status
+tp70707@AVD-HEX-73 MINGW64 ~/OneDrive - Allianz/My Documents/Automation/Athena_Automation/integration-tests (evidence_factory_fix)
+$ git status
 
 git rev-list --left-right --count origin/evidence_factory_fix...HEAD
 
 git --no-pager log -4 --oneline
+On branch evidence_factory_fix
+Your branch is up to date with 'origin/evidence_factory_fix'.
 
+nothing to commit, working tree clean
+0       0
+1bf773d (HEAD -> evidence_factory_fix, origin/evidence_factory_fix) Fix relocated Allure reporter path in navigation identity unit test
+5e642fd Fix browser metadata compatibility with framework unit tests
+45526ee Fix EvidenceFactory validator ESLint errors
+fc91afa Restore EvidenceFactory integration in brand configuration
 
+tp70707@AVD-HEX-73 MINGW64 ~/OneDrive - Allianz/My Documents/Automation/Athena_Automation/integration-tests (evidence_factory_fix)
+$ 
