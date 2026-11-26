@@ -1,1 +1,31 @@
-npm install --save-dev --save-exact allure-playwright@3.15.0
+PS C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\Athena_Automation\integration-tests> tree evidence-reports /F /A
+Folder PATH listing for volume Windows
+Volume serial number is 6E09-9B97
+C:\USERS\TP70707\ONEDRIVE - ALLIANZ\MY DOCUMENTS\AUTOMATION\ATHENA_AUTOMATION\INTEGRATION-TESTS\EVIDENCE-REPORTS
+\---Britannia-run-2026-11-26T10-31-45-239
+    |   Britannia-report.xlsx
+    |   results.json
+    |   results.xml
+    |   
+    +---allure-results
+    |       62dff88a-34ed-4ff9-9fb7-883daad0cf48-attachment.png
+    |       b60aa608-3070-45a6-9691-19701786bde1-attachment.md
+    |       bce85be8-1408-41ff-bda0-586fa4ae2666-result.json
+    |       
+    +---playwright-report
+    |   |   index.html
+    |   |   
+    |   \---data
+    |           3326814d51401b9d99717696fde912804c62ab2a.dat
+    |           3d137209fed5f74b3a88dfdd4734237bb77af000.png
+    |           85dc9589bd7c17d3168ec53392500c694e436517.dat
+    |           b1b07c26c2411fbfa9fb5ed66878f2f702db89c3.md
+    |           
+    \---test-results
+        |   .last-run.json
+        |   
+        \---Regression-Britannia_Hexa--3877c-i-Premier-Annual-Bri-Annual-chromium
+                error-context.md
+                test-failed-1.png
+                
+PS C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\Athena_Automation\integration-tests> 
