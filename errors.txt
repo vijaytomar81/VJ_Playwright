@@ -1,38 +1,74 @@
-tp70707@AVD-HEX-73 MINGW64 ~/OneDrive - Allianz/My Documents/Automation/Athena_Automation/integration-tests (evidence_factory_fix)
-$ git --no-pager diff -- configLayer/execution/validateReportPaths.cjs
 
-git diff --check -- configLayer/execution/validateReportPaths.cjs
+node --check configLayer/execution/validateReportPaths.cjs
 
-wc -l configLayer/execution/validateReportPaths.cjs
-diff --git a/configLayer/execution/validateReportPaths.cjs b/configLayer/execution/validateReportPaths.cjs
-index 857d34c..622ab8a 100644
---- a/configLayer/execution/validateReportPaths.cjs
-+++ b/configLayer/execution/validateReportPaths.cjs
-@@ -212,7 +212,8 @@ function resolveReportPath(key, value, repositoryRoot) {
-         if (
-             !component ||
-             component === '.' ||
--            /[<>:"|?*\x00-\x1f]/.test(component) ||
-+            /[<>:"|?*]/.test(component) ||
-+            Array.from(component).some((character) => character.charCodeAt(0) < 32) ||
-             /[. ]$/.test(component) ||
-             /^(CON|PRN|AUX|NUL|COM[1-9¹²³]|LPT[1-9¹²³])(?:\.|$)/i.test(component)
-         ) {
-@@ -253,6 +254,7 @@ function resolveReportPath(key, value, repositoryRoot) {
-         throw new Error(
-             `Invalid report path configuration: '${key}' cannot be ` +
-             `resolved safely: ${value}\n${error.message}`,
-+            { cause: error },
-         );
-     }
- 
-373 configLayer/execution/validateReportPaths.cjs
+node configLayer/execution/validateReportPaths.cjs
 
-tp70707@AVD-HEX-73 MINGW64 ~/OneDrive - Allianz/My Documents/Automation/Athena_Automation/integration-tests (evidence_factory_fix)
-$ npx --no-install eslint configLayer/execution/validateReportPaths.cjs
+echo "Validator exit code: $?"
 
-echo "ESLint exit code: $?"
-ESLint exit code: 0
+========
 
-tp70707@AVD-HEX-73 MINGW64 ~/OneDrive - Allianz/My Documents/Automation/Athena_Automation/integration-tests (evidence_factory_fix)
-$ 
+
+node - <<'NODE'
+const assert = require('node:assert/strict');
+const reportPaths = require('./configLayer/execution/reportPaths.json');
+const { validateReportPaths } = require('./configLayer/execution/validateReportPaths.cjs');
+
+for (let code = 0; code < 32; code++) {
+    assert.throws(
+        () => validateReportPaths({
+            ...reportPaths,
+            evidenceFactoryOutput: 'evidence' + String.fromCharCode(code) + '-reports',
+        }),
+        /unsupported path component/,
+        'Control character was not rejected: ' + code,
+    );
+}
+
+console.log('PASS: All 32 ASCII control characters rejected.');
+NODE
+
+
+=====
+
+node - <<'NODE'
+const assert = require('node:assert/strict');
+const reportPaths = require('./configLayer/execution/reportPaths.json');
+const { validateReportPaths } = require('./configLayer/execution/validateReportPaths.cjs');
+
+assert.throws(
+    () => validateReportPaths({
+        ...reportPaths,
+        testResults: 'automationLayer',
+    }),
+    /approved native report location/,
+);
+
+console.log('PASS: Unsafe native report location rejected.');
+
+assert.throws(
+    () => validateReportPaths({
+        ...reportPaths,
+        evidenceFactoryOutput: 'test-results/evidence',
+    }),
+    /conflicts with/,
+);
+
+console.log('PASS: Native report overlap rejected.');
+
+assert.throws(
+    () => validateReportPaths({
+        ...reportPaths,
+        evidenceFactoryOutput: '../evidence-reports',
+    }),
+    /parent directory traversal/,
+);
+
+console.log('PASS: Parent directory traversal rejected.');
+
+validateReportPaths();
+
+console.log('PASS: Original report configuration accepted.');
+NODE
+
+=========
+
