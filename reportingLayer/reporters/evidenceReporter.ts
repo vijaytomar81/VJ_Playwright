@@ -3,8 +3,6 @@ import { resolve } from 'node:path';
 
 import type {
     Reporter,
-    TestCase,
-    TestResult,
 } from '@playwright/test/reporter';
 
 import reportPaths from '../../configLayer/execution/reportPaths.json';
@@ -14,7 +12,7 @@ export default class EvidenceReporter implements Reporter {
     private readonly invocationStartedAt = Date.now();
     private executionStarted = false;
 
-    onTestBegin(_test: TestCase, _result: TestResult): void {
+    onTestBegin(): void {
         this.executionStarted = true;
     }
 
