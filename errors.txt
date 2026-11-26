@@ -1,7 +1,11 @@
-git --no-pager diff HEAD^ HEAD -- playwright.brands.config.ts
+tp70707@AVD-HEX-73 MINGW64 ~/OneDrive - Allianz/My Documents/Automation/Athena_Automation/integration-tests (evidence_factory_fix)
+$ git --no-pager diff HEAD^ HEAD -- playwright.brands.config.ts
 
 grep -nE 'validateReportPaths|reportPaths|evidenceReporter|brand-allure-reporter|fullPage' playwright.brands.config.ts
+125:    ['./reportingLayer/brand-allure-reporter.ts', { resultsDir: 'allure-results' }],
 
+tp70707@AVD-HEX-73 MINGW64 ~/OneDrive - Allianz/My Documents/Automation/Athena_Automation/integration-tests (evidence_factory_fix)
+$ npx --no-install tsc --noEmit
 
-npx --no-install tsc --noEmit
-
+tp70707@AVD-HEX-73 MINGW64 ~/OneDrive - Allianz/My Documents/Automation/Athena_Automation/integration-tests (evidence_factory_fix)
+$ 
