@@ -1,40 +1,33 @@
-tp70707@AVD-HEX-73 MINGW64 ~/OneDrive - Allianz/My Documents/Automation/Athena_Automation/integration-tests (evidence_factory_fix)
-$ git --no-pager diff -- reportingLayer/reporters/evidenceReporter.ts
-diff --git a/reportingLayer/reporters/evidenceReporter.ts b/reportingLayer/reporters/evidenceReporter.ts
-index a8386c0..b4307ef 100644
---- a/reportingLayer/reporters/evidenceReporter.ts
-+++ b/reportingLayer/reporters/evidenceReporter.ts
-@@ -3,8 +3,6 @@ import { resolve } from 'node:path';
- 
- import type {
-     Reporter,
--    TestCase,
--    TestResult,
- } from '@playwright/test/reporter';
- 
- import reportPaths from '../../configLayer/execution/reportPaths.json';
-@@ -14,7 +12,7 @@ export default class EvidenceReporter implements Reporter {
-     private readonly invocationStartedAt = Date.now();
-     private executionStarted = false;
- 
--    onTestBegin(_test: TestCase, _result: TestResult): void {
-+    onTestBegin(): void {
-         this.executionStarted = true;
-     }
- 
+git add reportingLayer/reporters/evidenceReporter.ts
 
-tp70707@AVD-HEX-73 MINGW64 ~/OneDrive - Allianz/My Documents/Automation/Athena_Automation/integration-tests (evidence_factory_fix)
-$ git diff --check -- reportingLayer/reporters/evidenceReporter.ts
+git --no-pager diff -- reportingLayer/reporters/evidenceReporter.ts
 
-tp70707@AVD-HEX-73 MINGW64 ~/OneDrive - Allianz/My Documents/Automation/Athena_Automation/integration-tests (evidence_factory_fix)
-$ npx --no-install eslint reportingLayer/reporters/evidenceReporter.ts
+git status --short
 
-tp70707@AVD-HEX-73 MINGW64 ~/OneDrive - Allianz/My Documents/Automation/Athena_Automation/integration-tests (evidence_factory_fix)
-$ npx --no-install tsc --noEmit
 
-tp70707@AVD-HEX-73 MINGW64 ~/OneDrive - Allianz/My Documents/Automation/Athena_Automation/integration-tests (evidence_factory_fix)
-$ wc -l reportingLayer/reporters/evidenceReporter.ts
-58 reportingLayer/reporters/evidenceReporter.ts
 
-tp70707@AVD-HEX-73 MINGW64 ~/OneDrive - Allianz/My Documents/Automation/Athena_Automation/integration-tests (evidence_factory_fix)
-$ 
+git status
+
+git --no-pager diff --cached --stat
+
+git --no-pager diff --cached --name-status
+
+git diff --cached --check
+
+git --no-pager diff --stat
+
+git stash list
+
+git --no-pager log --oneline origin/evidence_factory_fix..HEAD
+
+
+
+git --no-pager diff --cached -- .gitignore
+
+git --no-pager diff --cached -- .vscode/settings.json
+
+git --no-pager diff --cached -- package.json
+
+git --no-pager diff --cached -- package-lock.json
+
+
