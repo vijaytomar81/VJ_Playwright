@@ -1,76 +1,49 @@
 tp70707@AVD-HEX-73 MINGW64 ~/OneDrive - Allianz/My Documents/Automation/Athena_Automation/integration-tests (evidence_factory_fix)
-$ git status
-git --no-pager diff --cached --stat
-git --no-pager diff --stat
-git stash list
-git --no-pager log -3 --oneline
-On branch evidence_factory_fix
-Your branch is ahead of 'origin/evidence_factory_fix' by 2 commits.
-  (use "git push" to publish your local commits)
+$ cat .gitignore
+node_modules/
+# Excel temporary lock files.
+~$*.xlsx
+/test-results/
+/evidence-reports/
+/playwright-report/
+/allure-results/
+/allure-report/
+/.allure-jre/
+/results.xml
+/blob-report/
+/playwright/.cache/
+/playwright/.auth/
+auth.json
+configLayer/environments/**/.env.local
+configLayer/environments/**/.env.local.*
+!configLayer/environments/**/.env.local.example
+custom-test-reports/
+/common-job/
+# Workbook-generated Ferry test data.
+/generated/
+.vscode/*
+!.vscode/settings.json
+# Agent portal tokens written at run time (old framework).
+automationLayer/agentPortalAuth/auth.json
+automationLayer/agentPortalAuth/bearerToken.json
+.idea
+.run
+automationLayer/athena/agentPortalAuth/
 
-Changes to be committed:
-  (use "git restore --staged <file>..." to unstage)
-        modified:   .gitignore
-        modified:   .vscode/settings.json
-        modified:   JenkinsfileCommonTests
-        modified:   JenkinsfileTestsWithReport
-        modified:   automationLayer/common/basePage.ts
-        new file:   automationLayer/common/executionEnvironmentMetadata.ts
-        modified:   configLayer/execution/commonJob/reporter.cjs
-        modified:   configLayer/execution/commonJob/reporter.test.cjs
-        modified:   configLayer/execution/commonJob/reports.test.cjs
-        modified:   configLayer/execution/commonJob/runner.cjs
-        new file:   configLayer/execution/reportPaths.json
-        new file:   configLayer/execution/validateReportPaths.cjs
-        modified:   package-lock.json
-        modified:   package.json
-        modified:   playwright.brands.config.ts
-        modified:   playwright.config.base.ts
-        new file:   reportingLayer/README.md
-        new file:   reportingLayer/evidenceArtifacts.ts
-        new file:   reportingLayer/evidenceFactory.ts
-        new file:   reportingLayer/excel/excelGenerator.ts
-        new file:   reportingLayer/excel/excelStyleConfig.ts
-        new file:   reportingLayer/excel/excelStyles.ts
-        new file:   reportingLayer/excel/missingFields.ts
-        renamed:    reportingLayer/brand-allure-reporter.ts -> reportingLayer/reporters/brand-allure-reporter.ts
-        new file:   reportingLayer/reporters/evidenceReporter.ts
-        new file:   reportingLayer/schema/evidence-schema.ts
-        new file:   reportingLayer/schema/summary-schema.ts
-        new file:   results.json
-
- .gitignore                                         |    1 +
- .vscode/settings.json                              |    3 +
- JenkinsfileCommonTests                             |   68 +-
- JenkinsfileTestsWithReport                         |  110 +-
- automationLayer/common/basePage.ts                 |    6 +-
- .../common/executionEnvironmentMetadata.ts         |  163 ++
- configLayer/execution/commonJob/reporter.cjs       |   14 +-
- configLayer/execution/commonJob/reporter.test.cjs  |   15 +-
- configLayer/execution/commonJob/reports.test.cjs   |   24 +-
- configLayer/execution/commonJob/runner.cjs         |   51 +-
- configLayer/execution/reportPaths.json             |   10 +
- configLayer/execution/validateReportPaths.cjs      |  371 +++
- package-lock.json                                  | 2556 +++++++++++++++++++-
- package.json                                       |    4 +-
- playwright.brands.config.ts                        |   14 +-
- playwright.config.base.ts                          |   22 +-
- reportingLayer/README.md                           |  411 ++++
- reportingLayer/evidenceArtifacts.ts                |  360 +++
- reportingLayer/evidenceFactory.ts                  |  396 +++
- reportingLayer/excel/excelGenerator.ts             |  365 +++
- reportingLayer/excel/excelStyleConfig.ts           |  170 ++
- reportingLayer/excel/excelStyles.ts                |  553 +++++
- reportingLayer/excel/missingFields.ts              |   70 +
- .../{ => reporters}/brand-allure-reporter.ts       |    0
- reportingLayer/reporters/evidenceReporter.ts       |   60 +
- reportingLayer/schema/evidence-schema.ts           |   78 +
- reportingLayer/schema/summary-schema.ts            |  110 +
- results.json                                       |  286 +++
- 28 files changed, 6135 insertions(+), 156 deletions(-)
-9d2abbc (HEAD -> evidence_factory_fix) Merge branch 'evidence_factory_revert' into 'develop'
-61b1e1b (origin/evidence_factory_revert, evidence_factory_revert) Revert "Merge branch 'evidence_factory' into 'develop'"
-c116e6f (origin/evidence_factory_fix) Merge branch 'feature/FER-7997' into 'develop'
+tp70707@AVD-HEX-73 MINGW64 ~/OneDrive - Allianz/My Documents/Automation/Athena_Automation/integration-tests (evidence_factory_fix)
+$ git --no-pager diff --cached -- .gitignore
+diff --git a/.gitignore b/.gitignore
+index 357db2f..050aba6 100644
+--- a/.gitignore
++++ b/.gitignore
+@@ -2,6 +2,7 @@ node_modules/
+ # Excel temporary lock files.
+ ~$*.xlsx
+ /test-results/
++/evidence-reports/
+ /playwright-report/
+ /allure-results/
+ /allure-report/
 
 tp70707@AVD-HEX-73 MINGW64 ~/OneDrive - Allianz/My Documents/Automation/Athena_Automation/integration-tests (evidence_factory_fix)
 $ 
