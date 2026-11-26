@@ -1,7 +1,21 @@
-git --no-pager diff -- reportingLayer/evidenceArtifacts.ts
+tp70707@AVD-HEX-73 MINGW64 ~/OneDrive - Allianz/My Documents/Automation/Athena_Automation/integration-tests (evidence_factory_fix)
+$ git --no-pager diff -- reportingLayer/evidenceArtifacts.ts
 
-git diff --check -- reportingLayer/evidenceArtifacts.ts
+tp70707@AVD-HEX-73 MINGW64 ~/OneDrive - Allianz/My Documents/Automation/Athena_Automation/integration-tests (evidence_factory_fix)
+$ git diff --check -- reportingLayer/evidenceArtifacts.ts
 
-npx --no-install eslint reportingLayer/evidenceArtifacts.ts
+tp70707@AVD-HEX-73 MINGW64 ~/OneDrive - Allianz/My Documents/Automation/Athena_Automation/integration-tests (evidence_factory_fix)
+$ npx --no-install eslint reportingLayer/evidenceArtifacts.ts
 
-wc -l reportingLayer/evidenceArtifacts.ts
+C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\Athena_Automation\integration-tests\reportingLayer\evidenceArtifacts.ts
+  9:33  error  A `require()` style import is forbidden  @typescript-eslint/no-require-imports
+
+✖ 1 problem (1 error, 0 warnings)
+
+
+tp70707@AVD-HEX-73 MINGW64 ~/OneDrive - Allianz/My Documents/Automation/Athena_Automation/integration-tests (evidence_factory_fix)
+$ wc -l reportingLayer/evidenceArtifacts.ts
+360 reportingLayer/evidenceArtifacts.ts
+
+tp70707@AVD-HEX-73 MINGW64 ~/OneDrive - Allianz/My Documents/Automation/Athena_Automation/integration-tests (evidence_factory_fix)
+$ 
