@@ -1,12 +1,37 @@
-printf '\n' >> playwright.config.base.ts
+tp70707@AVD-HEX-73 MINGW64 ~/OneDrive - Allianz/My Documents/Automation/Athena_Automation/integration-tests (evidence_factory_fix)
+$ printf '\n' >> playwright.config.base.ts
 
-git --no-pager diff -- playwright.config.base.ts
-git diff --check -- playwright.config.base.ts
-wc -l playwright.config.base.ts
+tp70707@AVD-HEX-73 MINGW64 ~/OneDrive - Allianz/My Documents/Automation/Athena_Automation/integration-tests (evidence_factory_fix)
+$ git --no-pager diff -- playwright.config.base.ts
+warning: in the working copy of 'playwright.config.base.ts', LF will be replaced by CRLF the next time Git touches it
+diff --git a/playwright.config.base.ts b/playwright.config.base.ts
+index 18ec83a..be0c199 100644
+--- a/playwright.config.base.ts
++++ b/playwright.config.base.ts
+@@ -9,7 +9,7 @@ import {
+   NAVIGATION_TIMEOUT,
+ } from './configLayer/execution/timeouts';
+ 
+-const { validateReportPaths } = require('./configLayer/execution/validateReportPaths.cjs');
++import { validateReportPaths } from './configLayer/execution/validateReportPaths.cjs';
+ 
+ /**
+  * @see https://playwright.dev/docs/test-configuration
+@@ -20,7 +20,6 @@ export function createConfig(project: string | undefined) {
+   const { testDir } = getProjectConfig(project);
+   loadEnvironment(project);
+ 
+-  const env = process.env.ENV ?? 'dev';
+   const authMode = process.env.AGENT_PORTAL_AUTH;
+   const retries = parseRetries();
+ 
 
+tp70707@AVD-HEX-73 MINGW64 ~/OneDrive - Allianz/My Documents/Automation/Athena_Automation/integration-tests (evidence_factory_fix)
+$ git diff --check -- playwright.config.base.ts
+warning: in the working copy of 'playwright.config.base.ts', LF will be replaced by CRLF the next time Git touches it
 
+tp70707@AVD-HEX-73 MINGW64 ~/OneDrive - Allianz/My Documents/Automation/Athena_Automation/integration-tests (evidence_factory_fix)
+$ wc -l playwright.config.base.ts
+116 playwright.config.base.ts
 
-git add playwright.config.base.ts
-git --no-pager diff -- playwright.config.base.ts
-git status --short
-
+tp70707@AVD-HEX-73 MINGW64 ~/OneDrive - Allianz/My Documents/Automation/Athena_Automation/integration-tests (evidence_factory_fix)
