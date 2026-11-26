@@ -1,5 +1,79 @@
-cat reportingLayer/reporters/evidenceReporter.ts
+tp70707@AVD-HEX-73 MINGW64 ~/OneDrive - Allianz/My Documents/Automation/Athena_Automation/integration-tests (evidence_factory_fix)
+$ cat reportingLayer/reporters/evidenceReporter.ts
+import { existsSync, statSync } from 'node:fs';
+import { resolve } from 'node:path';
 
-npx --no-install eslint reportingLayer/reporters/evidenceReporter.ts
+import type {
+    Reporter,
+    TestCase,
+    TestResult,
+} from '@playwright/test/reporter';
 
-wc -l reportingLayer/reporters/evidenceReporter.ts
+import reportPaths from '../../configLayer/execution/reportPaths.json';
+import { generateEvidenceFactory } from '../evidenceFactory';
+
+export default class EvidenceReporter implements Reporter {
+    private readonly invocationStartedAt = Date.now();
+    private executionStarted = false;
+
+    onTestBegin(_test: TestCase, _result: TestResult): void {
+        this.executionStarted = true;
+    }
+
+    async onExit(): Promise<void> {
+        if (process.env.EVIDENCEFACTORY_AUTO_GENERATE === 'false') {
+            return;
+        }
+
+        if (!this.executionStarted) {
+            return;
+        }
+
+        try {
+            const jsonFile = resolve(reportPaths.json);
+
+            if (!existsSync(jsonFile)) {
+                console.warn(
+                    'EvidenceFactory: automatic generation skipped. Native JSON report is missing.',
+                );
+                return;
+            }
+
+            const jsonStats = statSync(jsonFile);
+
+            if (
+                !jsonStats.isFile() ||
+                jsonStats.mtimeMs < this.invocationStartedAt
+            ) {
+                console.warn(
+                    'EvidenceFactory: automatic generation skipped. Native JSON report is invalid or stale.',
+                );
+                return;
+            }
+
+            await generateEvidenceFactory(this.invocationStartedAt);
+        } catch (error) {
+            console.error(
+                'EvidenceFactory: automatic report generation failed.',
+                error,
+            );
+        }
+    }
+}
+
+tp70707@AVD-HEX-73 MINGW64 ~/OneDrive - Allianz/My Documents/Automation/Athena_Automation/integration-tests (evidence_factory_fix)
+$ npx --no-install eslint reportingLayer/reporters/evidenceReporter.ts
+
+C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\Athena_Automation\integration-tests\reportingLayer\reporters\evidenceReporter.ts
+  17:17  warning  '_test' is defined but never used    @typescript-eslint/no-unused-vars
+  17:34  warning  '_result' is defined but never used  @typescript-eslint/no-unused-vars
+
+✖ 2 problems (0 errors, 2 warnings)
+
+
+tp70707@AVD-HEX-73 MINGW64 ~/OneDrive - Allianz/My Documents/Automation/Athena_Automation/integration-tests (evidence_factory_fix)
+$ wc -l reportingLayer/reporters/evidenceReporter.ts
+60 reportingLayer/reporters/evidenceReporter.ts
+
+tp70707@AVD-HEX-73 MINGW64 ~/OneDrive - Allianz/My Documents/Automation/Athena_Automation/integration-tests (evidence_factory_fix)
+$ 
