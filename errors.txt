@@ -1,10 +1,124 @@
-cat automationLayer/insurance/unitTests/allureNavigationIdentity.test.ts
+tp70707@AVD-HEX-73 MINGW64 ~/OneDrive - Allianz/My Documents/Automation/Athena_Automation/integration-tests (evidence_factory_fix)
+$ cat automationLayer/insurance/unitTests/allureNavigationIdentity.test.ts
+import { test, expect } from '@playwright/test';
+import { spawnSync } from 'node:child_process';
+import fs from 'node:fs';
+import path from 'node:path';
 
-git ls-files '*brand-allure-reporter*'
+type AllureResult = {
+  name: string;
+  fullName: string;
+  historyId: string;
+  testCaseId: string;
+  status: string;
+};
+
+test('Allure keeps repeated navigation titles separate by route while grouping real retries', () => {
+  test.setTimeout(90_000);
+  const root = path.resolve(__dirname, '../../..');
+  const dir = test.info().outputPath('allure-navigation');
+  const helper = path.join(
+    dir,
+    'automationLayer/insurance/lv/automatedNavigation/reachEveryPage.ts'
+  );
+  fs.mkdirSync(path.dirname(helper), { recursive: true });
+  fs.writeFileSync(
+    helper,
+    `
+    const { test, expect } = require(${JSON.stringify(require.resolve('@playwright/test'))});
+    exports.defineTargets = () => {
+      test('02 Quote', async () => {});
+      test.skip('03 Conditional page', async () => {});
+      test('04 Retry', async ({}, info) => { expect(info.retry).toBe(1); });
+    };
+  `
+  );
+  for (const provider of ['CTM', 'Confused', 'GoCompare', 'MSM']) {
+    fs.writeFileSync(
+      path.join(dir, `${provider}.spec.js`),
+      `
+      const { test } = require(${JSON.stringify(require.resolve('@playwright/test'))});
+      test('01 Test harness', async () => {});
+      require(${JSON.stringify(helper)}).defineTargets();
+    `
+    );
+  }
+  function run(reporter: string, name: string) {
+    const resultsDir = path.join(dir, name);
+    const config = path.join(dir, `${name}.config.cjs`);
+    const jsonPath = path.join(dir, `${name}.json`);
+    fs.writeFileSync(
+      config,
+      `module.exports = {
+      testDir: ${JSON.stringify(dir)}, testMatch: '*.spec.js', workers: 1, retries: 1,
+      outputDir: ${JSON.stringify(path.join(dir, 'artifacts'))},
+      reporter: [[${JSON.stringify(reporter)}, { resultsDir: ${JSON.stringify(resultsDir)} }],
+        ['json', { outputFile: ${JSON.stringify(jsonPath)} }]],
+    };`
+    );
+    const result = spawnSync(
+      process.execPath,
+      [require.resolve('@playwright/test/cli'), 'test', '-c', config],
+      {
+        cwd: root,
+        encoding: 'utf8',
+        timeout: 35_000,
+        env: { ...process.env, ALLURE_TESTPLAN_PATH: '', PLAYWRIGHT_JSON_OUTPUT_FILE: jsonPath },
+      }
+    );
+    expect(result.status, result.stdout + result.stderr).toBe(0);
+    const results = fs
+      .readdirSync(resultsDir)
+      .filter((f) => f.endsWith('-result.json'))
+      .map((f) => JSON.parse(fs.readFileSync(path.join(resultsDir, f), 'utf8')) as AllureResult);
+    return { results, discovery: fs.readFileSync(jsonPath, 'utf8') };
+  }
+  const original = run(require.resolve('allure-playwright'), 'original');
+  const fixed = run(path.join(root, 'reportingLayer/brand-allure-reporter.ts'), 'fixed');
+  // All 16 logical cases execute in both runs (four have a retry), but the stock reporter
+  // collapses generated page identities across the four specs.
+  expect(original.results).toHaveLength(20);
+  expect(new Set(original.results.map((r) => r.historyId)).size).toBe(7);
+  expect(fixed.results).toHaveLength(20);
+  expect(new Set(fixed.results.map((r) => r.historyId)).size).toBe(16);
+  expect(new Set(fixed.results.map((r) => r.fullName)).size).toBe(16);
+  expect(new Set(fixed.results.map((r) => r.testCaseId)).size).toBe(16);
+  const retries = fixed.results.filter((r) => r.name === '04 Retry');
+  for (const historyId of new Set(retries.map((r) => r.historyId))) {
+    expect(
+      retries
+        .filter((r) => r.historyId === historyId)
+        .map((r) => r.status)
+        .sort()
+    ).toEqual(['failed', 'passed']);
+  }
+  const quotes = fixed.results.filter((r) => r.name === '02 Quote');
+  expect(quotes.every((r) => /(?:CTM|Confused|GoCompare|MSM)\.spec\.js/.test(r.fullName))).toBe(
+    true
+  );
+  // JSON/other reporters still see the original helper source; only Allure is adapted.
+  expect(fixed.discovery.replaceAll('\\\\', '/')).toContain(
+    'automatedNavigation/reachEveryPage.ts'
+  );
+});
+
+tp70707@AVD-HEX-73 MINGW64 ~/OneDrive - Allianz/My Documents/Automation/Athena_Automation/integration-tests (evidence_factory_fix)
+$ git ls-files '*brand-allure-reporter*'
 
 git grep -n "brand-allure-reporter"
 
 git status --short
 
 git --no-pager log -1 --oneline
+reportingLayer/reporters/brand-allure-reporter.ts
+automationLayer/insurance/unitTests/allureNavigationIdentity.test.ts:75:  const fixed = run(path.join(root, 'reportingLayer/brand-allure-reporter.ts'), 'fixed');
+configLayer/execution/commonJob/README.md:21:Insurance execution selects `reportingLayer/brand-allure-reporter.ts`, matching the
+configLayer/execution/commonJob/runner.cjs:146:    p.framework === 'insurance' ? './reportingLayer/reporters/brand-allure-reporter.ts' : 'allure-playwright';
+configLayer/execution/commonJob/runner.test.cjs:128:  assert.ok(argsFor(p, false).some((arg) => arg.includes('brand-allure-reporter.ts')));
+docs/Reporting.md:101:The new framework uses `reportingLayer/brand-allure-reporter.ts` in both the brand config
+playwright.brands.config.ts:132:      './reportingLayer/reporters/brand-allure-reporter.ts',
+reportingLayer/README.md:32:| `reportingLayer/reporters/brand-allure-reporter.ts` | Existing brand-specific Allure reporter. |
+5e642fd (HEAD -> evidence_factory_fix, origin/evidence_factory_fix) Fix browser metadata compatibility with framework unit tests
 
+tp70707@AVD-HEX-73 MINGW64 ~/OneDrive - Allianz/My Documents/Automation/Athena_Automation/integration-tests (evidence_factory_fix)
+$ 
