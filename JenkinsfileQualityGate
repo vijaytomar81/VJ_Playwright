@@ -1,0 +1,54 @@
+pipeline {
+    agent any
+
+    tools {
+        nodejs 'NodeJS_22'
+    }
+
+    options {
+        buildDiscarder(logRotator(daysToKeepStr: '60', numToKeepStr: '20'))
+    }
+
+    stages {
+
+        stage('Install dependencies') {
+            steps {
+                sh 'npm ci'
+            }
+        }
+
+        stage('Typecheck') {
+            steps {
+                sh 'npm run typecheck'
+            }
+        }
+
+        // format:check remains excluded until the existing formatting backlog is cleared.
+        stage('Lint') {
+            steps {
+                sh 'npm run lint'
+            }
+        }
+
+        // Import rules ESLint cannot see: layers, relative paths, circular imports.
+        stage('Dependency rules') {
+            steps {
+                sh 'npm run deps:check'
+            }
+        }
+
+        stage('Framework typecheck') {
+            steps {
+                sh 'npm run typecheck:insurance'
+            }
+        }
+
+        // Browser-free: no Playwright browser installation or environment credentials needed.
+        stage('Framework unit tests') {
+            steps {
+                sh 'npm run test:unit'
+            }
+        }
+
+    }
+}
