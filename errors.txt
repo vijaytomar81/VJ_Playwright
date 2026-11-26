@@ -1,62 +1,16 @@
-tp70707@AVD-HEX-73 MINGW64 ~/OneDrive - Allianz/My Documents/Automation/Athena_Automation/integration-tests (evidence_factory_fix)
-$ npm run test:unit -- portalCompatibility.test.ts -g "Trustpilot feedback is dismissed" --list
-
-> ferryplaywright@1.0.0 test:unit
-> playwright test -c automationLayer/insurance/unitTests/playwright.config.ts portalCompatibility.test.ts -g Trustpilot feedback is dismissed --list
-
-Listing tests:
-  [framework-unit] › portalCompatibility.test.ts:79:5 › Trustpilot feedback is dismissed through its own modal close control
-Total: 1 test in 1 file
-
-tp70707@AVD-HEX-73 MINGW64 ~/OneDrive - Allianz/My Documents/Automation/Athena_Automation/integration-tests (evidence_factory_fix)
-$ npm run test:unit -- portalCompatibility.test.ts -g "Trustpilot feedback is dismissed"
-
+npx --no-install eslint automationLayer/common/executionEnvironmentMetadata.ts
 echo "Exit code: $?"
 
-> ferryplaywright@1.0.0 test:unit
-> playwright test -c automationLayer/insurance/unitTests/playwright.config.ts portalCompatibility.test.ts -g Trustpilot feedback is dismissed
+
+npx --no-install tsc --noEmit
+echo "Exit code: $?"
 
 
-Running 1 test using 1 worker
+git diff --check
 
-  ✓  1 [framework-unit] › automationLayer\insurance\unitTests\portalCompatibility.test.ts:79:5 › Trustpilot feedback is dismissed through its own modal close control (16ms)
+git status --short
 
-  1 passed (6.9s)
-Exit code: 0
+git --no-pager diff --stat
 
-tp70707@AVD-HEX-73 MINGW64 ~/OneDrive - Allianz/My Documents/Automation/Athena_Automation/integration-tests (evidence_factory_fix)
-$ git --no-pager diff -- .vscode/settings.json
-diff --git a/.vscode/settings.json b/.vscode/settings.json
-index 1f02804..ea7e41c 100644
---- a/.vscode/settings.json
-+++ b/.vscode/settings.json
-@@ -2,15 +2,12 @@
-   "playwright.env": {
-     // Website environment: test, dev, uat or nft (availability depends on the brand).
-     "ENV": "test",
--
-     // Agent login: allianz (Active Directory), sapiens (Microsoft), sapiensKeycloak (Keycloak).
-     // Proposed Insurance framework: skip uses the brand default; login happens only when needed.
-     // Current Athena framework: skip disables the startup login.
-     "AGENT_PORTAL_AUTH": "skip",
--
-     // Proposed Insurance framework: maximum tests running at once (in parallel).
-     "WORKERS": "4",
--
-     // Proposed Insurance framework: true pauses at test end for manual inspection; Resume or close the browser to finish.
-     "KEEP_BROWSER_OPEN": "false"
-   },
-@@ -18,5 +15,8 @@
-   "editor.defaultFormatter": "esbenp.prettier-vscode",
-   "editor.codeActionsOnSave": {
-     "source.fixAll.eslint": "explicit"
-+  },
-+  "[jsonc]": {
-+    "editor.defaultFormatter": "vscode.json-language-features"
-   }
--}
-+}
-\ No newline at end of file
+git --no-pager diff -- package.json package-lock.json
 
-tp70707@AVD-HEX-73 MINGW64 ~/OneDrive - Allianz/My Documents/Automation/Athena_Automation/integration-tests (evidence_factory_fix)
-$ 
