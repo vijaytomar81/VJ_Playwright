@@ -1,39 +1,12 @@
-tp70707@AVD-HEX-73 MINGW64 ~/OneDrive - Allianz/My Documents/Automation/Athena_Automation/integration-tests (evidence_factory_fix)
-$ git --no-pager diff -- playwright.config.base.ts
-diff --git a/playwright.config.base.ts b/playwright.config.base.ts
-index 18ec83a..91dbe2c 100644
---- a/playwright.config.base.ts
-+++ b/playwright.config.base.ts
-@@ -9,7 +9,7 @@ import {
-   NAVIGATION_TIMEOUT,
- } from './configLayer/execution/timeouts';
- 
--const { validateReportPaths } = require('./configLayer/execution/validateReportPaths.cjs');
-+import { validateReportPaths } from './configLayer/execution/validateReportPaths.cjs';
- 
- /**
-  * @see https://playwright.dev/docs/test-configuration
-@@ -20,7 +20,6 @@ export function createConfig(project: string | undefined) {
-   const { testDir } = getProjectConfig(project);
-   loadEnvironment(project);
- 
--  const env = process.env.ENV ?? 'dev';
-   const authMode = process.env.AGENT_PORTAL_AUTH;
-   const retries = parseRetries();
- 
-@@ -114,4 +113,4 @@ export function createConfig(project: string | undefined) {
-     //   reuseExistingServer: !process.env.CI,
-     // },
-   });
--}
-+}
-\ No newline at end of file
+printf '\n' >> playwright.config.base.ts
 
-tp70707@AVD-HEX-73 MINGW64 ~/OneDrive - Allianz/My Documents/Automation/Athena_Automation/integration-tests (evidence_factory_fix)
-$ git diff --check -- playwright.config.base.ts
+git --no-pager diff -- playwright.config.base.ts
+git diff --check -- playwright.config.base.ts
+wc -l playwright.config.base.ts
 
-tp70707@AVD-HEX-73 MINGW64 ~/OneDrive - Allianz/My Documents/Automation/Athena_Automation/integration-tests (evidence_factory_fix)
-$ wc -l playwright.config.base.ts
-115 playwright.config.base.ts
 
-tp70707@AVD-HEX-73 MINGW64 ~/OneDrive - Allianz/My Documents/Automation/Athena_Automation/integration-tests (evidence_factory_fix)
+
+git add playwright.config.base.ts
+git --no-pager diff -- playwright.config.base.ts
+git status --short
+
