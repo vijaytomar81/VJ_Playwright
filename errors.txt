@@ -1,8 +1,35 @@
-git push origin evidence_factory_fix
+tp70707@AVD-HEX-73 MINGW64 ~/OneDrive - Allianz/My Documents/Automation/Athena_Automation/integration-tests (evidence_factory_fix)
+$ git push origin evidence_factory_fix
+Enumerating objects: 11, done.
+Counting objects: 100% (11/11), done.
+Delta compression using up to 8 threads
+Compressing objects: 100% (6/6), done.
+Writing objects: 100% (6/6), 664 bytes | 221.00 KiB/s, done.
+Total 6 (delta 4), reused 0 (delta 0), pack-reused 0 (from 0)
+remote: warning: core.fsyncObjectFiles is deprecated; use core.fsync instead
+remote: warning: core.fsyncObjectFiles is deprecated; use core.fsync instead
+remote: 
+remote: View merge request for evidence_factory_fix:
+remote:   https://gitlab-lv-dev.athenapaas.com/athenapaas/integration-tests/-/merge_requests/34
+remote: 
+remote: warning: core.fsyncObjectFiles is deprecated; use core.fsync instead
+To https://gitlab-lv-dev.athenapaas.com/athenapaas/integration-tests.git
+   fc91afa..45526ee  evidence_factory_fix -> evidence_factory_fix
 
-git status
+tp70707@AVD-HEX-73 MINGW64 ~/OneDrive - Allianz/My Documents/Automation/Athena_Automation/integration-tests (evidence_factory_fix)
+$ git status
 
 git rev-list --left-right --count origin/evidence_factory_fix...HEAD
 
 git --no-pager log -3 --oneline
+On branch evidence_factory_fix
+Your branch is up to date with 'origin/evidence_factory_fix'.
 
+nothing to commit, working tree clean
+0       0
+45526ee (HEAD -> evidence_factory_fix, origin/evidence_factory_fix) Fix EvidenceFactory validator ESLint errors
+fc91afa Restore EvidenceFactory integration in brand configuration
+40e26c9 Fix EvidenceFactory reporting integration
+
+tp70707@AVD-HEX-73 MINGW64 ~/OneDrive - Allianz/My Documents/Automation/Athena_Automation/integration-tests (evidence_factory_fix)
+$ 
