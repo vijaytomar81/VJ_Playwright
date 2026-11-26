@@ -29,7 +29,29 @@ export function captureExecutionEnvironmentMetadata(page: Page): void {
         return;
     }
 
-    const browser = page.context().browser();
+    /*
+     * Framework unit tests may use mocked Page objects
+     * without browser metadata APIs.
+     */
+    if (!page || typeof page.context !== 'function' || typeof page.viewportSize !== 'function') {
+        return;
+    }
+
+    const context = page.context();
+
+    if (!context || typeof context.browser !== 'function') {
+        return;
+    }
+
+    const browser = context.browser();
+
+    if (
+        browser &&
+        (typeof browser.browserType !== 'function' || typeof browser.version !== 'function')
+    ) {
+        return;
+    }
+
     const viewport = page.viewportSize();
 
     /*
@@ -56,20 +78,18 @@ export function captureExecutionEnvironmentMetadata(page: Page): void {
      */
     const projectUse = testInfo.project.use as Record<string, unknown>;
 
-    const capabilities = projectUse.capabilities &&
-        typeof projectUse.capabilities === 'object'
-        ? projectUse.capabilities as Record<string, unknown>
-        : {};
+    const capabilities =
+        projectUse.capabilities && typeof projectUse.capabilities === 'object'
+            ? (projectUse.capabilities as Record<string, unknown>)
+            : {};
 
-    const browserStackOptions = capabilities['bstack:options'] &&
-        typeof capabilities['bstack:options'] === 'object'
-        ? capabilities['bstack:options'] as Record<string, unknown>
-        : {};
+    const browserStackOptions =
+        capabilities['bstack:options'] && typeof capabilities['bstack:options'] === 'object'
+            ? (capabilities['bstack:options'] as Record<string, unknown>)
+            : {};
 
     const getValue = (value: unknown): string =>
-        typeof value === 'string' || typeof value === 'number'
-            ? String(value).trim()
-            : NOT_KNOWN;
+        typeof value === 'string' || typeof value === 'number' ? String(value).trim() : NOT_KNOWN;
 
     const remoteDevice =
         getValue(browserStackOptions.deviceName) ||
@@ -95,31 +115,20 @@ export function captureExecutionEnvironmentMetadata(page: Page): void {
      * Host + Remote:
      * Windows (10.0.26200) - (iPhone 15 - iOS 17)
      */
-    const remoteDetails = [
-        remoteDevice,
-        [remoteOS, remoteOSVersion]
-            .filter(Boolean)
-            .join(' '),
-    ].filter(Boolean).join(' - ');
+    const remoteDetails = [remoteDevice, [remoteOS, remoteOSVersion].filter(Boolean).join(' ')]
+        .filter(Boolean)
+        .join(' - ');
 
-    const device = remoteDetails
-        ? `${hostDevice} - (${remoteDetails})`
-        : hostDevice;
+    const device = remoteDetails ? `${hostDevice} - (${remoteDetails})` : hostDevice;
 
     const metadata: Record<string, string> = {
-        browser:
-            browser?.browserType().name() ?? NOT_KNOWN,
+        browser: browser?.browserType().name() ?? NOT_KNOWN,
 
-        browserVersion:
-            browser?.version() ?? NOT_KNOWN,
+        browserVersion: browser?.version() ?? NOT_KNOWN,
 
-        browserChannel:
-            testInfo.project.use.channel ?? NOT_KNOWN,
+        browserChannel: testInfo.project.use.channel ?? NOT_KNOWN,
 
-        viewport:
-            viewport
-                ? `${viewport.width}x${viewport.height}`
-                : NOT_KNOWN,
+        viewport: viewport ? `${viewport.width}x${viewport.height}` : NOT_KNOWN,
 
         // platform:
         //     hostPlatform,
@@ -136,9 +145,7 @@ export function captureExecutionEnvironmentMetadata(page: Page): void {
     };
 
     for (const [type, description] of Object.entries(metadata)) {
-        const existing = testInfo.annotations.find(
-            annotation => annotation.type === type,
-        );
+        const existing = testInfo.annotations.find((annotation) => annotation.type === type);
 
         if (!existing) {
             testInfo.annotations.push({
