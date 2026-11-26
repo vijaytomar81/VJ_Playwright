@@ -1,11 +1,232 @@
-$source = ".\evidence-reports\Britannia-run-2026-11-26T10-31-45-239"
+tp70707@AVD-HEX-73 MINGW64 ~/OneDrive - Allianz/My Documents/Automation/Athena_Automation/integration-tests (evidence_factory_fix)
+$ git status
+On branch evidence_factory_fix
+Your branch is ahead of 'origin/evidence_factory_fix' by 2 commits.
+  (use "git push" to publish your local commits)
 
-$destination = Join-Path $env:USERPROFILE "OneDrive - Allianz"
+Changes not staged for commit:
+  (use "git add/rm <file>..." to update what will be committed)
+  (use "git restore <file>..." to discard changes in working directory)
+        modified:   .gitignore
+        modified:   .vscode/settings.json
+        modified:   JenkinsfileCommonTests
+        modified:   JenkinsfileTestsWithReport
+        modified:   automationLayer/common/basePage.ts
+        modified:   configLayer/execution/commonJob/reporter.cjs
+        modified:   configLayer/execution/commonJob/reporter.test.cjs
+        modified:   configLayer/execution/commonJob/reports.test.cjs
+        modified:   configLayer/execution/commonJob/runner.cjs
+        modified:   package-lock.json
+        modified:   package.json
+        modified:   playwright.brands.config.ts
+        modified:   playwright.config.base.ts
+        deleted:    reportingLayer/brand-allure-reporter.ts
 
-Copy-Item -Path $source -Destination $destination -Recurse
+Untracked files:
+  (use "git add <file>..." to include in what will be committed)
+        automationLayer/common/executionEnvironmentMetadata.ts
+        configLayer/execution/reportPaths.json
+        configLayer/execution/validateReportPaths.cjs
+        reportingLayer/README.md
+        reportingLayer/evidenceArtifacts.ts
+        reportingLayer/evidenceFactory.ts
+        reportingLayer/excel/
+        reportingLayer/reporters/
+        reportingLayer/schema/
+        results.json
 
+no changes added to commit (use "git add" and/or "git commit -a")
 
+tp70707@AVD-HEX-73 MINGW64 ~/OneDrive - Allianz/My Documents/Automation/Athena_Automation/integration-tests (evidence_factory_fix)
+$ git add .
+warning: in the working copy of 'results.json', LF will be replaced by CRLF the next time Git touches it
 
+tp70707@AVD-HEX-73 MINGW64 ~/OneDrive - Allianz/My Documents/Automation/Athena_Automation/integration-tests (evidence_factory_fix)
+$ git diff --cached --stat
+ .gitignore                                         |    1 +
+ .vscode/settings.json                              |    3 +
+ JenkinsfileCommonTests                             |   68 +-
+ JenkinsfileTestsWithReport                         |  110 +-
+ automationLayer/common/basePage.ts                 |    6 +-
+ .../common/executionEnvironmentMetadata.ts         |  163 ++
+ configLayer/execution/commonJob/reporter.cjs       |   14 +-
+ configLayer/execution/commonJob/reporter.test.cjs  |   15 +-
+ configLayer/execution/commonJob/reports.test.cjs   |   24 +-
+ configLayer/execution/commonJob/runner.cjs         |   51 +-
+ configLayer/execution/reportPaths.json             |   10 +
+ configLayer/execution/validateReportPaths.cjs      |  371 +++
+ package-lock.json                                  | 2556 +++++++++++++++++++-
+ package.json                                       |    4 +-
+ playwright.brands.config.ts                        |   14 +-
+ playwright.config.base.ts                          |   22 +-
+set mark: ...skipping...
+ .gitignore                                         |    1 +
+ .vscode/settings.json                              |    3 +
+ JenkinsfileCommonTests                             |   68 +-
+ JenkinsfileTestsWithReport                         |  110 +-
+ automationLayer/common/basePage.ts                 |    6 +-
+ .../common/executionEnvironmentMetadata.ts         |  163 ++
+ configLayer/execution/commonJob/reporter.cjs       |   14 +-
+ configLayer/execution/commonJob/reporter.test.cjs  |   15 +-
+ configLayer/execution/commonJob/reports.test.cjs   |   24 +-
+ configLayer/execution/commonJob/runner.cjs         |   51 +-
+ configLayer/execution/reportPaths.json             |   10 +
+ configLayer/execution/validateReportPaths.cjs      |  371 +++
+ package-lock.json                                  | 2556 +++++++++++++++++++-
+ package.json                                       |    4 +-
+ playwright.brands.config.ts                        |   14 +-
+ playwright.config.base.ts                          |   22 +-
+set mark: ...skipping...
+ .gitignore                                         |    1 +
+ .vscode/settings.json                              |    3 +
+ JenkinsfileCommonTests                             |   68 +-
+ JenkinsfileTestsWithReport                         |  110 +-
+ automationLayer/common/basePage.ts                 |    6 +-
+ .../common/executionEnvironmentMetadata.ts         |  163 ++
+ configLayer/execution/commonJob/reporter.cjs       |   14 +-
+ configLayer/execution/commonJob/reporter.test.cjs  |   15 +-
+ configLayer/execution/commonJob/reports.test.cjs   |   24 +-
+ configLayer/execution/commonJob/runner.cjs         |   51 +-
+ configLayer/execution/reportPaths.json             |   10 +
+ configLayer/execution/validateReportPaths.cjs      |  371 +++
+ package-lock.json                                  | 2556 +++++++++++++++++++-
+ package.json                                       |    4 +-
+ playwright.brands.config.ts                        |   14 +-
+ playwright.config.base.ts                          |   22 +-
+ reportingLayer/README.md                           |  411 ++++
+ reportingLayer/evidenceArtifacts.ts                |  360 +++
+ reportingLayer/evidenceFactory.ts                  |  396 +++
+ reportingLayer/excel/excelGenerator.ts             |  365 +++
+ reportingLayer/excel/excelStyleConfig.ts           |  170 ++
+ reportingLayer/excel/excelStyles.ts                |  553 +++++
+ reportingLayer/excel/missingFields.ts              |   70 +
+ .../{ => reporters}/brand-allure-reporter.ts       |    0
+ reportingLayer/reporters/evidenceReporter.ts       |   60 +
+ reportingLayer/schema/evidence-schema.ts           |   78 +
+ reportingLayer/schema/summary-schema.ts            |  110 +
+ results.json                                       |  286 +++
+ 28 files changed, 6135 insertions(+), 156 deletions(-)
+...skipping...
+ package-lock.json                                  | 2556 +++++++++++++++++++-
+ .gitignore                                         |    1 +
+ .vscode/settings.json                              |    3 +
+ JenkinsfileCommonTests                             |   68 +-
+ JenkinsfileTestsWithReport                         |  110 +-
+ automationLayer/common/basePage.ts                 |    6 +-
+ .../common/executionEnvironmentMetadata.ts         |  163 ++
+ configLayer/execution/commonJob/reporter.cjs       |   14 +-
+ configLayer/execution/commonJob/reporter.test.cjs  |   15 +-
+ configLayer/execution/commonJob/reports.test.cjs   |   24 +-
+ configLayer/execution/commonJob/runner.cjs         |   51 +-
+ configLayer/execution/reportPaths.json             |   10 +
+ configLayer/execution/validateReportPaths.cjs      |  371 +++
+ package-lock.json                                  | 2556 +++++++++++++++++++-
+ package.json                                       |    4 +-
+ playwright.brands.config.ts                        |   14 +-
+ playwright.config.base.ts                          |   22 +-
+...skipping...
+ .gitignore                                         |    1 +
+ .vscode/settings.json                              |    3 +
+ JenkinsfileCommonTests                             |   68 +-
+ JenkinsfileTestsWithReport                         |  110 +-
+ automationLayer/common/basePage.ts                 |    6 +-
+ .../common/executionEnvironmentMetadata.ts         |  163 ++
+ configLayer/execution/commonJob/reporter.cjs       |   14 +-
+ configLayer/execution/commonJob/reporter.test.cjs  |   15 +-
+ configLayer/execution/commonJob/reports.test.cjs   |   24 +-
+ configLayer/execution/commonJob/runner.cjs         |   51 +-
+ configLayer/execution/reportPaths.json             |   10 +
+ configLayer/execution/validateReportPaths.cjs      |  371 +++
+ package-lock.json                                  | 2556 +++++++++++++++++++-
+ package.json                                       |    4 +-
+ playwright.brands.config.ts                        |   14 +-
+ playwright.config.base.ts                          |   22 +-
+...skipping...
 
-Invoke-Item (Join-Path $destination "Britannia-run-2026-11-26T10-31-45-239\Britannia-report.xlsx")
+                   SUMMARY OF LESS COMMANDS
+
+      Commands marked with * may be preceded by a number, N.
+      Notes in parentheses indicate the behavior if N is given.
+      A key preceded by a caret indicates the Ctrl key; thus ^K is ctrl-K.
+
+  h  H                 Display this help.
+  q  :q  Q  :Q  ZZ     Exit.
+ ---------------------------------------------------------------------------
+
+                           MOVING
+
+  e  ^E  j  ^N  CR  *  Forward  one line   (or N lines).
+  y  ^Y  k  ^K  ^P  *  Backward one line   (or N lines).
+  f  ^F  ^V  SPACE  *  Forward  one window (or N lines).
+  b  ^B  ESC-v      *  Backward one window (or N lines).
+  z                 *  Forward  one window (and set window to N).
+  w                 *  Backward one window (and set window to N).
+HELP -- Press RETURN for more, or q when done...skipping...
+ .gitignore                                         |    1 +
+ .vscode/settings.json                              |    3 +
+ JenkinsfileCommonTests                             |   68 +-
+ JenkinsfileTestsWithReport                         |  110 +-
+ automationLayer/common/basePage.ts                 |    6 +-
+ .../common/executionEnvironmentMetadata.ts         |  163 ++
+ configLayer/execution/commonJob/reporter.cjs       |   14 +-
+ configLayer/execution/commonJob/reporter.test.cjs  |   15 +-
+ configLayer/execution/commonJob/reports.test.cjs   |   24 +-
+ configLayer/execution/commonJob/runner.cjs         |   51 +-
+ configLayer/execution/reportPaths.json             |   10 +
+ configLayer/execution/validateReportPaths.cjs      |  371 +++
+ package-lock.json                                  | 2556 +++++++++++++++++++-
+ package.json                                       |    4 +-
+ playwright.brands.config.ts                        |   14 +-
+ playwright.config.base.ts                          |   22 +-
+ reportingLayer/README.md                           |  411 ++++
+ reportingLayer/evidenceArtifacts.ts                |  360 +++
+ reportingLayer/evidenceFactory.ts                  |  396 +++
+ reportingLayer/excel/excelGenerator.ts             |  365 +++
+ reportingLayer/excel/excelStyleConfig.ts           |  170 ++
+ reportingLayer/excel/excelStyles.ts                |  553 +++++
+ reportingLayer/excel/missingFields.ts              |   70 +
+ .../{ => reporters}/brand-allure-reporter.ts       |    0
+ reportingLayer/reporters/evidenceReporter.ts       |   60 +
+ reportingLayer/schema/evidence-schema.ts           |   78 +
+ reportingLayer/schema/summary-schema.ts            |  110 +
+ results.json                                       |  286 +++
+ 28 files changed, 6135 insertions(+), 156 deletions(-)
+
+tp70707@AVD-HEX-73 MINGW64 ~/OneDrive - Allianz/My Documents/Automation/Athena_Automation/integration-tests (evidence_factory_fix)
+$ 
+
+tp70707@AVD-HEX-73 MINGW64 ~/OneDrive - Allianz/My Documents/Automation/Athena_Automation/integration-tests (evidence_factory_fix)
+$ git commit -m "commit evidence factory fix branch"
+✔ Backed up original state in git stash (ab85704)
+⚠ Running tasks for staged files...
+  ❯ package.json — 28 files
+    ❯ *.ts — 14 files
+      ✖ eslint --fix [FAILED]
+      ◼ prettier --write
+↓ Skipped because of errors from tasks.
+✔ Reverting to original state because of errors...
+✔ Cleaning up temporary files...
+
+✖ eslint --fix:
+
+C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\Athena_Automation\integration-tests\playwright.config.base.ts
+  12:33  error    A `require()` style import is forbidden   @typescript-eslint/no-require-imports
+  23:9   warning  'env' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\Athena_Automation\integration-tests\reportingLayer\evidenceArtifacts.ts
+  9:33  error  A `require()` style import is forbidden  @typescript-eslint/no-require-imports
+
+C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\Athena_Automation\integration-tests\reportingLayer\evidenceFactory.ts
+  13:33  error  A `require()` style import is forbidden  @typescript-eslint/no-require-imports
+
+C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\Athena_Automation\integration-tests\reportingLayer\reporters\evidenceReporter.ts
+  17:17  warning  '_test' is defined but never used    @typescript-eslint/no-unused-vars
+  17:34  warning  '_result' is defined but never used  @typescript-eslint/no-unused-vars
+
+✖ 6 problems (3 errors, 3 warnings)
+
+husky - pre-commit script failed (code 1)
+
+tp70707@AVD-HEX-73 MINGW64 ~/OneDrive - Allianz/My Documents/Automation/Athena_Automation/integration-tests (evidence_factory_fix)
+$ 
 
