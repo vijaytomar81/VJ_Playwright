@@ -1,5 +1,7 @@
-git add reportingLayer/evidenceArtifacts.ts
+git --no-pager diff -- reportingLayer/evidenceFactory.ts
 
-git --no-pager diff -- reportingLayer/evidenceArtifacts.ts
+git diff --check -- reportingLayer/evidenceFactory.ts
 
-git status --short
+npx --no-install eslint reportingLayer/evidenceFactory.ts
+
+wc -l reportingLayer/evidenceFactory.ts

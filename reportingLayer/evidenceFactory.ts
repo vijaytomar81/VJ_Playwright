@@ -10,7 +10,7 @@ import {
     createRunDirectory, copyReports, resolveScreenshot,
 } from './evidenceArtifacts';
 
-const { validateReportPaths } = require('../configLayer/execution/validateReportPaths.cjs');
+import { validateReportPaths } from '../configLayer/execution/validateReportPaths.cjs';
 
 interface Annotation {
     type: string;
