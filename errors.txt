@@ -1,21 +1,124 @@
-git add -- .vscode/settings.json automationLayer/common/executionEnvironmentMetadata.ts
+tp70707@AVD-HEX-73 MINGW64 ~/OneDrive - Allianz/My Documents/Automation/Athena_Automation/integration-tests (evidence_factory_fix)
+$ git add -- .vscode/settings.json automationLayer/common/executionEnvironmentMetadata.ts
+warning: in the working copy of '.vscode/settings.json', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'automationLayer/common/executionEnvironmentMetadata.ts', LF will be replaced by CRLF the next time Git touches it
 
-
-git status --short
+tp70707@AVD-HEX-73 MINGW64 ~/OneDrive - Allianz/My Documents/Automation/Athena_Automation/integration-tests (evidence_factory_fix)
+$ git status --short
 
 git --no-pager diff --cached --stat
 
 git --no-pager diff --cached
 
 git diff --cached --check
+M  .vscode/settings.json
+M  automationLayer/common/executionEnvironmentMetadata.ts
+ .vscode/settings.json                              |  6 +++---
+ .../common/executionEnvironmentMetadata.ts         | 24 +++++++++++++++++++++-
+ 2 files changed, 26 insertions(+), 4 deletions(-)
+diff --git a/.vscode/settings.json b/.vscode/settings.json
+index 1f02804..095b092 100644
+--- a/.vscode/settings.json
++++ b/.vscode/settings.json
+@@ -2,15 +2,12 @@
+   "playwright.env": {
+     // Website environment: test, dev, uat or nft (availability depends on the brand).
+     "ENV": "test",
+-
+     // Agent login: allianz (Active Directory), sapiens (Microsoft), sapiensKeycloak (Keycloak).
+     // Proposed Insurance framework: skip uses the brand default; login happens only when needed.
+     // Current Athena framework: skip disables the startup login.
+     "AGENT_PORTAL_AUTH": "skip",
+-
+     // Proposed Insurance framework: maximum tests running at once (in parallel).
+     "WORKERS": "4",
+-
+     // Proposed Insurance framework: true pauses at test end for manual inspection; Resume or close the browser to finish.
+     "KEEP_BROWSER_OPEN": "false"
+   },
+@@ -18,5 +15,8 @@
+   "editor.defaultFormatter": "esbenp.prettier-vscode",
+   "editor.codeActionsOnSave": {
+     "source.fixAll.eslint": "explicit"
++  },
++  "[jsonc]": {
++    "editor.defaultFormatter": "vscode.json-language-features"
+   }
+ }
+diff --git a/automationLayer/common/executionEnvironmentMetadata.ts b/automationLayer/common/executionEnvironmentMetadata.ts
+index f49dd57..8bac0f4 100644
+--- a/automationLayer/common/executionEnvironmentMetadata.ts
++++ b/automationLayer/common/executionEnvironmentMetadata.ts
+@@ -29,7 +29,29 @@ export function captureExecutionEnvironmentMetadata(page: Page): void {
+     return;
+   }
+ 
+-  const browser = page.context().browser();
++  /*
++   * Framework unit tests may use mocked Page objects
++   * without browser metadata APIs.
++   */
++  if (!page || typeof page.context !== 'function' || typeof page.viewportSize !== 'function') {
++    return;
++  }
++
++  const context = page.context();
++
++  if (!context || typeof context.browser !== 'function') {
++    return;
++  }
++
++  const browser = context.browser();
++
++  if (
++    browser &&
++    (typeof browser.browserType !== 'function' || typeof browser.version !== 'function')
++  ) {
++    return;
++  }
++
+   const viewport = page.viewportSize();
+ 
+   /*
 
+tp70707@AVD-HEX-73 MINGW64 ~/OneDrive - Allianz/My Documents/Automation/Athena_Automation/integration-tests (evidence_factory_fix)
+$ git commit -m "Fix browser metadata compatibility with framework unit tests"
+✔ Backed up original state in git stash (e967eac)
+✔ Running tasks for staged files...
+✔ Applying modifications from tasks...
+✔ Cleaning up temporary files...
+[evidence_factory_fix 5e642fd] Fix browser metadata compatibility with framework unit tests
+ Committer: Tomar <tp70707@group.net>
+Your name and email address were configured automatically based
+on your username and hostname. Please check that they are accurate.
+You can suppress this message by setting them explicitly:
 
+    git config --global user.name "Your Name"
+    git config --global user.email you@example.com
 
+After doing this, you may fix the identity used for this commit with:
 
-git commit -m "Fix browser metadata compatibility with framework unit tests"
+    git commit --amend --reset-author
 
+ 2 files changed, 26 insertions(+), 4 deletions(-)
 
-git push origin evidence_factory_fix
+tp70707@AVD-HEX-73 MINGW64 ~/OneDrive - Allianz/My Documents/Automation/Athena_Automation/integration-tests (evidence_factory_fix)
+$ git push origin evidence_factory_fix
+Enumerating objects: 13, done.
+Counting objects: 100% (13/13), done.
+Delta compression using up to 8 threads
+Compressing objects: 100% (6/6), done.
+Writing objects: 100% (7/7), 875 bytes | 291.00 KiB/s, done.
+Total 7 (delta 5), reused 0 (delta 0), pack-reused 0 (from 0)
+remote: warning: core.fsyncObjectFiles is deprecated; use core.fsync instead
+remote: warning: core.fsyncObjectFiles is deprecated; use core.fsync instead
+remote: 
+remote: View merge request for evidence_factory_fix:
+remote:   https://gitlab-lv-dev.athenapaas.com/athenapaas/integration-tests/-/merge_requests/34
+remote: 
+remote: warning: core.fsyncObjectFiles is deprecated; use core.fsync instead
+To https://gitlab-lv-dev.athenapaas.com/athenapaas/integration-tests.git
+   45526ee..5e642fd  evidence_factory_fix -> evidence_factory_fix
 
-
-
+tp70707@AVD-HEX-73 MINGW64 ~/OneDrive - Allianz/My Documents/Automation/Athena_Automation/integration-tests (evidence_factory_fix)
+$ 
