@@ -1,24 +1,4 @@
-tp70707@AVD-HEX-73 MINGW64 ~/OneDrive - Allianz/My Documents/Automation/Athena_Automation/integration-tests (evidence_factory_fix)
-$ git add .gitignore
-
-tp70707@AVD-HEX-73 MINGW64 ~/OneDrive - Allianz/My Documents/Automation/Athena_Automation/integration-tests (evidence_factory_fix)
-$ git --no-pager diff --cached -- .gitignore
-diff --git a/.gitignore b/.gitignore
-index 357db2f..7fef955 100644
---- a/.gitignore
-+++ b/.gitignore
-@@ -2,10 +2,12 @@ node_modules/
- # Excel temporary lock files.
- ~$*.xlsx
- /test-results/
-+/evidence-reports/
- /playwright-report/
- /allure-results/
- /allure-report/
- /.allure-jre/
-+/results.json
- /results.xml
- /blob-report/
- /playwright/.cache/
-
-tp70707@AVD-HEX-73 MINGW64 ~/OneDrive - Allianz/My Documents/Automation/Athena_Automation/integration-tests (evidence_factory_fix)
+git check-ignore -v results.json
+git status --short
+git --no-pager diff --cached --stat
+ls -l results.json
