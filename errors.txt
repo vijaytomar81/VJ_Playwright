@@ -1,161 +1,18 @@
-tp70707@AVD-HEX-73 MINGW64 ~/OneDrive - Allianz/My Documents/Automation/Athena_Automation/integration-tests (evidence_factory_fix)
-$ git --no-pager diff --cached -- .vscode/settings.json
-
-git --no-pager diff -- .vscode/settings.json
-
-git status --short
-
-git --no-pager diff --cached --stat
-diff --git a/.vscode/settings.json b/.vscode/settings.json
-index 1f02804..c721f95 100644
---- a/.vscode/settings.json
-+++ b/.vscode/settings.json
-@@ -18,5 +18,8 @@
-   "editor.defaultFormatter": "esbenp.prettier-vscode",
-   "editor.codeActionsOnSave": {
-     "source.fixAll.eslint": "explicit"
-+  },
-+  "[typescript]": {
-+    "editor.defaultFormatter": "vscode.typescript-language-features"
-   }
- }
-M  .gitignore
- M .vscode/settings.json
-M  JenkinsfileCommonTests
-M  JenkinsfileTestsWithReport
-M  automationLayer/common/basePage.ts
-A  automationLayer/common/executionEnvironmentMetadata.ts
-M  configLayer/execution/commonJob/reporter.cjs
-M  configLayer/execution/commonJob/reporter.test.cjs
-M  configLayer/execution/commonJob/reports.test.cjs
-M  configLayer/execution/commonJob/runner.cjs
-A  configLayer/execution/reportPaths.json
-A  configLayer/execution/validateReportPaths.cjs
-M  package-lock.json
-M  package.json
-M  playwright.brands.config.ts
-M  playwright.config.base.ts
-A  reportingLayer/README.md
-A  reportingLayer/evidenceArtifacts.ts
-A  reportingLayer/evidenceFactory.ts
-A  reportingLayer/excel/excelGenerator.ts
-A  reportingLayer/excel/excelStyleConfig.ts
-AM reportingLayer/excel/excelStyles.ts
-A  reportingLayer/excel/missingFields.ts
-R  reportingLayer/brand-allure-reporter.ts -> reportingLayer/reporters/brand-allure-reporter.ts
-A  reportingLayer/reporters/evidenceReporter.ts
-A  reportingLayer/schema/evidence-schema.ts
-A  reportingLayer/schema/summary-schema.ts
- .gitignore                                         |    2 +
- JenkinsfileCommonTests                             |   68 +-
- JenkinsfileTestsWithReport                         |  110 +-
- automationLayer/common/basePage.ts                 |    6 +-
- .../common/executionEnvironmentMetadata.ts         |  163 ++
- configLayer/execution/commonJob/reporter.cjs       |   14 +-
- configLayer/execution/commonJob/reporter.test.cjs  |   15 +-
- configLayer/execution/commonJob/reports.test.cjs   |   24 +-
- configLayer/execution/commonJob/runner.cjs         |   51 +-
- configLayer/execution/reportPaths.json             |   10 +
- configLayer/execution/validateReportPaths.cjs      |  371 +++
- package-lock.json                                  | 2556 +++++++++++++++++++-
- package.json                                       |    4 +-
- playwright.brands.config.ts                        |   14 +-
- playwright.config.base.ts                          |   23 +-
- reportingLayer/README.md                           |  411 ++++
- reportingLayer/evidenceArtifacts.ts                |  360 +++
- reportingLayer/evidenceFactory.ts                  |  396 +++
- reportingLayer/excel/excelGenerator.ts             |  365 +++
- reportingLayer/excel/excelStyleConfig.ts           |  170 ++
- reportingLayer/excel/excelStyles.ts                |  553 +++++
- reportingLayer/excel/missingFields.ts              |   70 +
- .../{ => reporters}/brand-allure-reporter.ts       |    0
- reportingLayer/reporters/evidenceReporter.ts       |   58 +
- reportingLayer/schema/evidence-schema.ts           |   78 +
- reportingLayer/schema/summary-schema.ts            |  110 +
- 26 files changed, 5845 insertions(+), 157 deletions(-)
-
-tp70707@AVD-HEX-73 MINGW64 ~/OneDrive - Allianz/My Documents/Automation/Athena_Automation/integration-tests (evidence_factory_fix)
-$ git --no-pager diff -- reportingLayer/excel/excelStyles.ts
+git --no-pager diff -- reportingLayer/excel/excelStyles.ts
 
 git diff --check -- reportingLayer/excel/excelStyles.ts
 
 wc -l reportingLayer/excel/excelStyles.ts
-diff --git a/reportingLayer/excel/excelStyles.ts b/reportingLayer/excel/excelStyles.ts
-index ebe0d94..2885aed 100644
---- a/reportingLayer/excel/excelStyles.ts
-+++ b/reportingLayer/excel/excelStyles.ts
-@@ -549,5 +549,4 @@ export function setColumnWidths(
-             maximumWidth,
-         );
-     });
--}
--
-+}
-\ No newline at end of file
-551 reportingLayer/excel/excelStyles.ts
 
-tp70707@AVD-HEX-73 MINGW64 ~/OneDrive - Allianz/My Documents/Automation/Athena_Automation/integration-tests (evidence_factory_fix)
-$ git add reportingLayer/excel/excelStyles.ts
+
+
+
+git add reportingLayer/excel/excelStyles.ts
 
 git diff --cached --check
 
 git status --short
 
 git --no-pager diff --cached --stat
-M  .gitignore
- M .vscode/settings.json
-M  JenkinsfileCommonTests
-M  JenkinsfileTestsWithReport
-M  automationLayer/common/basePage.ts
-A  automationLayer/common/executionEnvironmentMetadata.ts
-M  configLayer/execution/commonJob/reporter.cjs
-M  configLayer/execution/commonJob/reporter.test.cjs
-M  configLayer/execution/commonJob/reports.test.cjs
-M  configLayer/execution/commonJob/runner.cjs
-A  configLayer/execution/reportPaths.json
-A  configLayer/execution/validateReportPaths.cjs
-M  package-lock.json
-M  package.json
-M  playwright.brands.config.ts
-M  playwright.config.base.ts
-A  reportingLayer/README.md
-A  reportingLayer/evidenceArtifacts.ts
-A  reportingLayer/evidenceFactory.ts
-A  reportingLayer/excel/excelGenerator.ts
-A  reportingLayer/excel/excelStyleConfig.ts
-A  reportingLayer/excel/excelStyles.ts
-A  reportingLayer/excel/missingFields.ts
-R  reportingLayer/brand-allure-reporter.ts -> reportingLayer/reporters/brand-allure-reporter.ts
-A  reportingLayer/reporters/evidenceReporter.ts
-A  reportingLayer/schema/evidence-schema.ts
-A  reportingLayer/schema/summary-schema.ts
- .gitignore                                         |    2 +
- JenkinsfileCommonTests                             |   68 +-
- JenkinsfileTestsWithReport                         |  110 +-
- automationLayer/common/basePage.ts                 |    6 +-
- .../common/executionEnvironmentMetadata.ts         |  163 ++
- configLayer/execution/commonJob/reporter.cjs       |   14 +-
- configLayer/execution/commonJob/reporter.test.cjs  |   15 +-
- configLayer/execution/commonJob/reports.test.cjs   |   24 +-
- configLayer/execution/commonJob/runner.cjs         |   51 +-
- configLayer/execution/reportPaths.json             |   10 +
- configLayer/execution/validateReportPaths.cjs      |  371 +++
- package-lock.json                                  | 2556 +++++++++++++++++++-
- package.json                                       |    4 +-
- playwright.brands.config.ts                        |   14 +-
- playwright.config.base.ts                          |   23 +-
- reportingLayer/README.md                           |  411 ++++
- reportingLayer/evidenceArtifacts.ts                |  360 +++
- reportingLayer/evidenceFactory.ts                  |  396 +++
- reportingLayer/excel/excelGenerator.ts             |  365 +++
- reportingLayer/excel/excelStyleConfig.ts           |  170 ++
- reportingLayer/excel/excelStyles.ts                |  552 +++++
- reportingLayer/excel/missingFields.ts              |   70 +
- .../{ => reporters}/brand-allure-reporter.ts       |    0
- reportingLayer/reporters/evidenceReporter.ts       |   58 +
- reportingLayer/schema/evidence-schema.ts           |   78 +
- reportingLayer/schema/summary-schema.ts            |  110 +
- 26 files changed, 5844 insertions(+), 157 deletions(-)
 
-tp70707@AVD-HEX-73 MINGW64 ~/OneDrive - Allianz/My Documents/Automation/Athena_Automation/integration-tests (evidence_factory_fix)
-$ 
+
