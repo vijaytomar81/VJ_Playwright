@@ -1,74 +1,66 @@
-
-node --check configLayer/execution/validateReportPaths.cjs
-
-node configLayer/execution/validateReportPaths.cjs
-
-echo "Validator exit code: $?"
-
-========
-
-
-node - <<'NODE'
-const assert = require('node:assert/strict');
-const reportPaths = require('./configLayer/execution/reportPaths.json');
-const { validateReportPaths } = require('./configLayer/execution/validateReportPaths.cjs');
+node -e '
+const assert = require("node:assert/strict");
+const reportPaths = require("./configLayer/execution/reportPaths.json");
+const { validateReportPaths } = require("./configLayer/execution/validateReportPaths.cjs");
 
 for (let code = 0; code < 32; code++) {
     assert.throws(
         () => validateReportPaths({
             ...reportPaths,
-            evidenceFactoryOutput: 'evidence' + String.fromCharCode(code) + '-reports',
+            evidenceFactoryOutput: "evidence" + String.fromCharCode(code) + "-reports",
         }),
         /unsupported path component/,
-        'Control character was not rejected: ' + code,
+        "Control character was not rejected: " + code,
     );
 }
 
-console.log('PASS: All 32 ASCII control characters rejected.');
-NODE
+console.log("PASS: All 32 ASCII control characters rejected.");
+'
+
+echo "Exit code: $?"
+
+===
 
 
-=====
-
-node - <<'NODE'
-const assert = require('node:assert/strict');
-const reportPaths = require('./configLayer/execution/reportPaths.json');
-const { validateReportPaths } = require('./configLayer/execution/validateReportPaths.cjs');
+node -e '
+const assert = require("node:assert/strict");
+const reportPaths = require("./configLayer/execution/reportPaths.json");
+const { validateReportPaths } = require("./configLayer/execution/validateReportPaths.cjs");
 
 assert.throws(
     () => validateReportPaths({
         ...reportPaths,
-        testResults: 'automationLayer',
+        testResults: "automationLayer",
     }),
     /approved native report location/,
 );
 
-console.log('PASS: Unsafe native report location rejected.');
+console.log("PASS: Unsafe native report location rejected.");
 
 assert.throws(
     () => validateReportPaths({
         ...reportPaths,
-        evidenceFactoryOutput: 'test-results/evidence',
+        evidenceFactoryOutput: "test-results/evidence",
     }),
     /conflicts with/,
 );
 
-console.log('PASS: Native report overlap rejected.');
+console.log("PASS: Native report overlap rejected.");
 
 assert.throws(
     () => validateReportPaths({
         ...reportPaths,
-        evidenceFactoryOutput: '../evidence-reports',
+        evidenceFactoryOutput: "../evidence-reports",
     }),
     /parent directory traversal/,
 );
 
-console.log('PASS: Parent directory traversal rejected.');
+console.log("PASS: Parent directory traversal rejected.");
 
 validateReportPaths();
 
-console.log('PASS: Original report configuration accepted.');
-NODE
+console.log("PASS: Original report configuration accepted.");
+'
 
-=========
+echo "Exit code: $?"
 
