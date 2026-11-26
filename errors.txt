@@ -1,34 +1,15 @@
-tp70707@AVD-HEX-73 MINGW64 ~/OneDrive - Allianz/My Documents/Automation/Athena_Automation/integration-tests (evidence_factory_fix)
-$ git --no-pager diff -- eslint.config.js
+git --no-pager diff -- configLayer/execution/validateReportPaths.cjs
 
-git diff --check -- eslint.config.js
+git diff --check -- configLayer/execution/validateReportPaths.cjs
 
-wc -l eslint.config.js
-
-node --check eslint.config.js
-diff --git a/eslint.config.js b/eslint.config.js
-index 5a29b36..a3a2065 100644
---- a/eslint.config.js
-+++ b/eslint.config.js
-@@ -89,6 +89,7 @@ module.exports = tseslint.config(
-     // Standalone Node CommonJS entry points and source-analysis tools.
-     files: [
-       'configLayer/execution/commonJob/**/*.cjs',
-+      'configLayer/execution/validateReportPaths.cjs',
-       'docs/page-object-analysis/**/*.cjs',
-       '.dependency-cruiser.cjs',
-     ],
-121 eslint.config.js
-
-tp70707@AVD-HEX-73 MINGW64 ~/OneDrive - Allianz/My Documents/Automation/Athena_Automation/integration-tests (evidence_factory_fix)
-$ npx --no-install eslint configLayer/execution/validateReportPaths.cjs
-
-C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\Athena_Automation\integration-tests\configLayer\execution\validateReportPaths.cjs
-  215:13  error  Unexpected control character(s) in regular expression: \x00, \x1f  no-control-regex
-  253:9   error  There is no `cause` attached to the symptom error being thrown     preserve-caught-error
-
-✖ 2 problems (2 errors, 0 warnings)
+wc -l configLayer/execution/validateReportPaths.cjs
 
 
-tp70707@AVD-HEX-73 MINGW64 ~/OneDrive - Allianz/My Documents/Automation/Athena_Automation/integration-tests (evidence_factory_fix)
-$ 
+
+
+npx --no-install eslint configLayer/execution/validateReportPaths.cjs
+
+echo "ESLint exit code: $?"
+
+
+

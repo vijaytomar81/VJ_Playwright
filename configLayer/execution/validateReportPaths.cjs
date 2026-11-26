@@ -212,7 +212,8 @@ function resolveReportPath(key, value, repositoryRoot) {
         if (
             !component ||
             component === '.' ||
-            /[<>:"|?*\x00-\x1f]/.test(component) ||
+            /[<>:"|?*]/.test(component) ||
+            Array.from(component).some((character) => character.charCodeAt(0) < 32) ||
             /[. ]$/.test(component) ||
             /^(CON|PRN|AUX|NUL|COM[1-9¹²³]|LPT[1-9¹²³])(?:\.|$)/i.test(component)
         ) {
@@ -253,6 +254,7 @@ function resolveReportPath(key, value, repositoryRoot) {
         throw new Error(
             `Invalid report path configuration: '${key}' cannot be ` +
             `resolved safely: ${value}\n${error.message}`,
+            { cause: error },
         );
     }
 
