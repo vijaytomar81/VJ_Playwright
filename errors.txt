@@ -1,9 +1,51 @@
-
-
-git --no-pager diff -- automationLayer/common/executionEnvironmentMetadata.ts
+tp70707@AVD-HEX-73 MINGW64 ~/OneDrive - Allianz/My Documents/Automation/Athena_Automation/integration-tests (evidence_factory_fix)
+$ git --no-pager diff -- automationLayer/common/executionEnvironmentMetadata.ts
 
 wc -l automationLayer/common/executionEnvironmentMetadata.ts
 
 git diff --check
 
 git status --short
+warning: in the working copy of 'automationLayer/common/executionEnvironmentMetadata.ts', LF will be replaced by CRLF the next time Git touches it
+diff --git a/automationLayer/common/executionEnvironmentMetadata.ts b/automationLayer/common/executionEnvironmentMetadata.ts
+index f49dd57..8bac0f4 100644
+--- a/automationLayer/common/executionEnvironmentMetadata.ts
++++ b/automationLayer/common/executionEnvironmentMetadata.ts
+@@ -29,7 +29,29 @@ export function captureExecutionEnvironmentMetadata(page: Page): void {
+     return;
+   }
+ 
+-  const browser = page.context().browser();
++  /*
++   * Framework unit tests may use mocked Page objects
++   * without browser metadata APIs.
++   */
++  if (!page || typeof page.context !== 'function' || typeof page.viewportSize !== 'function') {
++    return;
++  }
++
++  const context = page.context();
++
++  if (!context || typeof context.browser !== 'function') {
++    return;
++  }
++
++  const browser = context.browser();
++
++  if (
++    browser &&
++    (typeof browser.browserType !== 'function' || typeof browser.version !== 'function')
++  ) {
++    return;
++  }
++
+   const viewport = page.viewportSize();
+ 
+   /*
+170 automationLayer/common/executionEnvironmentMetadata.ts
+warning: in the working copy of 'automationLayer/common/executionEnvironmentMetadata.ts', LF will be replaced by CRLF the next time Git touches it
+ M .vscode/settings.json
+ M automationLayer/common/executionEnvironmentMetadata.ts
+
+tp70707@AVD-HEX-73 MINGW64 ~/OneDrive - Allianz/My Documents/Automation/Athena_Automation/integration-tests (evidence_factory_fix)
+$ 
