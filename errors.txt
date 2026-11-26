@@ -1,8 +1,40 @@
-git commit -m "Fix EvidenceFactory reporting integration"
+tp70707@AVD-HEX-73 MINGW64 ~/OneDrive - Allianz/My Documents/Automation/Athena_Automation/integration-tests (evidence_factory_fix)
+$ git commit -m "Fix EvidenceFactory reporting integration"
+✔ Backed up original state in git stash (a15083b)
+✔ Running tasks for staged files...
+✔ Applying modifications from tasks...
+✔ Cleaning up temporary files...
+[evidence_factory_fix 40e26c9] Fix EvidenceFactory reporting integration
+ Committer: Tomar <tp70707@group.net>
+Your name and email address were configured automatically based
+on your username and hostname. Please check that they are accurate.
+You can suppress this message by setting them explicitly:
 
+    git config --global user.name "Your Name"
+    git config --global user.email you@example.com
 
+After doing this, you may fix the identity used for this commit with:
 
-git status
+    git commit --amend --reset-author
+
+ 25 files changed, 5585 insertions(+), 150 deletions(-)
+ create mode 100644 automationLayer/common/executionEnvironmentMetadata.ts
+ create mode 100644 configLayer/execution/reportPaths.json
+ create mode 100644 configLayer/execution/validateReportPaths.cjs
+ create mode 100644 reportingLayer/README.md
+ create mode 100644 reportingLayer/evidenceArtifacts.ts
+ create mode 100644 reportingLayer/evidenceFactory.ts
+ create mode 100644 reportingLayer/excel/excelGenerator.ts
+ create mode 100644 reportingLayer/excel/excelStyleConfig.ts
+ create mode 100644 reportingLayer/excel/excelStyles.ts
+ create mode 100644 reportingLayer/excel/missingFields.ts
+ rename reportingLayer/{ => reporters}/brand-allure-reporter.ts (100%)
+ create mode 100644 reportingLayer/reporters/evidenceReporter.ts
+ create mode 100644 reportingLayer/schema/evidence-schema.ts
+ create mode 100644 reportingLayer/schema/summary-schema.ts
+
+tp70707@AVD-HEX-73 MINGW64 ~/OneDrive - Allianz/My Documents/Automation/Athena_Automation/integration-tests (evidence_factory_fix)
+$ git status
 
 git --no-pager log -3 --oneline
 
@@ -11,6 +43,76 @@ git --no-pager show --stat HEAD
 git --no-pager show --format= --name-status HEAD
 
 git show --format= --check HEAD
+On branch evidence_factory_fix
+Your branch is ahead of 'origin/evidence_factory_fix' by 3 commits.
+  (use "git push" to publish your local commits)
 
+Changes not staged for commit:
+  (use "git add <file>..." to update what will be committed)
+  (use "git restore <file>..." to discard changes in working directory)
+        modified:   .vscode/settings.json
 
+no changes added to commit (use "git add" and/or "git commit -a")
+40e26c9 (HEAD -> evidence_factory_fix) Fix EvidenceFactory reporting integration
+9d2abbc Merge branch 'evidence_factory_revert' into 'develop'
+61b1e1b (origin/evidence_factory_revert, evidence_factory_revert) Revert "Merge branch 'evidence_factory' into 'develop'"
+commit 40e26c9d06543af3f9da0b2726cfdfcdcf43215e (HEAD -> evidence_factory_fix)
+Author: Tomar <tp70707@group.net>
+Date:   Thu Nov 26 15:03:31 2026 +0100
 
+    Fix EvidenceFactory reporting integration
+
+ .gitignore                                         |    2 +
+ JenkinsfileCommonTests                             |   68 +-
+ JenkinsfileTestsWithReport                         |  110 +-
+ automationLayer/common/basePage.ts                 |    6 +-
+ .../common/executionEnvironmentMetadata.ts         |  148 ++
+ configLayer/execution/commonJob/reporter.cjs       |   14 +-
+ configLayer/execution/commonJob/reporter.test.cjs  |   15 +-
+ configLayer/execution/commonJob/reports.test.cjs   |   24 +-
+ configLayer/execution/commonJob/runner.cjs         |   51 +-
+ configLayer/execution/reportPaths.json             |   10 +
+ configLayer/execution/validateReportPaths.cjs      |  371 +++
+ package-lock.json                                  | 2556 +++++++++++++++++++-
+ package.json                                       |    4 +-
+ playwright.config.base.ts                          |   23 +-
+ reportingLayer/README.md                           |  411 ++++
+ reportingLayer/evidenceArtifacts.ts                |  309 +++
+ reportingLayer/evidenceFactory.ts                  |  362 +++
+ reportingLayer/excel/excelGenerator.ts             |  350 +++
+ reportingLayer/excel/excelStyleConfig.ts           |  169 ++
+ reportingLayer/excel/excelStyles.ts                |  429 ++++
+ reportingLayer/excel/missingFields.ts              |   69 +
+ .../{ => reporters}/brand-allure-reporter.ts       |    0
+ reportingLayer/reporters/evidenceReporter.ts       |   50 +
+ reportingLayer/schema/evidence-schema.ts           |   81 +
+ reportingLayer/schema/summary-schema.ts            |  103 +
+ 25 files changed, 5585 insertions(+), 150 deletions(-)
+M       .gitignore
+M       JenkinsfileCommonTests
+M       JenkinsfileTestsWithReport
+M       automationLayer/common/basePage.ts
+A       automationLayer/common/executionEnvironmentMetadata.ts
+M       configLayer/execution/commonJob/reporter.cjs
+M       configLayer/execution/commonJob/reporter.test.cjs
+M       configLayer/execution/commonJob/reports.test.cjs
+M       configLayer/execution/commonJob/runner.cjs
+A       configLayer/execution/reportPaths.json
+A       configLayer/execution/validateReportPaths.cjs
+M       package-lock.json
+M       package.json
+M       playwright.config.base.ts
+A       reportingLayer/README.md
+A       reportingLayer/evidenceArtifacts.ts
+A       reportingLayer/evidenceFactory.ts
+A       reportingLayer/excel/excelGenerator.ts
+A       reportingLayer/excel/excelStyleConfig.ts
+A       reportingLayer/excel/excelStyles.ts
+A       reportingLayer/excel/missingFields.ts
+R100    reportingLayer/brand-allure-reporter.ts reportingLayer/reporters/brand-allure-reporter.ts
+A       reportingLayer/reporters/evidenceReporter.ts
+A       reportingLayer/schema/evidence-schema.ts
+A       reportingLayer/schema/summary-schema.ts
+
+tp70707@AVD-HEX-73 MINGW64 ~/OneDrive - Allianz/My Documents/Automation/Athena_Automation/integration-tests (evidence_factory_fix)
+$ 
