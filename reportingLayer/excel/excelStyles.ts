@@ -550,4 +550,3 @@ export function setColumnWidths(
         );
     });
 }
-
