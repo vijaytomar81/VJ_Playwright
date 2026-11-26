@@ -1,107 +1,30 @@
-tp70707@AVD-HEX-73 MINGW64 ~/OneDrive - Allianz/My Documents/Automation/Athena_Automation/integration-tests (evidence_factory_fix)
-$ git --no-pager diff -- playwright.brands.config.ts
+npx --no-install playwright test -c playwright.brands.config.ts --list --reporter=list
 
-git diff --check -- playwright.brands.config.ts
 
-wc -l playwright.brands.config.ts
-warning: in the working copy of 'playwright.brands.config.ts', LF will be replaced by CRLF the next time Git touches it
-diff --git a/playwright.brands.config.ts b/playwright.brands.config.ts
-index b484b30..c02284d 100644
---- a/playwright.brands.config.ts
-+++ b/playwright.brands.config.ts
-@@ -2,11 +2,13 @@ import { defineConfig, devices, Project } from '@playwright/test';
- import { brands, BrandName } from './automationLayer/insurance/allBrands';
- import { hasEnvironment } from './automationLayer/insurance/shared/brands/BrandConfig';
- import { parseRetries, videoOption } from './configLayer/execution/playwrightArtifacts';
-+import reportPaths from './configLayer/execution/reportPaths.json';
- import {
-   ACTION_TIMEOUT,
-   EXPECT_TIMEOUT,
-   NAVIGATION_TIMEOUT,
- } from './configLayer/execution/timeouts';
-+import { validateReportPaths } from './configLayer/execution/validateReportPaths.cjs';
- 
- /**
-  * Brand-agnostic suite: the same specs under automationLayer/insurance run once per brand,
-@@ -20,6 +22,8 @@ import {
-  * The legacy per-brand configs (playwright.config.ts with PROJECT=...) are unaffected.
-  */
- 
-+validateReportPaths();
-+
- process.env.ENV ??= 'test';
- const env = process.env.ENV;
- 
-@@ -54,13 +58,13 @@ function brandProjects(name: BrandName): Project[] {
-     definition.suite === 'ferry'
-       ? ['ferry/automatedTests/**/*.spec.ts', 'ferry/automatedNavigation/**/*.spec.ts']
-       : [
--          ...definition.products.flatMap((p) => [
--            `lv/automatedTests/${p}/**/*.spec.ts`,
--            `lv/automatedNavigation/customerPortal/${p}/**/*.spec.ts`,
--            `lv/automatedNavigation/agentPortal/${p}/**/*.spec.ts`,
--          ]),
--          'lv/automatedTests/agentPortal/**/*.spec.ts',
--        ];
-+        ...definition.products.flatMap((p) => [
-+          `lv/automatedTests/${p}/**/*.spec.ts`,
-+          `lv/automatedNavigation/customerPortal/${p}/**/*.spec.ts`,
-+          `lv/automatedNavigation/agentPortal/${p}/**/*.spec.ts`,
-+        ]),
-+        'lv/automatedTests/agentPortal/**/*.spec.ts',
-+      ];
-   const setupName = setupProjectName(name);
-   // The brand project comes before its setup project: the VS Code extension enables only the
-   // first project of a config by default. Setup still runs first, as a dependency.
-@@ -117,19 +121,22 @@ export default defineConfig({
-   // Parallel workers: WORKERS=4 or WORKERS=50% (of CPU cores); the --workers CLI flag overrides
-   // it. Defaults to 1 because the test env is slow and every test pays with the same card.
-   workers: parseWorkers(process.env.WORKERS),
-+  outputDir: reportPaths.testResults,
-   reporter: [
-     ['list'],
--    ['./reportingLayer/custom-html-reporter.js'],
--    ['html', { open: 'never', outputFolder: 'playwright-report' }],
--    ['junit', { outputFile: 'results.xml' }],
--    ['./reportingLayer/brand-allure-reporter.ts', { resultsDir: 'allure-results' }],
-+    // ['./reportingLayer/custom-html-reporter.js'],
-+    ['html', { open: 'never', outputFolder: reportPaths.playwrightHtml }],
-+    ['json', { outputFile: reportPaths.json }],
-+    ['junit', { outputFile: reportPaths.junit }],
-+    ['./reportingLayer/reporters/brand-allure-reporter.ts', { resultsDir: reportPaths.allureResults }],
-+    ['./reportingLayer/reporters/evidenceReporter.ts'],
-   ],
-   // Per-test timeout comes from the shared fixtures (10 min, as in Selenium).
-   expect: { timeout: EXPECT_TIMEOUT },
-   use: {
-     ignoreHTTPSErrors: env === 'localhost',
-     trace: 'retain-on-failure',
--    screenshot: 'only-on-failure',
-+    screenshot: { mode: 'only-on-failure', fullPage: true },
-     // VIDEO_MODE: off (default), on, retain-on-failure, on-first-retry. See docs/Reporting.md.
-     video: videoOption(retries),
-     actionTimeout: ACTION_TIMEOUT,
-warning: in the working copy of 'playwright.brands.config.ts', LF will be replaced by CRLF the next time Git touches it
-147 playwright.brands.config.ts
 
-tp70707@AVD-HEX-73 MINGW64 ~/OneDrive - Allianz/My Documents/Automation/Athena_Automation/integration-tests (evidence_factory_fix)
-$ npx --no-install eslint playwright.brands.config.ts
+git add playwright.brands.config.ts
 
-tp70707@AVD-HEX-73 MINGW64 ~/OneDrive - Allianz/My Documents/Automation/Athena_Automation/integration-tests (evidence_factory_fix)
-$ npx --no-install tsc --noEmit
+git diff --cached --check
 
-tp70707@AVD-HEX-73 MINGW64 ~/OneDrive - Allianz/My Documents/Automation/Athena_Automation/integration-tests (evidence_factory_fix)
-$ grep -nE 'validateReportPaths|reportPaths|evidenceReporter|brand-allure-reporter|fullPage' playwright.brands.config.ts
-5:import reportPaths from './configLayer/execution/reportPaths.json';
-11:import { validateReportPaths } from './configLayer/execution/validateReportPaths.cjs';
-25:validateReportPaths();
-124:  outputDir: reportPaths.testResults,
-128:    ['html', { open: 'never', outputFolder: reportPaths.playwrightHtml }],
-129:    ['json', { outputFile: reportPaths.json }],
-130:    ['junit', { outputFile: reportPaths.junit }],
-131:    ['./reportingLayer/reporters/brand-allure-reporter.ts', { resultsDir: reportPaths.allureResults }],
-132:    ['./reportingLayer/reporters/evidenceReporter.ts'],
-139:    screenshot: { mode: 'only-on-failure', fullPage: true },
+git --no-pager diff --cached --stat
 
-tp70707@AVD-HEX-73 MINGW64 ~/OneDrive - Allianz/My Documents/Automation/Athena_Automation/integration-tests (evidence_factory_fix)
-$ 
+git status --short
+
+
+
+
+git commit -m "Restore EvidenceFactory integration in brand configuration"
+
+
+git status
+
+git --no-pager log -4 --oneline
+
+git --no-pager show --stat HEAD
+
+git show HEAD:playwright.brands.config.ts | grep -nE 'validateReportPaths|reportPaths|evidenceReporter|brand-allure-reporter|fullPage'
+
+git show --format= --check HEAD
+
+
+
