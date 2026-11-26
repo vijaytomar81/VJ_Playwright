@@ -1,4 +1,9 @@
-node -p "require('./package.json').scripts['test:unit']"
+tp70707@AVD-HEX-73 MINGW64 ~/OneDrive - Allianz/My Documents/Automation/Athena_Automation/integration-tests (evidence_factory_fix)
+$ node -p "require('./package.json').scripts['test:unit']"
+playwright test -c automationLayer/insurance/unitTests/playwright.config.ts
+
+tp70707@AVD-HEX-73 MINGW64 ~/OneDrive - Allianz/My Documents/Automation/Athena_Automation/integration-tests (evidence_factory_fix)
+$ 
 
 
 npm run test:unit -- portalCompatibility.test.ts -g "Trustpilot feedback is dismissed"
