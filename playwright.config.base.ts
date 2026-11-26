@@ -54,7 +54,7 @@ export function createConfig(project: string | undefined) {
       // baseURL: 'http://localhost:3000',
 
       trace: 'on-first-retry',
-      /* Capture a screenshot right after a test fails, saved under test-results/ */
+      /* Capture a screenshot right after a test fails, saved under test-results */
       screenshot: { mode: 'only-on-failure', fullPage: true },
       /* VIDEO_MODE: off (default), on, retain-on-failure or on-first-retry. See docs/Reporting.md. */
       video: videoOption(retries),
