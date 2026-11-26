@@ -1,1 +1,11 @@
-"C:\Users\tp70707\OneDrive - Allianz\My Documents\Automation\Athena_Automation\integration-tests\evidence-reports\Britannia-run-2026-11-26T10-31-45-239\test-results\Regression-Britannia_Hexa--3877c-i-Premier-Annual-Bri-Annual-chromium\test-failed-1.png"
+$source = ".\evidence-reports\Britannia-run-2026-11-26T10-31-45-239"
+
+$destination = Join-Path $env:USERPROFILE "OneDrive - Allianz"
+
+Copy-Item -Path $source -Destination $destination -Recurse
+
+
+
+
+Invoke-Item (Join-Path $destination "Britannia-run-2026-11-26T10-31-45-239\Britannia-report.xlsx")
+

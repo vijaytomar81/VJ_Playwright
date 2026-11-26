@@ -1,3 +1,4 @@
+
 import {
     existsSync, statSync, mkdirSync, copyFileSync, cpSync,
     realpathSync, lstatSync, constants,
@@ -64,7 +65,7 @@ export function createRunDirectory(
             return {
                 runId,
                 runDirectory,
-                outputFile: join(runDirectory, `${prefix}-report.xlsx`),
+                outputFile: join(runDirectory, `${basename(runDirectory)}.xlsx`),
             };
         } catch (error) {
             if ((error as NodeJS.ErrnoException).code !== 'EEXIST') {
