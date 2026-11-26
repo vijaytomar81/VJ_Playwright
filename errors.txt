@@ -1,24 +1,8 @@
-tp70707@AVD-HEX-73 MINGW64 ~/OneDrive - Allianz/My Documents/Automation/Athena_Automation/integration-tests (evidence_factory_fix)
-$ git branch --show-current
+cat eslint.config.js
 
-git ls-files '*eslint*' '*lint-staged*'
+wc -l eslint.config.js
 
-node -e "const p = require('./package.json'); console.log(JSON.stringify({lint: p.scripts.lint, lintStaged: p['lint-staged']}, null, 2))"
-evidence_factory_fix
-eslint.config.js
-{
-  "lint": "eslint .",
-  "lintStaged": {
-    "*.ts": [
-      "eslint --fix",
-      "prettier --write"
-    ]
-  }
-}
 
-tp70707@AVD-HEX-73 MINGW64 ~/OneDrive - Allianz/My Documents/Automation/Athena_Automation/integration-tests (evidence_factory_fix)
-$ ls -la | grep -Ei 'eslint|lint-staged'
--rw-r--r-- 1 tp70707 1049089   4442 Nov 11 10:53 eslint.config.js
 
-tp70707@AVD-HEX-73 MINGW64 ~/OneDrive - Allianz/My Documents/Automation/Athena_Automation/integration-tests (evidence_factory_fix)
-$ 
+git --no-pager show HEAD:configLayer/execution/validateReportPaths.cjs
+
