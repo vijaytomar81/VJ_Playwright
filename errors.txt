@@ -1,10 +1,41 @@
-git push origin evidence_factory_fix
+tp70707@AVD-HEX-73 MINGW64 ~/OneDrive - Allianz/My Documents/Automation/Athena_Automation/integration-tests (evidence_factory_fix)
+$ git push origin evidence_factory_fix
+Enumerating objects: 57, done.
+Counting objects: 100% (57/57), done.
+Delta compression using up to 8 threads
+Compressing objects: 100% (38/38), done.
+Writing objects: 100% (38/38), 54.15 KiB | 1.69 MiB/s, done.
+Total 38 (delta 16), reused 0 (delta 0), pack-reused 0 (from 0)
+remote: warning: core.fsyncObjectFiles is deprecated; use core.fsync instead
+remote: warning: core.fsyncObjectFiles is deprecated; use core.fsync instead
+remote: 
+remote: To create a merge request for evidence_factory_fix, visit:
+remote:   https://gitlab-lv-dev.athenapaas.com/athenapaas/integration-tests/-/merge_requests/new?merge_request%5Bsource_branch%5D=evidence_factory_fix
+remote: 
+remote: warning: core.fsyncObjectFiles is deprecated; use core.fsync instead
+To https://gitlab-lv-dev.athenapaas.com/athenapaas/integration-tests.git
+   c116e6f..fc91afa  evidence_factory_fix -> evidence_factory_fix
 
-
-git status
+tp70707@AVD-HEX-73 MINGW64 ~/OneDrive - Allianz/My Documents/Automation/Athena_Automation/integration-tests (evidence_factory_fix)
+$ git status
 
 git --no-pager log -4 --oneline
 
 git rev-list --left-right --count origin/evidence_factory_fix...HEAD
+On branch evidence_factory_fix
+Your branch is up to date with 'origin/evidence_factory_fix'.
 
+Changes not staged for commit:
+  (use "git add <file>..." to update what will be committed)
+  (use "git restore <file>..." to discard changes in working directory)
+        modified:   .vscode/settings.json
 
+no changes added to commit (use "git add" and/or "git commit -a")
+fc91afa (HEAD -> evidence_factory_fix, origin/evidence_factory_fix) Restore EvidenceFactory integration in brand configuration
+40e26c9 Fix EvidenceFactory reporting integration
+9d2abbc Merge branch 'evidence_factory_revert' into 'develop'
+61b1e1b (origin/evidence_factory_revert, evidence_factory_revert) Revert "Merge branch 'evidence_factory' into 'develop'"
+0       0
+
+tp70707@AVD-HEX-73 MINGW64 ~/OneDrive - Allianz/My Documents/Automation/Athena_Automation/integration-tests (evidence_factory_fix)
+$ 
