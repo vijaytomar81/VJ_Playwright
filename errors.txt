@@ -1,4 +1,64 @@
-git check-ignore -v results.json
+tp70707@AVD-HEX-73 MINGW64 ~/OneDrive - Allianz/My Documents/Automation/Athena_Automation/integration-tests (evidence_factory_fix)
+$ git check-ignore -v results.json
 git status --short
 git --no-pager diff --cached --stat
 ls -l results.json
+.gitignore:10:/results.json     results.json
+M  .gitignore
+M  .vscode/settings.json
+M  JenkinsfileCommonTests
+M  JenkinsfileTestsWithReport
+M  automationLayer/common/basePage.ts
+A  automationLayer/common/executionEnvironmentMetadata.ts
+M  configLayer/execution/commonJob/reporter.cjs
+M  configLayer/execution/commonJob/reporter.test.cjs
+M  configLayer/execution/commonJob/reports.test.cjs
+M  configLayer/execution/commonJob/runner.cjs
+A  configLayer/execution/reportPaths.json
+A  configLayer/execution/validateReportPaths.cjs
+M  package-lock.json
+M  package.json
+M  playwright.brands.config.ts
+M  playwright.config.base.ts
+A  reportingLayer/README.md
+A  reportingLayer/evidenceArtifacts.ts
+A  reportingLayer/evidenceFactory.ts
+A  reportingLayer/excel/excelGenerator.ts
+A  reportingLayer/excel/excelStyleConfig.ts
+A  reportingLayer/excel/excelStyles.ts
+A  reportingLayer/excel/missingFields.ts
+R  reportingLayer/brand-allure-reporter.ts -> reportingLayer/reporters/brand-allure-reporter.ts
+A  reportingLayer/reporters/evidenceReporter.ts
+A  reportingLayer/schema/evidence-schema.ts
+A  reportingLayer/schema/summary-schema.ts
+ .gitignore                                         |    2 +
+ .vscode/settings.json                              |    3 +
+ JenkinsfileCommonTests                             |   68 +-
+ JenkinsfileTestsWithReport                         |  110 +-
+ automationLayer/common/basePage.ts                 |    6 +-
+ .../common/executionEnvironmentMetadata.ts         |  163 ++
+ configLayer/execution/commonJob/reporter.cjs       |   14 +-
+ configLayer/execution/commonJob/reporter.test.cjs  |   15 +-
+ configLayer/execution/commonJob/reports.test.cjs   |   24 +-
+ configLayer/execution/commonJob/runner.cjs         |   51 +-
+ configLayer/execution/reportPaths.json             |   10 +
+ configLayer/execution/validateReportPaths.cjs      |  371 +++
+ package-lock.json                                  | 2556 +++++++++++++++++++-
+ package.json                                       |    4 +-
+ playwright.brands.config.ts                        |   14 +-
+ playwright.config.base.ts                          |   22 +-
+ reportingLayer/README.md                           |  411 ++++
+ reportingLayer/evidenceArtifacts.ts                |  360 +++
+ reportingLayer/evidenceFactory.ts                  |  396 +++
+ reportingLayer/excel/excelGenerator.ts             |  365 +++
+ reportingLayer/excel/excelStyleConfig.ts           |  170 ++
+ reportingLayer/excel/excelStyles.ts                |  553 +++++
+ reportingLayer/excel/missingFields.ts              |   70 +
+ .../{ => reporters}/brand-allure-reporter.ts       |    0
+ reportingLayer/reporters/evidenceReporter.ts       |   60 +
+ reportingLayer/schema/evidence-schema.ts           |   78 +
+ reportingLayer/schema/summary-schema.ts            |  110 +
+ 27 files changed, 5850 insertions(+), 156 deletions(-)
+-rw-r--r-- 1 tp70707 1049089 19173 Nov 26 13:53 results.json
+
+tp70707@AVD-HEX-73 MINGW64 ~/OneDrive - Allianz/My Documents/Automation/Athena_Automation/integration-tests (evidence_factory_fix)
