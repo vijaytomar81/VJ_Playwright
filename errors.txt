@@ -1,58 +1,13 @@
-tp70707@AVD-HEX-73 MINGW64 ~/OneDrive - Allianz/My Documents/Automation/Athena_Automation/integration-tests (evidence_factory_fix)
-$ git status --short
- M configLayer/execution/validateReportPaths.cjs
- M eslint.config.js
+git commit -m "Fix EvidenceFactory validator ESLint errors"
 
-tp70707@AVD-HEX-73 MINGW64 ~/OneDrive - Allianz/My Documents/Automation/Athena_Automation/integration-tests (evidence_factory_fix)
-$ git add -- eslint.config.js configLayer/execution/validateReportPaths.cjs
 
-tp70707@AVD-HEX-73 MINGW64 ~/OneDrive - Allianz/My Documents/Automation/Athena_Automation/integration-tests (evidence_factory_fix)
-$ git status --short
+git status
 
-git --no-pager diff --cached --stat
+git --no-pager log -1 --oneline
 
-git --no-pager diff --cached
+git --no-pager show --stat HEAD
 
-git diff --cached --check
-M  configLayer/execution/validateReportPaths.cjs
-M  eslint.config.js
- configLayer/execution/validateReportPaths.cjs | 4 +++-
- eslint.config.js                              | 1 +
- 2 files changed, 4 insertions(+), 1 deletion(-)
-diff --git a/configLayer/execution/validateReportPaths.cjs b/configLayer/execution/validateReportPaths.cjs
-index 857d34c..622ab8a 100644
---- a/configLayer/execution/validateReportPaths.cjs
-+++ b/configLayer/execution/validateReportPaths.cjs
-@@ -212,7 +212,8 @@ function resolveReportPath(key, value, repositoryRoot) {
-         if (
-             !component ||
-             component === '.' ||
--            /[<>:"|?*\x00-\x1f]/.test(component) ||
-+            /[<>:"|?*]/.test(component) ||
-+            Array.from(component).some((character) => character.charCodeAt(0) < 32) ||
-             /[. ]$/.test(component) ||
-             /^(CON|PRN|AUX|NUL|COM[1-9¹²³]|LPT[1-9¹²³])(?:\.|$)/i.test(component)
-         ) {
-@@ -253,6 +254,7 @@ function resolveReportPath(key, value, repositoryRoot) {
-         throw new Error(
-             `Invalid report path configuration: '${key}' cannot be ` +
-             `resolved safely: ${value}\n${error.message}`,
-+            { cause: error },
-         );
-     }
- 
-diff --git a/eslint.config.js b/eslint.config.js
-index 5a29b36..a3a2065 100644
---- a/eslint.config.js
-+++ b/eslint.config.js
-@@ -89,6 +89,7 @@ module.exports = tseslint.config(
-     // Standalone Node CommonJS entry points and source-analysis tools.
-     files: [
-       'configLayer/execution/commonJob/**/*.cjs',
-+      'configLayer/execution/validateReportPaths.cjs',
-       'docs/page-object-analysis/**/*.cjs',
-       '.dependency-cruiser.cjs',
-     ],
+git --no-pager show --format= HEAD
 
-tp70707@AVD-HEX-73 MINGW64 ~/OneDrive - Allianz/My Documents/Automation/Athena_Automation/integration-tests (evidence_factory_fix)
-$ 
+git show --format= --check HEAD
+
