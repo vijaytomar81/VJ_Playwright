@@ -1,5 +1,5 @@
 import { hostname, userInfo } from 'node:os';
-import { existsSync, readFileSync } from 'node:fs';
+import { existsSync, readFileSync, statSync } from 'node:fs';
 import { resolve } from 'node:path';
 
 import reportPaths from '../configLayer/execution/reportPaths.json';
@@ -143,6 +143,7 @@ function testStatus(test: JsonTest): ExcelEvidenceTest['status'] {
 function failureScreenshot(
     test: JsonTest,
     runDirectory: string,
+    copiedScreenshots: Map<string, string>,
 ): string {
     let screenshot = UNKNOWN;
 
@@ -157,7 +158,7 @@ function failureScreenshot(
             }
 
             const copiedScreenshot = resolveScreenshot(
-                attachment.path, runDirectory,
+                attachment.path, runDirectory, copiedScreenshots,
             );
 
             if (copiedScreenshot) {
@@ -172,6 +173,7 @@ function failureScreenshot(
 function buildTests(
     specs: readonly JsonSpec[],
     runDirectory: string,
+    copiedScreenshots: Map<string, string>,
 ): ExcelEvidenceTest[] {
     return specs.flatMap(spec => spec.tests.map(test => {
         const last = test.results[test.results.length - 1];
@@ -181,7 +183,7 @@ function buildTests(
         delete annotations.screenshot;
 
         const screenshot = failureScreenshot(
-            test, runDirectory,
+            test, runDirectory, copiedScreenshots,
         );
 
         if (screenshot) {
@@ -231,7 +233,9 @@ function summaryValue(
         : values.values().next().value ?? UNKNOWN;
 }
 
-export async function generateEvidenceFactory(): Promise<string> {
+export async function generateEvidenceFactory(
+    invocationStartedAt?: number,
+): Promise<string> {
     validateReportPaths();
 
     const jsonFile = resolve(reportPaths.json);
@@ -263,7 +267,8 @@ export async function generateEvidenceFactory(): Promise<string> {
     if (
         !Array.isArray(report.suites) ||
         !report.stats?.startTime ||
-        !Number.isFinite(report.stats.duration)
+        !Number.isFinite(report.stats.duration) ||
+        report.stats.duration < 0
     ) {
         throw new Error('EvidenceFactory: Invalid Playwright JSON report');
     }
@@ -277,6 +282,18 @@ export async function generateEvidenceFactory(): Promise<string> {
     const finishedAt = new Date(
         startedAt.getTime() + report.stats.duration,
     );
+
+    if (Number.isNaN(finishedAt.getTime())) {
+        throw new Error('EvidenceFactory: Invalid execution finish time');
+    }
+
+    if (
+        invocationStartedAt !== undefined &&
+        (!Number.isFinite(invocationStartedAt) ||
+            statSync(jsonFile).mtimeMs < invocationStartedAt)
+    ) {
+        throw new Error('EvidenceFactory: Native JSON report is invalid or stale');
+    }
 
     const specs = collectSpecs(report.suites);
 
@@ -308,10 +325,15 @@ export async function generateEvidenceFactory(): Promise<string> {
     }
 
     // Copy native reports before resolving Excel screenshot hyperlinks.
-    copyReports(runDirectory, jsonFile, reportSources);
+    copyReports(runDirectory, jsonFile, reportSources, {
+        startedAt,
+        includeCommonJob: process.env.EVIDENCEFACTORY_INCLUDE_COMMON_JOB === 'true',
+    });
+
+    const copiedScreenshots = new Map<string, string>();
 
     const rows = buildTests(
-        specs, runDirectory,
+        specs, runDirectory, copiedScreenshots,
     );
 
     const passed = rows.filter(row => row.status === 'passed').length;

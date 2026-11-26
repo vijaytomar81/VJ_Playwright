@@ -225,6 +225,7 @@ pipeline {
                             "ENV=${params.TEST_ENV}",
                             "EVIDENCEFACTORY_PROJECT=${params.PROJECT_NAME}",
                             "EVIDENCEFACTORY_JSON_FILE=${reportPaths.json}",
+                            'EVIDENCEFACTORY_INCLUDE_COMMON_JOB=false',
                             'EVIDENCEFACTORY_ALLURE_REPORT_DIR='
                         ]) {
                             def output = sh(returnStdout: true, script: '''

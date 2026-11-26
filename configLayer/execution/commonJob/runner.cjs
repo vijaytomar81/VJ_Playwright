@@ -205,6 +205,7 @@ function main(command) {
   validateReportPaths();
 
   if (command === 'prepare') {
+    const p = plan(process.env);
     // Only generated outputs, relative to the Jenkins checkout; no parameter controls deletion.
     for (const output of [
       reportPaths.commonJob,
@@ -217,7 +218,6 @@ function main(command) {
     ]) {
       fs.rmSync(path.resolve(output), { recursive: true, force: true });
     }
-    const p = plan(process.env);
     fs.mkdirSync(reportPaths.commonJob);
     fs.writeFileSync(path.join(reportPaths.commonJob, 'plan.json'), JSON.stringify(p, null, 2));
     console.log(`${p.target} | ${p.environment} | ${p.suite} | ${p.mode}`);

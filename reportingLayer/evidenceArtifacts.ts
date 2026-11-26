@@ -1,4 +1,3 @@
-
 import {
     existsSync, statSync, mkdirSync, copyFileSync, cpSync,
     realpathSync, lstatSync, constants,
@@ -10,6 +9,11 @@ import reportPaths from '../configLayer/execution/reportPaths.json';
 const { validateReportPaths } = require('../configLayer/execution/validateReportPaths.cjs');
 
 const DEFAULT_PROJECT_NAME = 'Evidence';
+
+export interface ReportFreshness {
+    startedAt: Date;
+    includeCommonJob: boolean;
+}
 
 function toPascalCase(value: string): string {
     return value.trim()
@@ -93,9 +97,66 @@ function isSameOrChild(candidate: string, parent: string): boolean {
 }
 
 /**
+ * Screens report files against the execution start time.
+ * Modification timestamps alone do not establish execution ownership.
+ */
+function isFreshFile(source: string, startedAt: Date): boolean {
+    if (!existsSync(source)) return false;
+
+    const stats = lstatSync(source);
+
+    return stats.isFile() &&
+        stats.mtimeMs >= startedAt.getTime();
+}
+
+/**
+ * Checks optional report eligibility without modifying native reports.
+ */
+function isEligibleReport(
+    source: string,
+    freshness: ReportFreshness,
+): boolean {
+    if (source === resolve(reportPaths.commonJob)) {
+        return freshness.includeCommonJob &&
+            isFreshFile(
+                join(source, 'results-summary.json'),
+                freshness.startedAt,
+            );
+    }
+
+    if (
+        source === resolve(reportPaths.playwrightHtml) ||
+        source === resolve(reportPaths.allureReport)
+    ) {
+        return isFreshFile(
+            join(source, 'index.html'),
+            freshness.startedAt,
+        );
+    }
+
+    if (source === resolve(reportPaths.junit)) {
+        return isFreshFile(source, freshness.startedAt);
+    }
+
+    return true;
+}
+
+/**
+ * Identifies native directories that may contain individual stale artifacts.
+ */
+function filterReportFiles(source: string): boolean {
+    return source === resolve(reportPaths.allureResults) ||
+        source === resolve(reportPaths.testResults);
+}
+
+/**
  * Copies an existing report without modifying its original location.
  */
-function copyReport(source: string, destination: string): void {
+function copyReport(
+    source: string,
+    destination: string,
+    startedAt?: Date,
+): void {
     const resultsRoot = realpathSync(
         resolve(process.cwd(), reportPaths.evidenceFactoryOutput),
     );
@@ -122,10 +183,17 @@ function copyReport(source: string, destination: string): void {
             force: false,
             errorOnExist: true,
             filter: entry => {
-                if (lstatSync(entry).isSymbolicLink()) {
+                const stats = lstatSync(entry);
+
+                if (stats.isSymbolicLink()) {
                     throw new Error(
                         `EvidenceFactory: Symbolic link report entry is not supported: ${entry}`,
                     );
+                }
+
+                if (startedAt && !stats.isDirectory()) {
+                    return stats.isFile() &&
+                        stats.mtimeMs >= startedAt.getTime();
                 }
 
                 return true;
@@ -137,13 +205,15 @@ function copyReport(source: string, destination: string): void {
 }
 
 /**
- * Copies reports produced during the current execution.
+ * Copies eligible native reports without modifying their original locations.
  * Preserves their existing names and directory structures.
+ * Groups native JSON and JUnit XML reports inside native-results.
  */
 export function copyReports(
     runDirectory: string,
     jsonFile: string,
     reportSources: readonly string[],
+    freshness?: ReportFreshness,
 ): void {
     const jsonSource = resolve(process.cwd(), jsonFile);
 
@@ -153,10 +223,22 @@ export function copyReports(
         );
     }
 
-    const jsonFilename = basename(reportPaths.json);
-    const destinations = new Set<string>([jsonFilename.toLowerCase()]);
+    if (freshness && !isFreshFile(jsonSource, freshness.startedAt)) {
+        throw new Error(
+            `EvidenceFactory: Mandatory JSON report is invalid or stale: ${jsonSource}`,
+        );
+    }
 
-    copyReport(jsonSource, join(runDirectory, jsonFilename));
+    const nativeResultsDirectory = join(runDirectory, 'native-results');
+
+    mkdirSync(nativeResultsDirectory);
+
+    const jsonFilename = basename(reportPaths.json);
+    const destinations = new Set<string>([
+        join('native-results', jsonFilename).toLowerCase(),
+    ]);
+
+    copyReport(jsonSource, join(nativeResultsDirectory, jsonFilename));
 
     for (const report of reportSources) {
         const source = resolve(process.cwd(), report);
@@ -164,8 +246,10 @@ export function copyReports(
         if (!existsSync(source)) continue;
 
         const filename = basename(source);
-        const destination = join(runDirectory, filename);
-        const destinationKey = filename.toLowerCase();
+        const destination = source === resolve(reportPaths.junit)
+            ? join(nativeResultsDirectory, filename)
+            : join(runDirectory, filename);
+        const destinationKey = relative(runDirectory, destination).toLowerCase();
 
         if (destinations.has(destinationKey)) {
             console.warn(
@@ -177,7 +261,17 @@ export function copyReports(
         destinations.add(destinationKey);
 
         try {
-            copyReport(source, destination);
+            if (freshness && !isEligibleReport(source, freshness)) {
+                console.warn(
+                    `EvidenceFactory: Stale or ineligible report skipped: ${source}`,
+                );
+                continue;
+            }
+
+            copyReport(
+                source, destination,
+                filterReportFiles(source) ? freshness?.startedAt : undefined,
+            );
         } catch (error) {
             console.warn(
                 `EvidenceFactory: Unable to copy report: ${source}`,
@@ -188,11 +282,13 @@ export function copyReports(
 }
 
 /**
- * Resolves a copied native Playwright screenshot as a portable Excel hyperlink.
+ * Copies a native Playwright screenshot into the dedicated screenshots directory.
+ * Reuses existing screenshot copies and returns a portable Excel hyperlink.
  */
 export function resolveScreenshot(
     attachmentPath: string,
     runDirectory: string,
+    copiedScreenshots: Map<string, string>,
 ): string {
     const source = isAbsolute(attachmentPath)
         ? attachmentPath
@@ -225,5 +321,40 @@ export function resolveScreenshot(
         return '';
     }
 
-    return relative(runDirectory, destination).replace(/\\/g, '/');
+    const screenshotKey = process.platform === 'win32'
+        ? resolve(destination).toLowerCase()
+        : resolve(destination);
+
+    const existingScreenshot = copiedScreenshots.get(screenshotKey);
+
+    if (existingScreenshot) {
+        return existingScreenshot;
+    }
+
+    const screenshotsDirectory = join(runDirectory, 'screenshots');
+    const prefix = String(copiedScreenshots.size + 1).padStart(3, '0');
+    const screenshotFilename = `${prefix}-${basename(screenshot)}`;
+    const screenshotDestination = join(screenshotsDirectory, screenshotFilename);
+
+    try {
+        mkdirSync(screenshotsDirectory, { recursive: true });
+
+        copyFileSync(
+            destination, screenshotDestination, constants.COPYFILE_EXCL,
+        );
+
+        const hyperlink = relative(
+            runDirectory, screenshotDestination,
+        ).replace(/\\/g, '/');
+
+        copiedScreenshots.set(screenshotKey, hyperlink);
+
+        return hyperlink;
+    } catch (error) {
+        console.warn(
+            `EvidenceFactory: Unable to copy screenshot: ${destination}`,
+            error,
+        );
+        return '';
+    }
 }

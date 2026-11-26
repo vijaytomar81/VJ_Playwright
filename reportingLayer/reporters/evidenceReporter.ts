@@ -49,7 +49,7 @@ export default class EvidenceReporter implements Reporter {
                 return;
             }
 
-            await generateEvidenceFactory();
+            await generateEvidenceFactory(this.invocationStartedAt);
         } catch (error) {
             console.error(
                 'EvidenceFactory: automatic report generation failed.',

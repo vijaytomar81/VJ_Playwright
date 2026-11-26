@@ -184,6 +184,7 @@ pipeline {
                             "ENV=${plan.environment}",
                             "EVIDENCEFACTORY_PROJECT=${plan.project ?: plan.brand}",
                             "EVIDENCEFACTORY_JSON_FILE=${reportPaths.json}",
+                            'EVIDENCEFACTORY_INCLUDE_COMMON_JOB=true',
                             'EVIDENCEFACTORY_ALLURE_REPORT_DIR='
                         ]) {
                             def output = sh(returnStdout: true, script: '''
