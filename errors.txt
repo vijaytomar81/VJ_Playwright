@@ -1,6 +1,3 @@
-node -p "require('./package.json').scripts['test:unit']"
+git --no-pager diff -- automationLayer/common/executionEnvironmentMetadata.ts
 
-
-npm run test:unit
-echo "Exit code: $?"
-
+git diff --check
