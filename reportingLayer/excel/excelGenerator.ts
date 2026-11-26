@@ -286,7 +286,7 @@ function createMissingFields(
     if (!missing.length) return;
 
     const sheet = workbook.addWorksheet('Missing Reporting Fields');
-    const headers = ['Missing Field', 'Affected Tests', 'Occurrences'];
+    const headers = ['Missing Field', 'Field Value', 'Affected Tests', 'Occurrences'];
 
     headers.forEach((header, index) => {
         sheet.getCell(1, index + 1).value = header;
@@ -299,6 +299,7 @@ function createMissingFields(
 
         [
             item.field,
+            item.value,
             item.affectedTests.join(', '),
             item.occurrences,
         ].forEach((value, column) => {

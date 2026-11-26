@@ -7,6 +7,7 @@
 
 export interface MissingReportingField {
     field: string;
+    value: string;
     affectedTests: string[];
     occurrences: number;
 }
@@ -33,26 +34,32 @@ export function findMissingReportingFields(
     const missingFields = new Map<
         string,
         {
+            field: string;
+            value: string;
             affectedTests: Set<string>;
             occurrences: number;
         }
     >();
 
     for (const test of tests) {
-        for (const field of Object.keys(test.annotations)) {
+        for (const [field, value] of Object.entries(test.annotations)) {
             if (knownFields.has(field) || SENSITIVE.test(field)) {
                 continue;
             }
 
-            let entry = missingFields.get(field);
+            const key = JSON.stringify([field, value]);
+
+            let entry = missingFields.get(key);
 
             if (!entry) {
                 entry = {
+                    field,
+                    value,
                     affectedTests: new Set<string>(),
                     occurrences: 0,
                 };
 
-                missingFields.set(field, entry);
+                missingFields.set(key, entry);
             }
 
             entry.affectedTests.add(test.testName);
@@ -60,9 +67,10 @@ export function findMissingReportingFields(
         }
     }
 
-    return Array.from(missingFields.entries())
-        .map(([field, entry]) => ({
-            field,
+    return Array.from(missingFields.values())
+        .map(entry => ({
+            field: entry.field,
+            value: entry.value,
             affectedTests: Array.from(entry.affectedTests).sort(),
             occurrences: entry.occurrences,
         }))
