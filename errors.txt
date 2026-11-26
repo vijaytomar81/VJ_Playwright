@@ -1,14 +1,40 @@
-git --no-pager diff -- reportingLayer/reporters/evidenceReporter.ts
+tp70707@AVD-HEX-73 MINGW64 ~/OneDrive - Allianz/My Documents/Automation/Athena_Automation/integration-tests (evidence_factory_fix)
+$ git --no-pager diff -- reportingLayer/reporters/evidenceReporter.ts
+diff --git a/reportingLayer/reporters/evidenceReporter.ts b/reportingLayer/reporters/evidenceReporter.ts
+index a8386c0..b4307ef 100644
+--- a/reportingLayer/reporters/evidenceReporter.ts
++++ b/reportingLayer/reporters/evidenceReporter.ts
+@@ -3,8 +3,6 @@ import { resolve } from 'node:path';
+ 
+ import type {
+     Reporter,
+-    TestCase,
+-    TestResult,
+ } from '@playwright/test/reporter';
+ 
+ import reportPaths from '../../configLayer/execution/reportPaths.json';
+@@ -14,7 +12,7 @@ export default class EvidenceReporter implements Reporter {
+     private readonly invocationStartedAt = Date.now();
+     private executionStarted = false;
+ 
+-    onTestBegin(_test: TestCase, _result: TestResult): void {
++    onTestBegin(): void {
+         this.executionStarted = true;
+     }
+ 
 
-git diff --check -- reportingLayer/reporters/evidenceReporter.ts
+tp70707@AVD-HEX-73 MINGW64 ~/OneDrive - Allianz/My Documents/Automation/Athena_Automation/integration-tests (evidence_factory_fix)
+$ git diff --check -- reportingLayer/reporters/evidenceReporter.ts
 
-npx --no-install eslint reportingLayer/reporters/evidenceReporter.ts
+tp70707@AVD-HEX-73 MINGW64 ~/OneDrive - Allianz/My Documents/Automation/Athena_Automation/integration-tests (evidence_factory_fix)
+$ npx --no-install eslint reportingLayer/reporters/evidenceReporter.ts
 
-npx --no-install tsc --noEmit
+tp70707@AVD-HEX-73 MINGW64 ~/OneDrive - Allianz/My Documents/Automation/Athena_Automation/integration-tests (evidence_factory_fix)
+$ npx --no-install tsc --noEmit
 
-wc -l reportingLayer/reporters/evidenceReporter.ts
+tp70707@AVD-HEX-73 MINGW64 ~/OneDrive - Allianz/My Documents/Automation/Athena_Automation/integration-tests (evidence_factory_fix)
+$ wc -l reportingLayer/reporters/evidenceReporter.ts
+58 reportingLayer/reporters/evidenceReporter.ts
 
-
-
-
-
+tp70707@AVD-HEX-73 MINGW64 ~/OneDrive - Allianz/My Documents/Automation/Athena_Automation/integration-tests (evidence_factory_fix)
+$ 
