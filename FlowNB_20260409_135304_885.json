@@ -1,0 +1,692 @@
+{
+  "sheet": "FlowNB",
+  "sourceExcel": "/Users/vijaytomar/AZOnline_Automation/AZOnline/sampleData/New Business.xlsx",
+  "generatedAt": "2026-04-09T11:53:04.884Z",
+  "caseCount": 3,
+  "cases": [
+    {
+      "caseIndex": 1,
+      "scriptName": "NB_CASE_01",
+      "scriptId": "NB_CASE_01",
+      "description": "Direct new business - standard petrol hatchback",
+      "data": {
+        "meta": {
+          "scriptId": "NB_CASE_01",
+          "description": "Direct new business - standard petrol hatchback",
+          "dataSpecification": "Direct NB basic case",
+          "scriptName": "NB_CASE_01",
+          "result": "ReadyForBuilder"
+        },
+        "accountInformation": {
+          "accountEmail": "john.smith@example.com",
+          "accountId": "ACC001",
+          "password": "Passw0rd!",
+          "gmailPassword": "GmailPass123!",
+          "todaysDate": "20/03/2026",
+          "formattedDate": "20 Mar 2026",
+          "formattedAccountId": "ACC001"
+        },
+        "carDetails": {
+          "vehicle": {
+            "registrationKnown": "Yes",
+            "registrationNumber": "AB12CDE",
+            "make": "Ford",
+            "model": "Fiesta",
+            "fuelType": "Petrol",
+            "yearOfManufacture": "2021",
+            "doors": "5",
+            "transmission": "Manual",
+            "engineSize": "1498",
+            "trim": "Standard",
+            "bodyType": "Hatchback",
+            "service": "Private",
+            "vehicleType": "Car",
+            "selectedCar": "Ford Fiesta",
+            "registerNumber": "AB12CDE",
+            "marketValue": "12000",
+            "imported": "No",
+            "driveSide": "Right Hand Drive",
+            "seatCount": 5,
+            "alarmOrImmobiliser": "Factory fitted immobiliser",
+            "tracker": "No",
+            "dashcamFitted": "No",
+            "hasModifications": "No",
+            "modificationFlag": "No"
+          },
+          "ownership": {
+            "purchaseDate": "01/03/2026",
+            "hasBoughtCar": "Yes",
+            "legalOwner": "Policy Holder",
+            "registeredKeeper": "Policy Holder",
+            "policyHolderIsLegalOwner": "Yes",
+            "policyHolderIsRegisteredKeeper": "Yes",
+            "policyHolderIsOwnerAndRegisteredKeeper": "Yes"
+          },
+          "usage": {
+            "mainDriver": "PolicyHolder",
+            "usageType": "Social Domestic and Pleasure",
+            "usageReason": "Commuting",
+            "businessUser": "No",
+            "annualMileage": "8000",
+            "annualBusinessMileage": "0",
+            "peakTimeDriving": "Yes",
+            "peakTimeDrivingFrequency": "Occasionally",
+            "storedAtHomeAddress": "Yes",
+            "storedAtSameLocation": "Yes",
+            "daytimeParkingLocation": "Driveway",
+            "overnightParkingLocation": "Driveway",
+            "parkingPlace": "Driveway",
+            "overnightAddressDoorNo": "10",
+            "overnightAddressPostcode": "SW1A 1AA",
+            "carsAtHome": "1",
+            "driveOtherCars": "No",
+            "otherCarsDriven": "0"
+          }
+        },
+        "policyHolder": {
+          "identity": {
+            "title": "Mr",
+            "firstName": "John",
+            "lastName": "Smith",
+            "fullName": "John Smith",
+            "dateOfBirth": "15/05/1990",
+            "dateOfBirthDerivation": "Manual",
+            "gender": "Male",
+            "relationshipStatus": "Married"
+          },
+          "address": {
+            "houseNumber": "10",
+            "postcode": "SW1A 1AA",
+            "addressLine": "10 Sample Street",
+            "livesInUKYears": "20",
+            "ukResidentSince": "2006"
+          },
+          "personalDetails": {
+            "maritalStatus": "Married",
+            "homeOwnership": "Owned",
+            "childrenUnder16": "0",
+            "employmentStatus": "Employed",
+            "occupation": "Engineer",
+            "industry": "Technology",
+            "hasSecondaryOccupation": "No",
+            "otherJob": "",
+            "otherJobIndustry": "",
+            "studentType": "",
+            "bestDescription": "Professional",
+            "phone": "07123456781",
+            "lvMemberAnswer": "No"
+          },
+          "licenceDetails": {
+            "enterDriverDetailsManually": "Yes",
+            "haveDrivingLicenceHandy": "Yes",
+            "licenceNumber": "SMITH905151JS9AB",
+            "licencePart1": "SMITH",
+            "licencePart2": "90515",
+            "licencePart3": "1JS9A",
+            "licencePart4": "B",
+            "licenceType": "Full UK",
+            "licenceIssuedLocation": "UK",
+            "licenceManualOrAutomatic": "Manual",
+            "licenceHeldYears": "12",
+            "yearsSinceTestPassed": "12",
+            "licenceRestrictionDuration": "0",
+            "licenceDate": "15/07/2012"
+          },
+          "drivingHistory": {
+            "additionalDrivingQualifications": "No",
+            "qualificationType": "",
+            "qualificationDate": "",
+            "iamCertificate": "No",
+            "passPlusCertificate": "No",
+            "medicalConditionFlag": "No",
+            "medicalConditionDetails": "",
+            "dvlaAwareOfMedicalCondition": "",
+            "heldCarInsuranceInLast2Years": "Yes",
+            "drivenCarNotInsured": "No",
+            "insuranceDeclinedCancelled": "No",
+            "unspentNonDrivingConvictions": "No",
+            "useAnotherVehicle": "No",
+            "otherVehicleUsage": "",
+            "namedDriverExperience": "Yes",
+            "namedDriverExperienceYears": "2"
+          },
+          "ncdDetails": {
+            "ncdYears": "5",
+            "howWasNCDEarned": "PolicyHolder",
+            "protectNCD": "No",
+            "ncdProtected": "No"
+          },
+          "claimsControl": {
+            "enabled": "No",
+            "count": 0
+          },
+          "convictionsControl": {
+            "enabled": "No",
+            "count": 0,
+            "nonMotoringFlag": ""
+          }
+        },
+        "coverDetails": {
+          "coverStartDay": "21",
+          "coverStartFullDate": "21/03/2026",
+          "coverType": "Comprehensive",
+          "voluntaryExcess": "",
+          "breakdownOption": "",
+          "renewalReminder": "",
+          "protectedNoClaimsDiscount": "0",
+          "guaranteedHireCar": "",
+          "motorLegalExpenses": "",
+          "personalInjuryCover": "No",
+          "courtesyCarCover": "Yes",
+          "product": "",
+          "declineMessage": "",
+          "athenaUWRuleId": "",
+          "athenaUWMessage": "",
+          "proceedToBuy": ""
+        },
+        "directDebitDetails": {
+          "bankCheckService": "",
+          "accountHolderName": "",
+          "accountNumber": "",
+          "sortCode": "",
+          "paymentDay": ""
+        },
+        "paymentDetails": {
+          "paymentGatewayService": "",
+          "paymentMode": "",
+          "lowRange": "",
+          "highRange": "",
+          "paymentDate": "20/03/2026",
+          "cardName": "JOHN SMITH",
+          "cardNumber": "4111111111111111",
+          "expiryMonth": "12",
+          "expiryYear": "29",
+          "securityCode": "123",
+          "monthlyCardCase": "No",
+          "convertToMonthlyCard": "No"
+        },
+        "policyHolderClaims": {
+          "count": 0
+        },
+        "policyHolderConvictions": {
+          "count": 0
+        },
+        "additionalDrivers": {
+          "count": 0
+        }
+      }
+    },
+    {
+      "caseIndex": 2,
+      "scriptName": "NB_CASE_02",
+      "scriptId": "NB_CASE_02",
+      "description": "Direct new business - hybrid supermini",
+      "data": {
+        "meta": {
+          "scriptId": "NB_CASE_02",
+          "description": "Direct new business - hybrid supermini",
+          "dataSpecification": "Direct NB alternate case",
+          "scriptName": "NB_CASE_02",
+          "result": "ReadyForBuilder"
+        },
+        "accountInformation": {
+          "accountEmail": "priya.patel@example.com",
+          "accountId": "ACC002",
+          "password": "Passw0rd!",
+          "gmailPassword": "GmailPass123!",
+          "todaysDate": "20/03/2026",
+          "formattedDate": "20 Mar 2026",
+          "formattedAccountId": "ACC002"
+        },
+        "carDetails": {
+          "vehicle": {
+            "registrationKnown": "Yes",
+            "registrationNumber": "CD34EFG",
+            "make": "Toyota",
+            "model": "Yaris",
+            "fuelType": "Hybrid",
+            "yearOfManufacture": "2022",
+            "doors": "5",
+            "transmission": "Automatic",
+            "engineSize": "1490",
+            "trim": "Standard",
+            "bodyType": "Hatchback",
+            "service": "Private",
+            "vehicleType": "Car",
+            "selectedCar": "Toyota Yaris",
+            "registerNumber": "CD34EFG",
+            "marketValue": "15500",
+            "imported": "No",
+            "driveSide": "Right Hand Drive",
+            "seatCount": 5,
+            "alarmOrImmobiliser": "Factory fitted immobiliser",
+            "tracker": "No",
+            "dashcamFitted": "No",
+            "hasModifications": "No",
+            "modificationFlag": "No"
+          },
+          "ownership": {
+            "purchaseDate": "01/03/2026",
+            "hasBoughtCar": "Yes",
+            "legalOwner": "Policy Holder",
+            "registeredKeeper": "Policy Holder",
+            "policyHolderIsLegalOwner": "Yes",
+            "policyHolderIsRegisteredKeeper": "Yes",
+            "policyHolderIsOwnerAndRegisteredKeeper": "Yes"
+          },
+          "usage": {
+            "mainDriver": "PolicyHolder",
+            "usageType": "Social Domestic and Pleasure",
+            "usageReason": "Commuting",
+            "businessUser": "No",
+            "annualMileage": "6500",
+            "annualBusinessMileage": "0",
+            "peakTimeDriving": "Yes",
+            "peakTimeDrivingFrequency": "Occasionally",
+            "storedAtHomeAddress": "Yes",
+            "storedAtSameLocation": "Yes",
+            "daytimeParkingLocation": "Driveway",
+            "overnightParkingLocation": "Driveway",
+            "parkingPlace": "Driveway",
+            "overnightAddressDoorNo": "25",
+            "overnightAddressPostcode": "M1 1AE",
+            "carsAtHome": "1",
+            "driveOtherCars": "No",
+            "otherCarsDriven": "0"
+          }
+        },
+        "policyHolder": {
+          "identity": {
+            "title": "Ms",
+            "firstName": "Priya",
+            "lastName": "Patel",
+            "fullName": "Priya Patel",
+            "dateOfBirth": "22/09/1992",
+            "dateOfBirthDerivation": "Manual",
+            "gender": "Female",
+            "relationshipStatus": "Single"
+          },
+          "address": {
+            "houseNumber": "25",
+            "postcode": "M1 1AE",
+            "addressLine": "25 Market Road",
+            "livesInUKYears": "20",
+            "ukResidentSince": "2006"
+          },
+          "personalDetails": {
+            "maritalStatus": "Single",
+            "homeOwnership": "Owned",
+            "childrenUnder16": "0",
+            "employmentStatus": "Employed",
+            "occupation": "Engineer",
+            "industry": "Technology",
+            "hasSecondaryOccupation": "No",
+            "otherJob": "",
+            "otherJobIndustry": "",
+            "studentType": "",
+            "bestDescription": "Professional",
+            "phone": "07123456782",
+            "lvMemberAnswer": "No"
+          },
+          "licenceDetails": {
+            "enterDriverDetailsManually": "Yes",
+            "haveDrivingLicenceHandy": "Yes",
+            "licenceNumber": "PATEL922292PP8CD",
+            "licencePart1": "PATEL",
+            "licencePart2": "92229",
+            "licencePart3": "2PP8C",
+            "licencePart4": "D",
+            "licenceType": "Full UK",
+            "licenceIssuedLocation": "UK",
+            "licenceManualOrAutomatic": "Automatic",
+            "licenceHeldYears": "12",
+            "yearsSinceTestPassed": "12",
+            "licenceRestrictionDuration": "0",
+            "licenceDate": "15/07/2012"
+          },
+          "drivingHistory": {
+            "additionalDrivingQualifications": "No",
+            "qualificationType": "",
+            "qualificationDate": "",
+            "iamCertificate": "No",
+            "passPlusCertificate": "No",
+            "medicalConditionFlag": "No",
+            "medicalConditionDetails": "",
+            "dvlaAwareOfMedicalCondition": "",
+            "heldCarInsuranceInLast2Years": "Yes",
+            "drivenCarNotInsured": "No",
+            "insuranceDeclinedCancelled": "No",
+            "unspentNonDrivingConvictions": "No",
+            "useAnotherVehicle": "No",
+            "otherVehicleUsage": "",
+            "namedDriverExperience": "Yes",
+            "namedDriverExperienceYears": "2"
+          },
+          "ncdDetails": {
+            "ncdYears": "4",
+            "howWasNCDEarned": "PolicyHolder",
+            "protectNCD": "No",
+            "ncdProtected": "No"
+          },
+          "claimsControl": {
+            "enabled": "No",
+            "count": 0
+          },
+          "convictionsControl": {
+            "enabled": "No",
+            "count": 1,
+            "nonMotoringFlag": ""
+          }
+        },
+        "coverDetails": {
+          "coverStartDay": "21",
+          "coverStartFullDate": "21/03/2026",
+          "coverType": "Comprehensive",
+          "voluntaryExcess": "",
+          "breakdownOption": "",
+          "renewalReminder": "",
+          "protectedNoClaimsDiscount": "0",
+          "guaranteedHireCar": "",
+          "motorLegalExpenses": "",
+          "personalInjuryCover": "No",
+          "courtesyCarCover": "Yes",
+          "product": "",
+          "declineMessage": "",
+          "athenaUWRuleId": "",
+          "athenaUWMessage": "",
+          "proceedToBuy": ""
+        },
+        "directDebitDetails": {
+          "bankCheckService": "",
+          "accountHolderName": "",
+          "accountNumber": "",
+          "sortCode": "",
+          "paymentDay": ""
+        },
+        "paymentDetails": {
+          "paymentGatewayService": "",
+          "paymentMode": "",
+          "lowRange": "",
+          "highRange": "",
+          "paymentDate": "20/03/2026",
+          "cardName": "PRIYA PATEL",
+          "cardNumber": "4111111111111111",
+          "expiryMonth": "11",
+          "expiryYear": "30",
+          "securityCode": "123",
+          "monthlyCardCase": "No",
+          "convertToMonthlyCard": "No"
+        },
+        "policyHolderClaims": {
+          "count": 0
+        },
+        "policyHolderConvictions": {
+          "count": 1,
+          "conviction1": {
+            "item": {
+              "type": "Test Con 1",
+              "code": "123",
+              "codeOtherOption": "",
+              "location": "road",
+              "date": "Fri Apr 03 2026 02:00:00 GMT+0200 (Central European Summer Time)",
+              "points": "",
+              "fineAmount": "",
+              "banLengthMonths": "",
+              "accidentRelated": "",
+              "breathalysed": "",
+              "breathalyserReading": "",
+              "resultedInDisqualification": ""
+            }
+          }
+        },
+        "additionalDrivers": {
+          "count": 0
+        }
+      }
+    },
+    {
+      "caseIndex": 3,
+      "scriptName": "NB_CASE_03",
+      "scriptId": "NB_CASE_03",
+      "description": "Direct new business - diesel hatchback commuter",
+      "data": {
+        "meta": {
+          "scriptId": "NB_CASE_03",
+          "description": "Direct new business - diesel hatchback commuter",
+          "dataSpecification": "Direct NB commuter case",
+          "scriptName": "NB_CASE_03",
+          "result": "ReadyForBuilder"
+        },
+        "accountInformation": {
+          "accountEmail": "alex.brown@example.com",
+          "accountId": "ACC003",
+          "password": "Passw0rd!",
+          "gmailPassword": "GmailPass123!",
+          "todaysDate": "20/03/2026",
+          "formattedDate": "20 Mar 2026",
+          "formattedAccountId": "ACC003"
+        },
+        "carDetails": {
+          "vehicle": {
+            "registrationKnown": "Yes",
+            "registrationNumber": "EF56GHI",
+            "make": "Vauxhall",
+            "model": "Corsa",
+            "fuelType": "Diesel",
+            "yearOfManufacture": "2020",
+            "doors": "5",
+            "transmission": "Manual",
+            "engineSize": "1399",
+            "trim": "Standard",
+            "bodyType": "Hatchback",
+            "service": "Private",
+            "vehicleType": "Car",
+            "selectedCar": "Vauxhall Corsa",
+            "registerNumber": "EF56GHI",
+            "marketValue": "9800",
+            "imported": "No",
+            "driveSide": "Right Hand Drive",
+            "seatCount": 5,
+            "alarmOrImmobiliser": "Factory fitted immobiliser",
+            "tracker": "No",
+            "dashcamFitted": "No",
+            "hasModifications": "No",
+            "modificationFlag": "No"
+          },
+          "ownership": {
+            "purchaseDate": "01/03/2026",
+            "hasBoughtCar": "Yes",
+            "legalOwner": "Policy Holder",
+            "registeredKeeper": "Policy Holder",
+            "policyHolderIsLegalOwner": "Yes",
+            "policyHolderIsRegisteredKeeper": "Yes",
+            "policyHolderIsOwnerAndRegisteredKeeper": "Yes"
+          },
+          "usage": {
+            "mainDriver": "PolicyHolder",
+            "usageType": "Social Domestic and Pleasure",
+            "usageReason": "Commuting",
+            "businessUser": "No",
+            "annualMileage": "10000",
+            "annualBusinessMileage": "1500",
+            "peakTimeDriving": "Yes",
+            "peakTimeDrivingFrequency": "Occasionally",
+            "storedAtHomeAddress": "Yes",
+            "storedAtSameLocation": "Yes",
+            "daytimeParkingLocation": "Driveway",
+            "overnightParkingLocation": "Driveway",
+            "parkingPlace": "Driveway",
+            "overnightAddressDoorNo": "7",
+            "overnightAddressPostcode": "B1 1TB",
+            "carsAtHome": "1",
+            "driveOtherCars": "No",
+            "otherCarsDriven": "0"
+          }
+        },
+        "policyHolder": {
+          "identity": {
+            "title": "Mr",
+            "firstName": "Alex",
+            "lastName": "Brown",
+            "fullName": "Alex Brown",
+            "dateOfBirth": "03/02/1988",
+            "dateOfBirthDerivation": "Manual",
+            "gender": "Male",
+            "relationshipStatus": "Married"
+          },
+          "address": {
+            "houseNumber": "7",
+            "postcode": "B1 1TB",
+            "addressLine": "7 Station View",
+            "livesInUKYears": "20",
+            "ukResidentSince": "2006"
+          },
+          "personalDetails": {
+            "maritalStatus": "Married",
+            "homeOwnership": "Owned",
+            "childrenUnder16": "0",
+            "employmentStatus": "Employed",
+            "occupation": "Engineer",
+            "industry": "Technology",
+            "hasSecondaryOccupation": "No",
+            "otherJob": "",
+            "otherJobIndustry": "",
+            "studentType": "",
+            "bestDescription": "Professional",
+            "phone": "07123456783",
+            "lvMemberAnswer": "No"
+          },
+          "licenceDetails": {
+            "enterDriverDetailsManually": "Yes",
+            "haveDrivingLicenceHandy": "Yes",
+            "licenceNumber": "BROWN802038AB7EF",
+            "licencePart1": "BROWN",
+            "licencePart2": "80203",
+            "licencePart3": "8AB7E",
+            "licencePart4": "F",
+            "licenceType": "Full UK",
+            "licenceIssuedLocation": "UK",
+            "licenceManualOrAutomatic": "Manual",
+            "licenceHeldYears": "12",
+            "yearsSinceTestPassed": "12",
+            "licenceRestrictionDuration": "0",
+            "licenceDate": "15/07/2012"
+          },
+          "drivingHistory": {
+            "additionalDrivingQualifications": "No",
+            "qualificationType": "",
+            "qualificationDate": "",
+            "iamCertificate": "No",
+            "passPlusCertificate": "No",
+            "medicalConditionFlag": "No",
+            "medicalConditionDetails": "",
+            "dvlaAwareOfMedicalCondition": "",
+            "heldCarInsuranceInLast2Years": "Yes",
+            "drivenCarNotInsured": "No",
+            "insuranceDeclinedCancelled": "No",
+            "unspentNonDrivingConvictions": "No",
+            "useAnotherVehicle": "No",
+            "otherVehicleUsage": "",
+            "namedDriverExperience": "Yes",
+            "namedDriverExperienceYears": "2"
+          },
+          "ncdDetails": {
+            "ncdYears": "6",
+            "howWasNCDEarned": "PolicyHolder",
+            "protectNCD": "No",
+            "ncdProtected": "No"
+          },
+          "claimsControl": {
+            "enabled": "No",
+            "count": 0
+          },
+          "convictionsControl": {
+            "enabled": "No",
+            "count": 2,
+            "nonMotoringFlag": ""
+          }
+        },
+        "coverDetails": {
+          "coverStartDay": "21",
+          "coverStartFullDate": "21/03/2026",
+          "coverType": "Comprehensive",
+          "voluntaryExcess": "",
+          "breakdownOption": "",
+          "renewalReminder": "",
+          "protectedNoClaimsDiscount": "0",
+          "guaranteedHireCar": "",
+          "motorLegalExpenses": "",
+          "personalInjuryCover": "No",
+          "courtesyCarCover": "Yes",
+          "product": "",
+          "declineMessage": "",
+          "athenaUWRuleId": "",
+          "athenaUWMessage": "",
+          "proceedToBuy": ""
+        },
+        "directDebitDetails": {
+          "bankCheckService": "",
+          "accountHolderName": "",
+          "accountNumber": "",
+          "sortCode": "",
+          "paymentDay": ""
+        },
+        "paymentDetails": {
+          "paymentGatewayService": "",
+          "paymentMode": "",
+          "lowRange": "",
+          "highRange": "",
+          "paymentDate": "20/03/2026",
+          "cardName": "ALEX BROWN",
+          "cardNumber": "4111111111111111",
+          "expiryMonth": "10",
+          "expiryYear": "31",
+          "securityCode": "123",
+          "monthlyCardCase": "No",
+          "convertToMonthlyCard": "No"
+        },
+        "policyHolderClaims": {
+          "count": 0
+        },
+        "policyHolderConvictions": {
+          "count": 2,
+          "conviction1": {
+            "item": {
+              "type": "Test Con 1",
+              "code": "123",
+              "codeOtherOption": "",
+              "location": "road",
+              "date": "Fri Apr 03 2026 02:00:00 GMT+0200 (Central European Summer Time)",
+              "points": "",
+              "fineAmount": "",
+              "banLengthMonths": "",
+              "accidentRelated": "",
+              "breathalysed": "",
+              "breathalyserReading": "",
+              "resultedInDisqualification": ""
+            }
+          },
+          "conviction2": {
+            "item": {
+              "type": "Test Con 2",
+              "code": "456",
+              "codeOtherOption": "",
+              "location": "office",
+              "date": "Fri Apr 03 2026 02:00:00 GMT+0200 (Central European Summer Time)",
+              "points": "",
+              "fineAmount": "",
+              "banLengthMonths": "",
+              "accidentRelated": "",
+              "breathalysed": "",
+              "breathalyserReading": "",
+              "resultedInDisqualification": ""
+            }
+          }
+        },
+        "additionalDrivers": {
+          "count": 0
+        }
+      }
+    }
+  ]
+}
