@@ -1,6 +1,8 @@
 import { test } from '@playwright/test';
 import { parameter } from 'allure-js-commons';
 
+const PRINT_ANNOTATION_LOGS = true;
+
 export type FieldValue = string | number | boolean | Date | object | null | undefined;
 
 export interface FieldMap {
@@ -23,6 +25,10 @@ export interface FieldMap {
 export function annotate(type: string, description: string): void {
   test.info().annotations.push({ type, description });
   void parameter(type, description, { excluded: true });
+
+  if (PRINT_ANNOTATION_LOGS) {
+    console.log(`[Annotation] ${type}: ${description}`);
+  }
 }
 
 export function attachValueInTestReport(fields: FieldMap): void {
