@@ -89,6 +89,7 @@ module.exports = tseslint.config(
     // Standalone Node CommonJS entry points and source-analysis tools.
     files: [
       'configLayer/execution/commonJob/**/*.cjs',
+      'configLayer/execution/validateReportPaths.cjs',
       'docs/page-object-analysis/**/*.cjs',
       '.dependency-cruiser.cjs',
     ],
