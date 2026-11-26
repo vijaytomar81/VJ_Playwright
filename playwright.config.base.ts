@@ -9,7 +9,7 @@ import {
   NAVIGATION_TIMEOUT,
 } from './configLayer/execution/timeouts';
 
-const { validateReportPaths } = require('./configLayer/execution/validateReportPaths.cjs');
+import { validateReportPaths } from './configLayer/execution/validateReportPaths.cjs';
 
 /**
  * @see https://playwright.dev/docs/test-configuration
@@ -20,7 +20,6 @@ export function createConfig(project: string | undefined) {
   const { testDir } = getProjectConfig(project);
   loadEnvironment(project);
 
-  const env = process.env.ENV ?? 'dev';
   const authMode = process.env.AGENT_PORTAL_AUTH;
   const retries = parseRetries();
 
