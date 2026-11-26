@@ -1,7 +1,22 @@
-git status --short
+tp70707@AVD-HEX-73 MINGW64 ~/OneDrive - Allianz/My Documents/Automation/Athena_Automation/integration-tests (evidence_factory_fix)
+$ npx --no-install tsc --noEmit
+
+echo "TypeScript exit code: $?"
+TypeScript exit code: 0
+
+tp70707@AVD-HEX-73 MINGW64 ~/OneDrive - Allianz/My Documents/Automation/Athena_Automation/integration-tests (evidence_factory_fix)
+$ git status --short
 
 git --no-pager diff --stat
 
 git diff --check
 
 git --no-pager diff --cached --stat
+ M configLayer/execution/validateReportPaths.cjs
+ M eslint.config.js
+ configLayer/execution/validateReportPaths.cjs | 4 +++-
+ eslint.config.js                              | 1 +
+ 2 files changed, 4 insertions(+), 1 deletion(-)
+
+tp70707@AVD-HEX-73 MINGW64 ~/OneDrive - Allianz/My Documents/Automation/Athena_Automation/integration-tests (evidence_factory_fix)
+$ 
