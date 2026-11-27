@@ -1,1 +1,14 @@
-const interactionIdPattern = /\/[a-f0-9]{24}\/?(?:[?#].*)?$/i;
+git switch evidence_factory_fix &&
+git fetch origin &&
+git merge origin/develop
+
+
+
+git push origin evidence_factory_fix
+
+
+
+git add .
+git commit
+git push origin evidence_factory_fix
+
